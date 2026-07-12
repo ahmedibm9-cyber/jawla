@@ -3,7 +3,7 @@
     "deny": [
       ".env",
       ".env.*",
-      "storage/*.key",
+      "Storage/*.key",
       "_ide_helper.php"
     ]
   }

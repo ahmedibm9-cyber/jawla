@@ -2,7 +2,29 @@
 
 namespace App\Services;
 
-class InvoiceService
+class InvoiceService implements Contracts\InvoiceService
 {
-    // Implemented in Phase 6 (sales).
+    public function create(array $data)
+    {
+        // Implemented in Phase 8.
+        return null;
+    }
+
+    public function submit($invoice)
+    {
+        // Implemented in Phase 8.
+        return null;
+    }
+
+    public function cancel($invoice, int $userId, string $reason)
+    {
+        // Implemented in Phase 8.
+        return null;
+    }
+
+    public function amend($invoice)
+    {
+        // Implemented in Phase 8.
+        return null;
+    }
 }
