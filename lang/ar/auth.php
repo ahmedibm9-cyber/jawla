@@ -1,5 +1,9 @@
 <?php
 
 return [
-    // Fill in during Phase 0.5 (design system) and beyond.
+    'failed' => 'بيانات الدخول غير صحيحة.',
+    'password' => 'كلمة المرور غير صحيحة.',
+    'throttle' => 'محاولات كثيرة جدًا. حاول مرة أخرى بعد :seconds ثانية.',
+    'email' => 'البريد الإلكتروني',
+    'password_label' => 'كلمة المرور',
 ];

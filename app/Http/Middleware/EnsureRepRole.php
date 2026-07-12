@@ -2,7 +2,22 @@
 
 namespace App\Http\Middleware;
 
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
 class EnsureRepRole
 {
-    // Implemented in Phase 2 (auth).
+    public function handle(Request $request, Closure $next): Response
+    {
+        $user = $request->user();
+
+        if (! $user) {
+            return redirect()->route('app.login');
+        }
+
+        abort_unless($user->is_active && $user->hasRole('sales_rep'), 403);
+
+        return $next($request);
+    }
 }
