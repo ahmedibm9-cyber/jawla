@@ -2,7 +2,17 @@
 
 namespace App\Services;
 
-class PaymentService
+class PaymentService implements Contracts\PaymentService
 {
-    // Implemented in Phase 6 (sales) / Phase 7 (collections).
+    public function collect(array $data)
+    {
+        // Implemented in Phase 9.
+        return null;
+    }
+
+    public function cancel($payment, int $userId)
+    {
+        // Implemented in Phase 9.
+        return null;
+    }
 }

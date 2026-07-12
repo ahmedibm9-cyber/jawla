@@ -2,121 +2,108 @@
 
 namespace App\Services;
 
+use App\Enums\StockReason;
+use App\Exceptions\Domain\InsufficientStockException;
 use App\Models\Stock;
 use App\Models\StockMovement;
 use App\Models\Warehouse;
+use App\Services\Contracts\StockService as StockServiceContract;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class StockService
+class StockService implements StockServiceContract
 {
-    /**
-     * Record a stock movement (sale, return, transfer, adjustment, etc.)
-     * ALWAYS: updates stocks.quantity AND writes stock_movements row
-     * NEVER: call this outside DB::transaction()
-     */
-    public function recordMovement(
-        Warehouse $warehouse,
-        int $productId,
-        int $quantityChange,
-        string $reason,
-        ?int $userId = null,
-        ?string $referenceType = null,
-        ?int $referenceId = null
-    ): StockMovement {
-        // Get or create the stock record
-        $stock = Stock::query()
-            ->where('warehouse_id', $warehouse->id)
-            ->where('product_id', $productId)
-            ->where('stock_type', 'regular')
-            ->firstOrCreate([
-                'warehouse_id' => $warehouse->id,
-                'product_id' => $productId,
-                'stock_type' => 'regular',
-            ], ['quantity' => 0]);
+    public function decrement(int $warehouseId, int $productId, ?int $batchId, float $qty, StockReason $reason, Model $ref, ?int $userId = null): StockMovement
+    {
+        return $this->move($warehouseId, $productId, $batchId, -$qty, $reason, $ref, $userId);
+    }
 
-        // Check for negative stock (except for admin adjustments)
-        if ($stock->quantity + $quantityChange < 0 && $reason !== 'adjustment') {
-            throw new \Exception(
-                "Cannot reduce stock below 0. Current: {$stock->quantity}, Change: {$quantityChange}"
-            );
+    public function increment(int $warehouseId, int $productId, ?int $batchId, float $qty, StockReason $reason, Model $ref, ?int $userId = null): StockMovement
+    {
+        return $this->move($warehouseId, $productId, $batchId, $qty, $reason, $ref, $userId);
+    }
+
+    public function transfer(int $fromWarehouseId, int $toWarehouseId, int $productId, ?int $batchId, float $qty, Model $ref, ?int $userId = null): StockMovement
+    {
+        return DB::transaction(function () use ($fromWarehouseId, $toWarehouseId, $productId, $batchId, $qty, $ref, $userId): StockMovement {
+            $this->decrement($fromWarehouseId, $productId, $batchId, $qty, StockReason::TransferOut, $ref, $userId);
+
+            return $this->increment($toWarehouseId, $productId, $batchId, $qty, StockReason::TransferIn, $ref, $userId);
+        });
+    }
+
+    public function balance(int $warehouseId, int $productId, ?int $batchId = null): float
+    {
+        $query = Stock::query()
+            ->where('warehouse_id', $warehouseId)
+            ->where('product_id', $productId);
+
+        if ($batchId !== null) {
+            $query->where('batch_id', $batchId);
         }
 
-        // Update stock quantity
-        $stock->increment('quantity', $quantityChange);
-
-        // Write audit trail
-        return StockMovement::create([
-            'warehouse_id' => $warehouse->id,
-            'product_id' => $productId,
-            'quantity_change' => $quantityChange,
-            'reason' => $reason,
-            'reference_type' => $referenceType,
-            'reference_id' => $referenceId,
-            'user_id' => $userId,
-        ]);
+        return (float) ($query->sum('quantity') ?? 0);
     }
 
-    /**
-     * Get current stock quantity for a product in a warehouse
-     */
-    public function getQuantity(Warehouse $warehouse, int $productId, string $stockType = 'regular'): int
+    public function reconcile(int $warehouseId, int $productId, ?int $batchId, float $countedQty, string $reason, int $userId): StockMovement
     {
-        return Stock::query()
-            ->where('warehouse_id', $warehouse->id)
-            ->where('product_id', $productId)
-            ->where('stock_type', $stockType)
-            ->value('quantity') ?? 0;
+        return DB::transaction(function () use ($warehouseId, $productId, $batchId, $countedQty, $reason, $userId): StockMovement {
+            $current = $this->balance($warehouseId, $productId, $batchId);
+            $difference = $countedQty - $current;
+
+            $stock = Stock::firstOrNew([
+                'warehouse_id' => $warehouseId,
+                'product_id' => $productId,
+                'batch_id' => $batchId,
+            ], ['quantity' => 0]);
+
+            $stock->quantity += $difference;
+            $stock->save();
+
+            return StockMovement::create([
+                'warehouse_id' => $warehouseId,
+                'product_id' => $productId,
+                'batch_id' => $batchId,
+                'quantity_change' => $difference,
+                'reason' => StockReason::Adjustment,
+                'reference_type' => 'reconciliation',
+                'reference_id' => 0,
+                'user_id' => $userId,
+            ]);
+        });
     }
 
-    /**
-     * Check if sufficient stock exists before sale
-     */
-    public function hasSufficientStock(Warehouse $warehouse, int $productId, int $requestedQty): bool
+    private function move(int $warehouseId, int $productId, ?int $batchId, float $qty, StockReason $reason, Model $ref, ?int $userId): StockMovement
     {
-        return $this->getQuantity($warehouse, $productId, 'regular') >= $requestedQty;
-    }
+        return DB::transaction(function () use ($warehouseId, $productId, $batchId, $qty, $reason, $ref, $userId): StockMovement {
+            $stock = Stock::firstOrNew([
+                'warehouse_id' => $warehouseId,
+                'product_id' => $productId,
+                'batch_id' => $batchId,
+            ], ['quantity' => 0]);
 
-    /**
-     * Get stock for returned/damaged items (can't be resold)
-     */
-    public function getReturnedStock(Warehouse $warehouse, int $productId): int
-    {
-        return $this->getQuantity($warehouse, $productId, 'returned_damaged');
-    }
+            $newQty = $stock->quantity + $qty;
 
-    /**
-     * Move stock from returned_damaged back to regular (after inspection)
-     */
-    public function promoteReturnedStock(
-        Warehouse $warehouse,
-        int $productId,
-        int $quantity,
-        ?int $userId = null
-    ): void {
-        DB::transaction(function () use ($warehouse, $productId, $quantity, $userId) {
-            // Reduce returned_damaged
-            $returnedStock = Stock::query()
-                ->where('warehouse_id', $warehouse->id)
-                ->where('product_id', $productId)
-                ->where('stock_type', 'returned_damaged')
-                ->first();
-
-            if (!$returnedStock || $returnedStock->quantity < $quantity) {
-                throw new \Exception('Insufficient returned stock to promote');
+            if ($newQty < 0) {
+                throw new InsufficientStockException(
+                    'errors.stock.insufficient',
+                    ['product' => $productId, 'available' => $stock->quantity],
+                );
             }
 
-            $returnedStock->decrement('quantity', $quantity);
+            $stock->quantity = $newQty;
+            $stock->save();
 
-            // Increase regular stock
-            $this->recordMovement(
-                $warehouse,
-                $productId,
-                $quantity,
-                'adjustment',
-                $userId,
-                'returned_stock_promotion',
-                null
-            );
+            return StockMovement::create([
+                'warehouse_id' => $warehouseId,
+                'product_id' => $productId,
+                'batch_id' => $batchId,
+                'quantity_change' => $qty,
+                'reason' => $reason,
+                'reference_type' => $ref::class,
+                'reference_id' => $ref->id,
+                'user_id' => $userId,
+            ]);
         });
     }
 }
