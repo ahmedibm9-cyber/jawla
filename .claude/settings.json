@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "deny": [
+      ".env",
+      ".env.*",
+      "storage/*.key",
+      "_ide_helper.php"
+    ]
+  }
+}
