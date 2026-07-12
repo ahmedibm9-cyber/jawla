@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Company extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'name_ar', 'name_en', 'tax_number', 'address', 'phone',
         'logo_path', 'currency', 'vat_percent', 'is_active',

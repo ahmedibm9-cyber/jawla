@@ -1,5 +1,8 @@
 <?php
 
 return [
-    // Fill in during Phase 0.5 (design system) and beyond.
+    'name' => 'جولة',
+    'login' => 'تسجيل الدخول',
+    'logout' => 'تسجيل الخروج',
+    'welcome' => 'مرحباً، :name',
 ];
