@@ -1,0 +1,12 @@
+:root {
+  --clr-bg: #ffffff;
+  --clr-bg-alt: #f5f5f4;
+  --clr-text: #1f2937;
+  --clr-accent: #9b1c31;
+  --clr-success: #16a34a;
+  --clr-warning: #d97706;
+  --clr-danger: #dc2626;
+  --clr-info: #2563eb;
+  --radius: 0.75rem;
+}
+html[dir="rtl"] { font-family: "IBM Plex Sans Arabic", system-ui, sans-serif; }

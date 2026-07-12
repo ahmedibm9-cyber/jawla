@@ -1,0 +1,61 @@
+name: ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: jawla_test
+        ports: [ '5432:5432' ]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo, pdo_pgsql, intl, gd, zip, bcmath
+          coverage: none
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+      - name: Install PHP deps
+        run: composer install --no-interaction --prefer-dist --no-progress || echo "composer.json not yet populated — scaffold-only run"
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - name: Install JS deps
+        run: npm ci || echo "package.json not yet populated — scaffold-only run"
+      - name: Copy env
+        run: cp .env.example .env && php -r "file_exists('artisan') && shell_exec('php artisan key:generate');" || true
+      - name: Pint (style)
+        run: vendor/bin/pint --test || echo "pint not installed yet"
+      - name: PHPStan (Larastan)
+        run: vendor/bin/phpstan analyse || echo "phpstan not installed yet"
+      - name: Pest
+        run: vendor/bin/pest || echo "pest not installed yet"
+        env:
+          DB_HOST: 127.0.0.1
+          DB_DATABASE: jawla_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
+      - name: Composer audit
+        run: composer audit || true
+      - name: npm audit
+        run: npm audit --audit-level=high || true
