@@ -30,7 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->colors([
-                'primary' => Color::hex('#9B1C31'),
+                'primary' => Color::hex('#4DB848'),
             ])
             ->font('IBM Plex Sans Arabic')
             ->brandName('Jawla')

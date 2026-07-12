@@ -9,7 +9,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        accent: '#9B1C31',
+        accent: '#4DB848',
+        'accent-blue': '#2C6FB4',
       },
       fontFamily: {
         sans: ['"IBM Plex Sans Arabic"', 'system-ui', 'sans-serif'],
