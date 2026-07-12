@@ -4,7 +4,7 @@
   "start_url": "/app",
   "display": "standalone",
   "background_color": "#FFFFFF",
-  "theme_color": "#9B1C31",
+  "theme_color": "#4DB848",
   "lang": "ar",
   "dir": "rtl",
   "icons": [

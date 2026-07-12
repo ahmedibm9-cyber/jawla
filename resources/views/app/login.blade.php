@@ -2,7 +2,7 @@
     <h1>{{ __('app.login') }}</h1>
 
     @if ($errors->any())
-        <div style="color:#9B1C31;">
+        <div style="color:#DC2626;">
             {{ $errors->first() }}
         </div>
     @endif

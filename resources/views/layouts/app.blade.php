@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#9B1C31">
+  <meta name="theme-color" content="#4DB848">
   <link rel="manifest" href="/manifest.json">
   <title>Jawla</title>
 </head>
