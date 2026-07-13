@@ -96,9 +96,9 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(VanTransfer::class, 'to_user_id');
     }
 
-    public function auditLogs(): HasMany
+    public function activities(): HasMany
     {
-        return $this->hasMany(AuditLog::class);
+        return $this->hasMany(Activity::class);
     }
 
     public function stockMovements(): HasMany

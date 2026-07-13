@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SecurityHeaders::class,
             \App\Http\Middleware\SetActiveCompanyContext::class,
             \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\ThrottlePost::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
