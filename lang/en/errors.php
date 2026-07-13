@@ -5,6 +5,7 @@ return [
     '404' => 'The page you are looking for could not be found.',
     '419' => 'Your session has expired. Please refresh and try again.',
     '500' => 'Something went wrong on our end. Please try again later.',
+    '429' => 'Too many requests. Please slow down.',
 
     'stock' => [
         'insufficient' => 'Insufficient stock for product ID :product (available: :available)',

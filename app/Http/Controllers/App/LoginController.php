@@ -4,6 +4,7 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\App\LoginRequest;
+use App\Models\Activity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,6 +40,8 @@ class LoginController extends Controller
         }
 
         $request->session()->regenerate();
+
+        Activity::log('login', $user, "Rep login: {$user->email}");
 
         return redirect()->intended(route('app.home'));
     }
