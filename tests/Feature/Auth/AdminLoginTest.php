@@ -35,7 +35,7 @@ class AdminLoginTest extends TestCase
 
     public function test_admin_role_can_log_into_admin_panel(): void
     {
-        $user = $this->makeUser('hr_admin');
+        $user = $this->makeUser('admin');
 
         Livewire::test(Login::class)
             ->set('data.email', $user->email)
@@ -47,7 +47,7 @@ class AdminLoginTest extends TestCase
 
     public function test_sales_rep_is_denied_admin_panel_access(): void
     {
-        $rep = $this->makeUser('sales_rep');
+        $rep = $this->makeUser('rep');
 
         $response = $this->actingAs($rep)->get('/admin');
 
@@ -56,7 +56,7 @@ class AdminLoginTest extends TestCase
 
     public function test_admin_login_rejects_wrong_password(): void
     {
-        $user = $this->makeUser('hr_admin');
+        $user = $this->makeUser('admin');
 
         Livewire::test(Login::class)
             ->set('data.email', $user->email)
@@ -69,7 +69,7 @@ class AdminLoginTest extends TestCase
 
     public function test_admin_login_is_rate_limited_after_five_attempts(): void
     {
-        $user = $this->makeUser('hr_admin');
+        $user = $this->makeUser('admin');
 
         for ($i = 0; $i < 5; $i++) {
             Livewire::test(Login::class)

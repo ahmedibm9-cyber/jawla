@@ -11,32 +11,46 @@ class RoleSeederTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_seeder_creates_all_five_roles(): void
+    public function test_seeder_creates_all_seven_roles(): void
     {
         $this->seed(RoleSeeder::class);
 
         $this->assertEqualsCanonicalizing(
-            ['system_viewer', 'hr_admin', 'sales_manager', 'warehouse_keeper', 'sales_rep'],
+            ['admin', 'sales_manager', 'accounts', 'purchasing', 'warehouse_keeper', 'executive', 'rep'],
             Role::pluck('name')->toArray()
         );
 
-        $this->assertSame(5, Role::count());
+        $this->assertSame(7, Role::count());
     }
 
-    public function test_permission_matrix_matches_roles_matrix_doc(): void
+    public function test_admin_has_full_access(): void
     {
         $this->seed(RoleSeeder::class);
 
-        $salesManager = Role::findByName('sales_manager');
-        $this->assertTrue($salesManager->hasPermissionTo('approve-van-transfers'));
-        $this->assertFalse($salesManager->hasPermissionTo('manage-main-warehouse-stock'));
+        $admin = Role::findByName('admin');
+        $this->assertTrue($admin->hasPermissionTo('full_access'));
+    }
 
-        $salesRep = Role::findByName('sales_rep');
-        $this->assertTrue($salesRep->hasPermissionTo('field-work'));
-        $this->assertTrue($salesRep->hasPermissionTo('access-app-panel'));
-        $this->assertFalse($salesRep->hasPermissionTo('access-admin-panel'));
+    public function test_rep_permissions_match_guide(): void
+    {
+        $this->seed(RoleSeeder::class);
 
-        $systemViewer = Role::findByName('system_viewer');
-        $this->assertTrue($systemViewer->hasPermissionTo('manage-products-prices'));
+        $rep = Role::findByName('rep');
+        $this->assertTrue($rep->hasPermissionTo('visits.execute'));
+        $this->assertTrue($rep->hasPermissionTo('invoices.create'));
+        $this->assertTrue($rep->hasPermissionTo('payments.collect'));
+        $this->assertFalse($rep->hasPermissionTo('full_access'));
+        $this->assertFalse($rep->hasPermissionTo('products.view_cost'));
+    }
+
+    public function test_accounts_can_view_cost_but_rep_cannot(): void
+    {
+        $this->seed(RoleSeeder::class);
+
+        $accounts = Role::findByName('accounts');
+        $this->assertTrue($accounts->hasPermissionTo('products.view_cost'));
+
+        $rep = Role::findByName('rep');
+        $this->assertFalse($rep->hasPermissionTo('products.view_cost'));
     }
 }

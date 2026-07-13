@@ -33,7 +33,7 @@ class RepLoginTest extends TestCase
 
     public function test_sales_rep_can_log_into_app(): void
     {
-        $rep = $this->makeUser('sales_rep');
+        $rep = $this->makeUser('rep');
 
         $response = $this->post('/app/login', [
             'email' => $rep->email,
@@ -46,7 +46,7 @@ class RepLoginTest extends TestCase
 
     public function test_rep_login_rejects_non_rep_role(): void
     {
-        $hrAdmin = $this->makeUser('hr_admin');
+        $hrAdmin = $this->makeUser('executive');
 
         $response = $this->post('/app/login', [
             'email' => $hrAdmin->email,
@@ -59,7 +59,7 @@ class RepLoginTest extends TestCase
 
     public function test_non_rep_is_blocked_from_app_routes(): void
     {
-        $hrAdmin = $this->makeUser('hr_admin');
+        $hrAdmin = $this->makeUser('executive');
 
         $response = $this->actingAs($hrAdmin)->get('/app');
 
@@ -68,7 +68,7 @@ class RepLoginTest extends TestCase
 
     public function test_rep_is_blocked_from_admin_panel(): void
     {
-        $rep = $this->makeUser('sales_rep');
+        $rep = $this->makeUser('rep');
 
         $response = $this->actingAs($rep)->get('/admin');
 
@@ -77,7 +77,7 @@ class RepLoginTest extends TestCase
 
     public function test_rep_login_rejects_wrong_password(): void
     {
-        $rep = $this->makeUser('sales_rep');
+        $rep = $this->makeUser('rep');
 
         $response = $this->post('/app/login', [
             'email' => $rep->email,
@@ -90,7 +90,7 @@ class RepLoginTest extends TestCase
 
     public function test_rep_login_is_rate_limited(): void
     {
-        $rep = $this->makeUser('sales_rep');
+        $rep = $this->makeUser('rep');
 
         for ($i = 0; $i < 5; $i++) {
             $this->post('/app/login', [

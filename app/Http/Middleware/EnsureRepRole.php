@@ -16,7 +16,7 @@ class EnsureRepRole
             return redirect()->route('app.login');
         }
 
-        abort_unless($user->is_active && $user->hasRole('sales_rep'), 403);
+        abort_unless($user->is_active && $user->hasRole('rep'), 403);
 
         return $next($request);
     }
