@@ -32,7 +32,8 @@ class DemoSeeder extends Seeder
         ]);
 
         // Create bank account
-        $company->bankAccounts()->create([
+        \App\Models\CompanyBankAccount::create([
+            'company_id' => $company->id,
             'bank_name' => 'البنك الأهلي المصري',
             'account_name' => 'شركة اللدائن العالمية',
             'account_number' => '1234567890',
@@ -41,12 +42,14 @@ class DemoSeeder extends Seeder
         ]);
 
         // Create tax template
-        $taxTemplate = $company->taxTemplates()->create([
+        $taxTemplate = \App\Models\TaxTemplate::create([
+            'company_id' => $company->id,
             'name' => 'Standard VAT 14%',
             'type' => 'selling',
             'is_default' => true,
         ]);
-        $taxTemplate->lines()->create([
+        \App\Models\TaxTemplateLine::create([
+            'tax_template_id' => $taxTemplate->id,
             'description' => 'Value Added Tax',
             'charge_type' => 'on_net_total',
             'rate' => 14.00,
@@ -55,26 +58,26 @@ class DemoSeeder extends Seeder
         // Create modes of payment
         foreach (['نقدي', 'شيك', 'تحويل بنكي', 'اعتماد مستندي', 'بطاقة ائتمان'] as $i => $name) {
             $types = ['cash', 'cheque', 'bank_transfer', 'lc', 'credit_card'];
-            $company->modesOfPayment()->create(['name' => $name, 'type' => $types[$i]]);
+            \App\Models\ModeOfPayment::create(['company_id' => $company->id, 'name' => $name, 'type' => $types[$i]]);
         }
 
         // Create price list
-        $priceList = $company->priceLists()->create([
-            'name' => 'Standard', 'type' => 'selling', 'is_default' => true,
+        \App\Models\PriceList::create([
+            'company_id' => $company->id, 'name' => 'Standard', 'type' => 'selling', 'is_default' => true,
         ]);
 
         // Create customer group
-        $customerGroup = $company->customerGroups()->create([
-            'name_ar' => 'تجاري', 'name_en' => 'Commercial',
+        \App\Models\CustomerGroup::create([
+            'company_id' => $company->id, 'name_ar' => 'تجاري', 'name_en' => 'Commercial',
         ]);
 
         // Create naming series
-        $company->namingSeries()->createMany([
-            ['name' => 'sales_invoice', 'prefix' => 'INV', 'series_format' => 'INV-{ABBR}-{YYYY}-{#####}', 'current_number' => 0],
-            ['name' => 'proforma_invoice', 'prefix' => 'PF', 'series_format' => 'PF-{ABBR}-{YYYY}-{#####}', 'current_number' => 0],
-            ['name' => 'purchase_order', 'prefix' => 'PO', 'series_format' => 'PO-{ABBR}-{YYYY}-{#####}', 'current_number' => 0],
-            ['name' => 'return', 'prefix' => 'RET', 'series_format' => 'RET-{ABBR}-{YYYY}-{#####}', 'current_number' => 0],
-        ]);
+        foreach ([
+            ['name' => 'sales_invoice', 'prefix' => 'INV', 'series_format' => 'INV-GPC-{YYYY}-{#####}', 'current_number' => 0],
+            ['name' => 'proforma_invoice', 'prefix' => 'PF', 'series_format' => 'PF-GPC-{YYYY}-{#####}', 'current_number' => 0],
+        ] as $ns) {
+            \App\Models\NamingSeries::create($ns + ['company_id' => $company->id]);
+        }
 
         // Create users
         $admin = User::factory()->create(['company_id' => $company->id, 'name' => 'عمرو حكيم', 'email' => 'admin@jawla.test', 'employee_code' => 'EMP-001'])->assignRole('admin');
@@ -191,6 +194,7 @@ class DemoSeeder extends Seeder
         // Create work session for the rep
         WorkSession::create([
             'user_id' => $rep->id,
+            'route_id' => $route->id,
             'started_at' => now()->subHours(2),
             'start_latitude' => 30.0444,
             'start_longitude' => 31.2357,
