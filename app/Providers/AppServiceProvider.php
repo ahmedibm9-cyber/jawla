@@ -11,6 +11,7 @@ use App\Services\Contracts\DocumentNumberService;
 use App\Services\Contracts\InvoiceService;
 use App\Services\Contracts\PricingService;
 use App\Services\Contracts\StockService;
+use App\Services\ComplaintService;
 use App\Services\StockService as StockServiceImpl;
 use App\Support\ActiveCompanyContext;
 use Filament\Events\Auth\Login as FilamentLogin;
@@ -31,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PricingService::class, fn () => app(\App\Services\PricingService::class));
         $this->app->bind(DocumentNumberService::class, fn () => app(\App\Services\NumberSequenceService::class));
         $this->app->bind(AlarmService::class, fn () => app(\App\Services\AlarmService::class));
+        $this->app->singleton(ComplaintService::class);
     }
 
     /**

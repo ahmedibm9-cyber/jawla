@@ -75,7 +75,23 @@ public static function getNavigationGroup(): ?string { return app()->getLocale()
                 Tables\Filters\SelectFilter::make('route_id')->label($l('خط السير', 'Route'))->relationship('route', 'name_ar'),
                 Tables\Filters\TernaryFilter::make('is_active'),
             ])
-            ->actions([Tables\Actions\EditAction::make()])
+            ->actions([
+                Tables\Actions\Action::make('approve')
+                    ->label($l('اعتماد', 'Approve'))
+                    ->icon('heroicon-o-check')
+                    ->color('success')
+                    ->visible(fn (Customer $c) => $c->status === 'pending')
+                    ->action(fn (Customer $c) => $c->update(['status' => 'approved']))
+                    ->requiresConfirmation(),
+                Tables\Actions\Action::make('reject')
+                    ->label($l('رفض', 'Reject'))
+                    ->icon('heroicon-o-x-mark')
+                    ->color('danger')
+                    ->visible(fn (Customer $c) => $c->status === 'pending')
+                    ->action(fn (Customer $c) => $c->update(['status' => 'rejected', 'is_active' => false]))
+                    ->requiresConfirmation(),
+                Tables\Actions\EditAction::make(),
+            ])
             ->bulkActions([Tables\Actions\DeleteBulkAction::make()]);
     }
 

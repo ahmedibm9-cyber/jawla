@@ -3,7 +3,13 @@
         step: '{{ $step }}',
         userLat: null,
         userLng: null,
+        online: navigator.onLine,
+        draftKey: 'visit_draft_{{ $visit->id }}',
+        draftInterval: null,
         init() {
+            window.addEventListener('online', () => this.online = true);
+            window.addEventListener('offline', () => this.online = false);
+
             if ('geolocation' in navigator) {
                 navigator.geolocation.getCurrentPosition(
                     (pos) => {
@@ -13,11 +19,39 @@
                         $wire.set('userLng', this.userLng);
                         $wire.checkGps();
                     },
-                    () => $wire.set('errorMessage', 'GPS {{ app()->getLocale() === "ar" ? "غير متاح" : "unavailable" }}')
+                    () => $wire.set('errorMessage', 'GPS {{ app()->getLocale() === "ar" ? "غير متوفر" : "unavailable" }}')
                 );
             }
+
+            const saved = localStorage.getItem(this.draftKey);
+            if (saved) {
+                try {
+                    const draft = JSON.parse(saved);
+                    if (draft.summary && !$wire.summary) $wire.set('summary', draft.summary);
+                    if (draft.customerFeedback && !$wire.customerFeedback) $wire.set('customerFeedback', draft.customerFeedback);
+                    if (draft.actionTaken && !$wire.actionTaken) $wire.set('actionTaken', draft.actionTaken);
+                } catch (e) {}
+            }
+
+            this.draftInterval = setInterval(() => {
+                const d = {
+                    summary: $wire.summary,
+                    customerFeedback: $wire.customerFeedback,
+                    actionTaken: $wire.actionTaken,
+                };
+                if (d.summary || d.customerFeedback || d.actionTaken) {
+                    localStorage.setItem(this.draftKey, JSON.stringify(d));
+                }
+            }, 3000);
         }
      }">
+
+    @if(!$online)
+        <div class="card" style="background:#FEF3C7;color:#92400E;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728M5.636 18.364a9 9 0 010-12.728M15.536 8.464a5 5 0 010 7.072M8.464 15.536a5 5 0 010-7.072"/></svg>
+            <span>{{ app()->getLocale() === 'ar' ? 'غير متصل — سيتم حفظ المسودة' : 'Offline — draft will be saved' }}</span>
+        </div>
+    @endif
 
     {{-- Stepper --}}
     <div class="stepper">
