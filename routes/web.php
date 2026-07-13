@@ -10,6 +10,7 @@ use App\Livewire\App\StockSearch;
 use App\Livewire\App\MorePage;
 use App\Livewire\App\AddCustomer;
 use App\Livewire\App\LogComplaint;
+use App\Livewire\App\SubmitPurchaseOffer;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/up', fn () => response('ok', 200));
@@ -41,6 +42,7 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/more', MorePage::class)->name('more');
     Route::get('/customers/create', AddCustomer::class)->name('customers.create');
     Route::get('/complaints', LogComplaint::class)->name('complaints');
+    Route::get('/purchase-offer', SubmitPurchaseOffer::class)->name('purchase-offer');
     Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])->name('pdf.proforma');
     Route::get('/pdf/invoice/{invoice}', [PdfController::class, 'invoice'])->name('pdf.invoice');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');

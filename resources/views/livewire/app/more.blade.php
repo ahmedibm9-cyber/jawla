@@ -30,6 +30,12 @@
                 <span style="color:#6b7280">&rsaquo;</span>
             </div>
         </a>
+        <a href="/app/purchase-offer" class="card" style="display:block;text-decoration:none;color:inherit;margin-top:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <span>{{ app()->getLocale() === 'ar' ? 'عرض شراء' : 'Purchase Offer' }}</span>
+                <span style="color:#6b7280">&rsaquo;</span>
+            </div>
+        </a>
     </div>
 
     <form action="/app/logout" method="POST" style="margin-top:24px">
