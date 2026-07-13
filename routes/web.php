@@ -5,6 +5,8 @@ use App\Livewire\App\Home;
 use App\Livewire\App\VisitFlow;
 use App\Livewire\App\TodaysCustomers;
 use App\Livewire\App\QuotationFlow;
+use App\Livewire\App\StockSearch;
+use App\Livewire\App\MorePage;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/up', fn () => response('ok', 200));
@@ -32,5 +34,7 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/visit/{visit}', VisitFlow::class)->name('visit');
     Route::get('/customers', TodaysCustomers::class)->name('customers');
     Route::get('/quotations', QuotationFlow::class)->name('quotations');
+    Route::get('/stock', StockSearch::class)->name('stock');
+    Route::get('/more', MorePage::class)->name('more');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 });

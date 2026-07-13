@@ -7,10 +7,17 @@
     </div>
 
     @forelse($customers as $customer)
-        <div class="card">
+<div class="card">
             <strong style="display:block">{{ $customer->name_ar }}</strong>
             <small style="color:#6b7280">{{ $customer->code }} · {{ $customer->phone }}</small>
             <p style="margin:4px 0 0;font-size:0.85rem;color:#9ca3af">{{ $customer->address }}</p>
+            @if($customer->latitude && $customer->longitude)
+                <a href="https://www.google.com/maps/dir/?api=1&destination={{ $customer->latitude }},{{ $customer->longitude }}"
+                   target="_blank" class="maps-link">
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 9m-6-2l6-3m6 10V9m-6 10V9"/></svg>
+                    {{ app()->getLocale() === 'ar' ? 'اتجاهات' : 'Directions' }}
+                </a>
+            @endif
         </div>
     @empty
         <div class="card" style="text-align:center;padding:32px;color:#9ca3af">
