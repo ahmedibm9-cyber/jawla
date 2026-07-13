@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\App\LoginController;
+use App\Http\Controllers\App\PdfController;
 use App\Livewire\App\Home;
 use App\Livewire\App\VisitFlow;
 use App\Livewire\App\TodaysCustomers;
@@ -40,5 +41,7 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/more', MorePage::class)->name('more');
     Route::get('/customers/create', AddCustomer::class)->name('customers.create');
     Route::get('/complaints', LogComplaint::class)->name('complaints');
+    Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])->name('pdf.proforma');
+    Route::get('/pdf/invoice/{invoice}', [PdfController::class, 'invoice'])->name('pdf.invoice');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 });
