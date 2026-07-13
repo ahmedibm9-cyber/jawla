@@ -1,0 +1,75 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\PriceQuotationRequestResource\Pages;
+use App\Models\PriceQuotationRequest;
+use Filament\Forms;
+use Filament\Forms\Form;
+use Filament\Schemas\Schema;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Tables\Actions\Action;
+use App\Models\PriceQuotation;
+
+class PriceQuotationRequestResource extends Resource
+{
+    public static function getModel(): string { return PriceQuotationRequest::class; }
+    public static function getNavigationIcon(): string { return 'heroicon-o-currency-dollar'; }
+    public static function getNavigationGroup(): ?string { return app()->getLocale() === 'ar' ? 'المبيعات' : 'Sales'; }
+    public static function getLabel(): string { return app()->getLocale() === 'ar' ? 'طلب عرض سعر' : 'Quotation Request'; }
+    public static function getPluralLabel(): string { return app()->getLocale() === 'ar' ? 'عروض الأسعار' : 'Quotations'; }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('product.name_ar')->label(app()->getLocale() === 'ar' ? 'المنتج' : 'Product')->searchable(),
+                Tables\Columns\TextColumn::make('customer.name_ar')->label(app()->getLocale() === 'ar' ? 'العميل' : 'Customer'),
+                Tables\Columns\TextColumn::make('user.name')->label(app()->getLocale() === 'ar' ? 'المندوب' : 'Rep'),
+                Tables\Columns\TextColumn::make('quantity_requested')->label(app()->getLocale() === 'ar' ? 'الكمية' : 'Qty'),
+                Tables\Columns\BadgeColumn::make('status')->label(app()->getLocale() === 'ar' ? 'الحالة' : 'Status')
+                    ->colors(['requested' => 'warning', 'priced' => 'info', 'confirmed' => 'success', 'cancelled' => 'danger']),
+                Tables\Columns\TextColumn::make('requested_at')->label(app()->getLocale() === 'ar' ? 'تاريخ الطلب' : 'Date')->dateTime()->sortable(),
+            ])
+            ->defaultSort('created_at', 'desc')
+            ->filters([
+                Tables\Filters\SelectFilter::make('status')->options(['requested' => 'Requested', 'priced' => 'Priced', 'confirmed' => 'Confirmed', 'cancelled' => 'Cancelled']),
+            ])
+            ->actions([
+                Tables\Actions\Action::make('set_price')
+                    ->label(app()->getLocale() === 'ar' ? 'تسعير' : 'Set Price')
+                    ->icon('heroicon-o-pencil-square')
+                    ->visible(fn (PriceQuotationRequest $r) => $r->status === 'requested')
+                    ->form([
+                        Forms\Components\TextInput::make('base_price')->label(app()->getLocale() === 'ar' ? 'السعر الأساسي' : 'Base Price')->numeric()->required(),
+                        Forms\Components\TextInput::make('manager_plus')->label(app()->getLocale() === 'ar' ? 'الحد الأعلى (±)' : 'Plus Range')->numeric()->default(0),
+                        Forms\Components\TextInput::make('manager_minus')->label(app()->getLocale() === 'ar' ? 'الحد الأدنى (±)' : 'Minus Range')->numeric()->default(0),
+                        Forms\Components\TextInput::make('rep_plus')->label(app()->getLocale() === 'ar' ? 'نطاق المندوب (+)' : 'Rep Plus')->numeric()->default(0),
+                        Forms\Components\TextInput::make('rep_minus')->label(app()->getLocale() === 'ar' ? 'نطاق المندوب (-)' : 'Rep Minus')->numeric()->default(0),
+                    ])
+                    ->action(function (PriceQuotationRequest $r, array $data): void {
+                        PriceQuotation::create([
+                            'price_quotation_request_id' => $r->id,
+                            'base_price' => $data['base_price'],
+                            'manager_plus' => $data['manager_plus'],
+                            'manager_minus' => $data['manager_minus'],
+                            'rep_plus' => $data['rep_plus'],
+                            'rep_minus' => $data['rep_minus'],
+                            'priced_by' => auth()->id(),
+                            'priced_at' => now(),
+                        ]);
+                        $r->update(['status' => 'priced']);
+                    }),
+                Tables\Actions\EditAction::make(),
+            ]);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListQuotationRequests::route('/'),
+        ];
+    }
+}
