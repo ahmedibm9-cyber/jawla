@@ -58,7 +58,7 @@ class PdfService
         $signatureLabel = $lang === 'ar' ? 'التوقيع' : 'Signature';
 
         $dir = $lang === 'ar' ? 'rtl' : 'ltr';
-        $ textAlign = $lang === 'ar' ? 'right' : 'left';
+        $textAlign = $lang === 'ar' ? 'right' : 'left';
 
         $rows = '';
         foreach ($items as $item) {
