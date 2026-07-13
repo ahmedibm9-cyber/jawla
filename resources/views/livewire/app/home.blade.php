@@ -5,13 +5,13 @@
     </div>
 
     <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
-        <a href="/app/visits" style="text-decoration:none">
+        <a href="/app" style="text-decoration:none">
             <div class="card" style="text-align:center;padding:20px 12px">
                 <div style="font-size:2rem;font-weight:700;color:#4DB848">{{ $pendingCount }}</div>
                 <div style="color:#6b7280;font-size:0.9rem;margin-top:4px">{{ __('app.visits_pending') }}</div>
             </div>
         </a>
-        <a href="/app/visits" style="text-decoration:none">
+        <a href="/app" style="text-decoration:none">
             <div class="card" style="text-align:center;padding:20px 12px">
                 <div style="font-size:2rem;font-weight:700;color:#16A34A">{{ $completedCount }}</div>
                 <div style="color:#6b7280;font-size:0.9rem;margin-top:4px">{{ __('app.visits_done') }}</div>
@@ -33,6 +33,13 @@
                         <div>
                             <strong style="display:block">{{ $assignment->customer?->name_ar ?? '?' }}</strong>
                             <small style="color:#6b7280">{{ $assignment->customer?->address }}</small>
+                            @if($assignment->customer?->latitude && $assignment->customer?->longitude)
+                                <a href="https://www.google.com/maps/dir/?api=1&destination={{ $assignment->customer->latitude }},{{ $assignment->customer->longitude }}"
+                                   target="_blank" class="maps-link" onclick="event.stopPropagation()">
+                                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 9m-6-2l6-3m6 10V9m-6 10V9"/></svg>
+                                    {{ app()->getLocale() === 'ar' ? 'اتجاهات' : 'Directions' }}
+                                </a>
+                            @endif
                         </div>
                         <span class="badge @if($assignment->status === 'completed') badge-success @elseif($assignment->status === 'missed') badge-danger @else badge-warning @endif">
                             {{ $assignment->status === 'completed' ? __('app.done') : ($assignment->status === 'missed' ? __('app.missed') : __('app.pending')) }}

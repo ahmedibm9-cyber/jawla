@@ -31,6 +31,14 @@
     .step.done .step-dot{background:#16A34A;color:#fff}
     .step-line{flex:1;height:2px;background:#e5e7eb;margin:0 -4px}
     .step.done .step-line,.step.active .step-line{background:#4DB848}
+    .skeleton{background:linear-gradient(90deg,#e5e7eb 25%,#f3f4f6 50%,#e5e7eb 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    .skeleton-card{height:80px;margin-bottom:12px}
+    .toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);padding:12px 24px;border-radius:10px;font-weight:600;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.1);animation:fadeIn 0.2s}
+    .toast-success{background:#16A34A;color:#fff}
+    .toast-error{background:#DC2626;color:#fff}
+    @keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(-8px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+    .maps-link{display:inline-flex;align-items:center;gap:4px;font-size:0.85rem;color:#2C6FB4;text-decoration:none;margin-top:4px}
   </style>
   @livewireStyles
 </head>
