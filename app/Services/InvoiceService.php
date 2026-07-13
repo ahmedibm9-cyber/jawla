@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\InvoiceStatus;
 use App\Enums\StockReason;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
@@ -38,7 +39,7 @@ class InvoiceService implements InvoiceContract
                 'visit_id' => $data['visit_id'] ?? null,
                 'proforma_invoice_id' => $data['proforma_invoice_id'] ?? null,
                 'invoice_number' => $invNumber,
-                'status' => 'submitted',
+                'status' => InvoiceStatus::Submitted,
                 'subtotal' => $lineTotal,
                 'vat_amount' => $vatAmount,
                 'total' => $total,
@@ -93,7 +94,7 @@ class InvoiceService implements InvoiceContract
     {
         return DB::transaction(function () use ($invoice, $userId, $reason): Invoice {
             $invoice->update([
-                'status' => 'cancelled',
+                'status' => InvoiceStatus::Cancelled,
                 'cancelled_at' => now(),
                 'cancelled_by' => $userId,
             ]);
@@ -132,7 +133,7 @@ class InvoiceService implements InvoiceContract
             'customer_id' => $invoice->customer_id,
             'user_id' => auth()->id(),
             'invoice_number' => $invoice->invoice_number,
-            'status' => 'draft',
+            'status' => InvoiceStatus::Draft,
             'subtotal' => $invoice->subtotal,
             'vat_amount' => $invoice->vat_amount,
             'total' => $invoice->total,

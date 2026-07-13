@@ -38,10 +38,16 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
+                \App\Filament\Pages\ReportsPage::class,
+                \App\Filament\Pages\CollectPayment::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
+                \App\Filament\Widgets\VisitsTodayWidget::class,
+                \App\Filament\Widgets\PendingQuotationsWidget::class,
+                \App\Filament\Widgets\OpenAlarmsWidget::class,
+                \App\Filament\Widgets\SalesTodayWidget::class,
                 FilamentInfoWidget::class,
             ])
             ->userMenuItems([
