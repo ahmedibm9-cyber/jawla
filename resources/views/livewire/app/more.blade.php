@@ -12,9 +12,21 @@
     </div>
 
     <div style="margin-top:16px">
-        <a href="/app/quotations" class="card" style="display:block;text-decoration:none;color:inherit">
+        <a href="/app/customers/create" class="card" style="display:block;text-decoration:none;color:inherit">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <span>{{ app()->getLocale() === 'ar' ? 'إضافة عميل' : 'Add Customer' }}</span>
+                <span style="color:#6b7280">&rsaquo;</span>
+            </div>
+        </a>
+        <a href="/app/quotations" class="card" style="display:block;text-decoration:none;color:inherit;margin-top:8px">
             <div style="display:flex;justify-content:space-between;align-items:center">
                 <span>{{ __('app.quotations') }}</span>
+                <span style="color:#6b7280">&rsaquo;</span>
+            </div>
+        </a>
+        <a href="/app/complaints" class="card" style="display:block;text-decoration:none;color:inherit;margin-top:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+                <span>{{ app()->getLocale() === 'ar' ? 'تسجيل شكوى' : 'Log Complaint' }}</span>
                 <span style="color:#6b7280">&rsaquo;</span>
             </div>
         </a>

@@ -3,34 +3,85 @@
 namespace App\Services;
 
 use App\Models\Alarm;
+use App\Models\AlarmRead;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class AlarmService implements Contracts\AlarmService
 {
-    public function raise(string $type, mixed $ref, string $title, string $description, string $severity): Alarm
+    public function raise(string $type, Model $ref, string $title, string $description, string $severity): Alarm
     {
-        return Alarm::create([
-            'company_id' => $ref->company_id ?? 1,
-            'type' => $type,
-            'reference_type' => get_class($ref),
-            'reference_id' => $ref->id,
-            'title' => $title,
-            'description' => $description,
-            'severity' => $severity,
-        ]);
+        return DB::transaction(function () use ($type, $ref, $title, $description, $severity): Alarm {
+            $alarm = Alarm::create([
+                'company_id' => $ref->company_id ?? 1,
+                'type' => $type,
+                'reference_type' => get_class($ref),
+                'reference_id' => $ref->id,
+                'title' => $title,
+                'description' => $description,
+                'severity' => $severity,
+            ]);
+
+            $recipients = $this->recipientsFor($type, $alarm->company_id);
+
+            foreach ($recipients as $userId) {
+                AlarmRead::firstOrCreate([
+                    'alarm_id' => $alarm->id,
+                    'user_id' => $userId,
+                ], [
+                    'read_at' => null,
+                ]);
+            }
+
+            return $alarm;
+        });
     }
 
-    public function acknowledge($alarm, int $userId)
+    public function acknowledge(Alarm $alarm, int $userId): Alarm
     {
-        return tap($alarm, fn (Alarm $a) => $a->update([
-            'is_read' => true, 'read_by' => $userId, 'read_at' => now(),
-        ]));
+        return DB::transaction(function () use ($alarm, $userId): Alarm {
+            $alarm->update(['is_read' => true, 'read_by' => $userId, 'read_at' => now()]);
+
+            AlarmRead::updateOrCreate(
+                ['alarm_id' => $alarm->id, 'user_id' => $userId],
+                ['acknowledged' => true, 'acknowledged_at' => now(), 'read_at' => now()],
+            );
+
+            return $alarm;
+        });
     }
 
-    public function resolve($alarm, int $userId)
+    public function resolve(Alarm $alarm, int $userId): Alarm
     {
-        return tap($alarm, fn (Alarm $a) => $a->update([
-            'is_read' => true, 'read_by' => $userId, 'read_at' => now(),
-        ]));
+        return DB::transaction(function () use ($alarm, $userId): Alarm {
+            $alarm->update(['is_read' => true, 'read_by' => $userId, 'read_at' => now()]);
+
+            AlarmRead::updateOrCreate(
+                ['alarm_id' => $alarm->id, 'user_id' => $userId],
+                ['acknowledged' => true, 'resolved' => true, 'acknowledged_at' => now(), 'resolved_at' => now(), 'read_at' => now()],
+            );
+
+            return $alarm;
+        });
+    }
+
+    private function recipientsFor(string $type, int $companyId): array
+    {
+        $roleMap = [
+            'out_of_stock_request' => ['accounts', 'sales_manager', 'executive'],
+            'customer_complaint' => ['sales_manager'],
+            'new_customer_pending' => ['sales_manager'],
+            'price_quotation_requested' => ['sales_manager'],
+            'purchase_request' => ['sales_manager', 'purchasing'],
+        ];
+
+        $roles = $roleMap[$type] ?? ['admin'];
+
+        return User::where('company_id', $companyId)
+            ->where('is_active', true)
+            ->whereHas('roles', fn ($q) => $q->whereIn('name', $roles))
+            ->pluck('id')
+            ->toArray();
     }
 }

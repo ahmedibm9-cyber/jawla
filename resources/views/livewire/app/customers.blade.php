@@ -1,10 +1,14 @@
 <div class="main-content" style="padding:16px">
     <h2 style="margin:0 0 16px">{{ __('app.customers') }}</h2>
 
-    <div style="margin-bottom:16px">
+<div style="margin-bottom:16px">
         <input type="text" wire:model.live="search" style="width:100%;padding:12px;border:1px solid #d1d5db;border-radius:10px;font-size:1rem"
-            placeholder="{{ app()->getLocale() === 'ar' ? 'بحث عن عميل...' : 'Search customers...' }}">
+            placeholder="{{ app()->getLocale() === 'ar' ? 'ابحث بالاسم أو الهاتف...' : 'Search customers...' }}">
     </div>
+
+    <a href="/app/customers/create" class="btn btn-primary" style="display:block;text-decoration:none;margin-bottom:12px;text-align:center">
+        {{ app()->getLocale() === 'ar' ? '+ إضافة عميل' : '+ Add Customer' }}
+    </a>
 
     @forelse($customers as $customer)
 <div class="card">
