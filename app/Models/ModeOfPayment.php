@@ -12,6 +12,8 @@ class ModeOfPayment extends Model
 
     use BelongsToCompany;
 
+    protected $table = 'modes_of_payment';
+
     protected $fillable = ['company_id', 'name', 'type', 'is_active'];
     protected $casts = ['is_active' => 'boolean'];
 }
