@@ -2,17 +2,23 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Expense extends Model
 {
+    use HasFactory;
+
+    use BelongsToCompany;
+
     protected $fillable = [
         'company_id', 'user_id', 'work_session_id', 'category',
-        'amount', 'note', 'status', 'spent_at',
+        'amount', 'note', 'spent_at', 'posting_date',
     ];
 
-    protected $casts = ['amount' => 'decimal:2', 'spent_at' => 'datetime'];
+    protected $casts = ['amount' => 'decimal:2', 'spent_at' => 'datetime', 'posting_date' => 'date'];
 
     public function company(): BelongsTo { return $this->belongsTo(Company::class); }
     public function user(): BelongsTo { return $this->belongsTo(User::class); }

@@ -2,14 +2,20 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WorkSession extends Model
 {
+    use HasFactory;
+
+    use BelongsToCompany;
+
     protected $fillable = [
-        'user_id', 'route_id', 'started_at', 'ended_at',
+        'company_id', 'user_id', 'route_id', 'started_at', 'ended_at',
         'start_latitude', 'start_longitude', 'end_latitude', 'end_longitude',
     ];
 

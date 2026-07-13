@@ -11,21 +11,25 @@ class DatabaseSeeder extends Seeder
 {
     use WithoutModelEvents;
 
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
         $this->call(RoleSeeder::class);
 
-        $company = Company::factory()->create();
+        $company = Company::factory()->create([
+            'name_ar' => 'شركة اللدائن العالمية',
+            'name_en' => 'Global Plastic Company (GPC)',
+            'abbr' => 'GPC',
+            'tax_number' => '618-549-994',
+        ]);
 
         $demoUsers = [
-            'system_viewer' => 'viewer@jawla.test',
-            'hr_admin' => 'hr@jawla.test',
+            'admin' => 'admin@jawla.test',
             'sales_manager' => 'manager@jawla.test',
+            'accounts' => 'accounts@jawla.test',
+            'purchasing' => 'purchasing@jawla.test',
             'warehouse_keeper' => 'warehouse@jawla.test',
-            'sales_rep' => 'rep@jawla.test',
+            'executive' => 'executive@jawla.test',
+            'rep' => 'rep@jawla.test',
         ];
 
         foreach ($demoUsers as $role => $email) {

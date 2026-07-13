@@ -30,7 +30,7 @@ class LoginController extends Controller
 
         $user = Auth::user();
 
-        if (! $user->is_active || ! $user->hasRole('sales_rep')) {
+        if (! $user->is_active || ! $user->hasRole('rep')) {
             Auth::logout();
 
             return back()
