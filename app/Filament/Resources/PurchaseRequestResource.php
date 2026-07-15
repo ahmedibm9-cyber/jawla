@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Actions\Action;
+
 use App\Filament\Resources\PurchaseRequestResource\Pages;
 use App\Models\PurchaseRequest;
 use Filament\Forms;
@@ -86,7 +88,7 @@ class PurchaseRequestResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
-                Tables\Actions\Action::make('sales_approve')
+                Filament\Actions\Action::make('sales_approve')
                     ->label($l('موافقة Sales', 'Sales Approve'))
                     ->icon('heroicon-o-check')
                     ->color('info')
@@ -99,7 +101,7 @@ class PurchaseRequestResource extends Resource
                         ]);
                     })
                     ->requiresConfirmation(),
-                Tables\Actions\Action::make('sales_reject')
+                Filament\Actions\Action::make('sales_reject')
                     ->label($l('رفض Sales', 'Sales Reject'))
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
@@ -112,7 +114,7 @@ class PurchaseRequestResource extends Resource
                         ]);
                     })
                     ->requiresConfirmation(),
-                Tables\Actions\Action::make('purchasing_approve')
+                Filament\Actions\Action::make('purchasing_approve')
                     ->label($l('موافقة Purchasing', 'Purchasing Approve'))
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
@@ -125,7 +127,7 @@ class PurchaseRequestResource extends Resource
                         ]);
                     })
                     ->requiresConfirmation(),
-                Tables\Actions\Action::make('purchasing_reject')
+                Filament\Actions\Action::make('purchasing_reject')
                     ->label($l('رفض Purchasing', 'Purchasing Reject'))
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')

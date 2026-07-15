@@ -1,0 +1,74 @@
+services:
+  - type: web
+    name: jawla
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /up
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_NAME
+        value: Jawla
+      - key: APP_LOCALE
+        value: ar
+      - key: APP_FALLBACK_LOCALE
+        value: en
+      - key: APP_FAKER_LOCALE
+        value: ar_SA
+      - key: APP_MAINTENANCE_DRIVER
+        value: file
+      - key: BCRYPT_ROUNDS
+        value: "12"
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: warning
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_LIFETIME
+        value: "720"
+      - key: SESSION_ENCRYPT
+        value: "false"
+      - key: BROADCAST_CONNECTION
+        value: log
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: MAIL_MAILER
+        value: log
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: jawla-db
+          key: host
+      - key: DB_PORT
+        fromDatabase:
+          name: jawla-db
+          key: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: jawla-db
+          key: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: jawla-db
+          key: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: jawla-db
+          key: password
+      - key: VITE_APP_NAME
+        value: Jawla
+
+databases:
+  - name: jawla-db
+    plan: free
+    ipAllowList: []

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Actions\Action;
+
 use App\Filament\Resources\CustomerResource\Pages;
 use App\Models\Customer;
 use Filament\Schemas\Schema;
@@ -76,14 +78,14 @@ public static function getNavigationGroup(): ?string { return app()->getLocale()
                 Tables\Filters\TernaryFilter::make('is_active'),
             ])
             ->actions([
-                Tables\Actions\Action::make('approve')
+                Filament\Actions\Action::make('approve')
                     ->label($l('اعتماد', 'Approve'))
                     ->icon('heroicon-o-check')
                     ->color('success')
                     ->visible(fn (Customer $c) => $c->status === 'pending')
                     ->action(fn (Customer $c) => $c->update(['status' => 'approved']))
                     ->requiresConfirmation(),
-                Tables\Actions\Action::make('reject')
+                Filament\Actions\Action::make('reject')
                     ->label($l('رفض', 'Reject'))
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
