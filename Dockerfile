@@ -14,7 +14,7 @@ FROM php:8.3-apache
 
 # System deps + PHP extensions
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        libpq-dev libpng-dev libzip-dev libicu-dev unzip git \
+        libpq-dev libpng-dev libzip-dev libicu-dev liboniguruma-dev unzip git \
     && docker-php-ext-install pdo pdo_pgsql gd mbstring zip bcmath intl opcache \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
