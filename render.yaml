@@ -48,23 +48,23 @@ services:
       - key: DB_HOST
         fromDatabase:
           name: jawla-db
-          key: host
+          property: host
       - key: DB_PORT
         fromDatabase:
           name: jawla-db
-          key: port
+          property: port
       - key: DB_DATABASE
         fromDatabase:
           name: jawla-db
-          key: database
+          property: database
       - key: DB_USERNAME
         fromDatabase:
           name: jawla-db
-          key: user
+          property: user
       - key: DB_PASSWORD
         fromDatabase:
           name: jawla-db
-          key: password
+          property: password
       - key: VITE_APP_NAME
         value: Jawla
 
