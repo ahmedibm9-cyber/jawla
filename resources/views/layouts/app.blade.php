@@ -43,7 +43,7 @@
   @livewireStyles
 </head>
 <body>
-  {{ $slot }}
+  {!! $slot !!}
   @livewireScripts
   @filamentScripts
 </body>

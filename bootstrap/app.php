@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure.rep' => \App\Http\Middleware\EnsureRepRole::class,
         ]);
 
+        $middleware->redirectGuestsTo('/app/login');
+
         $middleware->web(append: [
             \App\Http\Middleware\SecurityHeaders::class,
             \App\Http\Middleware\SetActiveCompanyContext::class,

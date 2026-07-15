@@ -62,6 +62,37 @@ The seed data reproduces the client's voice-message narrative:
 - Invoice flow (atomic create, oversell rollback, payment closes invoice, cancel reverses)
 - AM1 → AM9 end-to-end narrative (26 assertions, single test case)
 
+## Deploy to Render (free)
+
+A free-tier deployment for client demos. Uses Docker + Render Blueprint.
+
+### Prerequisites
+- GitHub repo with this code pushed
+- Render account (https://render.com)
+
+### Steps
+1. Push code to GitHub (include `Dockerfile`, `render.yaml`, `scripts/render-start.sh`).
+2. Go to https://dashboard.render.com → New → Blueprint.
+3. Select your GitHub repo. Render reads `render.yaml` and provisions:
+   - **Web service** (free plan, Docker runtime)
+   - **PostgreSQL** (free plan, 90-day limit)
+4. Set `APP_KEY` in the Render dashboard → Environment (generate with `php artisan key:generate` locally, paste the base64 key).
+5. Set `APP_URL` to your Render URL (`https://jawla.onrender.com`).
+6. Deploy. The `render-start.sh` entrypoint auto-runs:
+   - `php artisan migrate --force`
+   - `php artisan db:seed --class=DemoSeeder --force`
+   - `php artisan config:cache && route:cache && view:cache`
+7. After deploy, visit `https://<your-app>.onrender.com/` — redirects to `/app` (rep login).
+
+### Demo URLs
+- Rep app: `https://<your-app>.onrender.com/app`
+- Admin panel: `https://<your-app>.onrender.com/admin`
+
+### Free-tier limitations
+- **Cold start:** service sleeps after 15 min idle → ~30s wake on first request.
+- **PostgreSQL:** free for 90 days, then must upgrade or data is deleted.
+- **File storage:** ephemeral — generated PDFs/signatures are lost on redeploy. Acceptable for demo; switch to S3/R2 for persistence.
+
 ## Docs index
 - `docs/ARCHITECTURE.md` — stack + boundaries.
 - `docs/BUSINESS_RULES.md` — non-negotiables (stock, atomic sales, VAT).

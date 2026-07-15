@@ -13,6 +13,8 @@ use App\Livewire\App\LogComplaint;
 use App\Livewire\App\SubmitPurchaseOffer;
 use Illuminate\Support\Facades\Route;
 
+Route::get('/', fn () => redirect('/app'));
+
 Route::get('/up', fn () => response('ok', 200));
 
 Route::get('/locale/{locale}', function (string $locale) {

@@ -30,7 +30,7 @@ class ReportsPage extends Page
 
     public function getVisitsProperty()
     {
-        $q = VisitReport::whereHas('visit', function ($q) {
+        $q = VisitReport::whereHas('visit.customer', function ($q) {
             $q->where('company_id', Auth::user()->company_id);
         })->with(['visit.customer', 'visit.user'])->latest();
 
