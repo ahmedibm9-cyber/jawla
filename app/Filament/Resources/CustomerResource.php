@@ -9,6 +9,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 
 class CustomerResource extends Resource
 {
@@ -69,7 +70,7 @@ class CustomerResource extends Resource
                     ->maxValue(180),
                 Forms\Components\Placeholder::make('map')
                     ->label($l('الخريطة', 'Map'))
-                    ->content(new \Illuminate\Support\HtmlString(
+                    ->content(new HtmlString(
                         '<div x-data="{
                             lat: $wire.data.latitude || 30.0444,
                             lng: $wire.data.longitude || 31.2357,
@@ -107,8 +108,8 @@ class CustomerResource extends Resource
                         }" x-init="init()">
                             <div data-leaflet style="width:100%;height:300px;border-radius:8px;border:1px solid #d1d5db"></div>
                             <button type="button" @click="locate()" class="fi-btn fi-btn-sm fi-btn-outline mt-2">'
-                        . $l('استخدم موقعي الحالي', 'Use my current location')
-                        . '</button>
+                        .$l('استخدم موقعي الحالي', 'Use my current location')
+                        .'</button>
                         </div>'
                     )),
             ])->columns(2),
