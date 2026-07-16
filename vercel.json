@@ -1,6 +1,5 @@
 {
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "outputDirectory": "public",
-  "installCommand": "npm install && composer install --no-interaction --prefer-dist --optimize-autoloader"
+  "outputDirectory": "public"
 }
