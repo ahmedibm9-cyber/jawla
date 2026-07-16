@@ -8,11 +8,4 @@ use Filament\Resources\Pages\ListRecords;
 class ListStocks extends ListRecords
 {
     protected static string $resource = StockResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            StockResource::getHeaderActions(),
-        ];
-    }
 }
