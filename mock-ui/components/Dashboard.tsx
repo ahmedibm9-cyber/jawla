@@ -1,82 +1,59 @@
-export default function Dashboard() {
-  const widgets = [
-    { title: 'الزيارات اليوم', value: '24', icon: '📍', color: 'blue' },
-    { title: 'المبيعات اليوم', value: '45,320 ر.س', icon: '💰', color: 'green' },
-    { title: 'العروض المعلقة', value: '8', icon: '📄', color: 'yellow' },
-    { title: 'التنبيهات المفتوحة', value: '3', icon: '⚠️', color: 'red' },
-  ];
+'use client';
 
+import FinancialMetrics from '@/components/FinancialMetrics';
+import QuickActions from '@/components/QuickActions';
+import ActivityFeed from '@/components/ActivityFeed';
+
+export default function Dashboard() {
   return (
     <div className="p-8">
-      <h2 className="text-3xl font-bold text-white mb-8">لوحة التحكم</h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {widgets.map((widget, idx) => (
-          <div
-            key={idx}
-            className="bg-slate-800 border border-slate-700 rounded-lg p-6 hover:border-slate-600 transition"
-          >
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-slate-400 text-sm mb-2">{widget.title}</p>
-                <p className="text-3xl font-bold text-white">{widget.value}</p>
-              </div>
-              <span className="text-4xl">{widget.icon}</span>
-            </div>
-          </div>
-        ))}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-white mb-2">لوحة التحكم</h1>
+        <p className="text-slate-400">مرحبا بك في نظام إدارة العملاء المتقدم</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-          <h3 className="text-xl font-bold text-white mb-4">أحدث الزيارات</h3>
-          <div className="space-y-3">
-            {[
-              { customer: 'أحمد علي', route: 'الطريق 1', time: '09:30 AM' },
-              { customer: 'فاطمة محمد', route: 'الطريق 2', time: '10:15 AM' },
-              { customer: 'محمد سالم', route: 'الطريق 1', time: '11:00 AM' },
-            ].map((visit, idx) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between p-3 bg-slate-700/50 rounded"
-              >
-                <div>
-                  <p className="font-medium text-white">{visit.customer}</p>
-                  <p className="text-sm text-slate-400">{visit.route}</p>
-                </div>
-                <span className="text-slate-400">{visit.time}</span>
-              </div>
-            ))}
-          </div>
+      {/* Financial Metrics */}
+      <FinancialMetrics />
+
+      {/* Quick Actions */}
+      <QuickActions />
+
+      {/* Activity Feed and Summary */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <ActivityFeed />
         </div>
 
+        {/* Key Metrics Summary */}
         <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-          <h3 className="text-xl font-bold text-white mb-4">التنبيهات المهمة</h3>
-          <div className="space-y-3">
-            {[
-              { alert: 'عميل متأخر في الدفع', status: 'critical', days: '30+ يوم' },
-              { alert: 'مخزون منخفض', status: 'warning', days: '5 وحدات' },
-              { alert: 'شكوى جديدة', status: 'info', days: 'منذ ساعة' },
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                className={`flex items-center gap-3 p-3 rounded ${
-                  item.status === 'critical'
-                    ? 'bg-red-500/20 border border-red-500/30'
-                    : item.status === 'warning'
-                    ? 'bg-yellow-500/20 border border-yellow-500/30'
-                    : 'bg-blue-500/20 border border-blue-500/30'
-                }`}
-              >
-                <span className="text-2xl">
-                  {item.status === 'critical' ? '🔴' : item.status === 'warning' ? '🟡' : '🔵'}
-                </span>
-                <div>
-                  <p className="font-medium text-white">{item.alert}</p>
-                  <p className="text-sm text-slate-300">{item.days}</p>
-                </div>
+          <h2 className="text-white text-lg font-bold mb-6">ملخص رئيسي</h2>
+
+          <div className="space-y-4">
+            <div className="p-4 bg-slate-700/50 rounded-lg">
+              <p className="text-slate-400 text-sm mb-2">عملاء نشطون</p>
+              <p className="text-white text-2xl font-bold">487</p>
+              <p className="text-green-400 text-xs mt-2">↑ 12.5% هذا الشهر</p>
+            </div>
+
+            <div className="p-4 bg-slate-700/50 rounded-lg">
+              <p className="text-slate-400 text-sm mb-2">معدل التحويل</p>
+              <p className="text-white text-2xl font-bold">38.4%</p>
+              <p className="text-green-400 text-xs mt-2">↑ 5.2% هذا الشهر</p>
+            </div>
+
+            <div className="p-4 bg-slate-700/50 rounded-lg">
+              <p className="text-slate-400 text-sm mb-2">متوسط قيمة الطلب</p>
+              <p className="text-white text-2xl font-bold">28.5K</p>
+              <p className="text-yellow-400 text-xs mt-2">→ مستقرة</p>
+            </div>
+
+            <div className="p-4 bg-slate-700/50 rounded-lg">
+              <p className="text-slate-400 text-sm mb-2">رضا العملاء</p>
+              <div className="flex items-center gap-2 mt-2">
+                <div className="text-white text-2xl font-bold">4.7</div>
+                <div className="text-yellow-400">★★★★★</div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>
