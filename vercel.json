@@ -2,5 +2,20 @@
   "buildCommand": "npm run build",
   "outputDirectory": "public",
   "devCommand": "npm run dev",
-  "framework": "laravel"
+  "framework": "laravel",
+  "functions": {
+    "api/index.php": {
+      "runtime": "php-8.2"
+    }
+  },
+  "routes": [
+    {
+      "src": "/public/(.*)",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/api/index.php"
+    }
+  ]
 }

@@ -1,0 +1,14 @@
+.git
+.github
+.env.local
+.env.*.local
+node_modules
+storage/logs
+storage/app/private
+tests
+docs
+.claude
+.DS_Store
+*.md
+.gitignore
+.env.example
