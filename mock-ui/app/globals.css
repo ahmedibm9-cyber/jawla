@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  @apply bg-slate-950 text-slate-100;
+}
+
+body {
+  @apply font-sans;
+}
