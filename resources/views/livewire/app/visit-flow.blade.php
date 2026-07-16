@@ -48,7 +48,7 @@
 
     @if(!$online)
         <div class="card" style="background:#FEF3C7;color:#92400E;margin-bottom:12px;display:flex;align-items:center;gap:8px">
-            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728M5.636 18.364a9 9 0 010-12.728M15.536 8.464a5 5 0 010 7.072M8.464 15.536a5 5 0 010-7.072"/></svg>
+            <svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728M5.636 18.364a9 9 0 010-12.728M15.536 8.464a5 5 0 010 7.072M8.464 15.536a5 5 0 010-7.072"/></svg>
             <span>{{ app()->getLocale() === 'ar' ? 'غير متصل — سيتم حفظ المسودة' : 'Offline — draft will be saved' }}</span>
         </div>
     @endif
@@ -86,7 +86,7 @@
     {{-- Step: Check-in with GPS --}}
     @if($step === 'checkin')
         @if($errorMessage)
-            <div class="card" style="background:#FEF2F2;color:#DC2626;margin-bottom:16px">{{ $errorMessage }}</div>
+            <div class="card" aria-live="polite" style="background:#FEF2F2;color:#DC2626;margin-bottom:16px">{{ $errorMessage }}</div>
         @endif
 
         @if(!$withinRange && $distanceMeters !== null)
@@ -111,19 +111,19 @@
     {{-- Step: Visit Report --}}
     @if($step === 'report')
         <div class="card">
-            <label style="font-weight:600;display:block;margin-bottom:4px">{{ __('app.report_summary') }} *</label>
-            <textarea wire:model="summary" rows="3" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px" required></textarea>
+            <label for="summary" style="font-weight:600;display:block;margin-bottom:4px">{{ __('app.report_summary') }} *</label>
+            <textarea wire:model="summary" rows="3" autocomplete="off" id="summary" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px" required></textarea>
             @error('summary') <small style="color:#DC2626">{{ $message }}</small> @enderror
         </div>
 
         <div class="card">
-            <label style="font-weight:600;display:block;margin-bottom:4px">{{ __('app.customer_feedback') }}</label>
-            <textarea wire:model="customerFeedback" rows="2" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px"></textarea>
+            <label for="customerFeedback" style="font-weight:600;display:block;margin-bottom:4px">{{ __('app.customer_feedback') }}</label>
+            <textarea wire:model="customerFeedback" rows="2" autocomplete="off" id="customerFeedback" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px"></textarea>
         </div>
 
         <div class="card">
-            <label style="font-weight:600;display:block;margin-bottom:4px">{{ __('app.action_taken') }}</label>
-            <textarea wire:model="actionTaken" rows="2" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px"></textarea>
+            <label for="actionTaken" style="font-weight:600;display:block;margin-bottom:4px">{{ __('app.action_taken') }}</label>
+            <textarea wire:model="actionTaken" rows="2" autocomplete="off" id="actionTaken" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px"></textarea>
         </div>
 
         <div class="card">
@@ -139,7 +139,7 @@
         {{-- Signature --}}
         <div class="card">
             <label style="font-weight:600;display:block;margin-bottom:8px">{{ __('app.signature') }}</label>
-            <canvas id="sigCanvas" width="340" height="140"
+            <canvas id="sigCanvas" width="340" height="140" aria-label="{{ __('app.signature') }}" role="img"
                 style="border:2px dashed #d1d5db;border-radius:8px;display:block;width:100%;touch-action:none"
                 x-data="{ drawing:false, ctx:null }"
                 x-init="ctx = $el.getContext('2d'); ctx.strokeStyle='#1f2937';ctx.lineWidth=2;ctx.lineCap='round'"
@@ -156,7 +156,7 @@
 
         <button class="btn btn-primary" style="width:100%" wire:click="submitReport" wire:loading.attr="disabled">
             <span wire:loading.remove>{{ __('app.submit_report') }}</span>
-            <span wire:loading>{{ __('app.saving') }}...</span>
+            <span wire:loading>{{ __('app.saving') }}&hellip;</span>
         </button>
     @endif
 
