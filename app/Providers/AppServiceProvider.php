@@ -6,16 +6,18 @@ use App\Models\Activity;
 use App\Models\PriceQuotation;
 use App\Models\User;
 use App\Observers\AuditObserver;
+use App\Services\ComplaintService;
 use App\Services\Contracts\AlarmService;
 use App\Services\Contracts\DocumentNumberService;
 use App\Services\Contracts\InvoiceService;
 use App\Services\Contracts\PricingService;
 use App\Services\Contracts\StockService;
-use App\Services\ComplaintService;
+use App\Services\NumberSequenceService;
 use App\Services\StockService as StockServiceImpl;
 use App\Support\ActiveCompanyContext;
 use Filament\Events\Auth\Login as FilamentLogin;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
@@ -30,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(StockService::class, StockServiceImpl::class);
         $this->app->bind(InvoiceService::class, fn () => app(\App\Services\InvoiceService::class));
         $this->app->bind(PricingService::class, fn () => app(\App\Services\PricingService::class));
-        $this->app->bind(DocumentNumberService::class, fn () => app(\App\Services\NumberSequenceService::class));
+        $this->app->bind(DocumentNumberService::class, fn () => app(NumberSequenceService::class));
         $this->app->bind(AlarmService::class, fn () => app(\App\Services\AlarmService::class));
         $this->app->singleton(ComplaintService::class);
     }
@@ -40,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Model::preventLazyLoading(! app()->isProduction());
+
         User::observe(AuditObserver::class);
         PriceQuotation::observe(AuditObserver::class);
 

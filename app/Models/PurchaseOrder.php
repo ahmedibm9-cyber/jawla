@@ -10,9 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PurchaseOrder extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'company_id', 'supplier_id', 'order_number', 'status',
@@ -28,6 +27,13 @@ class PurchaseOrder extends Model
         'total' => 'decimal:2',
     ];
 
-    public function supplier(): BelongsTo { return $this->belongsTo(Supplier::class); }
-    public function items(): HasMany { return $this->hasMany(PurchaseOrderItem::class); }
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(PurchaseOrderItem::class);
+    }
 }

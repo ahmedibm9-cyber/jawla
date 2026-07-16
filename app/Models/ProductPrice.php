@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -21,7 +20,18 @@ class ProductPrice extends Model
         'is_active' => 'boolean',
     ];
 
-    public function product(): BelongsTo { return $this->belongsTo(Product::class); }
-    public function priceList(): BelongsTo { return $this->belongsTo(PriceList::class); }
-    public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function priceList(): BelongsTo
+    {
+        return $this->belongsTo(PriceList::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
 }

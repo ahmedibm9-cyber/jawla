@@ -8,9 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class CompanyBankAccount extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'company_id', 'bank_name', 'account_name', 'account_number',

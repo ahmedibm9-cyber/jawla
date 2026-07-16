@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -18,5 +17,8 @@ class VisitReport extends Model
         'submitted_at' => 'datetime',
     ];
 
-    public function visit(): BelongsTo { return $this->belongsTo(Visit::class); }
+    public function visit(): BelongsTo
+    {
+        return $this->belongsTo(Visit::class);
+    }
 }

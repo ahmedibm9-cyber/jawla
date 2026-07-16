@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -19,6 +18,13 @@ class ProformaInvoiceItem extends Model
         'line_total' => 'decimal:2',
     ];
 
-    public function proformaInvoice(): BelongsTo { return $this->belongsTo(ProformaInvoice::class); }
-    public function product(): BelongsTo { return $this->belongsTo(Product::class); }
+    public function proformaInvoice(): BelongsTo
+    {
+        return $this->belongsTo(ProformaInvoice::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

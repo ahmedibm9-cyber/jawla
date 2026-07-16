@@ -6,7 +6,6 @@ use App\Enums\StockReason;
 use App\Exceptions\Domain\InsufficientStockException;
 use App\Models\Stock;
 use App\Models\StockMovement;
-use App\Models\Warehouse;
 use App\Services\Contracts\StockService as StockServiceContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -47,7 +46,7 @@ class StockService implements StockServiceContract
 
     public function reconcile(int $warehouseId, int $productId, ?int $batchId, float $countedQty, string $reason, int $userId): StockMovement
     {
-        return DB::transaction(function () use ($warehouseId, $productId, $batchId, $countedQty, $reason, $userId): StockMovement {
+        return DB::transaction(function () use ($warehouseId, $productId, $batchId, $countedQty, $userId): StockMovement {
             $current = $this->balance($warehouseId, $productId, $batchId);
             $difference = $countedQty - $current;
 

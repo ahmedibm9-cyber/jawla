@@ -11,9 +11,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Invoice extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'company_id', 'customer_id', 'user_id', 'visit_id',
@@ -35,14 +34,53 @@ class Invoice extends Model
         'cancelled_at' => 'datetime',
     ];
 
-    public function company(): BelongsTo { return $this->belongsTo(Company::class); }
-    public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
-    public function visit(): BelongsTo { return $this->belongsTo(Visit::class); }
-    public function proformaInvoice(): BelongsTo { return $this->belongsTo(ProformaInvoice::class, 'proforma_invoice_id'); }
-    public function cancelledByUser(): BelongsTo { return $this->belongsTo(User::class, 'cancelled_by'); }
-    public function amendedFrom(): BelongsTo { return $this->belongsTo(Invoice::class, 'amended_from'); }
-    public function items(): HasMany { return $this->hasMany(InvoiceItem::class); }
-    public function payments(): HasMany { return $this->hasMany(Payment::class); }
-    public function taxes(): HasMany { return $this->hasMany(InvoiceTax::class); }
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function visit(): BelongsTo
+    {
+        return $this->belongsTo(Visit::class);
+    }
+
+    public function proformaInvoice(): BelongsTo
+    {
+        return $this->belongsTo(ProformaInvoice::class, 'proforma_invoice_id');
+    }
+
+    public function cancelledByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
+    }
+
+    public function amendedFrom(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class, 'amended_from');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function taxes(): HasMany
+    {
+        return $this->hasMany(InvoiceTax::class);
+    }
 }

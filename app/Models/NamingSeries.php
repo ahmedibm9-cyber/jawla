@@ -8,9 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class NamingSeries extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $table = 'naming_series';
 

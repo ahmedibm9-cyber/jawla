@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Invoice;
 use App\Models\ProformaInvoice;
 use Illuminate\Support\Facades\Storage;
+use Mpdf\Mpdf;
 use SimpleSoftwareIO\QrCode\Generator;
 
 class PdfService
@@ -63,7 +64,7 @@ class PdfService
         $rows = '';
         foreach ($items as $item) {
             $pName = $lang === 'ar' ? ($item->product?->name_ar ?? '') : ($item->product?->name_en ?? '');
-            $rows .= "<tr><td>{$pName}</td><td>{$item->quantity}</td><td>".number_format((float)$item->unit_price, 2)."</td><td>".number_format((float)$item->line_total, 2)."</td></tr>";
+            $rows .= "<tr><td>{$pName}</td><td>{$item->quantity}</td><td>".number_format((float) $item->unit_price, 2).'</td><td>'.number_format((float) $item->line_total, 2).'</td></tr>';
         }
 
         $bank = $doc instanceof ProformaInvoice && $doc->company_bank_account_id
@@ -118,13 +119,14 @@ HTML;
 
     private function qrSvg(string $data): string
     {
-        $qr = (new Generator())->size(100)->generate($data);
+        $qr = (new Generator)->size(100)->generate($data);
+
         return '<div class="qr">'.$qr.'</div>';
     }
 
     private function toPdf(string $html, string $filename): string
     {
-        $mpdf = new \Mpdf\Mpdf([
+        $mpdf = new Mpdf([
             'mode' => 'utf-8',
             'format' => 'A4',
             'tempDir' => storage_path('app/temp'),
@@ -133,6 +135,7 @@ HTML;
         $path = "pdfs/{$filename}";
         Storage::disk('private')->makeDirectory('pdfs');
         Storage::disk('private')->put($path, $mpdf->Output($filename, 'S'));
+
         return $path;
     }
 }

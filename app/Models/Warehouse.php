@@ -9,14 +9,30 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Warehouse extends Model
 {
+    use Concerns\BelongsToCompany;
     use HasFactory;
 
-    use Concerns\BelongsToCompany;
     protected $fillable = ['company_id', 'name_ar', 'name_en', 'type', 'user_id', 'is_active'];
+
     protected $casts = ['is_active' => 'boolean'];
 
-    public function company(): BelongsTo { return $this->belongsTo(Company::class); }
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
-    public function stocks(): HasMany { return $this->hasMany(Stock::class); }
-    public function stockMovements(): HasMany { return $this->hasMany(StockMovement::class); }
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function stocks(): HasMany
+    {
+        return $this->hasMany(Stock::class);
+    }
+
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
+    }
 }

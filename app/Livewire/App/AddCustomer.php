@@ -40,7 +40,7 @@ class AddCustomer extends Component
         $customer = Customer::create([
             'company_id' => $user->company_id,
             'route_id' => null,
-            'code' => 'C-' . strtoupper(substr(uniqid(), -6)),
+            'code' => 'C-'.strtoupper(substr(uniqid(), -6)),
             'name_ar' => $validated['name_ar'],
             'name_en' => $validated['name_en'],
             'phone' => $validated['phone'],

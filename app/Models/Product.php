@@ -10,10 +10,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory;
-
-    use SoftDeletes;
     use Concerns\BelongsToCompany;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'company_id', 'category_id', 'sku', 'name_ar', 'name_en',
@@ -35,9 +34,28 @@ class Product extends Model
         'is_active' => 'boolean',
     ];
 
-    public function company(): BelongsTo { return $this->belongsTo(Company::class); }
-    public function category(): BelongsTo { return $this->belongsTo(ProductCategory::class, 'category_id'); }
-    public function stocks(): HasMany { return $this->hasMany(Stock::class); }
-    public function invoiceItems(): HasMany { return $this->hasMany(InvoiceItem::class); }
-    public function returnItems(): HasMany { return $this->hasMany(ReturnItem::class); }
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ProductCategory::class, 'category_id');
+    }
+
+    public function stocks(): HasMany
+    {
+        return $this->hasMany(Stock::class);
+    }
+
+    public function invoiceItems(): HasMany
+    {
+        return $this->hasMany(InvoiceItem::class);
+    }
+
+    public function returnItems(): HasMany
+    {
+        return $this->hasMany(ReturnItem::class);
+    }
 }

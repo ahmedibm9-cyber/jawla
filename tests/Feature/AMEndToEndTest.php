@@ -6,6 +6,7 @@ use App\Models\Alarm;
 use App\Models\AlarmRead;
 use App\Models\Customer;
 use App\Models\DailyVisitAssignment;
+use App\Models\OutOfStockRequest;
 use App\Models\PriceQuotation;
 use App\Models\PriceQuotationRequest;
 use App\Models\Product;
@@ -16,8 +17,8 @@ use App\Models\VisitReport;
 use App\Services\AlarmService;
 use App\Services\ComplaintService;
 use App\Services\InvoiceService;
-use App\Services\PdfService;
 use App\Services\PaymentService;
+use App\Services\PdfService;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -179,7 +180,7 @@ class AMEndToEndTest extends TestCase
         $this->assertSame(0.0, (float) $invoice->fresh()->remaining_amount, 'AM8: invoice fully paid');
 
         // AM9: rep flags Material 952 out-of-stock -> red alarm to Finance + Manager + Executive
-        $oosr = \App\Models\OutOfStockRequest::create([
+        $oosr = OutOfStockRequest::create([
             'company_id' => $rep->company_id,
             'user_id' => $rep->id,
             'customer_id' => $customer->id,

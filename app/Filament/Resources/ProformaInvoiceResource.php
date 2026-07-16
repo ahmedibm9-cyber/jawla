@@ -2,21 +2,25 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Actions\Action;
-
 use App\Filament\Resources\ProformaInvoiceResource\Pages;
 use App\Models\ProformaInvoice;
+use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Forms;
 use Filament\Tables;
 use Filament\Tables\Table;
 
 class ProformaInvoiceResource extends Resource
 {
-    public static function getModel(): string { return ProformaInvoice::class; }
+    public static function getModel(): string
+    {
+        return ProformaInvoice::class;
+    }
 
-    public static function getNavigationIcon(): string { return 'heroicon-o-document-duplicate'; }
+    public static function getNavigationIcon(): string
+    {
+        return 'heroicon-o-document-duplicate';
+    }
 
     public static function getNavigationGroup(): ?string
     {
@@ -31,6 +35,7 @@ class ProformaInvoiceResource extends Resource
     public static function form(Schema $schema): Schema
     {
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
+
         return $schema->schema([
             Forms\Components\Section::make($l('بيانات', 'Info'))->schema([
                 Forms\Components\TextInput::make('proforma_number')->label($l('رقم', 'Number'))->disabled(),
@@ -38,7 +43,7 @@ class ProformaInvoiceResource extends Resource
                     ->relationship('customer', 'name_ar'),
                 Forms\Components\TextInput::make('total')->label($l('الإجمالي', 'Total'))->disabled(),
                 Forms\Components\Select::make('status')->label($l('الحالة', 'Status'))
-                    ->options(['sent' => $l('مرسلة', 'Sent'), 'converted_to_invoice' => $l('محول لفاتورة', 'Converted'), 'expired' => $l('منتهي', 'Expired'), 'cancelled' => $l('ملغي','Cancelled')]),
+                    ->options(['sent' => $l('مرسلة', 'Sent'), 'converted_to_invoice' => $l('محول لفاتورة', 'Converted'), 'expired' => $l('منتهي', 'Expired'), 'cancelled' => $l('ملغي', 'Cancelled')]),
             ])->columns(2),
         ]);
     }
@@ -46,6 +51,7 @@ class ProformaInvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
+
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('proforma_number')->label($l('رقم', 'Number'))->searchable()->sortable(),
@@ -69,7 +75,7 @@ class ProformaInvoiceResource extends Resource
                 Filament\Actions\Action::make('whatsapp')
                     ->label('WhatsApp')
                     ->icon('heroicon-o-share')
-                    ->url(fn (ProformaInvoice $r) => 'https://wa.me/?text=' . urlencode(__('app.proforma_msg')." #{$r->proforma_number} - ".number_format((float)$r->total, 2).' EGP'))
+                    ->url(fn (ProformaInvoice $r) => 'https://wa.me/?text='.urlencode(__('app.proforma_msg')." #{$r->proforma_number} - ".number_format((float) $r->total, 2).' EGP'))
                     ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
             ])

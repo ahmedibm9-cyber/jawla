@@ -4,7 +4,6 @@ namespace App\Services\Contracts;
 
 use App\Enums\StockReason;
 use App\Models\StockMovement;
-use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Model;
 
 interface StockService

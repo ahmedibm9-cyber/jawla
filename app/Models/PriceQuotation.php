@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -25,6 +24,13 @@ class PriceQuotation extends Model
         'valid_until' => 'date',
     ];
 
-    public function request(): BelongsTo { return $this->belongsTo(PriceQuotationRequest::class, 'price_quotation_request_id'); }
-    public function pricedBy(): BelongsTo { return $this->belongsTo(User::class, 'priced_by'); }
+    public function request(): BelongsTo
+    {
+        return $this->belongsTo(PriceQuotationRequest::class, 'price_quotation_request_id');
+    }
+
+    public function pricedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'priced_by');
+    }
 }

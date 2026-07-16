@@ -3,8 +3,8 @@
 namespace App\Filament\Widgets;
 
 use App\Models\DailyVisitAssignment;
-use Filament\Widgets\StatsOverviewWidget\Stat;
 use Filament\Widgets\StatsOverviewWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
 
 class VisitsTodayWidget extends StatsOverviewWidget

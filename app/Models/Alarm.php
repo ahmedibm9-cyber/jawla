@@ -9,9 +9,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Alarm extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'company_id', 'type', 'reference_type', 'reference_id',

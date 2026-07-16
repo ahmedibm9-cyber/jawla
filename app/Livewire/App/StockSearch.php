@@ -3,7 +3,6 @@
 namespace App\Livewire\App;
 
 use App\Models\Product;
-use App\Models\Stock;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 

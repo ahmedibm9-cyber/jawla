@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace App\Support;
 
+use App\Exceptions\Domain\GeofenceViolationException;
+
 final readonly class GpsCoordinate
 {
     public function __construct(public float $lat, public float $lng)
     {
         if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) {
-            throw new \App\Exceptions\Domain\GeofenceViolationException(
+            throw new GeofenceViolationException(
                 'errors.gps.invalid',
                 ['lat' => $lat, 'lng' => $lng],
             );

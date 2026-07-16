@@ -9,9 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PurchaseRequest extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'company_id', 'user_id', 'supplier_id', 'product_id',
@@ -28,9 +27,28 @@ class PurchaseRequest extends Model
         'purchasing_reviewed_at' => 'datetime',
     ];
 
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
-    public function supplier(): BelongsTo { return $this->belongsTo(Supplier::class); }
-    public function product(): BelongsTo { return $this->belongsTo(Product::class); }
-    public function salesReviewedBy(): BelongsTo { return $this->belongsTo(User::class, 'sales_reviewed_by'); }
-    public function purchasingReviewedBy(): BelongsTo { return $this->belongsTo(User::class, 'purchasing_reviewed_by'); }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function salesReviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'sales_reviewed_by');
+    }
+
+    public function purchasingReviewedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'purchasing_reviewed_by');
+    }
 }

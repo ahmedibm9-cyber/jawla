@@ -3,7 +3,8 @@
 namespace App\Livewire\App;
 
 use App\Models\DailyVisitAssignment;
-use App\Models\User;
+use App\Models\Visit;
+use App\Models\WorkSession;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -26,7 +27,7 @@ class Home extends Component
     {
         $assignment = DailyVisitAssignment::findOrFail($assignmentId);
         // Find or create today's visit
-        $visit = \App\Models\Visit::firstOrCreate([
+        $visit = Visit::firstOrCreate([
             'user_id' => auth()->id(),
             'customer_id' => $assignment->customer_id,
             'work_session_id' => session('work_session_id'),
@@ -43,7 +44,7 @@ class Home extends Component
     public function startWork(): void
     {
         if (! session('work_session_id')) {
-            $session = \App\Models\WorkSession::create([
+            $session = WorkSession::create([
                 'user_id' => auth()->id(),
                 'started_at' => now(),
                 'start_latitude' => 0,

@@ -2,15 +2,15 @@
 
 use App\Http\Controllers\App\LoginController;
 use App\Http\Controllers\App\PdfController;
+use App\Livewire\App\AddCustomer;
 use App\Livewire\App\Home;
-use App\Livewire\App\VisitFlow;
-use App\Livewire\App\TodaysCustomers;
+use App\Livewire\App\LogComplaint;
+use App\Livewire\App\MorePage;
 use App\Livewire\App\QuotationFlow;
 use App\Livewire\App\StockSearch;
-use App\Livewire\App\MorePage;
-use App\Livewire\App\AddCustomer;
-use App\Livewire\App\LogComplaint;
 use App\Livewire\App\SubmitPurchaseOffer;
+use App\Livewire\App\TodaysCustomers;
+use App\Livewire\App\VisitFlow;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect('/app'));

@@ -9,13 +9,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class CashBox extends Model
 {
+    use BelongsToCompany;
     use HasFactory;
 
-    use BelongsToCompany;
-
     protected $fillable = ['company_id', 'user_id', 'balance'];
+
     protected $casts = ['balance' => 'decimal:2'];
 
-    public function company(): BelongsTo { return $this->belongsTo(Company::class); }
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

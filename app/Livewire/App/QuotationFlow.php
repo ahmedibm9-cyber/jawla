@@ -2,8 +2,9 @@
 
 namespace App\Livewire\App;
 
-use App\Models\PriceQuotationRequest;
+use App\Models\CompanyBankAccount;
 use App\Models\PriceQuotation;
+use App\Models\PriceQuotationRequest;
 use App\Models\ProformaInvoice;
 use App\Models\ProformaInvoiceItem;
 use Livewire\Attributes\Layout;
@@ -48,13 +49,16 @@ class QuotationFlow extends Component
 
     public function confirmPrice(): void
     {
-        if (! $this->quotation) return;
+        if (! $this->quotation) {
+            return;
+        }
 
         if ($this->negotiatedPrice < $this->floor) {
             $this->errorMessage = __('errors.price.out_of_range', [
                 'price' => $this->negotiatedPrice,
                 'product' => $this->request->product->name_ar ?? '',
             ]);
+
             return;
         }
 
@@ -65,19 +69,22 @@ class QuotationFlow extends Component
 
     public function createProforma(): void
     {
-        if (! $this->quotation || ! $this->request) return;
+        if (! $this->quotation || ! $this->request) {
+            return;
+        }
 
         if ($this->negotiatedPrice < $this->floor) {
             $this->errorMessage = __('errors.price.out_of_range', [
                 'price' => $this->negotiatedPrice,
                 'product' => $this->request->product->name_ar ?? '',
             ]);
+
             return;
         }
 
         $company = $this->request->company;
-        $bank = \App\Models\CompanyBankAccount::where('company_id', $company->id)->where('is_default', true)->first();
-        $proformaNumber = 'PF-' . ($company->abbr ?? 'GPC') . '-' . date('Y') . '-' . str_pad((string) (ProformaInvoice::max('id') + 1), 5, '0', STR_PAD_LEFT);
+        $bank = CompanyBankAccount::where('company_id', $company->id)->where('is_default', true)->first();
+        $proformaNumber = 'PF-'.($company->abbr ?? 'GPC').'-'.date('Y').'-'.str_pad((string) (ProformaInvoice::max('id') + 1), 5, '0', STR_PAD_LEFT);
 
         $product = $this->request->product;
         $qty = (float) $this->request->quantity_requested;
@@ -110,7 +117,7 @@ class QuotationFlow extends Component
         ]);
 
         $this->step = 'proforma';
-        $this->successMessage = __('app.proforma_created') . ' #' . $proformaNumber;
+        $this->successMessage = __('app.proforma_created').' #'.$proformaNumber;
 
         session()->flash('proforma', $proforma);
     }
