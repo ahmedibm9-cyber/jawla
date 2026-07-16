@@ -1,25 +1,5 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm run build && composer install --no-interaction --prefer-dist --optimize-autoloader",
-  "devCommand": "npm run dev",
-  "builds": [
-    {
-      "src": "api/index.php",
-      "use": "@vercel/php"
-    },
-    {
-      "src": "public/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "^/public/(.*)",
-      "dest": "/public/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api/index.php"
-    }
-  ]
+  "framework": "laravel",
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev"
 }
