@@ -17,7 +17,8 @@ class Customer extends Model
         'address', 'latitude', 'longitude',
         'customer_group_id', 'territory_id', 'price_list_id', 'account_manager_id',
         'credit_limit', 'balance', 'is_active',
-        'added_by', 'status', 'approved_by', 'approved_at', 'rejection_reason',
+        'added_by', 'status', 'approved_by', 'approved_at',
+        'rejected_by', 'rejected_at', 'rejection_reason',
     ];
 
     protected $casts = [

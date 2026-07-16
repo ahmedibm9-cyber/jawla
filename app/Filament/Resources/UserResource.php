@@ -51,7 +51,7 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('password')->label($l('كلمة المرور', 'Password'))->password()
                     ->required(fn ($livewire) => $livewire instanceof CreateRecord)
                     ->dehydrated(fn ($state) => filled($state))
-                    ->dehydrateStateUsing(fn ($state) => bcrypt($state)),
+                    ->dehydrateStateUsing(fn ($state) => \Illuminate\Support\Facades\Hash::make($state)),
                 Forms\Components\Select::make('company_id')->label($l('الشركة', 'Company'))->relationship('company', 'name_ar')->preload()->required(),
                 Forms\Components\Select::make('roles')->label($l('الصلاحية', 'Role'))
                     ->relationship('roles', 'name')->preload()

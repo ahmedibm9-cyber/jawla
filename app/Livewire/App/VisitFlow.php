@@ -42,6 +42,8 @@ class VisitFlow extends Component
 
     public function mount(Visit $visit): void
     {
+        abort_unless($visit->user_id === auth()->id(), 403);
+
         $this->visit = $visit;
 
         if ($visit->arrival_confirmed) {

@@ -146,15 +146,33 @@ class CustomerResource extends Resource
                     ->label($l('اعتماد', 'Approve'))
                     ->icon('heroicon-o-check')
                     ->color('success')
-                    ->visible(fn (Customer $c) => $c->status === 'pending')
-                    ->action(fn (Customer $c) => $c->update(['status' => 'approved']))
+                    ->visible(fn (Customer $c) => $c->status === 'pending' && $c->added_by !== auth()->id())
+                    ->action(fn (Customer $c) => $c->update([
+                        'status' => 'approved',
+                        'approved_by' => auth()->id(),
+                        'approved_at' => now(),
+                    ]))
                     ->requiresConfirmation(),
                 Filament\Actions\Action::make('reject')
                     ->label($l('رفض', 'Reject'))
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
-                    ->visible(fn (Customer $c) => $c->status === 'pending')
-                    ->action(fn (Customer $c) => $c->update(['status' => 'rejected', 'is_active' => false]))
+                    ->visible(fn (Customer $c) => $c->status === 'pending' && $c->added_by !== auth()->id())
+                    ->form([
+                        Forms\Components\Textarea::make('rejection_reason')
+                            ->label($l('سبب الرفض', 'Rejection Reason'))
+                            ->required()
+                            ->maxLength(500),
+                    ])
+                    ->action(function (Customer $c, array $data) {
+                        $c->update([
+                            'status' => 'rejected',
+                            'is_active' => false,
+                            'rejected_by' => auth()->id(),
+                            'rejected_at' => now(),
+                            'rejection_reason' => $data['rejection_reason'],
+                        ]);
+                    })
                     ->requiresConfirmation(),
                 Tables\Actions\EditAction::make(),
             ])

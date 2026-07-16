@@ -18,6 +18,7 @@ use App\Support\ActiveCompanyContext;
 use Filament\Events\Auth\Login as FilamentLogin;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -41,6 +42,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Model::preventLazyLoading(! app()->isProduction());
+
         User::observe(AuditObserver::class);
         PriceQuotation::observe(AuditObserver::class);
 
