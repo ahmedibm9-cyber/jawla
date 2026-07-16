@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Services\Contracts\PricingService;
+use App\Services\Contracts\PricingService as PricingServiceContract;
 use App\Support\Money;
 use App\Support\PriceRange;
 
-class PricingService implements PricingService
+class PricingService implements PricingServiceContract
 {
     public function priceForRep(int $productId, int $repId, string $unitPrice): bool
     {
