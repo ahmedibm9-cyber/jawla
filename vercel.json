@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "public",
+  "devCommand": "npm run dev",
+  "framework": "laravel"
+}
