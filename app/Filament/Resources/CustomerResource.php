@@ -55,14 +55,63 @@ class CustomerResource extends Resource
             ])->columns(3),
 
             Forms\Components\Section::make('GPS')->schema([
-                Forms\Components\View::make('filament.forms.components.leaflet-map-picker', [
-                    'latitudeField' => 'latitude',
-                    'longitudeField' => 'longitude',
-                    'defaultLatitude' => 24.7136,
-                    'defaultLongitude' => 46.6753,
-                    'defaultZoom' => 15,
-                ]),
-            ])->columns(1),
+                Forms\Components\TextInput::make('latitude')
+                    ->label($l('خط العرض', 'Latitude'))
+                    ->numeric()
+                    ->step(0.0000001)
+                    ->minValue(-90)
+                    ->maxValue(90),
+                Forms\Components\TextInput::make('longitude')
+                    ->label($l('خط الطول', 'Longitude'))
+                    ->numeric()
+                    ->step(0.0000001)
+                    ->minValue(-180)
+                    ->maxValue(180),
+                Forms\Components\Placeholder::make('map')
+                    ->label($l('الخريطة', 'Map'))
+                    ->content(new \Illuminate\Support\HtmlString(
+                        '<div x-data="{
+                            lat: $wire.data.latitude || 30.0444,
+                            lng: $wire.data.longitude || 31.2357,
+                            map: null,
+                            marker: null,
+                            init() {
+                                if (typeof L === \'undefined\') return;
+                                this.map = L.map(this.$el.querySelector(\'[data-leaflet]\')).setView([this.lat, this.lng], 13);
+                                L.tileLayer(\'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png\', {
+                                    attribution: \'&copy; OpenStreetMap\'
+                                }).addTo(this.map);
+                                this.marker = L.marker([this.lat, this.lng], { draggable: true }).addTo(this.map);
+                                this.marker.on(\'dragend\', (e) => {
+                                    const pos = e.target.getLatLng();
+                                    $wire.data.latitude = pos.lat.toFixed(6);
+                                    $wire.data.longitude = pos.lng.toFixed(6);
+                                });
+                                this.map.on(\'click\', (e) => {
+                                    this.marker.setLatLng(e.latlng);
+                                    $wire.data.latitude = e.latlng.lat.toFixed(6);
+                                    $wire.data.longitude = e.latlng.lng.toFixed(6);
+                                });
+                            },
+                            locate() {
+                                if (!navigator.geolocation) return;
+                                navigator.geolocation.getCurrentPosition((pos) => {
+                                    const lat = pos.coords.latitude;
+                                    const lng = pos.coords.longitude;
+                                    $wire.data.latitude = lat.toFixed(6);
+                                    $wire.data.longitude = lng.toFixed(6);
+                                    this.marker.setLatLng([lat, lng]);
+                                    this.map.setView([lat, lng], 15);
+                                });
+                            }
+                        }" x-init="init()">
+                            <div data-leaflet style="width:100%;height:300px;border-radius:8px;border:1px solid #d1d5db"></div>
+                            <button type="button" @click="locate()" class="fi-btn fi-btn-sm fi-btn-outline mt-2">'
+                        . $l('استخدم موقعي الحالي', 'Use my current location')
+                        . '</button>
+                        </div>'
+                    )),
+            ])->columns(2),
 
             Forms\Components\Section::make($l('الإعدادات المالية', 'Financial Settings'))->schema([
                 Forms\Components\TextInput::make('credit_limit')->label($l('حد الائتمان', 'Credit Limit'))->numeric()->default(0),
