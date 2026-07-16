@@ -45,13 +45,27 @@ class AdminLoginTest extends TestCase
         $this->assertAuthenticatedAs($user);
     }
 
-    public function test_sales_rep_is_denied_admin_panel_access(): void
+    public function test_sales_rep_is_redirected_to_app_from_admin_panel(): void
     {
         $rep = $this->makeUser('rep');
 
         $response = $this->actingAs($rep)->get('/admin');
 
-        $response->assertForbidden();
+        $response->assertRedirect('/app');
+    }
+
+    public function test_inactive_user_cannot_log_into_admin_panel(): void
+    {
+        $user = $this->makeUser('admin', 'password');
+        $user->update(['is_active' => false]);
+
+        Livewire::test(Login::class)
+            ->set('data.email', $user->email)
+            ->set('data.password', 'password')
+            ->call('authenticate')
+            ->assertHasFormErrors();
+
+        $this->assertGuest();
     }
 
     public function test_admin_login_rejects_wrong_password(): void

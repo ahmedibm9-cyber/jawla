@@ -3,22 +3,22 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Pages\CollectPayment;
+use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ReportsPage;
 use App\Filament\Widgets\OpenAlarmsWidget;
 use App\Filament\Widgets\PendingQuotationsWidget;
 use App\Filament\Widgets\SalesTodayWidget;
 use App\Filament\Widgets\VisitsTodayWidget;
-use Filament\Http\Middleware\Authenticate;
+use App\Http\Middleware\FilamentAuthenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Navigation\MenuItem;
-use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
-use Filament\Widgets\FilamentInfoWidget;
+
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -34,7 +34,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login()
+            ->login(\App\Filament\Auth\Pages\Login::class)
             ->colors([
                 'primary' => Color::hex('#4DB848'),
             ])
@@ -54,7 +54,6 @@ class AdminPanelProvider extends PanelProvider
                 PendingQuotationsWidget::class,
                 OpenAlarmsWidget::class,
                 SalesTodayWidget::class,
-                FilamentInfoWidget::class,
             ])
             ->userMenuItems([
                 'locale_en' => MenuItem::make()
@@ -80,7 +79,7 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->authMiddleware([
-                Authenticate::class,
+                FilamentAuthenticate::class,
             ]);
     }
 }

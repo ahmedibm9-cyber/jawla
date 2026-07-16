@@ -29,6 +29,11 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->singleton(ActiveCompanyContext::class);
 
+        $this->app->bind(
+            \Filament\Auth\Http\Responses\Contracts\LoginResponse::class,
+            \App\Filament\Auth\Http\Responses\LoginResponse::class,
+        );
+
         $this->app->bind(StockService::class, StockServiceImpl::class);
         $this->app->bind(InvoiceService::class, fn () => app(\App\Services\InvoiceService::class));
         $this->app->bind(PricingService::class, fn () => app(\App\Services\PricingService::class));

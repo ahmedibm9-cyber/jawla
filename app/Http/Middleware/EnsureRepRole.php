@@ -13,7 +13,7 @@ class EnsureRepRole
         $user = $request->user();
 
         if (! $user) {
-            return redirect()->route('app.login');
+            return redirect('/admin/login');
         }
 
         abort_unless($user->is_active && $user->hasRole('rep'), 403);

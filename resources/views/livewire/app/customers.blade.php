@@ -1,3 +1,4 @@
+<div>
 <div class="main-content" style="padding:16px">
     <h2 style="margin:0 0 16px">{{ __('app.customers') }}</h2>
 
@@ -48,3 +49,4 @@
         {{ __('app.more') }}
     </a>
 </nav>
+</div>

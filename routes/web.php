@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\App\LoginController;
 use App\Http\Controllers\App\PdfController;
 use App\Livewire\App\AddCustomer;
 use App\Livewire\App\Home;
@@ -13,7 +12,7 @@ use App\Livewire\App\TodaysCustomers;
 use App\Livewire\App\VisitFlow;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect('/app'));
+Route::get('/', fn () => redirect('/admin/login'));
 
 Route::get('/up', fn () => response('ok', 200));
 
@@ -27,14 +26,7 @@ Route::get('/locale/{locale}', function (string $locale) {
 
 // Admin (Filament) is auto-registered by the panel provider.
 
-// Rep PWA route group
-Route::middleware(['web', 'guest'])->prefix('app')->name('app.')->group(function () {
-    Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])
-        ->middleware('throttle:login')
-        ->name('login.store');
-});
-
+// Rep PWA route group (protected)
 Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->group(function () {
     Route::get('/', Home::class)->name('home');
     Route::get('/visit/{visit}', VisitFlow::class)->name('visit');
@@ -47,5 +39,5 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/purchase-offer', SubmitPurchaseOffer::class)->name('purchase-offer');
     Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])->name('pdf.proforma');
     Route::get('/pdf/invoice/{invoice}', [PdfController::class, 'invoice'])->name('pdf.invoice');
-    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+    Route::post('/logout', [App\Http\Controllers\App\LoginController::class, 'destroy'])->name('logout');
 });

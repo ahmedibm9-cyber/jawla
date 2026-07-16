@@ -21,7 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure.rep' => EnsureRepRole::class,
         ]);
 
-        $middleware->redirectGuestsTo('/app/login');
+        $middleware->redirectGuestsTo('/admin/login');
 
         $middleware->web(append: [
             SecurityHeaders::class,
