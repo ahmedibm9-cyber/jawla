@@ -10,8 +10,7 @@ final readonly class PriceRange
         public Money $base,
         public Money $plus,
         public Money $minus,
-    ) {
-    }
+    ) {}
 
     public function lowerBound(): Money
     {

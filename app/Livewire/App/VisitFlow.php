@@ -5,6 +5,7 @@ namespace App\Livewire\App;
 use App\Models\Visit;
 use App\Models\VisitReport;
 use App\Support\GpsCoordinate;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -104,10 +105,10 @@ class VisitFlow extends Component
         ]);
 
         if ($this->signature) {
-            $path = 'signatures/' . $this->visit->id . '_' . time() . '.png';
+            $path = 'signatures/'.$this->visit->id.'_'.time().'.png';
             $data = explode(',', $this->signature, 2);
             $imgData = base64_decode($data[1] ?? '');
-            \Illuminate\Support\Facades\Storage::disk('private')->put($path, $imgData);
+            Storage::disk('private')->put($path, $imgData);
         }
 
         VisitReport::create([

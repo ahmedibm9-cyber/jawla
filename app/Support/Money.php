@@ -6,9 +6,7 @@ namespace App\Support;
 
 final readonly class Money
 {
-    public function __construct(public string $amount, public string $currency = 'EGP')
-    {
-    }
+    public function __construct(public string $amount, public string $currency = 'EGP') {}
 
     public function add(self $other): self
     {

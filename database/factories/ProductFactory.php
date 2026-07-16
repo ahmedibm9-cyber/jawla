@@ -3,8 +3,8 @@
 namespace Database\Factories;
 
 use App\Models\Company;
-use App\Models\ProductCategory;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,6 +18,7 @@ class ProductFactory extends Factory
     {
         $units = ['ton', 'kg', 'piece', 'box', 'carton'];
         $packaging = ['bag', 'jumbo_bag', 'barrel', 'drum', 'tank'];
+
         return [
             'company_id' => Company::factory(),
             'category_id' => ProductCategory::factory(),

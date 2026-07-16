@@ -2,6 +2,12 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\CollectPayment;
+use App\Filament\Pages\ReportsPage;
+use App\Filament\Widgets\OpenAlarmsWidget;
+use App\Filament\Widgets\PendingQuotationsWidget;
+use App\Filament\Widgets\SalesTodayWidget;
+use App\Filament\Widgets\VisitsTodayWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -38,16 +44,16 @@ class AdminPanelProvider extends PanelProvider
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
-                \App\Filament\Pages\ReportsPage::class,
-                \App\Filament\Pages\CollectPayment::class,
+                ReportsPage::class,
+                CollectPayment::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->widgets([
                 AccountWidget::class,
-                \App\Filament\Widgets\VisitsTodayWidget::class,
-                \App\Filament\Widgets\PendingQuotationsWidget::class,
-                \App\Filament\Widgets\OpenAlarmsWidget::class,
-                \App\Filament\Widgets\SalesTodayWidget::class,
+                VisitsTodayWidget::class,
+                PendingQuotationsWidget::class,
+                OpenAlarmsWidget::class,
+                SalesTodayWidget::class,
                 FilamentInfoWidget::class,
             ])
             ->userMenuItems([

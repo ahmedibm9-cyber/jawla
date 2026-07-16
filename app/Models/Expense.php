@@ -9,9 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Expense extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'company_id', 'user_id', 'work_session_id', 'category',
@@ -20,7 +19,18 @@ class Expense extends Model
 
     protected $casts = ['amount' => 'decimal:2', 'spent_at' => 'datetime', 'posting_date' => 'date'];
 
-    public function company(): BelongsTo { return $this->belongsTo(Company::class); }
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
-    public function workSession(): BelongsTo { return $this->belongsTo(WorkSession::class); }
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function workSession(): BelongsTo
+    {
+        return $this->belongsTo(WorkSession::class);
+    }
 }

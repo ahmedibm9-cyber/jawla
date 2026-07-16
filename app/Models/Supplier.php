@@ -9,10 +9,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends Model
 {
-    use HasFactory;
-
-    use SoftDeletes;
     use Concerns\BelongsToCompany;
+    use HasFactory;
+    use SoftDeletes;
 
     protected $fillable = [
         'company_id', 'code', 'name_ar', 'name_en', 'type',
@@ -22,5 +21,8 @@ class Supplier extends Model
 
     protected $casts = ['is_active' => 'boolean'];
 
-    public function company(): BelongsTo { return $this->belongsTo(Company::class); }
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
 }

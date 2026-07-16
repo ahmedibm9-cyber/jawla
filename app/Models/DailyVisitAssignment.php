@@ -9,9 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DailyVisitAssignment extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'company_id', 'user_id', 'customer_id', 'visit_date',
@@ -20,7 +19,18 @@ class DailyVisitAssignment extends Model
 
     protected $casts = ['visit_date' => 'date'];
 
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
-    public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
-    public function assignedBy(): BelongsTo { return $this->belongsTo(User::class, 'assigned_by'); }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function assignedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_by');
+    }
 }

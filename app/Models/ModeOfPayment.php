@@ -8,12 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class ModeOfPayment extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $table = 'modes_of_payment';
 
     protected $fillable = ['company_id', 'name', 'type', 'is_active'];
+
     protected $casts = ['is_active' => 'boolean'];
 }

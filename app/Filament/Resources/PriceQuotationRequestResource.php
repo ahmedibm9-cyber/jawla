@@ -3,23 +3,39 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\PriceQuotationRequestResource\Pages;
+use App\Models\PriceQuotation;
 use App\Models\PriceQuotationRequest;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Schemas\Schema;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Actions\Action;
-use App\Models\PriceQuotation;
 
 class PriceQuotationRequestResource extends Resource
 {
-    public static function getModel(): string { return PriceQuotationRequest::class; }
-    public static function getNavigationIcon(): string { return 'heroicon-o-currency-dollar'; }
-    public static function getNavigationGroup(): ?string { return app()->getLocale() === 'ar' ? 'المبيعات' : 'Sales'; }
-    public static function getLabel(): string { return app()->getLocale() === 'ar' ? 'طلب عرض سعر' : 'Quotation Request'; }
-    public static function getPluralLabel(): string { return app()->getLocale() === 'ar' ? 'عروض الأسعار' : 'Quotations'; }
+    public static function getModel(): string
+    {
+        return PriceQuotationRequest::class;
+    }
+
+    public static function getNavigationIcon(): string
+    {
+        return 'heroicon-o-currency-dollar';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return app()->getLocale() === 'ar' ? 'المبيعات' : 'Sales';
+    }
+
+    public static function getLabel(): string
+    {
+        return app()->getLocale() === 'ar' ? 'طلب عرض سعر' : 'Quotation Request';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return app()->getLocale() === 'ar' ? 'عروض الأسعار' : 'Quotations';
+    }
 
     public static function table(Table $table): Table
     {

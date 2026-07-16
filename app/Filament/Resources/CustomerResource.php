@@ -2,13 +2,11 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Actions\Action;
-
 use App\Filament\Resources\CustomerResource\Pages;
 use App\Models\Customer;
-use Filament\Schemas\Schema;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -23,13 +21,25 @@ class CustomerResource extends Resource
     {
         return 'heroicon-o-user-group';
     }
-public static function getNavigationGroup(): ?string { return app()->getLocale() === 'ar' ? 'المبيعات' : 'Sales'; }
-    public static function getLabel(): string { return app()->getLocale() === 'ar' ? 'عميل' : 'Customer'; }
-    public static function getPluralLabel(): string { return app()->getLocale() === 'ar' ? 'العملاء' : 'Customers'; }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return app()->getLocale() === 'ar' ? 'المبيعات' : 'Sales';
+    }
+
+    public static function getLabel(): string
+    {
+        return app()->getLocale() === 'ar' ? 'عميل' : 'Customer';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return app()->getLocale() === 'ar' ? 'العملاء' : 'Customers';
+    }
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn(string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
+        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
             Forms\Components\Section::make($l('البيانات الأساسية', 'Basic Information'))->schema([
@@ -45,9 +55,14 @@ public static function getNavigationGroup(): ?string { return app()->getLocale()
             ])->columns(3),
 
             Forms\Components\Section::make('GPS')->schema([
-                Forms\Components\TextInput::make('latitude')->label($l('خط العرض', 'Latitude'))->numeric(),
-                Forms\Components\TextInput::make('longitude')->label($l('خط الطول', 'Longitude'))->numeric(),
-            ])->columns(2),
+                Forms\Components\View::make('filament.forms.components.leaflet-map-picker', [
+                    'latitudeField' => 'latitude',
+                    'longitudeField' => 'longitude',
+                    'defaultLatitude' => 24.7136,
+                    'defaultLongitude' => 46.6753,
+                    'defaultZoom' => 15,
+                ]),
+            ])->columns(1),
 
             Forms\Components\Section::make($l('الإعدادات المالية', 'Financial Settings'))->schema([
                 Forms\Components\TextInput::make('credit_limit')->label($l('حد الائتمان', 'Credit Limit'))->numeric()->default(0),
@@ -60,7 +75,7 @@ public static function getNavigationGroup(): ?string { return app()->getLocale()
 
     public static function table(Table $table): Table
     {
-        $l = fn(string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
+        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
@@ -97,7 +112,10 @@ public static function getNavigationGroup(): ?string { return app()->getLocale()
             ->bulkActions([Tables\Actions\DeleteBulkAction::make()]);
     }
 
-    public static function getRelations(): array { return []; }
+    public static function getRelations(): array
+    {
+        return [];
+    }
 
     public static function getPages(): array
     {

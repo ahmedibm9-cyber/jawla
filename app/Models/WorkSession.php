@@ -10,9 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WorkSession extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'company_id', 'user_id', 'route_id', 'started_at', 'ended_at',
@@ -28,8 +27,23 @@ class WorkSession extends Model
         'end_longitude' => 'decimal:7',
     ];
 
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
-    public function route(): BelongsTo { return $this->belongsTo(Route::class); }
-    public function visits(): HasMany { return $this->hasMany(Visit::class); }
-    public function expenses(): HasMany { return $this->hasMany(Expense::class); }
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function route(): BelongsTo
+    {
+        return $this->belongsTo(Route::class);
+    }
+
+    public function visits(): HasMany
+    {
+        return $this->hasMany(Visit::class);
+    }
+
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
 }

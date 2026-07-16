@@ -9,9 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Payment extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'company_id', 'customer_id', 'user_id', 'invoice_id', 'visit_id',
@@ -29,11 +28,38 @@ class Payment extends Model
         'cancelled_at' => 'datetime',
     ];
 
-    public function company(): BelongsTo { return $this->belongsTo(Company::class); }
-    public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
-    public function invoice(): BelongsTo { return $this->belongsTo(Invoice::class); }
-    public function visit(): BelongsTo { return $this->belongsTo(Visit::class); }
-    public function modeOfPayment(): BelongsTo { return $this->belongsTo(ModeOfPayment::class); }
-    public function cancelledByUser(): BelongsTo { return $this->belongsTo(User::class, 'cancelled_by'); }
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
+    }
+
+    public function visit(): BelongsTo
+    {
+        return $this->belongsTo(Visit::class);
+    }
+
+    public function modeOfPayment(): BelongsTo
+    {
+        return $this->belongsTo(ModeOfPayment::class);
+    }
+
+    public function cancelledByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
+    }
 }

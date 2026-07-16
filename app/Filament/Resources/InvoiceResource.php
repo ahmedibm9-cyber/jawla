@@ -2,22 +2,25 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Actions\Action;
-
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Models\Invoice;
+use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Forms;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
 
 class InvoiceResource extends Resource
 {
-    public static function getModel(): string { return Invoice::class; }
+    public static function getModel(): string
+    {
+        return Invoice::class;
+    }
 
-    public static function getNavigationIcon(): string { return 'heroicon-o-document-text'; }
+    public static function getNavigationIcon(): string
+    {
+        return 'heroicon-o-document-text';
+    }
 
     public static function getNavigationGroup(): ?string
     {
@@ -32,6 +35,7 @@ class InvoiceResource extends Resource
     public static function form(Schema $schema): Schema
     {
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
+
         return $schema->schema([
             Forms\Components\Section::make($l('بيانات الفاتورة', 'Invoice Info'))->schema([
                 Forms\Components\Select::make('customer_id')->label($l('العميل', 'Customer'))
@@ -53,6 +57,7 @@ class InvoiceResource extends Resource
     public static function table(Table $table): Table
     {
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
+
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('invoice_number')->label($l('رقم', 'Number'))->searchable()->sortable(),
@@ -77,7 +82,7 @@ class InvoiceResource extends Resource
                 Filament\Actions\Action::make('whatsapp')
                     ->label('WhatsApp')
                     ->icon('heroicon-o-share')
-                    ->url(fn (Invoice $r) => 'https://wa.me/?text=' . urlencode(__('app.proforma_msg')." #{$r->invoice_number} - ".number_format((float)$r->total, 2).' EGP'))
+                    ->url(fn (Invoice $r) => 'https://wa.me/?text='.urlencode(__('app.proforma_msg')." #{$r->invoice_number} - ".number_format((float) $r->total, 2).' EGP'))
                     ->openUrlInNewTab(),
                 Tables\Actions\EditAction::make(),
             ])

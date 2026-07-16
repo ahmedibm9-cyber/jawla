@@ -6,7 +6,6 @@ use App\Enums\InvoiceStatus;
 use App\Models\CashBox;
 use App\Models\Invoice;
 use App\Models\Payment;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class PaymentService
@@ -78,7 +77,7 @@ class PaymentService
             $payment->update([
                 'cancelled_at' => now(),
                 'cancelled_by' => $userId,
-                'notes' => ($payment->notes ? $payment->notes."\n" : '') . "Cancelled: {$reason}",
+                'notes' => ($payment->notes ? $payment->notes."\n" : '')."Cancelled: {$reason}",
             ]);
 
             return $payment;

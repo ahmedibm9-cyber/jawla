@@ -3,11 +3,18 @@
 namespace Database\Seeders;
 
 use App\Models\Company;
+use App\Models\CompanyBankAccount;
 use App\Models\Customer;
+use App\Models\CustomerGroup;
 use App\Models\DailyVisitAssignment;
+use App\Models\ModeOfPayment;
+use App\Models\NamingSeries;
+use App\Models\PriceList;
 use App\Models\Product;
 use App\Models\Route;
 use App\Models\Stock;
+use App\Models\TaxTemplate;
+use App\Models\TaxTemplateLine;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WorkSession;
@@ -32,7 +39,7 @@ class DemoSeeder extends Seeder
         ]);
 
         // Create bank account
-        \App\Models\CompanyBankAccount::create([
+        CompanyBankAccount::create([
             'company_id' => $company->id,
             'bank_name' => 'البنك الأهلي المصري',
             'account_name' => 'شركة اللدائن العالمية',
@@ -42,13 +49,13 @@ class DemoSeeder extends Seeder
         ]);
 
         // Create tax template
-        $taxTemplate = \App\Models\TaxTemplate::create([
+        $taxTemplate = TaxTemplate::create([
             'company_id' => $company->id,
             'name' => 'Standard VAT 14%',
             'type' => 'selling',
             'is_default' => true,
         ]);
-        \App\Models\TaxTemplateLine::create([
+        TaxTemplateLine::create([
             'tax_template_id' => $taxTemplate->id,
             'description' => 'Value Added Tax',
             'charge_type' => 'on_net_total',
@@ -58,16 +65,16 @@ class DemoSeeder extends Seeder
         // Create modes of payment
         foreach (['نقدي', 'شيك', 'تحويل بنكي', 'اعتماد مستندي', 'بطاقة ائتمان'] as $i => $name) {
             $types = ['cash', 'cheque', 'bank_transfer', 'lc', 'credit_card'];
-            \App\Models\ModeOfPayment::create(['company_id' => $company->id, 'name' => $name, 'type' => $types[$i]]);
+            ModeOfPayment::create(['company_id' => $company->id, 'name' => $name, 'type' => $types[$i]]);
         }
 
         // Create price list
-        \App\Models\PriceList::create([
+        PriceList::create([
             'company_id' => $company->id, 'name' => 'Standard', 'type' => 'selling', 'is_default' => true,
         ]);
 
         // Create customer group
-        \App\Models\CustomerGroup::create([
+        CustomerGroup::create([
             'company_id' => $company->id, 'name_ar' => 'تجاري', 'name_en' => 'Commercial',
         ]);
 
@@ -76,7 +83,7 @@ class DemoSeeder extends Seeder
             ['name' => 'sales_invoice', 'prefix' => 'INV', 'series_format' => 'INV-GPC-{YYYY}-{#####}', 'current_number' => 0],
             ['name' => 'proforma_invoice', 'prefix' => 'PF', 'series_format' => 'PF-GPC-{YYYY}-{#####}', 'current_number' => 0],
         ] as $ns) {
-            \App\Models\NamingSeries::create($ns + ['company_id' => $company->id]);
+            NamingSeries::create($ns + ['company_id' => $company->id]);
         }
 
         // Create users
@@ -154,10 +161,10 @@ class DemoSeeder extends Seeder
             $customers[] = Customer::factory()->create([
                 'company_id' => $company->id,
                 'route_id' => $route->id,
-                'code' => 'C-' . ($i + 1),
+                'code' => 'C-'.($i + 1),
                 'name_ar' => $name,
-                'name_en' => 'Customer ' . ($i + 1),
-                'phone' => '01' . fake()->numerify('0########'),
+                'name_en' => 'Customer '.($i + 1),
+                'phone' => '01'.fake()->numerify('0########'),
                 'latitude' => 30.10 + ($i * 0.01),
                 'longitude' => 31.30 + ($i * 0.01),
                 'status' => 'approved',

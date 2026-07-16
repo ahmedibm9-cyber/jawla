@@ -9,9 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class StockMovement extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'company_id', 'warehouse_id', 'product_id', 'batch_id',
@@ -25,8 +24,23 @@ class StockMovement extends Model
         'posting_date' => 'date',
     ];
 
-    public function warehouse(): BelongsTo { return $this->belongsTo(Warehouse::class); }
-    public function product(): BelongsTo { return $this->belongsTo(Product::class); }
-    public function batch(): BelongsTo { return $this->belongsTo(Batch::class); }
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function batch(): BelongsTo
+    {
+        return $this->belongsTo(Batch::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
 }

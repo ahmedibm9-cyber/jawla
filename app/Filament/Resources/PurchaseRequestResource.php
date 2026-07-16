@@ -2,8 +2,6 @@
 
 namespace App\Filament\Resources;
 
-use Filament\Actions\Action;
-
 use App\Filament\Resources\PurchaseRequestResource\Pages;
 use App\Models\PurchaseRequest;
 use Filament\Forms;
@@ -15,9 +13,15 @@ use Illuminate\Support\Facades\Auth;
 
 class PurchaseRequestResource extends Resource
 {
-    public static function getModel(): string { return PurchaseRequest::class; }
+    public static function getModel(): string
+    {
+        return PurchaseRequest::class;
+    }
 
-    public static function getNavigationIcon(): string { return 'heroicon-o-shopping-cart'; }
+    public static function getNavigationIcon(): string
+    {
+        return 'heroicon-o-shopping-cart';
+    }
 
     public static function getNavigationGroup(): ?string
     {

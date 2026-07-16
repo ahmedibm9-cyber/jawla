@@ -9,9 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SupplierQuotation extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'purchase_request_id', 'company_id', 'supplier_id', 'product_id',
@@ -25,6 +24,13 @@ class SupplierQuotation extends Model
         'valid_until' => 'date',
     ];
 
-    public function supplier(): BelongsTo { return $this->belongsTo(Supplier::class); }
-    public function product(): BelongsTo { return $this->belongsTo(Product::class); }
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

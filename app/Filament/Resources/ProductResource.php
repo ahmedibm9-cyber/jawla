@@ -4,9 +4,9 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductResource\Pages;
 use App\Models\Product;
-use Filament\Schemas\Schema;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Gate;
@@ -22,13 +22,25 @@ class ProductResource extends Resource
     {
         return 'heroicon-o-cube';
     }
-public static function getNavigationGroup(): ?string { return app()->getLocale() === 'ar' ? 'المخزون' : 'Inventory'; }
-    public static function getLabel(): string { return app()->getLocale() === 'ar' ? 'منتج' : 'Product'; }
-    public static function getPluralLabel(): string { return app()->getLocale() === 'ar' ? 'المنتجات' : 'Products'; }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return app()->getLocale() === 'ar' ? 'المخزون' : 'Inventory';
+    }
+
+    public static function getLabel(): string
+    {
+        return app()->getLocale() === 'ar' ? 'منتج' : 'Product';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return app()->getLocale() === 'ar' ? 'المنتجات' : 'Products';
+    }
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn(string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
+        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
             Forms\Components\Section::make($l('البيانات الأساسية', 'Basic Information'))->schema([
@@ -49,9 +61,9 @@ public static function getNavigationGroup(): ?string { return app()->getLocale()
 
             Forms\Components\Section::make($l('التسعير', 'Pricing'))->schema([
                 Forms\Components\TextInput::make('price')->label($l('سعر البيع', 'Selling Price'))->numeric()->required()
-                    ->visible(fn() => Gate::allows('products.manage_prices')),
+                    ->visible(fn () => Gate::allows('products.manage_prices')),
                 Forms\Components\TextInput::make('cost')->label($l('سعر التكلفة', 'Cost Price'))->numeric()->required()
-                    ->visible(fn() => Gate::allows('products.view_cost')),
+                    ->visible(fn () => Gate::allows('products.view_cost')),
                 Forms\Components\TextInput::make('max_discount')->label($l('الحد الأقصى للخصم', 'Max Discount'))->numeric(),
                 Forms\Components\Select::make('valuation_method')->label($l('طريقة التقييم', 'Valuation'))
                     ->options(['fifo' => 'FIFO', 'moving_average' => $l('المتوسط المتحرك', 'Moving Average'), 'standard' => $l('قياسي', 'Standard')])
@@ -64,7 +76,7 @@ public static function getNavigationGroup(): ?string { return app()->getLocale()
 
     public static function table(Table $table): Table
     {
-        $l = fn(string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
+        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
@@ -73,9 +85,9 @@ public static function getNavigationGroup(): ?string { return app()->getLocale()
                 Tables\Columns\TextColumn::make('category.name_ar')->label($l('الفئة', 'Category')),
                 Tables\Columns\TextColumn::make('unit')->label($l('الوحدة', 'Unit')),
                 Tables\Columns\TextColumn::make('price')->label($l('السعر', 'Price'))->money('EGP')->sortable()
-                    ->visible(fn() => Gate::allows('products.view_cost')),
+                    ->visible(fn () => Gate::allows('products.view_cost')),
                 Tables\Columns\TextColumn::make('cost')->label($l('التكلفة', 'Cost'))->money('EGP')->sortable()
-                    ->visible(fn() => Gate::allows('products.view_cost')),
+                    ->visible(fn () => Gate::allows('products.view_cost')),
                 Tables\Columns\IconColumn::make('vat_applicable')->label($l('ضريبة', 'VAT'))->boolean(),
                 Tables\Columns\IconColumn::make('is_active')->label($l('نشط', 'Active'))->boolean(),
             ])
@@ -87,7 +99,11 @@ public static function getNavigationGroup(): ?string { return app()->getLocale()
             ->bulkActions([Tables\Actions\DeleteBulkAction::make()]);
     }
 
-    public static function getRelations(): array { return []; }
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
     public static function getPages(): array
     {
         return [

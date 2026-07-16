@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\Services\Contracts\PricingService;
-use App\Support\PriceRange;
 use App\Support\Money;
+use App\Support\PriceRange;
 
-class PricingService implements Contracts\PricingService
+class PricingService implements PricingService
 {
     public function priceForRep(int $productId, int $repId, string $unitPrice): bool
     {

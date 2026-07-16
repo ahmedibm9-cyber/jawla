@@ -10,9 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class GoodsInTransit extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'company_id', 'purchase_order_id', 'supplier_id', 'shipment_number',
@@ -31,7 +30,18 @@ class GoodsInTransit extends Model
         'cancelled_at' => 'datetime',
     ];
 
-    public function company(): BelongsTo { return $this->belongsTo(Company::class); }
-    public function supplier(): BelongsTo { return $this->belongsTo(Supplier::class); }
-    public function items(): HasMany { return $this->hasMany(GoodsInTransitItem::class); }
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function supplier(): BelongsTo
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(GoodsInTransitItem::class);
+    }
 }

@@ -1,5 +1,10 @@
 <?php
 
+use App\Http\Middleware\EnsureRepRole;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SetActiveCompanyContext;
+use App\Http\Middleware\SetLocale;
+use App\Http\Middleware\ThrottlePost;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,16 +18,16 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'ensure.rep' => \App\Http\Middleware\EnsureRepRole::class,
+            'ensure.rep' => EnsureRepRole::class,
         ]);
 
         $middleware->redirectGuestsTo('/app/login');
 
         $middleware->web(append: [
-            \App\Http\Middleware\SecurityHeaders::class,
-            \App\Http\Middleware\SetActiveCompanyContext::class,
-            \App\Http\Middleware\SetLocale::class,
-            \App\Http\Middleware\ThrottlePost::class,
+            SecurityHeaders::class,
+            SetActiveCompanyContext::class,
+            SetLocale::class,
+            ThrottlePost::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

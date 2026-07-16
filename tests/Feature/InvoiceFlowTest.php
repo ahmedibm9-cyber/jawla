@@ -3,10 +3,15 @@
 namespace Tests\Feature;
 
 use App\Enums\InvoiceStatus;
+use App\Enums\StockReason;
+use App\Exceptions\Domain\InsufficientStockException;
+use App\Models\CashBox;
 use App\Models\Customer;
-use App\Models\Invoice;
+use App\Models\Product;
+use App\Models\Stock;
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Services\Contracts\StockService;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
 use Database\Seeders\DemoSeeder;
@@ -28,9 +33,9 @@ class InvoiceFlowTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $van = Warehouse::where('user_id', $rep->id)->first();
         $customer = Customer::where('status', 'approved')->first();
-        $product = \App\Models\Product::where('sku', 'PP-H030')->first();
+        $product = Product::where('sku', 'PP-H030')->first();
 
-        $stockBefore = (float) \App\Models\Stock::where('warehouse_id', $van->id)
+        $stockBefore = (float) Stock::where('warehouse_id', $van->id)
             ->where('product_id', $product->id)->value('quantity');
 
         $this->actingAs($rep);
@@ -44,7 +49,7 @@ class InvoiceFlowTest extends TestCase
         ]);
 
         $this->assertSame(InvoiceStatus::Submitted, $invoice->status);
-        $this->assertSame($stockBefore - 5, (float) \App\Models\Stock::where('warehouse_id', $van->id)
+        $this->assertSame($stockBefore - 5, (float) Stock::where('warehouse_id', $van->id)
             ->where('product_id', $product->id)->value('quantity'));
         $this->assertSame((float) $invoice->total, (float) $customer->fresh()->balance);
     }
@@ -54,26 +59,26 @@ class InvoiceFlowTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $van = Warehouse::where('user_id', $rep->id)->first();
         $customer = Customer::where('status', 'approved')->first();
-        $product = \App\Models\Product::where('sku', 'PP-H030')->first();
+        $product = Product::where('sku', 'PP-H030')->first();
 
-        $stockBefore = (float) \App\Models\Stock::where('warehouse_id', $van->id)
+        $stockBefore = (float) Stock::where('warehouse_id', $van->id)
             ->where('product_id', $product->id)->value('quantity');
 
         $this->actingAs($rep);
         // sanity: van warehouse known to InvoiceService via auth
-        $vanCheck = \App\Models\Warehouse::where('user_id', $rep->id)->where('type', 'van')->first();
-        $this->assertNotNull($vanCheck, "van warehouse for rep not found");
-        $this->assertSame($van->id, $vanCheck->id, "van mismatch");
+        $vanCheck = Warehouse::where('user_id', $rep->id)->where('type', 'van')->first();
+        $this->assertNotNull($vanCheck, 'van warehouse for rep not found');
+        $this->assertSame($van->id, $vanCheck->id, 'van mismatch');
         // Diagnosis: stockBefore expected 30 from seeder
         $this->assertSame(30.0, $stockBefore, "stockBefore not 30 got: {$stockBefore}");
 
         // Sanity: StockService directly should throw
         try {
-            app(\App\Services\Contracts\StockService::class)->decrement(
-                $van->id, $product->id, null, 40.0, \App\Enums\StockReason::Sale, $product, $rep->id
+            app(StockService::class)->decrement(
+                $van->id, $product->id, null, 40.0, StockReason::Sale, $product, $rep->id
             );
             $this->fail('StockService.decrement refused to throw on oversell');
-        } catch (\App\Exceptions\Domain\InsufficientStockException $e) {
+        } catch (InsufficientStockException $e) {
             // confirmed StockService path works
         }
 
@@ -87,14 +92,14 @@ class InvoiceFlowTest extends TestCase
                 'quantity' => $stockBefore + 10,
                 'unit_price' => 1000,
             ]);
-        } catch (\App\Exceptions\Domain\InsufficientStockException $e) {
+        } catch (InsufficientStockException $e) {
             $threw = true;
         } catch (\Throwable $e) {
             $this->fail('Got different exception: '.get_class($e).' — '.$e->getMessage());
         }
         $this->assertTrue($threw, 'Expected InsufficientStockException from InvoiceService.create');
 
-        $stockAfter = (float) \App\Models\Stock::where('warehouse_id', $van->id)
+        $stockAfter = (float) Stock::where('warehouse_id', $van->id)
             ->where('product_id', $product->id)->value('quantity');
         $this->assertSame($stockBefore, $stockAfter, 'Stock must not change on oversell rollback');
     }
@@ -104,7 +109,7 @@ class InvoiceFlowTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
         $customer = Customer::where('status', 'approved')->first();
-        $product = \App\Models\Product::where('sku', 'PE-LD100')->first();
+        $product = Product::where('sku', 'PE-LD100')->first();
 
         $invoice = app(InvoiceService::class)->create([
             'company_id' => $rep->company_id,
@@ -129,7 +134,7 @@ class InvoiceFlowTest extends TestCase
         $this->assertSame(InvoiceStatus::Paid, $invoice->status);
         $this->assertSame(0.0, (float) $invoice->remaining_amount);
 
-        $cashBox = \App\Models\CashBox::where('user_id', $rep->id)->first();
+        $cashBox = CashBox::where('user_id', $rep->id)->first();
         $this->assertSame($total, (float) $cashBox->balance);
     }
 
@@ -139,9 +144,9 @@ class InvoiceFlowTest extends TestCase
         $this->actingAs($rep);
         $van = Warehouse::where('user_id', $rep->id)->first();
         $customer = Customer::where('status', 'approved')->first();
-        $product = \App\Models\Product::where('sku', 'PP-H030')->first();
+        $product = Product::where('sku', 'PP-H030')->first();
 
-        $stockBefore = (float) \App\Models\Stock::where('warehouse_id', $van->id)
+        $stockBefore = (float) Stock::where('warehouse_id', $van->id)
             ->where('product_id', $product->id)->value('quantity');
 
         $invoice = app(InvoiceService::class)->create([
@@ -157,7 +162,7 @@ class InvoiceFlowTest extends TestCase
 
         app(InvoiceService::class)->cancel($invoice, $rep->id, 'test cancel');
 
-        $stockAfter = (float) \App\Models\Stock::where('warehouse_id', $van->id)
+        $stockAfter = (float) Stock::where('warehouse_id', $van->id)
             ->where('product_id', $product->id)->value('quantity');
         $this->assertSame($stockBefore, $stockAfter);
         $this->assertSame(0.0, (float) $customer->fresh()->balance);

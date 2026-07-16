@@ -10,9 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ReturnRecord extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $table = 'returns';
 
@@ -30,11 +29,38 @@ class ReturnRecord extends Model
         'cancelled_at' => 'datetime',
     ];
 
-    public function company(): BelongsTo { return $this->belongsTo(Company::class); }
-    public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
-    public function visit(): BelongsTo { return $this->belongsTo(Visit::class); }
-    public function againstInvoice(): BelongsTo { return $this->belongsTo(Invoice::class, 'against_invoice_id'); }
-    public function cancelledByUser(): BelongsTo { return $this->belongsTo(User::class, 'cancelled_by'); }
-    public function items(): HasMany { return $this->hasMany(ReturnItem::class, 'return_id'); }
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function visit(): BelongsTo
+    {
+        return $this->belongsTo(Visit::class);
+    }
+
+    public function againstInvoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class, 'against_invoice_id');
+    }
+
+    public function cancelledByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(ReturnItem::class, 'return_id');
+    }
 }

@@ -12,11 +12,17 @@ use Livewire\Component;
 class SubmitPurchaseOffer extends Component
 {
     public ?int $product_id = null;
+
     public ?int $supplier_id = null;
+
     public ?float $quantity = null;
+
     public ?float $offered_price = null;
+
     public string $currency = 'EGP';
+
     public string $payment_terms = '';
+
     public ?string $successMessage = null;
 
     public function submit(): void

@@ -10,9 +10,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ProformaInvoice extends Model
 {
-    use HasFactory;
-
     use BelongsToCompany;
+    use HasFactory;
 
     protected $fillable = [
         'company_id', 'customer_id', 'user_id', 'visit_id',
@@ -32,9 +31,28 @@ class ProformaInvoice extends Model
         'cancelled_at' => 'datetime',
     ];
 
-    public function company(): BelongsTo { return $this->belongsTo(Company::class); }
-    public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
-    public function user(): BelongsTo { return $this->belongsTo(User::class); }
-    public function visit(): BelongsTo { return $this->belongsTo(Visit::class); }
-    public function items(): HasMany { return $this->hasMany(ProformaInvoiceItem::class); }
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function visit(): BelongsTo
+    {
+        return $this->belongsTo(Visit::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(ProformaInvoiceItem::class);
+    }
 }

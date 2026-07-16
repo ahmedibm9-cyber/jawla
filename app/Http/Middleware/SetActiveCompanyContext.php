@@ -9,9 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class SetActiveCompanyContext
 {
-    public function __construct(private readonly ActiveCompanyContext $context)
-    {
-    }
+    public function __construct(private readonly ActiveCompanyContext $context) {}
 
     public function handle(Request $request, Closure $next): Response
     {

@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -15,5 +14,8 @@ class LandedCost extends Model
 
     protected $casts = ['amount' => 'decimal:2'];
 
-    public function goodsInTransit(): BelongsTo { return $this->belongsTo(GoodsInTransit::class); }
+    public function goodsInTransit(): BelongsTo
+    {
+        return $this->belongsTo(GoodsInTransit::class);
+    }
 }

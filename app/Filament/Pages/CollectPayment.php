@@ -4,12 +4,11 @@ namespace App\Filament\Pages;
 
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\ModeOfPayment;
 use App\Services\PaymentService;
-use Filament\Pages\Page;
 use Filament\Forms;
-use Filament\Schemas\Schema;
 use Filament\Notifications\Notification;
+use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 
 class CollectPayment extends Page
@@ -26,9 +25,13 @@ class CollectPayment extends Page
     }
 
     public ?int $customer_id = null;
+
     public ?int $invoice_id = null;
+
     public ?float $amount = null;
+
     public string $method = 'cash';
+
     public ?string $notes = null;
 
     public static function form(Schema $schema): Schema

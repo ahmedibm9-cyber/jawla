@@ -26,8 +26,8 @@ return new class extends Migration
         });
 
         // Change unit enum to add 'ton'
-        DB::statement("ALTER TABLE products ALTER COLUMN unit TYPE VARCHAR(255)");
-        DB::statement("ALTER TABLE products DROP CONSTRAINT IF EXISTS products_unit_check");
+        DB::statement('ALTER TABLE products ALTER COLUMN unit TYPE VARCHAR(255)');
+        DB::statement('ALTER TABLE products DROP CONSTRAINT IF EXISTS products_unit_check');
         DB::statement("ALTER TABLE products ADD CONSTRAINT products_unit_check CHECK (unit::text = ANY (ARRAY['ton'::text, 'kg'::text, 'piece'::text, 'box'::text, 'carton'::text]))");
     }
 
@@ -45,7 +45,7 @@ return new class extends Migration
         });
 
         // Restore old enum
-        DB::statement("ALTER TABLE products DROP CONSTRAINT IF EXISTS products_unit_check");
+        DB::statement('ALTER TABLE products DROP CONSTRAINT IF EXISTS products_unit_check');
         DB::statement("ALTER TABLE products ADD CONSTRAINT products_unit_check CHECK (unit::text = ANY (ARRAY['piece'::text, 'box'::text, 'carton'::text, 'kg'::text, 'liter'::text, 'gallon'::text]))");
     }
 };

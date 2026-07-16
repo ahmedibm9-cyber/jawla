@@ -4,9 +4,14 @@ namespace App\Services;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\StockReason;
+use App\Models\Company;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
+use App\Models\Product;
 use App\Models\ProformaInvoice;
+use App\Models\Warehouse;
+use App\Services\Contracts\DocumentNumberService;
 use App\Services\Contracts\InvoiceService as InvoiceContract;
 use App\Services\Contracts\StockService as StockContract;
 use Illuminate\Support\Facades\DB;
@@ -15,21 +20,20 @@ class InvoiceService implements InvoiceContract
 {
     public function __construct(
         private readonly StockContract $stock,
-    ) {
-    }
+    ) {}
 
     public function create(array $data): Invoice
     {
         return DB::transaction(function () use ($data): Invoice {
-            $company = \App\Models\Company::findOrFail($data['company_id']);
-            $prod = \App\Models\Product::findOrFail($data['product_id']);
+            $company = Company::findOrFail($data['company_id']);
+            $prod = Product::findOrFail($data['product_id']);
             $qty = (float) $data['quantity'];
             $unitPrice = (float) $data['unit_price'];
             $lineTotal = round($qty * $unitPrice, 2);
             $vatAmount = $prod->vat_applicable ? round($lineTotal * ((float) $company->vat_percent / 100), 2) : 0;
             $total = round($lineTotal + $vatAmount, 2);
 
-            $invNumber = app(\App\Services\Contracts\DocumentNumberService::class)
+            $invNumber = app(DocumentNumberService::class)
                 ->generate('sales_invoice', $company->id);
 
             $invoice = Invoice::create([
@@ -59,7 +63,7 @@ class InvoiceService implements InvoiceContract
             ]);
 
             // Van stock: look up rep's van warehouse
-            $vanWarehouse = \App\Models\Warehouse::where('user_id', auth()->id())
+            $vanWarehouse = Warehouse::where('user_id', auth()->id())
                 ->where('type', 'van')->first();
 
             if ($vanWarehouse) {
@@ -75,7 +79,7 @@ class InvoiceService implements InvoiceContract
             }
 
             // Customer balance update
-            $customer = \App\Models\Customer::findOrFail($data['customer_id']);
+            $customer = Customer::findOrFail($data['customer_id']);
             $customer->increment('balance', $total);
 
             // If from proforma, mark it converted
@@ -88,11 +92,14 @@ class InvoiceService implements InvoiceContract
         });
     }
 
-    public function submit($invoice): Invoice { return $invoice; }
+    public function submit($invoice): Invoice
+    {
+        return $invoice;
+    }
 
     public function cancel($invoice, int $userId, string $reason): Invoice
     {
-        return DB::transaction(function () use ($invoice, $userId, $reason): Invoice {
+        return DB::transaction(function () use ($invoice, $userId): Invoice {
             $invoice->update([
                 'status' => InvoiceStatus::Cancelled,
                 'cancelled_at' => now(),
@@ -100,7 +107,7 @@ class InvoiceService implements InvoiceContract
             ]);
 
             // Reverse stock
-            $vanWarehouse = \App\Models\Warehouse::where('user_id', $invoice->user_id)
+            $vanWarehouse = Warehouse::where('user_id', $invoice->user_id)
                 ->where('type', 'van')->first();
 
             if ($vanWarehouse) {
@@ -128,6 +135,7 @@ class InvoiceService implements InvoiceContract
     {
         // Cancel + create draft copy
         $this->cancel($invoice, auth()->id(), 'Amendment requested');
+
         return Invoice::create([
             'company_id' => $invoice->company_id,
             'customer_id' => $invoice->customer_id,
