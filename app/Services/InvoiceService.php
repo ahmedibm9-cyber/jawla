@@ -100,7 +100,18 @@ class InvoiceService implements InvoiceContract
 
     public function submit($invoice): Invoice
     {
-        return $invoice;
+        return DB::transaction(function () use ($invoice): Invoice {
+            if ($invoice->status !== InvoiceStatus::Draft) {
+                throw new \RuntimeException('Only draft invoices can be submitted.');
+            }
+
+            $invoice->update([
+                'status' => InvoiceStatus::Submitted,
+                'issued_at' => now(),
+            ]);
+
+            return $invoice->fresh();
+        });
     }
 
     public function cancel($invoice, int $userId, string $reason): Invoice
@@ -139,23 +150,37 @@ class InvoiceService implements InvoiceContract
 
     public function amend($invoice): Invoice
     {
-        // Cancel + create draft copy
-        $this->cancel($invoice, auth()->id(), 'Amendment requested');
+        return DB::transaction(function () use ($invoice): Invoice {
+            $this->cancel($invoice, auth()->id(), 'Amendment requested');
 
-        return Invoice::create([
-            'company_id' => $invoice->company_id,
-            'customer_id' => $invoice->customer_id,
-            'user_id' => auth()->id(),
-            'invoice_number' => $invoice->invoice_number,
-            'status' => InvoiceStatus::Draft,
-            'subtotal' => $invoice->subtotal,
-            'vat_amount' => $invoice->vat_amount,
-            'total' => $invoice->total,
-            'paid_amount' => 0,
-            'remaining_amount' => $invoice->total,
-            'amended_from' => $invoice->id,
-            'posting_date' => today(),
-            'issued_at' => now(),
-        ]);
+            $draft = Invoice::create([
+                'company_id' => $invoice->company_id,
+                'customer_id' => $invoice->customer_id,
+                'user_id' => auth()->id(),
+                'invoice_number' => $invoice->invoice_number,
+                'status' => InvoiceStatus::Draft,
+                'subtotal' => $invoice->subtotal,
+                'vat_amount' => $invoice->vat_amount,
+                'total' => $invoice->total,
+                'paid_amount' => 0,
+                'remaining_amount' => $invoice->total,
+                'amended_from' => $invoice->id,
+                'posting_date' => today(),
+                'issued_at' => now(),
+            ]);
+
+            foreach ($invoice->items as $item) {
+                InvoiceItem::create([
+                    'invoice_id' => $draft->id,
+                    'product_id' => $item->product_id,
+                    'batch_id' => $item->batch_id,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->unit_price,
+                    'line_total' => $item->line_total,
+                ]);
+            }
+
+            return $draft->fresh(['items']);
+        });
     }
 }

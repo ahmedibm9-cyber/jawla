@@ -12,7 +12,8 @@ use App\Models\NamingSeries;
 use App\Models\PriceList;
 use App\Models\Product;
 use App\Models\Route;
-use App\Models\Stock;
+use App\Enums\StockReason;
+use App\Services\Contracts\StockService as StockServiceContract;
 use App\Models\TaxTemplate;
 use App\Models\TaxTemplateLine;
 use App\Models\User;
@@ -133,14 +134,15 @@ class DemoSeeder extends Seeder
             'unit' => 'ton', 'packaging_type' => 'bag', 'price' => 1200.00, 'cost' => 850.00,
         ]);
 
-        // Add stock to van
-        Stock::create(['warehouse_id' => $vanWarehouse->id, 'product_id' => $productPP->id, 'quantity' => 30]);
-        Stock::create(['warehouse_id' => $vanWarehouse->id, 'product_id' => $productPE->id, 'quantity' => 20]);
+        // Add stock to van (via StockService for proper movement tracking)
+        $stockService = app(StockServiceContract::class);
+        $stockService->increment($vanWarehouse->id, $productPP->id, null, 30, StockReason::Initial, $vanWarehouse);
+        $stockService->increment($vanWarehouse->id, $productPE->id, null, 20, StockReason::Initial, $vanWarehouse);
         // Material 952 has no van stock → triggers out-of-stock
 
         // Add stock to main warehouse
-        Stock::create(['warehouse_id' => $mainWarehouse->id, 'product_id' => $productPP->id, 'quantity' => 100]);
-        Stock::create(['warehouse_id' => $mainWarehouse->id, 'product_id' => $productPE->id, 'quantity' => 80]);
+        $stockService->increment($mainWarehouse->id, $productPP->id, null, 100, StockReason::Initial, $mainWarehouse);
+        $stockService->increment($mainWarehouse->id, $productPE->id, null, 80, StockReason::Initial, $mainWarehouse);
 
         // Create route
         $route = Route::factory()->create([

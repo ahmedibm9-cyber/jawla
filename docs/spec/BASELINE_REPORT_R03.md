@@ -34,10 +34,10 @@
 - **Cause:** The contract interface `app/Services/Contracts/PricingService.php` and the implementation `app/Services/PricingService.php` share the same fully-qualified class name `App\Services\PricingService`. PHP cannot resolve this.
 - **Fix ticket:** R-04
 
-#### 2. Explicit bcrypt usage (violates Argon2id rule)
+#### 2. Explicit bcrypt usage (violates Argon2id rule) — RESOLVED
 - **File:** `app/Filament/Resources/UserResource.php:54`
 - **Issue:** `->dehydrateStateUsing(fn ($state) => bcrypt($state))` uses `bcrypt()` directly instead of Laravel's `Hash` facade (which is configured for Argon2id).
-- **Fix ticket:** R-07
+- **Status:** Fixed in code — `bcrypt()` replaced with `Hash::make()`
 
 ### P1 — Security / Integrity
 
@@ -78,9 +78,9 @@
 
 | Severity | Count | Tickets |
 |----------|-------|---------|
-| P0 | 2 | R-04, R-07 |
+| P0 | 1 | R-04 |
 | P1 | 1 | R-07, B1-06 |
 | P2 | 3 | R-05, R-06 |
-| **Total** | **6** | — |
+| **Total** | **5** | — |
 
 The app boots, tests pass, migrations work, and the build succeeds. The P0 PricingService collision is the most critical — it prevents the container from resolving pricing correctly and will cause a fatal error when any code path tries to use the pricing service.

@@ -12,6 +12,7 @@ use App\Services\Contracts\DocumentNumberService;
 use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\InvoiceService;
 use App\Services\Contracts\PricingService;
+use App\Services\Contracts\ProformaService;
 use App\Services\Contracts\StockService;
 use App\Services\InvoiceCalculationService as InvoiceCalculationServiceImpl;
 use App\Services\NumberSequenceService;
@@ -23,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -43,6 +45,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DocumentNumberService::class, fn () => app(NumberSequenceService::class));
         $this->app->bind(AlarmService::class, fn () => app(\App\Services\AlarmService::class));
         $this->app->singleton(ComplaintService::class);
+        $this->app->bind(ProformaService::class, fn () => app(\App\Services\ProformaService::class));
     }
 
     /**
@@ -50,6 +53,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (app()->isProduction()) {
+            URL::forceScheme('https');
+        }
+
         Model::preventLazyLoading(! app()->isProduction());
 
         User::observe(AuditObserver::class);

@@ -2,21 +2,24 @@
 
 namespace App\Livewire\App;
 
-use App\Models\CompanyBankAccount;
 use App\Models\PriceQuotation;
 use App\Models\PriceQuotationRequest;
-use App\Models\ProformaInvoice;
-use App\Models\ProformaInvoiceItem;
 use App\Services\Contracts\DocumentNumberService;
 use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\LineItemInput;
+use App\Models\CompanyBankAccount;
+use App\Models\ProformaInvoice;
+use App\Models\ProformaInvoiceItem;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 class QuotationFlow extends Component
 {
+    use WithPagination;
+
     public ?PriceQuotationRequest $request = null;
 
     public ?PriceQuotation $quotation = null;
@@ -134,7 +137,7 @@ class QuotationFlow extends Component
         });
 
         $this->step = 'proforma';
-        $this->successMessage = __('app.proforma_created').' #'.$proformaNumber;
+        $this->successMessage = __('app.proforma_created').' #'.$proforma->proforma_number;
 
         session()->flash('proforma', $proforma);
     }
@@ -148,15 +151,13 @@ class QuotationFlow extends Component
                 ->where('user_id', $user->id)
                 ->with(['product', 'customer', 'quotation'])
                 ->latest()
-                ->take(20)
-                ->get(),
+                ->paginate(20),
             'priced' => PriceQuotationRequest::query()
                 ->where('user_id', $user->id)
                 ->where('status', 'priced')
                 ->with(['product', 'customer', 'quotation'])
                 ->latest()
-                ->take(20)
-                ->get(),
+                ->paginate(20),
         ]);
     }
 }

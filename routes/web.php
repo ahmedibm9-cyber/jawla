@@ -16,6 +16,13 @@ Route::get('/', fn () => redirect('/admin/login'));
 
 Route::get('/up', fn () => response('ok', 200));
 
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toIso8601String(),
+    ]);
+});
+
 Route::get('/locale/{locale}', function (string $locale) {
     abort_unless(in_array($locale, ['en', 'ar'], true), 404);
 

@@ -28,7 +28,6 @@ class NumberSequenceService implements Contracts\DocumentNumberService
                         'company_id' => $companyId,
                     ]);
                 } catch (UniqueConstraintViolationException) {
-                    // Race: another transaction created the row; re-fetch with lock
                     $series = NamingSeries::where('name', $docType)
                         ->where('company_id', $companyId)
                         ->lockForUpdate()
@@ -39,10 +38,6 @@ class NumberSequenceService implements Contracts\DocumentNumberService
             $next = $series->current_number + 1;
             $series->update(['current_number' => $next]);
 
-            // ponytail: current_number does not reset per year.
-            //   Year-reset scoping (e.g. INV-2026-00001, INV-2027-00001)
-            //   requires a `year` column and a composite unique scope.
-            //   Add when: the business requires per-year reset.
             $abbr = Company::where('id', $companyId)->value('abbr') ?? 'XX';
 
             return $series->prefix.'-'.$abbr.'-'.date('Y').'-'.

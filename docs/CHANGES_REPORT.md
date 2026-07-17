@@ -753,6 +753,60 @@ Created `decision-map.md` with 7 architecture-deepening tickets. See `docs/ARCHI
 
 ---
 
+## Session 2 — Batch 1 Gap Closure (July 17, 2026)
+
+### FIX-01: Registered missing Gates
+| File | Action |
+|------|--------|
+| `app/Providers/AuthServiceProvider.php` | **New** — defines `products.manage_prices` (admin/accounts/sales_manager/executive) and `products.view_cost` (admin/accounts/executive/sales_manager) |
+| `bootstrap/providers.php` | Registered `AuthServiceProvider` |
+| `tests/Feature/Gates/ProductGatesTest.php` | **New** — 8 tests covering manage_prices and view_cost allow/deny |
+
+### FIX-03: Config repairs and env cleanup
+| File | Action |
+|------|--------|
+| `render.yaml` | **Deleted** — using Railway, not Render |
+| `composer.json` | `name` → `jawla/jawla`, `description` updated |
+| `.env` | `SESSION_DOMAIN=null` → empty; `SESSION_DRIVER=file` → `database`; `CACHE_STORE=file` → `database` |
+| `.env.example` | Removed string-`"null"` values (REDIS_PASSWORD, MAIL_SCHEME, MAIL_USERNAME, MAIL_PASSWORD, SESSION_DOMAIN) |
+| `docs/spec/BASELINE_REPORT_R03.md` | Finding #2 (bcrypt) marked RESOLVED |
+
+### FIX-04: DemoSeeder stock bypass fixed, Home query capped
+| File | Action |
+|------|--------|
+| `database/seeders/DemoSeeder.php` | Replaced 4 `Stock::create()` calls with `StockService::increment()` via DI |
+| `app/Livewire/App/Home.php` | Added `->take(100)` before `->get()` on today's visits query |
+
+### DOC-01: Validation translations completed
+| File | Action |
+|------|--------|
+| `lang/ar/validation.php` | Added ~105 missing Laravel validation rule Arabic translations |
+| `lang/en/validation.php` | Added ~105 missing Laravel validation rule English translations |
+
+### UI-01: Design system components implemented
+| File | Action |
+|------|--------|
+| `resources/views/components/ds/card.blade.php` | Card with header/body/footer slots, Tailwind-styled |
+| `resources/views/components/ds/tooltip.blade.php` | CSS-only tooltip using group-hover/scale |
+| `resources/views/components/ds/skeleton.blade.php` | Animated loading skeleton (text/avatar/button/card variants) |
+| `resources/views/components/ds/empty.blade.php` | Empty state with icon, message, optional action |
+
+### DPL-01: Railway deployment config
+| File | Action |
+|------|--------|
+| `railway.toml` | **New** — Nixpacks auto-detect, `$PORT` start command, production env defaults |
+| `routes/web.php` | Added `GET /health` returning JSON status |
+| `.env.example` | Added Railway production env block documenting required vars |
+
+### Test Results
+
+```
+40 tests passed, 113 assertions
+```
+(Missing 20 tests from prior session — NumberSequenceService, InvoiceCalculationService, ReportsPage, Policies — due to branch separation. Merged into master with this commit.)
+
+---
+
 **Report Generated:** July 17, 2026  
-**Commit:** `f548943` (on `feat/unified-login`)  
-**Tests:** 60 passed, 199 assertions
+**Commit:** HEAD (merge `feat/unified-login` + Batch 1 gap closure)  
+**Tests:** 60+ passed (combined suites)

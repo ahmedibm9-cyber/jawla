@@ -18,7 +18,7 @@ Implement configurable `floor_only` and `two_sided` strategies. Use the currentl
 
 ### Answer
 
-PENDING
+Floor-only. Rep can increase from base price but not go below. No upper bound. Example to confirm: base=1000, manager floor=950, rep floor=900 — rep can sell at 900–1200+.
 
 ## D-02: Geofence override behavior and radius
 
@@ -36,7 +36,10 @@ Keep one company-configurable radius and implement the proposed flag-and-notify 
 
 ### Answer
 
-PENDING
+- **In range:** Allow confirm visit normally.
+- **Out of range:** Decline. Rep cannot check in.
+- **GPS denied:** GPS must be on — app won't work without it. Block check-in entirely.
+- **Radius:** 500m (100m is better if feasible).
 
 ## D-03: Warehouse stock import contract
 
@@ -58,7 +61,7 @@ An anonymized real sample plus written answers to the quantity and duplicate rul
 
 ### Answer
 
-PENDING
+Deferred. Client will provide real CSV sample and answers when ready.
 
 ## D-04: Sales/Purchasing dual-review mechanics
 
@@ -76,5 +79,10 @@ Use separate immutable decisions. Sales veto prevents final approval regardless 
 
 ### Answer
 
-PENDING
+1. **Review order:** Sales first, then Purchasing (in Odoo).
+2. **Sales veto:** Offer stays in Jawla for renegotiation — not killed.
+3. **Resubmission:** Yes, rejected offers can be edited and resubmitted.
+4. **Reasons:** Nice-to-have — optional text field to type reason (not mandatory).
+5. **Expiration:** Rep sets the expiration date on the offer.
+6. **Race condition:** Purchasing (Odoo) never sees the offer unless Sales manager approves first.
 

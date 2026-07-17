@@ -67,7 +67,7 @@ class Home extends Component
                 ->whereDate('visit_date', today())
                 ->with('customer')
                 ->orderBy('sort_order')
-                ->get(),
+                ->take(100)->get(),
             'pendingCount' => DailyVisitAssignment::query()
                 ->where('user_id', $user->id)
                 ->whereDate('visit_date', today())

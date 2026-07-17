@@ -5,10 +5,13 @@ namespace App\Livewire\App;
 use App\Models\Customer;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 class TodaysCustomers extends Component
 {
+    use WithPagination;
+
     public string $search = '';
 
     public function render()
@@ -22,8 +25,7 @@ class TodaysCustomers extends Component
             }))
             ->where('is_active', true)
             ->orderBy('name_ar')
-            ->limit(30)
-            ->get();
+            ->paginate(30);
 
         return view('livewire.app.customers', [
             'customers' => $customers,
