@@ -81,6 +81,20 @@ class InvoiceCalculationServiceTest extends TestCase
         $this->assertSame(0.0, $result->total);
     }
 
+    public function test_fractional_totals_are_consistent(): void
+    {
+        $result = $this->service->calculate(
+            [
+                new LineItemInput(1, 1.33, true),
+                new LineItemInput(1, 1.33, true),
+            ],
+            14,
+        );
+
+        $perLineSum = array_sum(array_map(fn ($l) => $l->vatAmount, $result->lines));
+        $this->assertSame($result->vatAmount, $perLineSum);
+    }
+
     public function test_per_line_results_contain_correct_data(): void
     {
         $result = $this->service->calculate(

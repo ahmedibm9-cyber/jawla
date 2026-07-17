@@ -13,21 +13,19 @@ class InvoiceCalculationService implements Contract
     {
         $results = [];
         $subtotal = 0.0;
-        $vatApplicableSubtotal = 0.0;
 
         foreach ($lines as $input) {
             $lineTotal = round($input->qty * $input->unitPrice, 2);
             $subtotal += $lineTotal;
 
             if ($input->vatApplicable) {
-                $vatApplicableSubtotal += $lineTotal;
                 $results[] = new LineItemResult($lineTotal, round($lineTotal * ($vatPercent / 100), 2), true);
             } else {
                 $results[] = new LineItemResult($lineTotal, 0.0, false);
             }
         }
 
-        $vatAmount = round($vatApplicableSubtotal * ($vatPercent / 100), 2);
+        $vatAmount = array_sum(array_map(fn ($r) => $r->vatAmount, $results));
         $total = round($subtotal + $vatAmount, 2);
 
         return new InvoiceCalculation($subtotal, $vatAmount, $total, $results);
