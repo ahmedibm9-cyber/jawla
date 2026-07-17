@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Route;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -16,7 +17,7 @@ class CustomerFactory extends Factory
     public function definition(): array
     {
         return [
-            'company_id' => 1,
+            'company_id' => Company::factory(),
             'route_id' => Route::factory(),
             'code' => fake()->unique()->numerify('CUST-####'),
             'name_ar' => fake()->company(),

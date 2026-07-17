@@ -38,8 +38,13 @@ use Filament\Forms\Components\Tabs;
                 @empty
                     <tr><td colspan="4" class="text-center text-gray-400 py-4">{{ __('No results') }}</td></tr>
                 @endforelse
-            </tbody>
+                </tbody>
         </table>
+        @if ($this->visits->hasPages())
+            <div class="px-4 py-2 border-t">
+                {{ $this->visits->links() }}
+            </div>
+        @endif
     @elseif($tab === 'quotations')
         <table class="w-full text-sm border-collapse">
             <thead class="bg-gray-50">
@@ -63,8 +68,13 @@ use Filament\Forms\Components\Tabs;
                 @empty
                     <tr><td colspan="5" class="text-center text-gray-400 py-4">{{ __('No results') }}</td></tr>
                 @endforelse
-            </tbody>
+                </tbody>
         </table>
+        @if ($this->quotations->hasPages())
+            <div class="px-4 py-2 border-t">
+                {{ $this->quotations->links() }}
+            </div>
+        @endif
     @elseif($tab === 'proformas')
         <table class="w-full text-sm border-collapse">
             <thead class="bg-gray-50">
@@ -86,8 +96,13 @@ use Filament\Forms\Components\Tabs;
                 @empty
                     <tr><td colspan="4" class="text-center text-gray-400 py-4">{{ __('No results') }}</td></tr>
                 @endforelse
-            </tbody>
+                </tbody>
         </table>
+        @if ($this->proformas->hasPages())
+            <div class="px-4 py-2 border-t">
+                {{ $this->proformas->links() }}
+            </div>
+        @endif
     @elseif($tab === 'invoices')
         <table class="w-full text-sm border-collapse">
             <thead class="bg-gray-50">
@@ -111,7 +126,12 @@ use Filament\Forms\Components\Tabs;
                 @empty
                     <tr><td colspan="5" class="text-center text-gray-400 py-4">{{ __('No results') }}</td></tr>
                 @endforelse
-            </tbody>
+                </tbody>
         </table>
+        @if ($this->invoices->hasPages())
+            <div class="px-4 py-2 border-t">
+                {{ $this->invoices->links() }}
+            </div>
+        @endif
     @endif
 </div>

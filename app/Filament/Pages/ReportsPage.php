@@ -8,9 +8,12 @@ use App\Models\ProformaInvoice;
 use App\Models\VisitReport;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
+use Livewire\WithPagination;
 
 class ReportsPage extends Page
 {
+    use WithPagination;
+
     protected string $view = 'filament.pages.reports-page';
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-text';
@@ -41,7 +44,7 @@ class ReportsPage extends Page
             $q->whereDate('submitted_at', '<=', $this->toDate);
         }
 
-        return $q->limit(100)->get();
+        return $q->paginate(100, pageName: 'visitPage');
     }
 
     public function getQuotationsProperty()
@@ -57,7 +60,7 @@ class ReportsPage extends Page
             $q->whereDate('created_at', '<=', $this->toDate);
         }
 
-        return $q->limit(100)->get();
+        return $q->paginate(100, pageName: 'quotationPage');
     }
 
     public function getProformasProperty()
@@ -73,7 +76,7 @@ class ReportsPage extends Page
             $q->whereDate('posting_date', '<=', $this->toDate);
         }
 
-        return $q->limit(100)->get();
+        return $q->paginate(100, pageName: 'proformaPage');
     }
 
     public function getInvoicesProperty()
@@ -89,6 +92,6 @@ class ReportsPage extends Page
             $q->whereDate('issued_at', '<=', $this->toDate);
         }
 
-        return $q->limit(100)->get();
+        return $q->paginate(100, pageName: 'invoicePage');
     }
 }

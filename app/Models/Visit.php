@@ -4,12 +4,15 @@ namespace App\Models;
 
 use App\Enums\VisitPurpose;
 use App\Enums\VisitStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Visit extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id', 'customer_id', 'route_id', 'work_session_id',
         'daily_visit_assignment_id',
