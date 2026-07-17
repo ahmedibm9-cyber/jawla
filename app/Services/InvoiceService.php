@@ -12,7 +12,9 @@ use App\Models\Product;
 use App\Models\ProformaInvoice;
 use App\Models\Warehouse;
 use App\Services\Contracts\DocumentNumberService;
+use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\InvoiceService as InvoiceContract;
+use App\Services\Contracts\LineItemInput;
 use App\Services\Contracts\StockService as StockContract;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +22,8 @@ class InvoiceService implements InvoiceContract
 {
     public function __construct(
         private readonly StockContract $stock,
+        private readonly InvoiceCalculationService $calc,
+        private readonly DocumentNumberService $numbers,
     ) {}
 
     public function create(array $data): Invoice
@@ -29,12 +33,13 @@ class InvoiceService implements InvoiceContract
             $prod = Product::findOrFail($data['product_id']);
             $qty = (float) $data['quantity'];
             $unitPrice = (float) $data['unit_price'];
-            $lineTotal = round($qty * $unitPrice, 2);
-            $vatAmount = $prod->vat_applicable ? round($lineTotal * ((float) $company->vat_percent / 100), 2) : 0;
-            $total = round($lineTotal + $vatAmount, 2);
 
-            $invNumber = app(DocumentNumberService::class)
-                ->generate('sales_invoice', $company->id);
+            $calculation = $this->calc->calculate(
+                [new LineItemInput($qty, $unitPrice, (bool) $prod->vat_applicable)],
+                (float) $company->vat_percent,
+            );
+
+            $invNumber = $this->numbers->generate('sales_invoice', $company->id);
 
             $invoice = Invoice::create([
                 'company_id' => $company->id,
@@ -44,11 +49,11 @@ class InvoiceService implements InvoiceContract
                 'proforma_invoice_id' => $data['proforma_invoice_id'] ?? null,
                 'invoice_number' => $invNumber,
                 'status' => InvoiceStatus::Submitted,
-                'subtotal' => $lineTotal,
-                'vat_amount' => $vatAmount,
-                'total' => $total,
+                'subtotal' => $calculation->subtotal,
+                'vat_amount' => $calculation->vatAmount,
+                'total' => $calculation->total,
                 'paid_amount' => 0,
-                'remaining_amount' => $total,
+                'remaining_amount' => $calculation->total,
                 'posting_date' => today(),
                 'issued_at' => now(),
             ]);
@@ -59,7 +64,7 @@ class InvoiceService implements InvoiceContract
                 'batch_id' => $data['batch_id'] ?? null,
                 'quantity' => $qty,
                 'unit_price' => $unitPrice,
-                'line_total' => $lineTotal,
+                'line_total' => $calculation->lines[0]->lineTotal,
             ]);
 
             // Van stock: look up rep's van warehouse
@@ -80,7 +85,7 @@ class InvoiceService implements InvoiceContract
 
             // Customer balance update
             $customer = Customer::findOrFail($data['customer_id']);
-            $customer->increment('balance', $total);
+            $customer->increment('balance', $calculation->total);
 
             // If from proforma, mark it converted
             if (isset($data['proforma_invoice_id'])) {

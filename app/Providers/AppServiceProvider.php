@@ -9,9 +9,11 @@ use App\Observers\AuditObserver;
 use App\Services\ComplaintService;
 use App\Services\Contracts\AlarmService;
 use App\Services\Contracts\DocumentNumberService;
+use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\InvoiceService;
 use App\Services\Contracts\PricingService;
 use App\Services\Contracts\StockService;
+use App\Services\InvoiceCalculationService as InvoiceCalculationServiceImpl;
 use App\Services\NumberSequenceService;
 use App\Services\StockService as StockServiceImpl;
 use App\Support\ActiveCompanyContext;
@@ -36,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(StockService::class, StockServiceImpl::class);
         $this->app->bind(InvoiceService::class, fn () => app(\App\Services\InvoiceService::class));
+        $this->app->bind(InvoiceCalculationService::class, InvoiceCalculationServiceImpl::class);
         $this->app->bind(PricingService::class, fn () => app(\App\Services\PricingService::class));
         $this->app->bind(DocumentNumberService::class, fn () => app(NumberSequenceService::class));
         $this->app->bind(AlarmService::class, fn () => app(\App\Services\AlarmService::class));

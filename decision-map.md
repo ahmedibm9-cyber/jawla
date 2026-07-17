@@ -50,15 +50,21 @@ Pre-decided:
 - Raw inputs (float qty, float price, bool vatApplicable) — not Eloquent models
 - Tests need no DB (pure math assertions)
 
-Open decisions:
-1. Single method `calculate(array $lines, float $vatPercent): CalculationResult`
-   vs multi-method (calculateLineTotal, calculateVat, etc.)?
-2. Does PricingService get absorbed into this, or stay separate?
-3. Does ZATCA QR data construction live here or in PdfService?
+Resolved:
+1. **Single method** with `InvoiceCalculation` DTO (deeper — callers make one call)
+2. PricingService stays separate (different concern — price negotiation, not calculation)
+3. ZATCA QR stays in PdfService (presentation concern)
 
 ### Answer
 
-(filled when resolved)
+Implemented as:
+- `Contracts\InvoiceCalculationService` — single `calculate(array $lines, float $vatPercent): InvoiceCalculation` method
+- DTOs: `LineItemInput`, `LineItemResult`, `InvoiceCalculation` (per-line vat amounts included)
+- Implementation fixes latent multi-line bug: VAT computed on subtotal of vat-eligible items
+- Install sites: `InvoiceService::create` (injected via constructor)
+- Also migrated `DocumentNumberService` from `app()` inline to constructor injection in `InvoiceService`
+- 6 Pest tests (pure math, no DB needed) — all pass
+- Bound in `AppServiceProvider`
 
 ## #3: QuotationFlow — deepen via service seams
 
