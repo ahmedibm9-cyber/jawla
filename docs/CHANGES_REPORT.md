@@ -673,6 +673,86 @@ app/Filament/Resources/StockResource/Pages/EditStock.php
 
 ---
 
-**Report Generated:** July 16, 2026  
-**Commit:** `HEAD` (includes all changes above)  
-**Tests:** 32 passed, 105 assertions
+---
+
+## Phase 6 — Architecture Deepening (Tickets #1–#4)
+
+**Date:** July 17, 2026  
+**Branch:** `feat/unified-login`  
+**Commits:** `e5af127` → `f548943` (10 commits)
+
+### Ticket #1: NumberSequenceService
+
+| File | Action |
+|------|--------|
+| `app/Services/NumberSequenceService.php` | Created — sequential + gapless document number generator with `FOR UPDATE` row lock, year-aware format (`{prefix}-{abbr}-{year}-{n}`) |
+| `tests/Unit/Services/NumberSequenceServiceTest.php` | 6 tests: formatted output, sequential, per-docType isolation, per-company isolation, auto-create, respects seed data |
+
+### Ticket #2: InvoiceCalculationService
+
+| File | Action |
+|------|--------|
+| `app/Services/Contracts/InvoiceCalculationService.php` | Interface + DTOs (`LineItemInput`, `LineItemResult`, `InvoiceCalculation`) |
+| `app/Services/InvoiceCalculationService.php` | Implementation — per-line VAT, subtotal/total calculation |
+| `app/Services/InvoiceService.php` | Refactored: constructor injection for `InvoiceCalculationService` + `DocumentNumberService` |
+| `tests/Unit/Services/InvoiceCalculationServiceTest.php` | 7 tests: pure math, multi-line, VAT filtering, edge cases |
+
+### Ticket #3: QuotationFlow Deepening
+
+| File | Action |
+|------|--------|
+| `app/Livewire/App/QuotationFlow.php` | Constructor injection (`DocumentNumberService`, `InvoiceCalculationService`), `DB::transaction()` wrapping, fixed lazy-loading |
+| `app/Models/PriceQuotationRequest.php` | Added `company()` BelongsTo relation (fixes lazy-loading) |
+
+### Ticket #4: Policy Gaps
+
+| File | Action |
+|------|--------|
+| `app/Policies/InvoicePolicy.php` | Created — viewAny/view: admin/sales_manager/accounts, create: admin/sales_manager |
+| `app/Policies/ProformaInvoicePolicy.php` | Created — viewAny/view: admin/sales_manager/accounts |
+| `app/Policies/DailyVisitAssignmentPolicy.php` | Created — admin/sales_manager only |
+| `app/Policies/PurchaseRequestPolicy.php` | Created — viewAny: admin/sales_manager/purchasing, create: admin/sales_manager |
+| `app/Policies/ComplaintPolicy.php` | Created — admin/sales_manager only |
+| `app/Policies/AlarmPolicy.php` | Created — admin/sales_manager/executive |
+| `app/Policies/PriceQuotationRequestPolicy.php` | Created — admin/sales_manager only |
+| `tests/Feature/Policies/ResourcePolicyTest.php` | 16 tests / 62 assertions covering allow+deny for all 7 policies |
+
+### Other Fixes
+
+| Commit | Description |
+|--------|-------------|
+| `e5af127` | Collect-payment form: `inputmode=decimal`, autocomplete, loading spinner, textarea for notes, `<select autocomplete>`, `number_format()` |
+| `4c9f818` | Cleaned session dump, browser artifacts, build debris |
+| `f2fefe7` | NumberSequenceService: fixed auto-create race condition + document numbering ceiling |
+| `ff4d552` | InvoiceCalculationService: rounded per-line vatAmount, documented multi-line ceiling |
+| `53918e3` | Fixed aggregate vatAmount derivation from per-line values |
+| `c1c3573` | Fixed GET `/admin/logout` and `/app/logout` returning 405 (changed to `Route::match` + inline closure) |
+
+### Test Results
+
+```
+60 tests passed, 199 assertions
+```
+
+| Test Suite | Tests | Assertions |
+|------------|-------|------------|
+| Auth (Admin/Rep/Login/Locale) | 14 | 42 |
+| Roles | 3 | 12 |
+| Tenancy | 2 | 6 |
+| StockService | 5 | 18 |
+| InvoiceFlow | 4 | 15 |
+| AlarmBroadcast | 3 | 12 |
+| AM1→AM9 E2E | 1 | 26 |
+| NumberSequenceService | 6 | 18 |
+| InvoiceCalculationService | 7 | 14 |
+| Policies (7 resources) | 16 | 62 |
+
+### Decision Map
+
+Created `decision-map.md` with 7 architecture-deepening tickets. See `docs/ARCHITECTURE.md` and `decision-map.md` for details.
+
+---
+
+**Report Generated:** July 17, 2026  
+**Commit:** `f548943` (on `feat/unified-login`)  
+**Tests:** 60 passed, 199 assertions

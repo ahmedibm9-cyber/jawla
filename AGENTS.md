@@ -51,6 +51,11 @@
 - Feature tests must include the failure path for every money/stock flow.
 - E2E: at minimum, rep day flow + admin master-data flow + RTL smoke.
 
+## Browser Automation (playwright-cli)
+- Session name: `playwright` — use `-s=playwright` with all commands.
+- Profile: Chrome profile named "playwright" (created by user). Use `open --persistent` or `attach --cdp=chrome` in guest mode for visible browser testing.
+- Dev server: `php artisan serve --port=8000` for local testing.
+
 ## When in doubt
 - Prefer the simplest solution that meets the guide.
 - Do not introduce new packages beyond §2 of the main guide without asking.

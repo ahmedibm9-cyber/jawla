@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\AvatarProviders\CompanyAvatarProvider;
 use App\Filament\Pages\CollectPayment;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ReportsPage;
@@ -40,6 +41,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->font('IBM Plex Sans Arabic')
             ->brandName('Jawla')
+            ->defaultAvatarProvider(CompanyAvatarProvider::class)
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([

@@ -1,0 +1,8 @@
+Jawla — Competitive Gaps (vs market)
+
+- No AI-powered features (PeppyBooks: AI order recs, HAL: AI reporting)
+- No native mobile app (most competitors have Android/iOS)
+- No route optimization (BizModo, Delta, Dynamics Mobile)
+- No offline mode (critical for field work in low-connectivity areas)
+- No WhatsApp integration (HAL ERP's key differentiator)
+- Narrower ERP scope (no HR/payroll, manufacturing, procurement depth)
