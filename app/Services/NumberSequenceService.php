@@ -2,11 +2,38 @@
 
 namespace App\Services;
 
+use App\Models\Company;
+use App\Models\NamingSeries;
+use Illuminate\Support\Facades\DB;
+
 class NumberSequenceService implements Contracts\DocumentNumberService
 {
     public function generate(string $docType, int $companyId): string
     {
-        // Implemented in Phase 8 with naming_series table + row-level lock.
-        return $docType.'-'.$companyId.'-'.date('Y').'-'.str_pad((string) random_int(1, 99999), 5, '0', STR_PAD_LEFT);
+        return DB::transaction(function () use ($docType, $companyId): string {
+            $series = NamingSeries::where('name', $docType)
+                ->where('company_id', $companyId)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $series) {
+                $series = NamingSeries::create([
+                    'name' => $docType,
+                    'prefix' => strtoupper(preg_replace('/[^a-z]/i', '', $docType)),
+                    'series_format' => '{YYYY}-{#####}',
+                    'current_number' => 0,
+                    'pad_length' => 5,
+                    'company_id' => $companyId,
+                ]);
+            }
+
+            $next = $series->current_number + 1;
+            $series->update(['current_number' => $next]);
+
+            $abbr = Company::where('id', $companyId)->value('abbr') ?? 'XX';
+
+            return $series->prefix.'-'.$abbr.'-'.date('Y').'-'.
+                str_pad((string) $next, $series->pad_length, '0', STR_PAD_LEFT);
+        });
     }
 }
