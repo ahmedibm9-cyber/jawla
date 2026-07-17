@@ -93,8 +93,10 @@ class InvoiceCalculationServiceTest extends TestCase
 
         $this->assertCount(2, $result->lines);
         $this->assertSame(2000.0, $result->lines[0]->lineTotal);
+        $this->assertSame(280.0, $result->lines[0]->vatAmount);
         $this->assertTrue($result->lines[0]->vatApplicable);
         $this->assertSame(200.0, $result->lines[1]->lineTotal);
+        $this->assertSame(0.0, $result->lines[1]->vatAmount);
         $this->assertFalse($result->lines[1]->vatApplicable);
     }
 }

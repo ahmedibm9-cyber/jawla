@@ -21,7 +21,7 @@ class InvoiceCalculationService implements Contract
 
             if ($input->vatApplicable) {
                 $vatApplicableSubtotal += $lineTotal;
-                $results[] = new LineItemResult($lineTotal, $lineTotal * ($vatPercent / 100), true);
+                $results[] = new LineItemResult($lineTotal, round($lineTotal * ($vatPercent / 100), 2), true);
             } else {
                 $results[] = new LineItemResult($lineTotal, 0.0, false);
             }

@@ -64,6 +64,7 @@ class InvoiceService implements InvoiceContract
                 'batch_id' => $data['batch_id'] ?? null,
                 'quantity' => $qty,
                 'unit_price' => $unitPrice,
+                // ponytail: single-line only; iterate $calculation->lines when multi-line
                 'line_total' => $calculation->lines[0]->lineTotal,
             ]);
 
