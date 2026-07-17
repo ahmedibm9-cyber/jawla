@@ -7,6 +7,10 @@ use App\Models\PriceQuotation;
 use App\Models\PriceQuotationRequest;
 use App\Models\ProformaInvoice;
 use App\Models\ProformaInvoiceItem;
+use App\Services\Contracts\DocumentNumberService;
+use App\Services\Contracts\InvoiceCalculationService;
+use App\Services\Contracts\LineItemInput;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -29,6 +33,13 @@ class QuotationFlow extends Component
 
     public string $step = 'list'; // list, detail, proforma, done
 
+    public function __construct(
+        private readonly DocumentNumberService $numbers,
+        private readonly InvoiceCalculationService $calc,
+    ) {
+        parent::__construct();
+    }
+
     public function mount(): void
     {
         $this->step = 'list';
@@ -36,7 +47,7 @@ class QuotationFlow extends Component
 
     public function selectQuotation(int $id): void
     {
-        $this->request = PriceQuotationRequest::with(['product', 'customer', 'quotation'])->findOrFail($id);
+        $this->request = PriceQuotationRequest::with(['product', 'customer', 'quotation', 'company'])->findOrFail($id);
         $q = $this->request->quotation;
         $this->quotation = $q;
         $this->negotiatedPrice = (float) $this->request->quotation?->base_price ?? 0;
@@ -83,38 +94,44 @@ class QuotationFlow extends Component
         }
 
         $company = $this->request->company;
-        $bank = CompanyBankAccount::where('company_id', $company->id)->where('is_default', true)->first();
-        $proformaNumber = 'PF-'.($company->abbr ?? 'GPC').'-'.date('Y').'-'.str_pad((string) (ProformaInvoice::max('id') + 1), 5, '0', STR_PAD_LEFT);
-
         $product = $this->request->product;
         $qty = (float) $this->request->quantity_requested;
         $unitPrice = $this->negotiatedPrice;
-        $lineTotal = round($qty * $unitPrice, 2);
-        $vatAmount = $product->vat_applicable ? round($lineTotal * ((float) $company->vat_percent / 100), 2) : 0;
-        $total = round($lineTotal + $vatAmount, 2);
 
-        $proforma = ProformaInvoice::create([
-            'company_id' => $company->id,
-            'customer_id' => $this->request->customer_id,
-            'user_id' => auth()->id(),
-            'visit_id' => $this->request->visit_id,
-            'price_quotation_id' => $this->quotation->id,
-            'proforma_number' => $proformaNumber,
-            'subtotal' => $lineTotal,
-            'vat_amount' => $vatAmount,
-            'total' => $total,
-            'company_bank_account_id' => $bank?->id,
-            'status' => 'sent',
-            'posting_date' => today(),
-        ]);
+        $proformaNumber = $this->numbers->generate('proforma_invoice', $company->id);
+        $bank = CompanyBankAccount::where('company_id', $company->id)->where('is_default', true)->first();
 
-        ProformaInvoiceItem::create([
-            'proforma_invoice_id' => $proforma->id,
-            'product_id' => $product->id,
-            'quantity' => $qty,
-            'unit_price' => $unitPrice,
-            'line_total' => $lineTotal,
-        ]);
+        $calculation = $this->calc->calculate(
+            [new LineItemInput(qty: $qty, unitPrice: $unitPrice, vatApplicable: $product->vat_applicable)],
+            (float) $company->vat_percent,
+        );
+
+        $proforma = DB::transaction(function () use ($company, $product, $qty, $unitPrice, $proformaNumber, $bank, $calculation): ProformaInvoice {
+            $p = ProformaInvoice::create([
+                'company_id' => $company->id,
+                'customer_id' => $this->request->customer_id,
+                'user_id' => auth()->id(),
+                'visit_id' => $this->request->visit_id,
+                'price_quotation_id' => $this->quotation->id,
+                'proforma_number' => $proformaNumber,
+                'subtotal' => $calculation->subtotal,
+                'vat_amount' => $calculation->vatAmount,
+                'total' => $calculation->total,
+                'company_bank_account_id' => $bank?->id,
+                'status' => 'sent',
+                'posting_date' => today(),
+            ]);
+
+            ProformaInvoiceItem::create([
+                'proforma_invoice_id' => $p->id,
+                'product_id' => $product->id,
+                'quantity' => $qty,
+                'unit_price' => $unitPrice,
+                'line_total' => $calculation->lines[0]->lineTotal,
+            ]);
+
+            return $p;
+        });
 
         $this->step = 'proforma';
         $this->successMessage = __('app.proforma_created').' #'.$proformaNumber;
