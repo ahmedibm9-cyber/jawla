@@ -26,6 +26,15 @@ Route::get('/locale/{locale}', function (string $locale) {
 
 // Admin (Filament) is auto-registered by the panel provider.
 
+// Handle GET /admin/logout — Filament registers POST only
+Route::get('/admin/logout', function () {
+    auth()->logout();
+    session()->invalidate();
+    session()->regenerateToken();
+
+    return redirect('/admin/login');
+});
+
 // Rep PWA route group (protected)
 Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->group(function () {
     Route::get('/', Home::class)->name('home');
@@ -39,5 +48,5 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/purchase-offer', SubmitPurchaseOffer::class)->name('purchase-offer');
     Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])->name('pdf.proforma');
     Route::get('/pdf/invoice/{invoice}', [PdfController::class, 'invoice'])->name('pdf.invoice');
-    Route::post('/logout', [App\Http\Controllers\App\LoginController::class, 'destroy'])->name('logout');
+    Route::match(['get', 'post'], '/logout', [App\Http\Controllers\App\LoginController::class, 'destroy'])->name('logout');
 });
