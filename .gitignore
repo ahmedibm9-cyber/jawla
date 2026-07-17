@@ -26,5 +26,6 @@ Homestead.yaml
 Thumbs.db
 .obsidian/
 .playwright-cli/
+.playwright-mcp/
 .agents/
 *.png
