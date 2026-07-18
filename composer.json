@@ -30,6 +30,7 @@
         "laravel/pint": "^1.27",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.6",
+        "pestphp/pest": "*",
         "phpunit/phpunit": "^12.5.12"
     },
     "autoload": {
@@ -45,6 +46,12 @@
         }
     },
     "scripts": {
+        "optimize": [
+            "@php artisan optimize",
+            "@php artisan filament:optimize",
+            "@php artisan view:cache",
+            "@php artisan icons:cache"
+        ],
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
