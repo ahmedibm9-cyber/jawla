@@ -2,7 +2,7 @@ name: ci
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   pull_request:
 
 jobs:
@@ -43,13 +43,11 @@ jobs:
       - name: Install JS deps
         run: npm ci || echo "package.json not yet populated — scaffold-only run"
       - name: Copy env
-        run: cp .env.example .env && php -r "file_exists('artisan') && shell_exec('php artisan key:generate');" || true
+        run: cp .env.example .env && php artisan key:generate
       - name: Pint (style)
-        run: vendor/bin/pint --test || echo "pint not installed yet"
-      - name: PHPStan (Larastan)
-        run: vendor/bin/phpstan analyse || echo "phpstan not installed yet"
+        run: vendor/bin/pint --test
       - name: Pest
-        run: vendor/bin/pest || echo "pest not installed yet"
+        run: vendor/bin/pest
         env:
           DB_HOST: 127.0.0.1
           DB_DATABASE: jawla_test
