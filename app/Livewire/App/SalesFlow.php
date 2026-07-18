@@ -19,6 +19,8 @@ class SalesFlow extends Component
 
     public int $customerId = 0;
 
+    public ?int $visitId = null;
+
     public string $customerSearch = '';
 
     public string $productSearch = '';
@@ -38,12 +40,13 @@ class SalesFlow extends Component
         parent::__construct();
     }
 
-    public function mount(?int $customer = null): void
+    public function mount(?int $customer = null, ?int $visitId = null): void
     {
         if ($customer) {
             $this->customerId = $customer;
         }
 
+        $this->visitId = $visitId;
         $this->recalcCart();
     }
 
@@ -86,6 +89,10 @@ class SalesFlow extends Component
 
     public function updateQty(int $index, float $qty): void
     {
+        if (! isset($this->cart[$index])) {
+            return;
+        }
+
         if ($qty <= 0) {
             unset($this->cart[$index]);
             $this->cart = array_values($this->cart);
@@ -98,6 +105,10 @@ class SalesFlow extends Component
 
     public function updatePrice(int $index, float $price): void
     {
+        if (! isset($this->cart[$index])) {
+            return;
+        }
+
         $this->cart[$index]['price'] = max(0, $price);
         $this->recalcCart();
     }
@@ -179,6 +190,7 @@ class SalesFlow extends Component
             $invoice = $this->invoices->create([
                 'company_id' => auth()->user()->company_id,
                 'customer_id' => $this->customerId,
+                'visit_id' => $this->visitId,
                 'items' => $items,
             ]);
 

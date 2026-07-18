@@ -13,6 +13,7 @@ class PdfService
 {
     public function generateProforma(ProformaInvoice $proforma): string
     {
+        $proforma->load('items.product', 'company', 'customer', 'bankAccount');
         $qr = $this->qrSvg($proforma->proforma_number.'|'.$proforma->total.'|'.$proforma->company?->tax_number);
 
         $html = $this->render('proforma', $proforma, $qr);
@@ -22,6 +23,7 @@ class PdfService
 
     public function generateReceipt(Payment $payment): string
     {
+        $payment->load('invoice', 'customer', 'user');
         $qr = $this->qrSvg('RECEIPT|'.$payment->id.'|'.$payment->amount.'|'.$payment->collected_at?->format('Y-m-d H:i'));
 
         $html = $this->renderReceipt($payment, $qr);
@@ -31,6 +33,7 @@ class PdfService
 
     public function generateInvoice(Invoice $invoice): string
     {
+        $invoice->load('items.product', 'company', 'customer', 'visit.report', 'user');
         $signaturePath = $invoice->visit?->report?->signature_path
             ?? $invoice->user?->name;
         $signatureSvg = is_string($signaturePath) && Storage::disk('private')->exists($signaturePath)
@@ -86,24 +89,24 @@ h1{color:#4DB848;margin:0}
 </style></head><body>
 <div class="header">
   <div>
-    <h1>{$company?->name_ar}</h1>
-    <div>{$company?->address}</div>
-    <div>VAT: {$company?->tax_number}</div>
+    <h1>".e($company?->name_ar)."</h1>
+    <div>".e($company?->address)."</div>
+    <div>VAT: ".e($company?->tax_number)."</div>
   </div>
-  <div style="text-align:right">
+  <div style=\"text-align:right\">
     <strong>{$title}</strong><br>
     {$receiptLabel}: {$payment->id}<br>
     {$dateLabel}: {$payment->collected_at?->format('Y-m-d H:i')}
   </div>
 </div>
 <hr>
-<div class="detail-row"><span><strong>{$customerLabel}:</strong> {$customer?->name_ar}</span></div>
-<div class="detail-row"><span><strong>{$amountLabel}:</strong> {$payment->amount}</span></div>
-<div class="detail-row"><span><strong>{$methodLabel}:</strong> {$methodName}</span></div>
-<div class="detail-row"><span><strong>{$collectorLabel}:</strong> {$payment->user?->name}</span></div>
+<div class=\"detail-row\"><span><strong>{$customerLabel}:</strong> ".e($customer?->name_ar)."</span></div>
+<div class=\"detail-row\"><span><strong>{$amountLabel}:</strong> {$payment->amount}</span></div>
+<div class=\"detail-row\"><span><strong>{$methodLabel}:</strong> {$methodName}</span></div>
+<div class=\"detail-row\"><span><strong>{$collectorLabel}:</strong> ".e($payment->user?->name)."</span></div>
 HTML.
-($payment->invoice_id ? '<div class="detail-row"><span><strong>'.$invoiceLabel.':</strong> '.$payment->invoice?->invoice_number.'</span></div>' : '').
-($payment->notes ? '<div class="detail-row"><span><strong>'.$noteLabel.':</strong> '.$payment->notes.'</span></div>' : '').
+($payment->invoice_id ? '<div class=\"detail-row\"><span><strong>'.$invoiceLabel.':</strong> '.e($payment->invoice?->invoice_number).'</span></div>' : '').
+($payment->notes ? '<div class=\"detail-row\"><span><strong>'.$noteLabel.':</strong> '.e($payment->notes).'</span></div>' : '').
 <<<HTML
 {$qr}
 </body></html>
@@ -140,7 +143,7 @@ HTML;
         $rows = '';
         foreach ($items as $item) {
             $pName = $lang === 'ar' ? ($item->product?->name_ar ?? '') : ($item->product?->name_en ?? '');
-            $rows .= "<tr><td>{$pName}</td><td>{$item->quantity}</td><td>".number_format((float) $item->unit_price, 2).'</td><td>'.number_format((float) $item->line_total, 2).'</td></tr>';
+            $rows .= "<tr><td>".e($pName)."</td><td>{$item->quantity}</td><td>".number_format((float) $item->unit_price, 2).'</td><td>'.number_format((float) $item->line_total, 2).'</td></tr>';
         }
 
         $bank = $doc instanceof ProformaInvoice && $doc->company_bank_account_id
@@ -165,18 +168,18 @@ h1{color:#4DB848;margin:0}
 </style></head><body>
 <div class="header">
   <div>
-    <h1>{$company?->name_ar}</h1>
-    <div>{$company?->address}</div>
-    <div>VAT: {$company?->tax_number}</div>
+    <h1>".e($company?->name_ar)."</h1>
+    <div>".e($company?->address)."</div>
+    <div>VAT: ".e($company?->tax_number)."</div>
   </div>
-  <div style="text-align:right">
+  <div style=\"text-align:right\">
     <strong>{$title}</strong><br>
     {$numberLabel}: {$number}<br>
     {$dateLabel}: {$date}
   </div>
 </div>
 <hr>
-<p><strong>{$customerLabel}:</strong> {$customer?->name_ar} ({$customer?->code})<br>{$customer?->address}</p>
+<p><strong>{$customerLabel}:</strong> ".e($customer?->name_ar)." (".e($customer?->code).")<br>".e($customer?->address)."</p>
 <table>
   <thead><tr><th>{$productLabel}</th><th>{$qtyLabel}</th><th>{$priceLabel}</th><th>{$totalLabel}</th></tr></thead>
   <tbody>

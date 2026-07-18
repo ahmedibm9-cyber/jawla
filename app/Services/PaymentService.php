@@ -34,6 +34,7 @@ class PaymentService
 
             if ($invoiceId) {
                 $invoice = Invoice::findOrFail($invoiceId);
+                abort_if($invoice->customer_id !== $customerId, 422, 'Invoice does not belong to this customer');
                 $invoice->increment('paid_amount', $amount);
                 $invoice->decrement('remaining_amount', $amount);
 
@@ -48,9 +49,7 @@ class PaymentService
             }
 
             $customer = $payment->customer;
-            if ((float) $customer->balance > 0) {
-                $customer->decrement('balance', $amount);
-            }
+            $customer->decrement('balance', $amount);
 
             return $payment;
         });

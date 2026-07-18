@@ -82,6 +82,7 @@ class CollectPayment extends Component
             ->where('company_id', $user->company_id)
             ->where('is_active', true)
             ->orderBy('name_ar')
+            ->limit(100)
             ->get();
 
         $invoices = [];

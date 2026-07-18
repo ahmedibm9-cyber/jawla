@@ -77,12 +77,14 @@ class LogReturn extends Component
             ->where('company_id', $user->company_id)
             ->where('is_active', true)
             ->orderBy('name_ar')
+            ->limit(100)
             ->get();
 
         $products = Product::query()
             ->where('company_id', $user->company_id)
             ->where('is_active', true)
             ->orderBy('name_ar')
+            ->limit(100)
             ->get();
 
         $vanWarehouse = Warehouse::where('user_id', $user->id)

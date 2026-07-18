@@ -28,7 +28,7 @@ class PricingService implements PricingServiceContract
 
         $base = new Money((string) $product->price);
 
-        $rep = User::with('roles')->find($repId);
+        $rep = User::with('roles', 'company')->find($repId);
         $isRep = $rep && $rep->hasRole('rep');
 
         if (! $isRep) {
