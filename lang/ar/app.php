@@ -115,4 +115,6 @@ return [
     'new_invoice' => 'فاتورة جديدة',
     'change' => 'تغيير',
     'view_receipt' => 'عرض الإيصال',
+    'admin_cancelled' => 'إلغاء من المدير',
+    'tasks' => 'المهام',
 ];

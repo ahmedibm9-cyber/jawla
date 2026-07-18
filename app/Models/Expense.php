@@ -15,9 +15,15 @@ class Expense extends Model
     protected $fillable = [
         'company_id', 'user_id', 'work_session_id', 'category',
         'amount', 'note', 'spent_at', 'posting_date',
+        'cancelled_at', 'cancelled_by',
     ];
 
-    protected $casts = ['amount' => 'decimal:2', 'spent_at' => 'datetime', 'posting_date' => 'date'];
+    protected $casts = [
+        'amount' => 'decimal:2',
+        'spent_at' => 'datetime',
+        'posting_date' => 'date',
+        'cancelled_at' => 'datetime',
+    ];
 
     public function company(): BelongsTo
     {

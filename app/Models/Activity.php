@@ -13,10 +13,13 @@ class Activity extends Model
         'subject_type', 'subject_id',
         'description', 'properties',
         'ip_address', 'user_agent',
+        'is_reversed', 'reversed_by', 'reversed_at', 'reversal_of',
     ];
 
     protected $casts = [
         'properties' => 'array',
+        'is_reversed' => 'boolean',
+        'reversed_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

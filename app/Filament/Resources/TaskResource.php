@@ -1,0 +1,110 @@
+<?php
+
+namespace App\Filament\Resources;
+
+use App\Filament\Resources\TaskResource\Pages;
+use App\Models\Task;
+use Filament\Forms;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+
+class TaskResource extends Resource
+{
+    public static function getModel(): string
+    {
+        return Task::class;
+    }
+
+    public static function getNavigationIcon(): string
+    {
+        return 'heroicon-o-check-circle';
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return app()->getLocale() === 'ar' ? 'إدارة' : 'Management';
+    }
+
+    public static function getLabel(): string
+    {
+        return app()->getLocale() === 'ar' ? 'مهمة' : 'Task';
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return app()->getLocale() === 'ar' ? 'المهام' : 'Tasks';
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
+
+        return $schema->schema([
+            Forms\Components\Section::make($l('تفاصيل المهمة', 'Task Details'))->schema([
+                Forms\Components\Select::make('assigned_to')
+                    ->label($l('مسند إلى', 'Assigned To'))
+                    ->relationship('assignedTo', 'name')
+                    ->searchable()
+                    ->required(),
+                Forms\Components\Select::make('customer_id')
+                    ->label($l('العميل', 'Customer'))
+                    ->relationship('customer', 'name_ar')
+                    ->searchable()
+                    ->nullable(),
+                Forms\Components\TextInput::make('title')
+                    ->label($l('العنوان', 'Title'))
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\Textarea::make('note')
+                    ->label($l('ملاحظات', 'Note'))
+                    ->nullable(),
+                Forms\Components\DatePicker::make('due_date')
+                    ->label($l('تاريخ الاستحقاق', 'Due Date'))
+                    ->nullable(),
+                Forms\Components\Select::make('status')
+                    ->label($l('الحالة', 'Status'))
+                    ->options(['open' => $l('مفتوحة', 'Open'), 'done' => $l('تم', 'Done')])
+                    ->default('open')
+                    ->required(),
+            ]),
+        ]);
+    }
+
+    public static function table(Table $table): Table
+    {
+        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
+
+        return $table
+            ->columns([
+                TextColumn::make('title')->label($l('العنوان', 'Title'))->searchable(),
+                TextColumn::make('assignedTo.name')->label($l('مسند إلى', 'Assigned To')),
+                TextColumn::make('status')
+                    ->label($l('الحالة', 'Status'))
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) { 'done' => 'success', default => 'warning' }),
+                TextColumn::make('due_date')->label($l('تاريخ الاستحقاق', 'Due Date'))->date(),
+                TextColumn::make('created_at')->label($l('تاريخ الإنشاء', 'Created'))->dateTime(),
+            ])
+            ->filters([
+                SelectFilter::make('status')
+                    ->options(['open' => $l('مفتوحة', 'Open'), 'done' => $l('تم', 'Done')]),
+            ]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => Pages\ListTasks::route('/'),
+            'create' => Pages\CreateTask::route('/create'),
+            'edit' => Pages\EditTask::route('/{record}/edit'),
+        ];
+    }
+}

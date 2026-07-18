@@ -50,6 +50,29 @@
                 @endforeach
             @endif
 
+            @if($openTasks->isNotEmpty())
+                <h3 class="m-0 mb-3 mt-4">{{ __('app.tasks') }}</h3>
+                @foreach($openTasks as $task)
+                    <div class="card flex justify-between items-center">
+                        <div>
+                            <strong class="block text-sm">{{ $task->title }}</strong>
+                            @if($task->note)
+                                <small class="text-text-secondary">{{ $task->note }}</small>
+                            @endif
+                            @if($task->customer)
+                                <small class="block text-text-secondary">{{ $task->customer->name_ar }}</small>
+                            @endif
+                            @if($task->due_date)
+                                <small class="block text-warning text-xs">{{ app()->getLocale() === 'ar' ? 'تاريخ الاستحقاق: ' : 'Due: ' }}{{ $task->due_date->format('Y-m-d') }}</small>
+                            @endif
+                        </div>
+                        <button wire:click="completeTask({{ $task->id }})" class="btn btn-sm text-success bg-transparent border border-success rounded-lg px-3 py-1 cursor-pointer text-xs">
+                            {{ __('app.done') }}
+                        </button>
+                    </div>
+                @endforeach
+            @endif
+
             <button class="btn btn-primary w-full mt-3" wire:click="startWork">
                 {{ __('app.start_work') }}
             </button>

@@ -115,4 +115,6 @@ return [
     'new_invoice' => 'New Invoice',
     'change' => 'Change',
     'view_receipt' => 'View Receipt',
+    'admin_cancelled' => 'Admin cancelled',
+    'tasks' => 'Tasks',
 ];

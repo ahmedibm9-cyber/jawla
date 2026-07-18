@@ -3,6 +3,7 @@
 namespace App\Livewire\App;
 
 use App\Models\DailyVisitAssignment;
+use App\Models\Task;
 use App\Models\Visit;
 use App\Models\WorkSession;
 use Livewire\Attributes\Layout;
@@ -39,6 +40,14 @@ class Home extends Component
         ]);
 
         $this->redirect(route('app.visit', $visit));
+    }
+
+    public function completeTask(int $taskId): void
+    {
+        Task::where('id', $taskId)->where('assigned_to', auth()->id())->update([
+            'status' => 'done',
+            'completed_at' => now(),
+        ]);
     }
 
     public function startWork(): void
@@ -78,6 +87,12 @@ class Home extends Component
                 ->whereDate('visit_date', today())
                 ->where('status', 'completed')
                 ->count(),
+            'openTasks' => Task::query()
+                ->where('assigned_to', $user->id)
+                ->where('status', 'open')
+                ->latest()
+                ->take(10)
+                ->get(),
         ]);
     }
 }
