@@ -172,8 +172,11 @@ class InvoiceService implements InvoiceContract
                 }
             }
 
-            // Reverse customer balance
-            $invoice->customer->decrement('balance', (float) $invoice->total);
+            // Reverse customer balance — only the unpaid portion
+            $unpaidAmount = (float) $invoice->total - (float) $invoice->paid_amount;
+            if ($unpaidAmount > 0) {
+                $invoice->customer->decrement('balance', $unpaidAmount);
+            }
 
             return $invoice;
         });
@@ -184,11 +187,14 @@ class InvoiceService implements InvoiceContract
         return DB::transaction(function () use ($invoice): Invoice {
             $this->cancel($invoice, auth()->id(), 'Amendment requested');
 
+            $company = $invoice->company;
+            $newNumber = $this->numbers->generate('sales_invoice', $company->id);
+
             $draft = Invoice::create([
                 'company_id' => $invoice->company_id,
                 'customer_id' => $invoice->customer_id,
                 'user_id' => auth()->id(),
-                'invoice_number' => $invoice->invoice_number,
+                'invoice_number' => $newNumber,
                 'status' => InvoiceStatus::Draft,
                 'subtotal' => $invoice->subtotal,
                 'vat_amount' => $invoice->vat_amount,

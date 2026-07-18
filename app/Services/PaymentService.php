@@ -37,6 +37,9 @@ class PaymentService
                 $invoice->increment('paid_amount', $amount);
                 $invoice->decrement('remaining_amount', $amount);
 
+                // Read fresh values from DB to avoid stale state
+                $invoice->refresh();
+
                 if ((float) $invoice->remaining_amount <= 0) {
                     $invoice->update(['status' => InvoiceStatus::Paid]);
                 } elseif ((float) $invoice->paid_amount > 0 && $invoice->status !== InvoiceStatus::Paid) {

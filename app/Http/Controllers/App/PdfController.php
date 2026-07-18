@@ -14,6 +14,8 @@ class PdfController extends Controller
 {
     public function proforma(ProformaInvoice $proforma, PdfService $pdf): Response
     {
+        abort_unless($proforma->company_id === auth()->user()->company_id, 403);
+
         $path = $pdf->generateProforma($proforma);
 
         return $this->download($path, "proforma_{$proforma->proforma_number}.pdf");
@@ -21,6 +23,8 @@ class PdfController extends Controller
 
     public function receipt(Payment $payment, PdfService $pdf): Response
     {
+        abort_unless($payment->company_id === auth()->user()->company_id, 403);
+
         $path = $pdf->generateReceipt($payment);
 
         return $this->download($path, "receipt_{$payment->id}.pdf");
@@ -28,6 +32,8 @@ class PdfController extends Controller
 
     public function invoice(Invoice $invoice, PdfService $pdf): Response
     {
+        abort_unless($invoice->company_id === auth()->user()->company_id, 403);
+
         $path = $pdf->generateInvoice($invoice);
 
         return $this->download($path, "invoice_{$invoice->invoice_number}.pdf");
