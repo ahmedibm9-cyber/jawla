@@ -70,6 +70,8 @@ class PdfService
             'other' => $lang === 'ar' ? 'أخرى' : 'Other',
         ];
 
+        $methodName = $methodMap[$payment->method] ?? $payment->method;
+
         return <<<HTML
 <!doctype html>
 <html lang="$lang" dir="$dir"><head><meta charset="utf-8"><style>
@@ -97,7 +99,7 @@ h1{color:#4DB848;margin:0}
 <hr>
 <div class="detail-row"><span><strong>{$customerLabel}:</strong> {$customer?->name_ar}</span></div>
 <div class="detail-row"><span><strong>{$amountLabel}:</strong> {$payment->amount}</span></div>
-<div class="detail-row"><span><strong>{$methodLabel}:</strong> {$methodMap[$payment->method] ?? $payment->method}</span></div>
+<div class="detail-row"><span><strong>{$methodLabel}:</strong> {$methodName}</span></div>
 <div class="detail-row"><span><strong>{$collectorLabel}:</strong> {$payment->user?->name}</span></div>
 HTML.
 ($payment->invoice_id ? '<div class="detail-row"><span><strong>'.$invoiceLabel.':</strong> '.$payment->invoice?->invoice_number.'</span></div>' : '').
