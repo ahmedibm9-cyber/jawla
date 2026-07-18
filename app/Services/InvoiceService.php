@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\StockReason;
+use App\Models\Activity;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -147,7 +148,7 @@ class InvoiceService implements InvoiceContract
 
     public function cancel(Invoice $invoice, int $userId, string $reason): Invoice
     {
-        return DB::transaction(function () use ($invoice, $userId): Invoice {
+        return DB::transaction(function () use ($invoice, $userId, $reason): Invoice {
             $invoice->update([
                 'status' => InvoiceStatus::Cancelled,
                 'cancelled_at' => now(),
@@ -178,6 +179,9 @@ class InvoiceService implements InvoiceContract
                 $invoice->customer->decrement('balance', $unpaidAmount);
             }
 
+            // Log the reversal activity
+            Activity::log('invoice_reversed', $invoice, 'Invoice '.$invoice->invoice_number.' reversed: '.$reason);
+
             return $invoice;
         });
     }
@@ -185,6 +189,7 @@ class InvoiceService implements InvoiceContract
     public function amend(Invoice $invoice): Invoice
     {
         return DB::transaction(function () use ($invoice): Invoice {
+            // Cancel the original invoice and log the reversal
             $this->cancel($invoice, auth()->id(), 'Amendment requested');
 
             $company = $invoice->company;

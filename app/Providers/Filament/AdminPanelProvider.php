@@ -10,6 +10,10 @@ use App\Filament\Widgets\OpenAlarmsWidget;
 use App\Filament\Widgets\PendingQuotationsWidget;
 use App\Filament\Widgets\SalesTodayWidget;
 use App\Filament\Widgets\VisitsTodayWidget;
+use App\Filament\Widgets\OutstandingBalanceWidget;
+use App\Filament\Widgets\LowStockAlertWidget;
+use App\Filament\Widgets\CollectionRateWidget;
+use App\Filament\Widgets\RepPerformanceWidget;
 use App\Http\Middleware\FilamentAuthenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -57,6 +61,10 @@ class AdminPanelProvider extends PanelProvider
                 PendingQuotationsWidget::class,
                 OpenAlarmsWidget::class,
                 SalesTodayWidget::class,
+                OutstandingBalanceWidget::class,
+                LowStockAlertWidget::class,
+                CollectionRateWidget::class,
+                RepPerformanceWidget::class,
             ])
             ->userMenuItems([
                 'locale_en' => MenuItem::make()

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class ProformaInvoice extends Model
 {
@@ -20,6 +21,7 @@ class ProformaInvoice extends Model
         'company_bank_account_id', 'status', 'notes',
         'valid_until', 'posting_date',
         'cancelled_at', 'cancelled_by',
+        'uuid', 'hash_chain', 'cryptographic_stamp', 'zatca_status', 'zatca_submitted_at', 'zatca_response',
     ];
 
     protected $casts = [
@@ -29,7 +31,20 @@ class ProformaInvoice extends Model
         'valid_until' => 'date',
         'posting_date' => 'date',
         'cancelled_at' => 'datetime',
+        'zatca_submitted_at' => 'datetime',
+        'zatca_status' => 'string',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = (string) Str::uuid();
+            }
+        });
+    }
 
     public function company(): BelongsTo
     {

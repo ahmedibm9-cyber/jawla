@@ -15,12 +15,14 @@ class Company extends Model
         'tax_number', 'commercial_registration_number',
         'address', 'phone', 'logo_path', 'currency', 'vat_percent',
         'bank_name', 'bank_account', 'bank_iban', 'rep_discount_percent', 'is_active',
+        'country', 'zatca_enabled', 'zatca_csid', 'zatca_secret', 'zatca_environment',
     ];
 
     protected $casts = [
         'vat_percent' => 'decimal:2',
         'rep_discount_percent' => 'decimal:2',
         'is_active' => 'boolean',
+        'zatca_enabled' => 'boolean',
     ];
 
     public function users(): HasMany

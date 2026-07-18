@@ -11,10 +11,14 @@ use SimpleSoftwareIO\QrCode\Generator;
 
 class PdfService
 {
+    public function __construct(
+        private readonly InvoiceQrService $qrService
+    ) {}
+
     public function generateProforma(ProformaInvoice $proforma): string
     {
         $proforma->load('items.product', 'company', 'customer', 'bankAccount');
-        $qr = $this->qrSvg($proforma->proforma_number.'|'.$proforma->total.'|'.$proforma->company?->tax_number);
+        $qr = $this->qrSvg($this->qrService->generateForProforma($proforma));
 
         $html = $this->render('proforma', $proforma, $qr);
 
@@ -40,7 +44,7 @@ class PdfService
             ? '<img src="data:image/png;base64,'.base64_encode(Storage::disk('private')->get($signaturePath)).'" style="max-width:160px;max-height:60px">'
             : '<span style="font-style:italic">'.$invoice->user?->name.'</span>';
 
-        $qr = $this->qrSvg($invoice->invoice_number.'|'.$invoice->total.'|'.$invoice->company?->tax_number);
+        $qr = $this->qrSvg($this->qrService->generateForInvoice($invoice));
 
         $html = $this->render('invoice', $invoice, $qr, $signatureSvg);
 

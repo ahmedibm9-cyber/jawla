@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Invoice extends Model
 {
@@ -20,6 +21,7 @@ class Invoice extends Model
         'subtotal', 'vat_amount', 'total', 'paid_amount', 'remaining_amount',
         'eta_qr', 'zatca_qr', 'posting_date', 'issued_at',
         'cancelled_at', 'cancelled_by', 'amended_from',
+        'uuid', 'hash_chain', 'cryptographic_stamp', 'zatca_status', 'zatca_submitted_at', 'zatca_response',
     ];
 
     protected $casts = [
@@ -32,7 +34,20 @@ class Invoice extends Model
         'posting_date' => 'date',
         'issued_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'zatca_submitted_at' => 'datetime',
+        'zatca_status' => 'string',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = (string) Str::uuid();
+            }
+        });
+    }
 
     public function company(): BelongsTo
     {

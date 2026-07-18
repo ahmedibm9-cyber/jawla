@@ -7,6 +7,8 @@
   <link rel="manifest" href="/manifest.json">
   <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
   <title>Jawla</title>
+  <meta name="description" content="{{ app()->getLocale() === 'ar' ? 'تطبيق إدارة المبيعات الميدانية - Jawla' : 'Field Sales Management PWA - Jawla' }}">
+  <meta name="robots" content="noindex, nofollow">
   @filamentStyles
   @vite('resources/css/app.css')
   <style>:root{-webkit-tap-highlight-color:transparent}</style>
