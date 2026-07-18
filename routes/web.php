@@ -12,7 +12,7 @@ use App\Livewire\App\TodaysCustomers;
 use App\Livewire\App\VisitFlow;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect('/admin/login'));
+Route::get('/', fn () => redirect('/login'));
 
 Route::get('/up', fn () => response('ok', 200));
 
@@ -33,13 +33,13 @@ Route::get('/locale/{locale}', function (string $locale) {
 
 // Admin (Filament) is auto-registered by the panel provider.
 
-// Handle GET /admin/logout — Filament registers POST only
-Route::get('/admin/logout', function () {
+// Handle GET /logout — Filament registers POST only
+Route::get('/logout', function () {
     auth()->logout();
     session()->invalidate();
     session()->regenerateToken();
 
-    return redirect('/admin/login');
+    return redirect('/login');
 });
 
 // Rep PWA route group (protected)
