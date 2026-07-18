@@ -4,6 +4,7 @@ namespace App\Http\Controllers\App;
 
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\ProformaInvoice;
 use App\Services\PdfService;
 use Illuminate\Http\Response;
@@ -16,6 +17,13 @@ class PdfController extends Controller
         $path = $pdf->generateProforma($proforma);
 
         return $this->download($path, "proforma_{$proforma->proforma_number}.pdf");
+    }
+
+    public function receipt(Payment $payment, PdfService $pdf): Response
+    {
+        $path = $pdf->generateReceipt($payment);
+
+        return $this->download($path, "receipt_{$payment->id}.pdf");
     }
 
     public function invoice(Invoice $invoice, PdfService $pdf): Response

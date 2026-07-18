@@ -79,5 +79,6 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/purchase-offer', SubmitPurchaseOffer::class)->name('purchase-offer');
     Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])->name('pdf.proforma');
     Route::get('/pdf/invoice/{invoice}', [PdfController::class, 'invoice'])->name('pdf.invoice');
+    Route::get('/pdf/receipt/{payment}', [PdfController::class, 'receipt'])->name('pdf.receipt');
     Route::match(['get', 'post'], '/logout', [App\Http\Controllers\App\LoginController::class, 'destroy'])->name('logout');
 });

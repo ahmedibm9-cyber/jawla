@@ -26,6 +26,8 @@ class CollectPayment extends Component
 
     public string $successMessage = '';
 
+    public ?int $lastPaymentId = null;
+
     public function updatedCustomerId(): void
     {
         $this->invoice_id = null;
@@ -64,6 +66,7 @@ class CollectPayment extends Component
             notes: $this->notes ?: null,
         );
 
+        $this->lastPaymentId = $payment->id;
         $this->success = true;
         $this->successMessage = __('app.payment_collected') . ' — ' . number_format((float) $payment->amount, 2);
 

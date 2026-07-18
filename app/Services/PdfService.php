@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\ProformaInvoice;
 use Illuminate\Support\Facades\Storage;
 use Mpdf\Mpdf;
@@ -19,6 +20,15 @@ class PdfService
         return $this->toPdf($html, "proforma_{$proforma->proforma_number}.pdf");
     }
 
+    public function generateReceipt(Payment $payment): string
+    {
+        $qr = $this->qrSvg('RECEIPT|'.$payment->id.'|'.$payment->amount.'|'.$payment->collected_at?->format('Y-m-d H:i'));
+
+        $html = $this->renderReceipt($payment, $qr);
+
+        return $this->toPdf($html, "receipt_{$payment->id}.pdf");
+    }
+
     public function generateInvoice(Invoice $invoice): string
     {
         $signaturePath = $invoice->visit?->report?->signature_path
@@ -32,6 +42,70 @@ class PdfService
         $html = $this->render('invoice', $invoice, $qr, $signatureSvg);
 
         return $this->toPdf($html, "invoice_{$invoice->invoice_number}.pdf");
+    }
+
+    private function renderReceipt(Payment $payment, string $qr): string
+    {
+        $company = $payment->company;
+        $customer = $payment->customer;
+        $lang = app()->getLocale();
+
+        $title = $lang === 'ar' ? 'إيصال استلام' : 'Payment Receipt';
+        $receiptLabel = $lang === 'ar' ? 'رقم الإيصال' : 'Receipt #';
+        $dateLabel = $lang === 'ar' ? 'التاريخ' : 'Date';
+        $customerLabel = $lang === 'ar' ? 'العميل' : 'Customer';
+        $amountLabel = $lang === 'ar' ? 'المبلغ' : 'Amount';
+        $methodLabel = $lang === 'ar' ? 'طريقة الدفع' : 'Payment Method';
+        $invoiceLabel = $lang === 'ar' ? 'الفاتورة' : 'Invoice';
+        $noteLabel = $lang === 'ar' ? 'ملاحظات' : 'Notes';
+        $collectorLabel = $lang === 'ar' ? 'المحصل' : 'Collected By';
+
+        $dir = $lang === 'ar' ? 'rtl' : 'ltr';
+        $textAlign = $lang === 'ar' ? 'right' : 'left';
+
+        $methodMap = [
+            'cash' => $lang === 'ar' ? 'نقدي' : 'Cash',
+            'cheque' => $lang === 'ar' ? 'شيك' : 'Cheque',
+            'transfer' => $lang === 'ar' ? 'تحويل' : 'Transfer',
+            'other' => $lang === 'ar' ? 'أخرى' : 'Other',
+        ];
+
+        return <<<HTML
+<!doctype html>
+<html lang="$lang" dir="$dir"><head><meta charset="utf-8"><style>
+body{font-family:system-ui,sans-serif;margin:32px;text-align:$textAlign}
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th,td{border:1px solid #ccc;padding:8px;text-align:$textAlign}
+th{background:#4DB848;color:#fff}
+h1{color:#4DB848;margin:0}
+.header{display:flex;justify-content:space-between;margin-bottom:16px}
+.qr{width:100px;height:100px;margin:8px 0}
+.detail-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee}
+</style></head><body>
+<div class="header">
+  <div>
+    <h1>{$company?->name_ar}</h1>
+    <div>{$company?->address}</div>
+    <div>VAT: {$company?->tax_number}</div>
+  </div>
+  <div style="text-align:right">
+    <strong>{$title}</strong><br>
+    {$receiptLabel}: {$payment->id}<br>
+    {$dateLabel}: {$payment->collected_at?->format('Y-m-d H:i')}
+  </div>
+</div>
+<hr>
+<div class="detail-row"><span><strong>{$customerLabel}:</strong> {$customer?->name_ar}</span></div>
+<div class="detail-row"><span><strong>{$amountLabel}:</strong> {$payment->amount}</span></div>
+<div class="detail-row"><span><strong>{$methodLabel}:</strong> {$methodMap[$payment->method] ?? $payment->method}</span></div>
+<div class="detail-row"><span><strong>{$collectorLabel}:</strong> {$payment->user?->name}</span></div>
+HTML.
+($payment->invoice_id ? '<div class="detail-row"><span><strong>'.$invoiceLabel.':</strong> '.$payment->invoice?->invoice_number.'</span></div>' : '').
+($payment->notes ? '<div class="detail-row"><span><strong>'.$noteLabel.':</strong> '.$payment->notes.'</span></div>' : '').
+<<<HTML
+{$qr}
+</body></html>
+HTML;
     }
 
     private function render(string $type, $doc, string $qr, string $signature = ''): string

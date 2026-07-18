@@ -114,4 +114,5 @@ return [
     'view_pdf' => 'View PDF',
     'new_invoice' => 'New Invoice',
     'change' => 'Change',
+    'view_receipt' => 'View Receipt',
 ];

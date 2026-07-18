@@ -5,7 +5,10 @@
         <div class="card text-center p-6 bg-green-50 border-2 border-success mb-4" aria-live="polite">
             <svg aria-hidden="true" class="size-12 text-success mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
             <p class="font-bold text-green-700 my-2">{{ $successMessage }}</p>
-            <button class="btn btn-outline mt-2" wire:click="$set('success', false)">{{ __('app.collect_another') ?? __('app.collect_payment') }}</button>
+            <div class="flex flex-col gap-2 mt-3">
+                <a href="/app/pdf/receipt/{{ $lastPaymentId }}" target="_blank" class="btn btn-outline">{{ __('app.view_receipt') }}</a>
+                <button class="btn btn-outline" wire:click="$set('success', false)">{{ __('app.collect_another') ?? __('app.collect_payment') }}</button>
+            </div>
         </div>
     @endif
 

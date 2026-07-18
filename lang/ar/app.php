@@ -114,4 +114,5 @@ return [
     'view_pdf' => 'عرض PDF',
     'new_invoice' => 'فاتورة جديدة',
     'change' => 'تغيير',
+    'view_receipt' => 'عرض الإيصال',
 ];
