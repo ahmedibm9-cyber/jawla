@@ -7,7 +7,8 @@ use App\Models\ProformaInvoice;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 
 class ProformaInvoiceResource extends Resource
@@ -67,17 +68,17 @@ class ProformaInvoiceResource extends Resource
             ])
             ->defaultSort('posting_date', 'desc')
             ->actions([
-                Filament\Actions\Action::make('view_pdf')
+                Action::make('view_pdf')
                     ->label($l('عرض PDF', 'View PDF'))
                     ->icon('heroicon-o-document-arrow-down')
                     ->url(fn (ProformaInvoice $r) => route('pdf.proforma', $r))
                     ->openUrlInNewTab(),
-                Filament\Actions\Action::make('whatsapp')
+                Action::make('whatsapp')
                     ->label('WhatsApp')
                     ->icon('heroicon-o-share')
                     ->url(fn (ProformaInvoice $r) => 'https://wa.me/?text='.urlencode(__('app.proforma_msg')." #{$r->proforma_number} - ".number_format((float) $r->total, 2).' EGP'))
                     ->openUrlInNewTab(),
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([]);
     }

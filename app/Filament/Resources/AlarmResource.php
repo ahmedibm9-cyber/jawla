@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\AlarmResource\Pages;
 use App\Models\Alarm;
 use Filament\Resources\Resource;
+use Filament\Actions\Action;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -46,7 +47,7 @@ class AlarmResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')->label(app()->getLocale() === 'ar' ? 'التاريخ' : 'Date')->dateTime()->sortable(),
             ])
             ->defaultSort('created_at', 'desc')
-            ->actions([Filament\Actions\Action::make('mark_read')->label(app()->getLocale() === 'ar' ? 'تحديد كمقروء' : 'Mark Read')->action(fn (Alarm $a) => $a->update(['is_read' => true, 'read_by' => auth()->id(), 'read_at' => now()]))]);
+            ->actions([Action::make('mark_read')->label(app()->getLocale() === 'ar' ? 'تحديد كمقروء' : 'Mark Read')->action(fn (Alarm $a) => $a->update(['is_read' => true, 'read_by' => auth()->id(), 'read_at' => now()]))]);
     }
 
     public static function getPages(): array

@@ -7,7 +7,8 @@ use App\Models\Complaint;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 
 class ComplaintResource extends Resource
@@ -87,8 +88,8 @@ class ComplaintResource extends Resource
                     ->options(['open' => $l('مفتوحة', 'Open'), 'resolved' => $l('محلولة', 'Resolved'), 'closed' => $l('مغلقة', 'Closed')]),
             ])
             ->defaultSort('created_at', 'desc')
-            ->actions([Tables\Actions\EditAction::make()])
-            ->bulkActions([Tables\Actions\DeleteBulkAction::make()]);
+            ->actions([EditAction::make()])
+            ->bulkActions([DeleteBulkAction::make()]);
     }
 
     public static function getPages(): array

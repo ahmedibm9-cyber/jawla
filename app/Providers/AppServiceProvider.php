@@ -13,6 +13,7 @@ use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\InvoiceService;
 use App\Services\Contracts\PricingService;
 use App\Services\Contracts\StockService;
+use App\Services\Contracts\VanTransferService as VanTransferServiceContract;
 use App\Services\InvoiceCalculationService as InvoiceCalculationServiceImpl;
 use App\Services\NumberSequenceService;
 use App\Services\StockService as StockServiceImpl;
@@ -44,6 +45,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(DocumentNumberService::class, fn () => app(NumberSequenceService::class));
         $this->app->bind(AlarmService::class, fn () => app(\App\Services\AlarmService::class));
         $this->app->singleton(ComplaintService::class);
+        $this->app->bind(VanTransferServiceContract::class, fn () => app(\App\Services\VanTransferService::class));
     }
 
     /**

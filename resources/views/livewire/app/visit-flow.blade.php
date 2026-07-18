@@ -151,7 +151,7 @@
                 @touchmove.prevent="if(drawing){ctx.lineTo($event.touches[0].clientX-$el.getBoundingClientRect().left,$event.touches[0].clientY-$el.getBoundingClientRect().top);ctx.stroke()}"
                 @touchend="drawing=false;$wire.set('signature', $el.toDataURL())">
             </canvas>
-            <button class="btn btn-outline mt-2 text-sm" onclick="document.getElementById('sigCanvas').getContext('2d').clearRect(0,0,340,140);document.getElementById('sigCanvas').dispatchEvent(new Event('touchend'))">{{ __('app.clear') }}</button>
+            <button class="btn btn-outline mt-2 text-sm" x-on:click="()=>{let c=$event.target.closest('div').querySelector('#sigCanvas').getContext('2d');c.clearRect(0,0,340,140);$wire.set('signature','')}">{{ __('app.clear') }}</button>
         </div>
 
         <button class="btn btn-primary w-full" wire:click="submitReport" wire:loading.attr="disabled">

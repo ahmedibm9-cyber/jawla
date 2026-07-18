@@ -29,7 +29,7 @@
                 </div>
             @else
                 @foreach($todayVisits as $assignment)
-                    <div class="card clickable-card" wire:click="goToVisit({{ $assignment->id }})" role="button" tabindex="0" @keydown.enter="goToVisit({{ $assignment->id }})">
+                    <div class="card clickable-card" wire:click="goToVisit({{ $assignment->id }})" role="button" tabindex="0">
                         <div class="flex justify-between items-center">
                             <div>
                                 <strong class="block">{{ $assignment->customer?->name_ar ?? '?' }}</strong>

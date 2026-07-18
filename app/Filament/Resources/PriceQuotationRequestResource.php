@@ -8,7 +8,8 @@ use App\Models\PriceQuotationRequest;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 
 class PriceQuotationRequestResource extends Resource
@@ -76,7 +77,7 @@ class PriceQuotationRequestResource extends Resource
                 Tables\Filters\SelectFilter::make('status')->options(['requested' => 'Requested', 'priced' => 'Priced', 'confirmed' => 'Confirmed', 'cancelled' => 'Cancelled']),
             ])
             ->actions([
-                Filament\Actions\Action::make('set_price')
+                Action::make('set_price')
                     ->label(app()->getLocale() === 'ar' ? 'تسعير' : 'Set Price')
                     ->icon('heroicon-o-pencil-square')
                     ->visible(fn (PriceQuotationRequest $r) => $r->status === 'requested' && auth()->user()->hasAnyRole(['admin', 'accounts']))
@@ -100,7 +101,7 @@ class PriceQuotationRequestResource extends Resource
                         ]);
                         $r->update(['status' => 'priced']);
                     }),
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ]);
     }
 

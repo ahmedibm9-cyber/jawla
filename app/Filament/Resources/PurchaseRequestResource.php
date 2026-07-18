@@ -7,7 +7,8 @@ use App\Models\PurchaseRequest;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Auth;
 
@@ -92,7 +93,7 @@ class PurchaseRequestResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
-                Filament\Actions\Action::make('sales_approve')
+                Action::make('sales_approve')
                     ->label($l('موافقة Sales', 'Sales Approve'))
                     ->icon('heroicon-o-check')
                     ->color('info')
@@ -105,7 +106,7 @@ class PurchaseRequestResource extends Resource
                         ]);
                     })
                     ->requiresConfirmation(),
-                Filament\Actions\Action::make('sales_reject')
+                Action::make('sales_reject')
                     ->label($l('رفض Sales', 'Sales Reject'))
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
@@ -118,7 +119,7 @@ class PurchaseRequestResource extends Resource
                         ]);
                     })
                     ->requiresConfirmation(),
-                Filament\Actions\Action::make('purchasing_approve')
+                Action::make('purchasing_approve')
                     ->label($l('موافقة Purchasing', 'Purchasing Approve'))
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
@@ -131,7 +132,7 @@ class PurchaseRequestResource extends Resource
                         ]);
                     })
                     ->requiresConfirmation(),
-                Filament\Actions\Action::make('purchasing_reject')
+                Action::make('purchasing_reject')
                     ->label($l('رفض Purchasing', 'Purchasing Reject'))
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
@@ -144,7 +145,7 @@ class PurchaseRequestResource extends Resource
                         ]);
                     })
                     ->requiresConfirmation(),
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([]);
     }

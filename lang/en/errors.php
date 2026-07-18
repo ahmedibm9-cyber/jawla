@@ -47,4 +47,11 @@ return [
     'credit_limit' => [
         'exceeded' => 'Credit limit exceeded for customer :name. Limit: :limit, balance: :balance.',
     ],
+
+    '403_description' => 'You do not have permission to access this page.',
+    '404_description' => 'The page you are looking for could not be found.',
+    '419_description' => 'Your session has expired. Please refresh and try again.',
+    '500_description' => 'Something went wrong on our end. Please try again later.',
+    'go_home' => 'Go to Home',
+    'login_again' => 'Log in again',
 ];

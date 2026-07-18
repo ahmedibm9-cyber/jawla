@@ -7,7 +7,8 @@ use App\Models\Company;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 
 class CompanyResource extends Resource
@@ -137,10 +138,10 @@ class CompanyResource extends Resource
                     ->label(app()->getLocale() === 'ar' ? 'نشط' : 'Active'),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                DeleteBulkAction::make(),
             ]);
     }
 

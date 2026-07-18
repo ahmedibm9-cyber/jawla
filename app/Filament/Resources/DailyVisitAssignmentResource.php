@@ -7,7 +7,8 @@ use App\Models\DailyVisitAssignment;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 
 class DailyVisitAssignmentResource extends Resource
@@ -91,8 +92,8 @@ class DailyVisitAssignmentResource extends Resource
                     ->options(['pending' => $l('معلق', 'Pending'), 'completed' => $l('مكتمل', 'Completed'), 'missed' => $l('فاتت', 'Missed')]),
             ])
             ->defaultSort('visit_date', 'desc')
-            ->actions([Tables\Actions\EditAction::make()])
-            ->bulkActions([Tables\Actions\DeleteBulkAction::make()]);
+            ->actions([EditAction::make()])
+            ->bulkActions([DeleteBulkAction::make()]);
     }
 
     public static function getPages(): array

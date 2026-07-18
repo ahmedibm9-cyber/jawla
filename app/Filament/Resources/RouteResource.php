@@ -7,7 +7,8 @@ use App\Models\Route;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 
 class RouteResource extends Resource
@@ -62,8 +63,8 @@ class RouteResource extends Resource
                 Tables\Columns\IconColumn::make('is_active')->label($l('نشط', 'Active'))->boolean(),
             ])
             ->filters([Tables\Filters\TernaryFilter::make('is_active')])
-            ->actions([Tables\Actions\EditAction::make()])
-            ->bulkActions([Tables\Actions\DeleteBulkAction::make()]);
+            ->actions([EditAction::make()])
+            ->bulkActions([DeleteBulkAction::make()]);
     }
 
     public static function getRelations(): array

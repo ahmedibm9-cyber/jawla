@@ -7,7 +7,8 @@ use App\Models\Product;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Gate;
 
@@ -95,8 +96,8 @@ class ProductResource extends Resource
                 Tables\Filters\SelectFilter::make('category_id')->label($l('الفئة', 'Category'))->relationship('category', 'name_ar'),
                 Tables\Filters\TernaryFilter::make('is_active'),
             ])
-            ->actions([Tables\Actions\EditAction::make()])
-            ->bulkActions([Tables\Actions\DeleteBulkAction::make()]);
+            ->actions([EditAction::make()])
+            ->bulkActions([DeleteBulkAction::make()]);
     }
 
     public static function getRelations(): array

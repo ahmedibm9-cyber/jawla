@@ -7,7 +7,9 @@ use App\Models\Customer;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
 
@@ -143,7 +145,7 @@ class CustomerResource extends Resource
                 Tables\Filters\TernaryFilter::make('is_active'),
             ])
             ->actions([
-                Filament\Actions\Action::make('approve')
+                Action::make('approve')
                     ->label($l('اعتماد', 'Approve'))
                     ->icon('heroicon-o-check')
                     ->color('success')
@@ -154,7 +156,7 @@ class CustomerResource extends Resource
                         'approved_at' => now(),
                     ]))
                     ->requiresConfirmation(),
-                Filament\Actions\Action::make('reject')
+                Action::make('reject')
                     ->label($l('رفض', 'Reject'))
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
@@ -175,9 +177,9 @@ class CustomerResource extends Resource
                         ]);
                     })
                     ->requiresConfirmation(),
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([Tables\Actions\DeleteBulkAction::make()]);
+            ->bulkActions([DeleteBulkAction::make()]);
     }
 
     public static function getRelations(): array

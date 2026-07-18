@@ -8,7 +8,8 @@ use Filament\Forms;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
 
@@ -79,8 +80,8 @@ class UserResource extends Resource
                 Tables\Filters\SelectFilter::make('company_id')->label($l('الشركة', 'Company'))->relationship('company', 'name_ar'),
                 Tables\Filters\TernaryFilter::make('is_active'),
             ])
-            ->actions([Tables\Actions\EditAction::make()])
-            ->bulkActions([Tables\Actions\DeleteBulkAction::make()]);
+            ->actions([EditAction::make()])
+            ->bulkActions([DeleteBulkAction::make()]);
     }
 
     public static function getRelations(): array

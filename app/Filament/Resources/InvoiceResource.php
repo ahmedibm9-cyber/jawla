@@ -7,7 +7,8 @@ use App\Models\Invoice;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Tables\Table;
 
 class InvoiceResource extends Resource
@@ -74,17 +75,17 @@ class InvoiceResource extends Resource
             ])
             ->defaultSort('issued_at', 'desc')
             ->actions([
-                Filament\Actions\Action::make('view_pdf')
+                Action::make('view_pdf')
                     ->label($l('عرض PDF', 'View PDF'))
                     ->icon('heroicon-o-document-arrow-down')
                     ->url(fn (Invoice $r) => route('pdf.invoice', $r))
                     ->openUrlInNewTab(),
-                Filament\Actions\Action::make('whatsapp')
+                Action::make('whatsapp')
                     ->label('WhatsApp')
                     ->icon('heroicon-o-share')
                     ->url(fn (Invoice $r) => 'https://wa.me/?text='.urlencode(__('app.proforma_msg')." #{$r->invoice_number} - ".number_format((float) $r->total, 2).' EGP'))
                     ->openUrlInNewTab(),
-                Tables\Actions\EditAction::make(),
+                EditAction::make(),
             ])
             ->bulkActions([]);
     }

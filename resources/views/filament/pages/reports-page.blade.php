@@ -10,14 +10,15 @@ use Filament\Forms\Components\Tabs;
         <input type="date" wire:model="toDate" class="rounded-md border-gray-300 shadow-sm" placeholder="{{ __('To') }}">
     </div>
 
-    <div class="flex gap-2 border-b">
-        <button wire:click="$set('tab','visit_reports')" class="px-4 py-2 {{ $tab === 'visit_reports' ? 'bg-gray-100 font-semibold' : '' }}">{{ app()->getLocale() === 'ar' ? 'زيارات' : 'Visits' }}</button>
-        <button wire:click="$set('tab','quotations')" class="px-4 py-2 {{ $tab === 'quotations' ? 'bg-gray-100 font-semibold' : '' }}">{{ app()->getLocale() === 'ar' ? 'عروض أسعار' : 'Quotations' }}</button>
-        <button wire:click="$set('tab','proformas')" class="px-4 py-2 {{ $tab === 'proformas' ? 'bg-gray-100 font-semibold' : '' }}">{{ app()->getLocale() === 'ar' ? 'فواتير مبدئية' : 'Proformas' }}</button>
-        <button wire:click="$set('tab','invoices')" class="px-4 py-2 {{ $tab === 'invoices' ? 'bg-gray-100 font-semibold' : '' }}">{{ app()->getLocale() === 'ar' ? 'فواتير' : 'Invoices' }}</button>
+    <div class="flex gap-2 border-b" role="tablist">
+        <button role="tab" aria-selected="{{ $tab === 'visit_reports' ? 'true' : 'false' }}" aria-controls="tabpanel-visit_reports" id="tab-visit_reports" wire:click="$set('tab','visit_reports')" tabindex="{{ $tab === 'visit_reports' ? '0' : '-1' }}" class="px-4 py-2 {{ $tab === 'visit_reports' ? 'bg-gray-100 font-semibold' : '' }}">{{ app()->getLocale() === 'ar' ? 'زيارات' : 'Visits' }}</button>
+        <button role="tab" aria-selected="{{ $tab === 'quotations' ? 'true' : 'false' }}" aria-controls="tabpanel-quotations" id="tab-quotations" wire:click="$set('tab','quotations')" tabindex="{{ $tab === 'quotations' ? '0' : '-1' }}" class="px-4 py-2 {{ $tab === 'quotations' ? 'bg-gray-100 font-semibold' : '' }}">{{ app()->getLocale() === 'ar' ? 'عروض أسعار' : 'Quotations' }}</button>
+        <button role="tab" aria-selected="{{ $tab === 'proformas' ? 'true' : 'false' }}" aria-controls="tabpanel-proformas" id="tab-proformas" wire:click="$set('tab','proformas')" tabindex="{{ $tab === 'proformas' ? '0' : '-1' }}" class="px-4 py-2 {{ $tab === 'proformas' ? 'bg-gray-100 font-semibold' : '' }}">{{ app()->getLocale() === 'ar' ? 'فواتير مبدئية' : 'Proformas' }}</button>
+        <button role="tab" aria-selected="{{ $tab === 'invoices' ? 'true' : 'false' }}" aria-controls="tabpanel-invoices" id="tab-invoices" wire:click="$set('tab','invoices')" tabindex="{{ $tab === 'invoices' ? '0' : '-1' }}" class="px-4 py-2 {{ $tab === 'invoices' ? 'bg-gray-100 font-semibold' : '' }}">{{ app()->getLocale() === 'ar' ? 'فواتير' : 'Invoices' }}</button>
     </div>
 
     @if($tab === 'visit_reports')
+        <div role="tabpanel" id="tabpanel-visit_reports" aria-labelledby="tab-visit_reports">
         <table class="w-full text-sm border-collapse">
             <thead class="bg-gray-50">
                 <tr>
@@ -30,7 +31,7 @@ use Filament\Forms\Components\Tabs;
             <tbody>
                 @forelse($this->visits as $vr)
                     <tr class="border-b">
-                        <td class="px-2 py-1">{{ $vr->visit?->user?->name }}</a></td>
+                        <td class="px-2 py-1">{{ $vr->visit?->user?->name }}</td>
                         <td class="px-2 py-1">{{ $vr->visit?->customer?->name_ar }}</td>
                         <td class="px-2 py-1">{{ $vr->submitted_at?->format('Y-m-d H:i') }}</td>
                         <td class="px-2 py-1">{{ Str::limit($vr->summary, 50) }}</td>
@@ -45,7 +46,9 @@ use Filament\Forms\Components\Tabs;
                 {{ $this->visits->links() }}
             </div>
         @endif
+        </div>
     @elseif($tab === 'quotations')
+        <div role="tabpanel" id="tabpanel-quotations" aria-labelledby="tab-quotations">
         <table class="w-full text-sm border-collapse">
             <thead class="bg-gray-50">
                 <tr>
@@ -75,7 +78,9 @@ use Filament\Forms\Components\Tabs;
                 {{ $this->quotations->links() }}
             </div>
         @endif
+        </div>
     @elseif($tab === 'proformas')
+        <div role="tabpanel" id="tabpanel-proformas" aria-labelledby="tab-proformas">
         <table class="w-full text-sm border-collapse">
             <thead class="bg-gray-50">
                 <tr>
@@ -103,7 +108,9 @@ use Filament\Forms\Components\Tabs;
                 {{ $this->proformas->links() }}
             </div>
         @endif
+        </div>
     @elseif($tab === 'invoices')
+        <div role="tabpanel" id="tabpanel-invoices" aria-labelledby="tab-invoices">
         <table class="w-full text-sm border-collapse">
             <thead class="bg-gray-50">
                 <tr>
@@ -133,5 +140,6 @@ use Filament\Forms\Components\Tabs;
                 {{ $this->invoices->links() }}
             </div>
         @endif
+        </div>
     @endif
 </div>

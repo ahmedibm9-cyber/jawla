@@ -45,4 +45,9 @@ class VanTransfer extends Model
     {
         return $this->hasMany(VanTransferItem::class);
     }
+
+    public function transitWarehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'in_transit_warehouse_id');
+    }
 }
