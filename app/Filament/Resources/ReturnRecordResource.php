@@ -5,7 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ReturnRecordResource\Pages;
 use App\Models\ReturnRecord;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
