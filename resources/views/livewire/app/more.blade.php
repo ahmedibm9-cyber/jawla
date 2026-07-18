@@ -19,6 +19,12 @@
                 <span class="text-text-secondary">&rsaquo;</span>
             </div>
         </a>
+        <a href="/app/sell" class="card block no-underline text-inherit">
+            <div class="flex justify-between items-center">
+                <span>{{ __('app.create_invoice') }}</span>
+                <span class="text-text-secondary">&rsaquo;</span>
+            </div>
+        </a>
         <a href="/app/quotations" class="card block no-underline text-inherit mt-2">
             <div class="flex justify-between items-center">
                 <span>{{ __('app.quotations') }}</span>
@@ -34,6 +40,18 @@
         <a href="/app/collect-payment" class="card block no-underline text-inherit mt-2">
             <div class="flex justify-between items-center">
                 <span>{{ __('app.collect_payment') }}</span>
+                <span class="text-text-secondary">&rsaquo;</span>
+            </div>
+        </a>
+        <a href="/app/returns" class="card block no-underline text-inherit mt-2">
+            <div class="flex justify-between items-center">
+                <span>{{ __('app.log_return') }}</span>
+                <span class="text-text-secondary">&rsaquo;</span>
+            </div>
+        </a>
+        <a href="/app/expenses" class="card block no-underline text-inherit mt-2">
+            <div class="flex justify-between items-center">
+                <span>{{ __('app.log_expense') }}</span>
                 <span class="text-text-secondary">&rsaquo;</span>
             </div>
         </a>

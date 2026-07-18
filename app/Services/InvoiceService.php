@@ -30,14 +30,25 @@ class InvoiceService implements InvoiceContract
     {
         return DB::transaction(function () use ($data): Invoice {
             $company = Company::findOrFail($data['company_id']);
-            $prod = Product::findOrFail($data['product_id']);
-            $qty = (float) $data['quantity'];
-            $unitPrice = (float) $data['unit_price'];
 
-            $calculation = $this->calc->calculate(
-                [new LineItemInput($qty, $unitPrice, (bool) $prod->vat_applicable)],
-                (float) $company->vat_percent,
-            );
+            // Support both multi-line (items array) and single-line (legacy)
+            $items = $data['items'] ?? [
+                ['product_id' => $data['product_id'], 'quantity' => $data['quantity'], 'unit_price' => $data['unit_price'], 'batch_id' => $data['batch_id'] ?? null],
+            ];
+
+            $products = Product::whereIn('id', array_column($items, 'product_id'))->get()->keyBy('id');
+
+            $lineInputs = [];
+            foreach ($items as $item) {
+                $prod = $products->get($item['product_id']);
+                $lineInputs[] = new LineItemInput(
+                    qty: (float) $item['quantity'],
+                    unitPrice: (float) $item['unit_price'],
+                    vatApplicable: (bool) ($prod?->vat_applicable ?? true),
+                );
+            }
+
+            $calculation = $this->calc->calculate($lineInputs, (float) $company->vat_percent);
 
             $invNumber = $this->numbers->generate('sales_invoice', $company->id);
 
@@ -58,35 +69,38 @@ class InvoiceService implements InvoiceContract
                 'issued_at' => now(),
             ]);
 
-            InvoiceItem::create([
-                'invoice_id' => $invoice->id,
-                'product_id' => $prod->id,
-                'batch_id' => $data['batch_id'] ?? null,
-                'quantity' => $qty,
-                'unit_price' => $unitPrice,
-                // ponytail: single-line only; iterate $calculation->lines when multi-line
-                'line_total' => $calculation->lines[0]->lineTotal,
-            ]);
+            foreach ($items as $i => $item) {
+                InvoiceItem::create([
+                    'invoice_id' => $invoice->id,
+                    'product_id' => $item['product_id'],
+                    'batch_id' => $item['batch_id'] ?? null,
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'line_total' => $calculation->lines[$i]->lineTotal,
+                ]);
+            }
 
             // Van stock: look up rep's van warehouse
             $vanWarehouse = Warehouse::where('user_id', auth()->id())
                 ->where('type', 'van')->first();
 
             if ($vanWarehouse) {
-                $this->stock->decrement(
-                    $vanWarehouse->id,
-                    $prod->id,
-                    $data['batch_id'] ?? null,
-                    $qty,
-                    StockReason::Sale,
-                    $invoice,
-                    auth()->id(),
-                );
+                foreach ($items as $item) {
+                    $this->stock->decrement(
+                        $vanWarehouse->id,
+                        $item['product_id'],
+                        $item['batch_id'] ?? null,
+                        (float) $item['quantity'],
+                        StockReason::Sale,
+                        $invoice,
+                        auth()->id(),
+                    );
+                }
             }
 
             // Customer balance update
             $customer = Customer::findOrFail($data['customer_id']);
-            $customer->increment('balance', $calculation->total);
+            $customer->increment('balance', (float) $calculation->total);
 
             // If from proforma, mark it converted
             if (isset($data['proforma_invoice_id'])) {
