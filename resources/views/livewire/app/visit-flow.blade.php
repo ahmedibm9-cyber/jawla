@@ -1,4 +1,4 @@
-<div class="main-content p-4"
+<div class="main-content"
      x-data="{
         step: '{{ $step }}',
         userLat: null,
@@ -46,6 +46,12 @@
         }
      }">
 
+    <x-page-header
+        :title="$customer->name_ar"
+        :subtitle="$customer->address"
+    />
+
+    <div class="page-body">
     @if(!$online)
         <div class="card bg-amber-50 text-amber-800 mb-3 flex items-center gap-2">
             <svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728M5.636 18.364a9 9 0 010-12.728M15.536 8.464a5 5 0 010 7.072M8.464 15.536a5 5 0 010-7.072"/></svg>
@@ -72,7 +78,7 @@
     </div>
 
     {{-- Customer Info --}}
-    <div class="card mb-4">
+    <div class="card mb-4 min-w-0">
         <h3 class="m-0 mb-1">{{ $customer->name_ar }}</h3>
         <p class="m-0 text-text-secondary text-sm">{{ $customer->address }}</p>
         @if($distanceMeters !== null)
@@ -112,18 +118,18 @@
     @if($step === 'report')
         <div class="card">
             <label for="summary" class="font-semibold block mb-1">{{ __('app.report_summary') }} *</label>
-            <textarea wire:model="summary" rows="3" autocomplete="off" id="summary" class="w-full p-3 border border-border rounded-lg" required></textarea>
+            <textarea wire:model="summary" rows="3" autocomplete="off" id="summary" class="form-textarea" required></textarea>
             @error('summary') <small class="text-danger">{{ $message }}</small> @enderror
         </div>
 
         <div class="card">
             <label for="customerFeedback" class="font-semibold block mb-1">{{ __('app.customer_feedback') }}</label>
-            <textarea wire:model="customerFeedback" rows="2" autocomplete="off" id="customerFeedback" class="w-full p-3 border border-border rounded-lg"></textarea>
+            <textarea wire:model="customerFeedback" rows="2" autocomplete="off" id="customerFeedback" class="form-textarea"></textarea>
         </div>
 
         <div class="card">
             <label for="actionTaken" class="font-semibold block mb-1">{{ __('app.action_taken') }}</label>
-            <textarea wire:model="actionTaken" rows="2" autocomplete="off" id="actionTaken" class="w-full p-3 border border-border rounded-lg"></textarea>
+            <textarea wire:model="actionTaken" rows="2" autocomplete="off" id="actionTaken" class="form-textarea"></textarea>
         </div>
 
         <div class="card">
@@ -132,7 +138,7 @@
                 <span class="font-semibold">{{ __('app.follow_up_needed') }}</span>
             </label>
             @if($followUpNeeded)
-                <textarea wire:model="followUpNote" rows="2" class="w-full p-3 border border-border rounded-lg mt-2" placeholder="{{ __('app.follow_up_placeholder') }}"></textarea>
+                <textarea wire:model="followUpNote" rows="2" class="form-textarea mt-2" placeholder="{{ __('app.follow_up_placeholder') }}"></textarea>
             @endif
         </div>
 
@@ -151,7 +157,7 @@
                 @touchmove.prevent="if(drawing){ctx.lineTo($event.touches[0].clientX-$el.getBoundingClientRect().left,$event.touches[0].clientY-$el.getBoundingClientRect().top);ctx.stroke()}"
                 @touchend="drawing=false;$wire.set('signature', $el.toDataURL())">
             </canvas>
-            <button class="btn btn-outline mt-2 text-sm" x-on:click="()=>{let c=$event.target.closest('div').querySelector('#sigCanvas').getContext('2d');c.clearRect(0,0,340,140);$wire.set('signature','')}">{{ __('app.clear') }}</button>
+            <button class="btn btn-outline mt-2 text-sm" x-on:click="()=>{let c=$event.target.closest('div').querySelector('#sigCanvas').getContext('2d');c.clearRect(0,0,340,140);$wire.set('signature','')}" aria-label="{{ __('app.clear') }}">{{ __('app.clear') }}</button>
         </div>
 
         <button class="btn btn-primary w-full" wire:click="submitReport" wire:loading.attr="disabled">
@@ -169,4 +175,5 @@
             <a href="/app" class="btn btn-primary inline-block mt-4 no-underline">{{ __('app.back_home') }}</a>
         </div>
     @endif
+    </div>
 </div>

@@ -1,6 +1,11 @@
 <div>
-<div class="main-content p-4">
-    <h2 class="m-0 mb-4">{{ __('app.quotations') }}</h2>
+<div class="main-content">
+    <x-page-header
+        :title="__('app.quotations')"
+        :icon="'<svg fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" width=\"22\" height=\"22\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z\"/></svg>'"
+    />
+
+    <div class="page-body">
 
     @if($errorMessage)
         <div class="card bg-red-50 text-danger mb-3" aria-live="polite">{{ $errorMessage }}</div>
@@ -49,7 +54,7 @@
             </div>
 
             <label class="font-semibold block mb-1">{{ __('app.your_price') }}</label>
-            <input type="number" step="0.01" id="negotiatedPrice" name="negotiatedPrice" wire:model.live="negotiatedPrice" autocomplete="off" class="w-full p-3 border border-border rounded-lg text-lg">
+            <input type="number" step="0.01" id="negotiatedPrice" name="negotiatedPrice" wire:model.live="negotiatedPrice" autocomplete="off" class="form-input text-lg">
 
             <div class="mt-3 flex gap-2">
                 <button class="btn btn-primary flex-1" wire:click="confirmPrice">{{ __('app.confirm_price') }}</button>
@@ -77,12 +82,8 @@
             </div>
         @endif
     @endif
+    </div>
 </div>
 
-<nav class="tab-bar" aria-label="Bottom navigation">
-    <a href="/app" class="tab-item"><svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>{{ __('app.home') }}</a>
-    <a href="/app/customers" class="tab-item"><svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>{{ __('app.customers') }}</a>
-    <a href="/app/quotations" class="tab-item active"><svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>{{ __('app.quotations') }}</a>
-    <a href="/app/more" class="tab-item"><svg aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>{{ __('app.more') }}</a>
-</nav>
+<x-tab-bar active="more" />
 </div>

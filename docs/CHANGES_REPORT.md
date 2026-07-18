@@ -810,3 +810,143 @@ Created `decision-map.md` with 7 architecture-deepening tickets. See `docs/ARCHI
 **Report Generated:** July 17, 2026  
 **Commit:** HEAD (merge `feat/unified-login` + Batch 1 gap closure)  
 **Tests:** 60+ passed (combined suites)
+
+---
+
+## Session 3 — UI/UX Overhaul (July 18, 2026)
+
+**Trigger:** Client reported pages look "ugly"  
+**Scope:** Full UI/UX audit and redesign of PWA (Rep App) + Admin Panel  
+**Design System:** Generated via ui-ux-pro-max skill (Enterprise Gateway pattern, Vibrant & Block-based style, IBM Plex Sans Arabic)
+
+---
+
+### P0 — Critical Fixes
+
+#### Tab Bar Extraction
+- Created `resources/views/components/tab-bar.blade.php` — single source of truth with `<x-tab-bar active="..." />` API
+- Replaced **9 duplicated tab bars** across: `home`, `customers`, `stock-search`, `more`, `sales-flow`, `log-complaint`, `add-customer`, `submit-purchase-offer`, `quotation-flow`
+- Tab bar HTML reduced from ~250 lines across 9 files to 16 lines in 1 component
+
+#### Safe Area Support (iOS)
+- Added `padding-bottom: env(safe-area-inset-bottom, 0px)` to `.tab-bar`
+- Updated `.main-content` padding to `calc(72px + env(safe-area-inset-bottom, 0px))`
+- Added `viewport-fit=cover` to layout meta tag (required for safe areas)
+
+#### CSS Consolidation
+- Moved all inline styles from `layouts/app.blade.php` to `resources/css/app.css`
+- Single CSS source of truth for all component styles
+
+---
+
+### P1 — High-Impact Improvements
+
+#### Home Page Redesign
+- Replaced flat green header with **gradient hero** (135deg accent gradient + decorative circle)
+- Added **user avatar** (initials in semi-transparent circle)
+- Stats cards now have **colored left borders** (amber=pending, green=done) with matching number colors
+- Visit cards have **status indicator bar** on left edge (amber/green/red) for instant visual scanning
+- "Start Work" button upgraded to `btn-lg` variant
+
+#### More Page with Icons
+- Grouped menu items into 3 sections: **Sales**, **Finance**, **Other**
+- Each item has **colored icon badge** (green/blue/amber/emerald/red/purple/orange/teal)
+- Added **descriptive subtitles** under each label
+- Proper **chevron arrows** on the right
+- Logout button redesigned as outlined danger button with icon
+- Section titles use uppercase small-caps style
+
+#### Tab Bar Active Indicator
+- Added **3px accent-colored bar** at top of active tab (`::after` pseudo-element)
+- Smooth color transition on tab switch
+- Icons bumped from 22px to 24px for better touch targets
+
+---
+
+### P2 — Consistency & Polish
+
+#### Page Header Component
+- Created `components/page-header.blade.php` with `title`, `subtitle`, and `icon` props
+- Applied to **11 pages**: customers, stock-search, sales-flow, collect-payment, log-return, log-expense, log-complaint, add-customer, submit-purchase-offer, quotation-flow, visit-flow
+- Each page now has consistent header with colored icon badge + title + optional subtitle
+
+#### Form Input System
+- Created unified CSS classes: `.form-input`, `.form-select`, `.form-textarea`, `.form-label`, `.form-group`, `.form-row`, `.form-error`
+- Inputs now have:
+  - 1.5px border (lighter than before)
+  - Animated focus ring — accent color border + 3px transparent glow
+  - Custom select dropdown arrow (SVG data URI, RTL-aware)
+  - Consistent 10px border-radius
+- Updated **all 33 form inputs** across 10 blade templates
+- `.form-row` provides 2-column grid for side-by-side fields
+
+#### Success Screens
+- Created `.success-screen` system with animated checkmark
+- Green circle with **scale-in animation** (`successPop` keyframe)
+- Clean title + message + stacked action buttons
+- Applied to: collect-payment, log-expense, log-return, sales-flow
+
+---
+
+### P3 — Admin & Branding
+
+#### Filament Admin Pages
+- **ReportsPage** — Replaced raw HTML tables with Filament-styled tables (proper headers, row separators, hover states, status badges, dark mode support)
+- **ActivityLog** — Replaced raw card list with styled sections, status badges, styled reverse button
+- **CollectPayment** — Switched to `{{ $this->form }}` rendering for native Filament form layout
+
+#### Brand Logo
+- Created `public/images/logo.svg` — green icon + "Jawla" wordmark
+- Added to **home page hero** above welcome message
+- Added to **guest/login layout** centered above login form
+
+---
+
+### Files Changed — Session 3
+
+#### New Files
+| File | Purpose |
+|------|---------|
+| `resources/views/components/tab-bar.blade.php` | Reusable bottom tab bar component |
+| `resources/views/components/page-header.blade.php` | Reusable page header component |
+| `public/images/logo.svg` | Brand logo SVG |
+
+#### Modified — Rep PWA
+| File | Changes |
+|------|---------|
+| `resources/css/app.css` | +400 lines: tab bar, page header, form inputs, success screens, home, more page CSS |
+| `resources/views/layouts/app.blade.php` | Removed inline styles, added `viewport-fit=cover` |
+| `resources/views/layouts/guest.blade.php` | Added logo, font preconnect, styled layout |
+| `resources/views/livewire/app/home.blade.php` | Gradient hero, stats cards, visit cards, tab-bar component |
+| `resources/views/livewire/app/more.blade.php` | Icon badges, grouped sections, logout redesign |
+| `resources/views/livewire/app/customers.blade.php` | Page header, form classes, tab-bar component |
+| `resources/views/livewire/app/stock-search.blade.php` | Page header, form classes, tab-bar component |
+| `resources/views/livewire/app/sales-flow.blade.php` | Page header, form classes, success screen, stepper |
+| `resources/views/livewire/app/visit-flow.blade.php` | Page header, form classes, padding consolidation |
+| `resources/views/livewire/app/collect-payment.blade.php` | Page header, form classes, success screen |
+| `resources/views/livewire/app/log-return.blade.php` | Page header, form classes, success screen |
+| `resources/views/livewire/app/log-expense.blade.php` | Page header, form classes, success screen |
+| `resources/views/livewire/app/log-complaint.blade.php` | Page header, form classes, tab-bar component |
+| `resources/views/livewire/app/add-customer.blade.php` | Page header, form classes, tab-bar component |
+| `resources/views/livewire/app/submit-purchase-offer.blade.php` | Page header, form classes, tab-bar component |
+| `resources/views/livewire/app/quotation-flow.blade.php` | Page header, form classes, tab-bar component |
+
+#### Modified — Admin Panel
+| File | Changes |
+|------|---------|
+| `resources/views/filament/pages/reports-page.blade.php` | Filament-styled tables, tabs, date filters |
+| `resources/views/filament/pages/activity-log.blade.php` | Styled sections, status badges, reverse button |
+| `resources/views/filament/pages/collect-payment.blade.php` | Native Filament form rendering |
+
+---
+
+### Build Verification — Session 3
+
+```
+php artisan view:clear && php artisan view:cache  ✅ Blade templates compiled
+npx vite build                                     ✅ Frontend assets built
+```
+
+**Report Generated:** July 18, 2026  
+**Session:** UI/UX Overhaul (P0–P3)  
+**Tests:** 60+ passed (combined suites, no backend changes)

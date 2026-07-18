@@ -77,10 +77,4 @@ class ActivityLog extends Page
         return $q->paginate(50);
     }
 
-    public function render(): \Illuminate\Contracts\View\View
-    {
-        return view('filament.pages.activity-log', [
-            'activities' => $this->activities,
-        ]);
-    }
 }
