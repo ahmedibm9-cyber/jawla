@@ -12,7 +12,7 @@ class VisitReport extends Model
 
     protected $fillable = [
         'visit_id', 'summary', 'customer_feedback', 'action_taken',
-        'follow_up_needed', 'follow_up_note', 'submitted_at',
+        'follow_up_needed', 'follow_up_note', 'submitted_at', 'signature_path',
     ];
 
     protected $casts = [

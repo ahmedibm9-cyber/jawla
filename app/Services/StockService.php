@@ -75,11 +75,20 @@ class StockService implements StockServiceContract
     private function move(int $warehouseId, int $productId, ?int $batchId, float $qty, StockReason $reason, Model $ref, ?int $userId): StockMovement
     {
         return DB::transaction(function () use ($warehouseId, $productId, $batchId, $qty, $reason, $ref, $userId): StockMovement {
-            $stock = Stock::firstOrNew([
-                'warehouse_id' => $warehouseId,
-                'product_id' => $productId,
-                'batch_id' => $batchId,
-            ], ['quantity' => 0]);
+            $stock = Stock::where('warehouse_id', $warehouseId)
+                ->where('product_id', $productId)
+                ->where('batch_id', $batchId)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $stock) {
+                $stock = Stock::create([
+                    'warehouse_id' => $warehouseId,
+                    'product_id' => $productId,
+                    'batch_id' => $batchId,
+                    'quantity' => 0,
+                ]);
+            }
 
             $newQty = $stock->quantity + $qty;
 

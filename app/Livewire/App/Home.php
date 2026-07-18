@@ -88,6 +88,7 @@ class Home extends Component
                 ->where('status', 'completed')
                 ->count(),
             'openTasks' => Task::query()
+                ->with('customer')
                 ->where('assigned_to', $user->id)
                 ->where('status', 'open')
                 ->latest()

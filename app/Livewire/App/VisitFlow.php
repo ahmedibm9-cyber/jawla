@@ -108,11 +108,14 @@ class VisitFlow extends Component
         ]);
 
         DB::transaction(function () {
+            $signaturePath = null;
+
             if ($this->signature) {
                 $path = 'signatures/'.$this->visit->id.'_'.time().'.png';
                 $data = explode(',', $this->signature, 2);
                 $imgData = base64_decode($data[1] ?? '');
                 Storage::disk('private')->put($path, $imgData);
+                $signaturePath = $path;
             }
 
             VisitReport::create([
@@ -123,6 +126,7 @@ class VisitFlow extends Component
                 'follow_up_needed' => $this->followUpNeeded,
                 'follow_up_note' => $this->followUpNote ?: null,
                 'submitted_at' => now(),
+                'signature_path' => $signaturePath,
             ]);
 
             $this->visit->update(['status' => 'closed']);
