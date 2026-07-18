@@ -14,11 +14,12 @@ class Company extends Model
         'name_ar', 'name_en', 'legal_entity', 'parent_company', 'abbr',
         'tax_number', 'commercial_registration_number',
         'address', 'phone', 'logo_path', 'currency', 'vat_percent',
-        'bank_name', 'bank_account', 'bank_iban', 'is_active',
+        'bank_name', 'bank_account', 'bank_iban', 'rep_discount_percent', 'is_active',
     ];
 
     protected $casts = [
         'vat_percent' => 'decimal:2',
+        'rep_discount_percent' => 'decimal:2',
         'is_active' => 'boolean',
     ];
 

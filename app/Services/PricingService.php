@@ -35,7 +35,8 @@ class PricingService implements PricingServiceContract
             return new PriceRange($base, Money::zero(), Money::zero());
         }
 
-        $minus = $base->percent('10');
+        $discount = $rep->company?->rep_discount_percent ?? 10;
+        $minus = $base->percent((string) $discount);
 
         return new PriceRange($base, Money::zero(), $minus);
     }
