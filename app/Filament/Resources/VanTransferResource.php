@@ -12,6 +12,9 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Actions\Action;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Notifications\Notification;
 
 class VanTransferResource extends Resource
