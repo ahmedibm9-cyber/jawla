@@ -1,7 +1,7 @@
 @props(['header' => null, 'footer' => null])
-<div {{ $attributes->merge(['class' => 'rounded-xl border border-gray-200 bg-white shadow-sm']) }}>
+<div {{ $attributes->merge(['class' => 'rounded-xl border border-border bg-surface shadow-sm']) }}>
     @if($header)
-        <div class="border-b border-gray-200 px-6 py-4">
+        <div class="border-b border-border px-6 py-4">
             {{ $header }}
         </div>
     @endif
@@ -9,7 +9,7 @@
         {{ $slot }}
     </div>
     @if($footer)
-        <div class="border-t border-gray-200 px-6 py-3">
+        <div class="border-t border-border px-6 py-3">
             {{ $footer }}
         </div>
     @endif

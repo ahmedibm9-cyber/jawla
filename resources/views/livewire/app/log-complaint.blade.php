@@ -1,25 +1,25 @@
 <div>
-<div class="main-content" style="padding:16px">
-    <h2 style="margin:0 0 16px">{{ app()->getLocale() === 'ar' ? 'تسجيل شكوى' : 'Log Complaint' }}</h2>
+<div class="main-content p-4">
+    <h2 class="m-0 mb-4">{{ app()->getLocale() === 'ar' ? 'تسجيل شكوى' : 'Log Complaint' }}</h2>
 
     @if($successMessage)
-        <div class="toast toast-success" aria-live="polite" style="position:relative;top:0;transform:none;margin-bottom:16px">{{ $successMessage }}</div>
+        <div class="toast toast-success relative top-0 mb-4" aria-live="polite" style="transform:none">{{ $successMessage }}</div>
     @endif
 
     <div class="card">
-        <label for="customer_id" style="font-weight:600;display:block;margin-bottom:4px">{{ app()->getLocale() === 'ar' ? 'العميل' : 'Customer' }}</label>
-        <select id="customer_id" wire:model="customer_id" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px">
+        <label for="customer_id" class="font-semibold block mb-1">{{ app()->getLocale() === 'ar' ? 'العميل' : 'Customer' }}</label>
+        <select id="customer_id" wire:model="customer_id" class="w-full p-3 border border-border rounded-lg">
             <option value="">{{ app()->getLocale() === 'ar' ? 'اختر…' : 'Select…' }}</option>
             @foreach($customers as $c)
                 <option value="{{ $c->id }}">{{ $c->name_ar }}</option>
             @endforeach
         </select>
-        @error('customer_id') <small style="color:#DC2626">{{ $message }}</small> @enderror
+        @error('customer_id') <small class="text-danger">{{ $message }}</small> @enderror
     </div>
 
     <div class="card">
-        <label for="complaint_type" style="font-weight:600;display:block;margin-bottom:4px">{{ app()->getLocale() === 'ar' ? 'النوع' : 'Type' }}</label>
-        <select id="complaint_type" wire:model="complaint_type" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px">
+        <label for="complaint_type" class="font-semibold block mb-1">{{ app()->getLocale() === 'ar' ? 'النوع' : 'Type' }}</label>
+        <select id="complaint_type" wire:model="complaint_type" class="w-full p-3 border border-border rounded-lg">
             <option value="non_conforming_materials">{{ app()->getLocale() === 'ar' ? 'مواد غير مطابقة' : 'Non-conforming materials' }}</option>
             <option value="delivery_issue">{{ app()->getLocale() === 'ar' ? 'مشكلة تسليم' : 'Delivery issue' }}</option>
             <option value="quality_issue">{{ app()->getLocale() === 'ar' ? 'مشكلة جودة' : 'Quality issue' }}</option>
@@ -29,12 +29,12 @@
     </div>
 
     <div class="card">
-        <label for="description" style="font-weight:600;display:block;margin-bottom:4px">{{ app()->getLocale() === 'ar' ? 'الوصف' : 'Description' }}</label>
-        <textarea id="description" wire:model="description" rows="3" autocomplete="off" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px"></textarea>
-        @error('description') <small style="color:#DC2626">{{ $message }}</small> @enderror
+        <label for="description" class="font-semibold block mb-1">{{ app()->getLocale() === 'ar' ? 'الوصف' : 'Description' }}</label>
+        <textarea id="description" wire:model="description" rows="3" autocomplete="off" class="w-full p-3 border border-border rounded-lg"></textarea>
+        @error('description') <small class="text-danger">{{ $message }}</small> @enderror
     </div>
 
-    <button class="btn btn-primary" style="width:100%" wire:click="submit" wire:loading.attr="disabled">
+    <button class="btn btn-primary w-full" wire:click="submit" wire:loading.attr="disabled">
         <span wire:loading.remove>{{ app()->getLocale() === 'ar' ? 'إرسال' : 'Submit' }}</span>
         <span wire:loading>{{ app()->getLocale() === 'ar' ? 'جاري…' : 'Sending…' }}</span>
     </button>

@@ -1,21 +1,21 @@
 <div>
-<div class="main-content" style="padding:16px">
-    <h2 style="margin:0 0 16px">{{ __('app.customers') }}</h2>
+<div class="main-content p-4">
+    <h2 class="m-0 mb-4">{{ __('app.customers') }}</h2>
 
-<div style="margin-bottom:16px">
-        <input type="text" wire:model.live="search" aria-label="{{ app()->getLocale() === 'ar' ? 'بحث' : 'Search' }}" autocomplete="off" style="width:100%;padding:12px;border:1px solid #d1d5db;border-radius:10px;font-size:1rem"
+<div class="mb-4">
+        <input type="text" wire:model.live="search" aria-label="{{ app()->getLocale() === 'ar' ? 'بحث' : 'Search' }}" autocomplete="off" class="w-full p-3 border border-border rounded-xl text-base"
             placeholder="{{ app()->getLocale() === 'ar' ? 'ابحث بالاسم أو الهاتف…' : 'Search customers…' }}">
     </div>
 
-    <a href="/app/customers/create" class="btn btn-primary" style="display:block;text-decoration:none;margin-bottom:12px;text-align:center">
+    <a href="/app/customers/create" class="btn btn-primary block no-underline mb-3 text-center">
         {{ app()->getLocale() === 'ar' ? '+ إضافة عميل' : '+ Add Customer' }}
     </a>
 
     @forelse($customers as $customer)
 <div class="card">
-            <strong style="display:block">{{ $customer->name_ar }}</strong>
-            <small style="color:#6b7280">{{ $customer->code }} · {{ $customer->phone }}</small>
-            <p style="margin:4px 0 0;font-size:0.85rem;color:#9ca3af">{{ $customer->address }}</p>
+            <strong class="block">{{ $customer->name_ar }}</strong>
+            <small class="text-text-secondary">{{ $customer->code }} · {{ $customer->phone }}</small>
+            <p class="mt-1 text-sm text-text-muted">{{ $customer->address }}</p>
             @if($customer->latitude && $customer->longitude)
                 <a href="https://www.google.com/maps/dir/?api=1&destination={{ $customer->latitude }},{{ $customer->longitude }}"
                    target="_blank" class="maps-link">
@@ -25,7 +25,7 @@
             @endif
         </div>
     @empty
-        <div class="card" style="text-align:center;padding:32px;color:#9ca3af">
+        <div class="card text-center p-8 text-text-muted">
             {{ app()->getLocale() === 'ar' ? 'لا يوجد عملاء' : 'No customers found' }}
         </div>
     @endforelse

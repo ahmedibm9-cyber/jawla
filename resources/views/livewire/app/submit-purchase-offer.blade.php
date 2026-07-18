@@ -1,25 +1,25 @@
 <div>
-<div class="main-content" style="padding:16px">
-    <h2 style="margin:0 0 16px">{{ app()->getLocale() === 'ar' ? 'عرض شراء' : 'Purchase Offer' }}</h2>
+<div class="main-content p-4">
+    <h2 class="m-0 mb-4">{{ app()->getLocale() === 'ar' ? 'عرض شراء' : 'Purchase Offer' }}</h2>
 
     @if($successMessage)
-        <div class="toast toast-success" aria-live="polite" style="position:relative;top:0;transform:none;margin-bottom:16px">{{ $successMessage }}</div>
+        <div class="toast toast-success relative top-0 mb-4" aria-live="polite" style="transform:none">{{ $successMessage }}</div>
     @endif
 
     <div class="card">
-        <label for="product_id" style="font-weight:600;display:block;margin-bottom:4px">{{ app()->getLocale() === 'ar' ? 'المنتج' : 'Product' }}</label>
-        <select id="product_id" wire:model="product_id" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px">
+        <label for="product_id" class="font-semibold block mb-1">{{ app()->getLocale() === 'ar' ? 'المنتج' : 'Product' }}</label>
+        <select id="product_id" wire:model="product_id" class="w-full p-3 border border-border rounded-lg">
             <option value="">{{ app()->getLocale() === 'ar' ? 'اختر…' : 'Select…' }}</option>
             @foreach($products as $p)
                 <option value="{{ $p->id }}">{{ $p->name_ar }}</option>
             @endforeach
         </select>
-        @error('product_id') <small style="color:#DC2626">{{ $message }}</small> @enderror
+        @error('product_id') <small class="text-danger">{{ $message }}</small> @enderror
     </div>
 
     <div class="card">
-        <label for="supplier_id" style="font-weight:600;display:block;margin-bottom:4px">{{ app()->getLocale() === 'ar' ? 'المورد (اختياري)' : 'Supplier (optional)' }}</label>
-        <select id="supplier_id" wire:model="supplier_id" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px">
+        <label for="supplier_id" class="font-semibold block mb-1">{{ app()->getLocale() === 'ar' ? 'المورد (اختياري)' : 'Supplier (optional)' }}</label>
+        <select id="supplier_id" wire:model="supplier_id" class="w-full p-3 border border-border rounded-lg">
             <option value="">{{ app()->getLocale() === 'ar' ? 'بدون' : 'N/A' }}</option>
             @foreach($suppliers as $s)
                 <option value="{{ $s->id }}">{{ $s->name_ar ?? $s->name_en }}</option>
@@ -27,25 +27,25 @@
         </select>
     </div>
 
-    <div class="card" style="display:flex;gap:12px">
-        <div style="flex:1">
-            <label for="quantity" style="font-weight:600;display:block;margin-bottom:4px">{{ app()->getLocale() === 'ar' ? 'الكمية' : 'Quantity' }}</label>
-            <input type="number" step="0.001" id="quantity" name="quantity" wire:model="quantity" autocomplete="off" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px">
-            @error('quantity') <small style="color:#DC2626">{{ $message }}</small> @enderror
+    <div class="card flex gap-3">
+        <div class="flex-1">
+            <label for="quantity" class="font-semibold block mb-1">{{ app()->getLocale() === 'ar' ? 'الكمية' : 'Quantity' }}</label>
+            <input type="number" step="0.001" id="quantity" name="quantity" wire:model="quantity" autocomplete="off" class="w-full p-3 border border-border rounded-lg">
+            @error('quantity') <small class="text-danger">{{ $message }}</small> @enderror
         </div>
-        <div style="flex:1">
-            <label for="offered_price" style="font-weight:600;display:block;margin-bottom:4px">{{ app()->getLocale() === 'ar' ? 'السعر المعروض' : 'Offered Price' }}</label>
-            <input type="number" step="0.01" id="offered_price" name="offered_price" wire:model="offered_price" autocomplete="off" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px">
-            @error('offered_price') <small style="color:#DC2626">{{ $message }}</small> @enderror
+        <div class="flex-1">
+            <label for="offered_price" class="font-semibold block mb-1">{{ app()->getLocale() === 'ar' ? 'السعر المعروض' : 'Offered Price' }}</label>
+            <input type="number" step="0.01" id="offered_price" name="offered_price" wire:model="offered_price" autocomplete="off" class="w-full p-3 border border-border rounded-lg">
+            @error('offered_price') <small class="text-danger">{{ $message }}</small> @enderror
         </div>
     </div>
 
     <div class="card">
-        <label for="payment_terms" style="font-weight:600;display:block;margin-bottom:4px">{{ app()->getLocale() === 'ar' ? 'شروط الدفع' : 'Payment Terms' }}</label>
-        <textarea id="payment_terms" wire:model="payment_terms" rows="2" autocomplete="off" style="width:100%;padding:10px;border:1px solid #d1d5db;border-radius:8px"></textarea>
+        <label for="payment_terms" class="font-semibold block mb-1">{{ app()->getLocale() === 'ar' ? 'شروط الدفع' : 'Payment Terms' }}</label>
+        <textarea id="payment_terms" wire:model="payment_terms" rows="2" autocomplete="off" class="w-full p-3 border border-border rounded-lg"></textarea>
     </div>
 
-    <button class="btn btn-primary" style="width:100%" wire:click="submit" wire:loading.attr="disabled">
+    <button class="btn btn-primary w-full" wire:click="submit" wire:loading.attr="disabled">
         <span wire:loading.remove>{{ app()->getLocale() === 'ar' ? 'إرسال' : 'Submit' }}</span>
         <span wire:loading>{{ app()->getLocale() === 'ar' ? 'جاري…' : 'Sending…' }}</span>
     </button>

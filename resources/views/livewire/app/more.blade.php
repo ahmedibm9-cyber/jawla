@@ -1,47 +1,47 @@
 <div>
-<div class="main-content" style="padding:16px">
-    <h2 style="margin:0 0 16px">{{ __('app.more') }}</h2>
+<div class="main-content p-4">
+    <h2 class="m-0 mb-4">{{ __('app.more') }}</h2>
 
-    <div class="card" style="display:flex;align-items:center;gap:12px">
-        <div style="width:48px;height:48px;border-radius:50%;background:#4DB848;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.2rem">
+    <div class="card flex items-center gap-3">
+        <div class="size-12 rounded-full bg-accent text-white flex items-center justify-center font-bold text-lg">
             {{ strtoupper(substr($user->name, 0, 1)) }}
         </div>
         <div>
-            <strong style="display:block">{{ $user->name }}</strong>
-            <small style="color:#6b7280">{{ $user->email }}</small>
+            <strong class="block">{{ $user->name }}</strong>
+            <small class="text-text-secondary">{{ $user->email }}</small>
         </div>
     </div>
 
-    <div style="margin-top:16px">
-        <a href="/app/customers/create" class="card" style="display:block;text-decoration:none;color:inherit">
-            <div style="display:flex;justify-content:space-between;align-items:center">
+    <div class="mt-4">
+        <a href="/app/customers/create" class="card block no-underline text-inherit">
+            <div class="flex justify-between items-center">
                 <span>{{ app()->getLocale() === 'ar' ? 'إضافة عميل' : 'Add Customer' }}</span>
-                <span style="color:#6b7280">&rsaquo;</span>
+                <span class="text-text-secondary">&rsaquo;</span>
             </div>
         </a>
-        <a href="/app/quotations" class="card" style="display:block;text-decoration:none;color:inherit;margin-top:8px">
-            <div style="display:flex;justify-content:space-between;align-items:center">
+        <a href="/app/quotations" class="card block no-underline text-inherit mt-2">
+            <div class="flex justify-between items-center">
                 <span>{{ __('app.quotations') }}</span>
-                <span style="color:#6b7280">&rsaquo;</span>
+                <span class="text-text-secondary">&rsaquo;</span>
             </div>
         </a>
-        <a href="/app/complaints" class="card" style="display:block;text-decoration:none;color:inherit;margin-top:8px">
-            <div style="display:flex;justify-content:space-between;align-items:center">
+        <a href="/app/complaints" class="card block no-underline text-inherit mt-2">
+            <div class="flex justify-between items-center">
                 <span>{{ app()->getLocale() === 'ar' ? 'تسجيل شكوى' : 'Log Complaint' }}</span>
-                <span style="color:#6b7280">&rsaquo;</span>
+                <span class="text-text-secondary">&rsaquo;</span>
             </div>
         </a>
-        <a href="/app/purchase-offer" class="card" style="display:block;text-decoration:none;color:inherit;margin-top:8px">
-            <div style="display:flex;justify-content:space-between;align-items:center">
+        <a href="/app/purchase-offer" class="card block no-underline text-inherit mt-2">
+            <div class="flex justify-between items-center">
                 <span>{{ app()->getLocale() === 'ar' ? 'عرض شراء' : 'Purchase Offer' }}</span>
-                <span style="color:#6b7280">&rsaquo;</span>
+                <span class="text-text-secondary">&rsaquo;</span>
             </div>
         </a>
     </div>
 
-    <form action="/app/logout" method="POST" style="margin-top:24px">
+    <form action="/app/logout" method="POST" class="mt-6">
         @csrf
-        <button type="submit" class="btn btn-danger" style="width:100%">{{ __('app.logout') }}</button>
+        <button type="submit" class="btn btn-danger w-full">{{ __('app.logout') }}</button>
     </form>
 </div>
 
