@@ -1,0 +1,60 @@
+# Jawla (جولة)
+
+> Bilingual (Arabic/English) field-sales CRM/ERP for the Egyptian market. Reps use the PWA to visit customers with GPS, sell from van stock, collect payments, and record returns. Admins manage master data via a Filament dashboard. Built with Laravel 13, Livewire 3, Filament 4, PostgreSQL 16.
+
+This system implements a complete sales cycle: route assignment → daily visits → cash sales with on-the-spot invoicing → payment collection → returns handling → expense logging. All money and stock mutations happen inside `DB::transaction()` via dedicated service classes. The codebase follows strict engineering rules: no secrets in frontend, no shell execution, pagination everywhere, RTL from day one.
+
+## Documentation
+
+- [Main README](README.md): Project overview, setup, and feature list
+- [Production Build Guide](docs/Jawla_Production_Build_Guide.md): Primary spec — phase-by-phase build instructions for the entire system
+- [Build Reference v1](docs/Jawla_Build_Guide_v1_Reference.md): Secondary reference spec
+- [Architecture](docs/ARCHITECTURE.md): Stack overview, system boundaries, architectural decisions
+- [Business Rules](docs/BUSINESS_RULES.md): Non-negotiable business rules (stock, atomic sales, VAT, negative-balance guard)
+- [Roles Matrix](docs/ROLES_MATRIX.md): Role-based permissions for all 5 roles (Admin, Sales Manager, Finance, Purchasing, Rep)
+- [Design System](docs/DESIGN_SYSTEM.md): 60/30/10 color palette, typography, component states, RTL guidelines
+- [Security](docs/SECURITY.md): Authentication, session management, HTTP headers, secrets policy
+- [Testing](docs/TESTING.md): Pest + Playwright testing strategy
+- [Deployment](docs/DEPLOYMENT.md): Forge deployment, deploy script, rollback procedure
+- [Backup & Restore](docs/BACKUP_RESTORE.md): Nightly backup and restore drill
+- [ZATCA Notes](docs/ZATCA_NOTES.md): Saudi Phase 1 QR TLV encoding for invoicing
+- [Build Guide Review](Jawla_Build_Guide_Review.md): Code review against the build guide
+- [Build Guide Certification](Jawla_Build_Guide_Certification.md): Certification checklist
+- [Build Guide Stress Test](Jawla_Build_Guide_StressTest.md): Stress-testing scenarios
+- [Repository Audit](Jawla_Repository_Audit.md): Full repository audit
+- [Beta PRD](docs/Jawla_Beta_PRD_v1.1.md): Beta-phase product requirements document
+- [Agent Rules](AGENTS.md): Rules for AI coding agents — engineering guidelines, business rules, testing expectations
+- [Security Policy](SECURITY.md): Security vulnerability reporting policy
+
+## Specifications
+
+- [Source Precedence](docs/spec/SOURCE_PRECEDENCE.md): Source-of-truth precedence rules
+- [Requirement Traceability](docs/spec/REQUIREMENT_TRACEABILITY.md): Requirement traceability matrix
+- [Build Guide Amendment v1.1](docs/spec/Jawla_Build_Guide_v1.1_Amendment.md): Amendments to the v1.1 build guide
+
+## Configuration
+
+- [Composer Dependencies](composer.json): Laravel 13, Filament 4, mpdf, simple-qrcode, spatie/laravel-permission, Pest, Playwright
+- [Node Dependencies](package.json): Vite 8, Tailwind 4, Leaflet maps, concurrently
+- [Environment Template](.env.example): PostgreSQL, Redis, S3, Sentry, backup config placeholders
+- [PHPUnit Config](phpunit.xml): Unit + Feature test suites with PostgreSQL test database
+- [PHPStan Config](phpstan.neon): Static analysis configuration
+- [Laravel Pint Config](pint.json): Code style configuration
+- [Tailwind Config](tailwind.config.js): Tailwind CSS configuration
+- [Vite Config](vite.config.js): Vite build configuration
+- [Railway Deploy](railway.toml): Railway deployment configuration
+- [Editor Config](.editorconfig): Cross-editor settings
+
+## Routes
+
+- [Web Routes](routes/web.php): All HTTP routes — Filament admin panel, `/app/*` PWA routes (visit flow, sales, payments, returns, expenses), locale switch, PDF generation, health endpoints
+
+## Optional
+
+- [Beta PRD from Voice](docs/Jawla_Beta_PRD_from_Voice_Messages.md): Requirements extracted from client voice messages (AM1-AM9 narrative)
+- [Beta Completion Master Plan](docs/BETA_COMPLETION_MASTER_PLAN.md): Master plan for completing the beta phase
+- [Open Decisions](docs/BETA_OPEN_DECISIONS.md): Open decisions from the beta phase
+- [Phase 1 Plan](docs/PHASE_1_PLAN.md): Initial implementation plan
+- [Changes Report](docs/CHANGES_REPORT.md): Changelog and changes report
+- [Decision Map](decision-map.md): Decision mapping document
+- [Gap Analysis](docs/gaps.txt): Identified gaps in the project
