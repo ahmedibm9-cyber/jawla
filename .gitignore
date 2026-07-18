@@ -25,6 +25,7 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 .obsidian/
+.opencode/
 .playwright-cli/
 .playwright-mcp/
 .agents/
