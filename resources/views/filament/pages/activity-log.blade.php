@@ -19,7 +19,7 @@
 
         {{-- Activity List --}}
         <div class="space-y-3">
-            @forelse($activities as $a)
+            @forelse($this->activities as $a)
                 <x-filament::section>
                     <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                         <div class="flex-1 min-w-0">
@@ -55,9 +55,9 @@
             @endforelse
         </div>
 
-        @if($activities->hasPages())
+        @if($this->activities->hasPages())
             <div>
-                {{ $activities->links() }}
+                {{ $this->activities->links() }}
             </div>
         @endif
     </div>
