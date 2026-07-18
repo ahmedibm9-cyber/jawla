@@ -31,6 +31,12 @@
                 <span class="text-text-secondary">&rsaquo;</span>
             </div>
         </a>
+        <a href="/app/collect-payment" class="card block no-underline text-inherit mt-2">
+            <div class="flex justify-between items-center">
+                <span>{{ __('app.collect_payment') }}</span>
+                <span class="text-text-secondary">&rsaquo;</span>
+            </div>
+        </a>
         <a href="/app/purchase-offer" class="card block no-underline text-inherit mt-2">
             <div class="flex justify-between items-center">
                 <span>{{ app()->getLocale() === 'ar' ? 'عرض شراء' : 'Purchase Offer' }}</span>

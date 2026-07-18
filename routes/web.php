@@ -3,6 +3,7 @@
 use App\Http\Controllers\App\PdfController;
 use App\Livewire\App\AddCustomer;
 use App\Livewire\App\Home;
+use App\Livewire\App\CollectPayment;
 use App\Livewire\App\LogComplaint;
 use App\Livewire\App\MorePage;
 use App\Livewire\App\QuotationFlow;
@@ -67,6 +68,7 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/more', MorePage::class)->name('more');
     Route::get('/customers/create', AddCustomer::class)->name('customers.create');
     Route::get('/complaints', LogComplaint::class)->name('complaints');
+    Route::get('/collect-payment', CollectPayment::class)->name('collect-payment');
     Route::get('/purchase-offer', SubmitPurchaseOffer::class)->name('purchase-offer');
     Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])->name('pdf.proforma');
     Route::get('/pdf/invoice/{invoice}', [PdfController::class, 'invoice'])->name('pdf.invoice');

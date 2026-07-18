@@ -5,6 +5,7 @@ namespace App\Livewire\App;
 use App\Models\Visit;
 use App\Models\VisitReport;
 use App\Support\GpsCoordinate;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -44,7 +45,7 @@ class VisitFlow extends Component
     {
         abort_unless($visit->user_id === auth()->id(), 403);
 
-        $this->visit = $visit;
+        $this->visit = $visit->load('customer');
 
         if ($visit->arrival_confirmed) {
             $this->step = 'report';
@@ -106,24 +107,26 @@ class VisitFlow extends Component
             'summary' => 'required|string|min:5',
         ]);
 
-        if ($this->signature) {
-            $path = 'signatures/'.$this->visit->id.'_'.time().'.png';
-            $data = explode(',', $this->signature, 2);
-            $imgData = base64_decode($data[1] ?? '');
-            Storage::disk('private')->put($path, $imgData);
-        }
+        DB::transaction(function () {
+            if ($this->signature) {
+                $path = 'signatures/'.$this->visit->id.'_'.time().'.png';
+                $data = explode(',', $this->signature, 2);
+                $imgData = base64_decode($data[1] ?? '');
+                Storage::disk('private')->put($path, $imgData);
+            }
 
-        VisitReport::create([
-            'visit_id' => $this->visit->id,
-            'summary' => $this->summary,
-            'customer_feedback' => $this->customerFeedback ?: null,
-            'action_taken' => $this->actionTaken ?: null,
-            'follow_up_needed' => $this->followUpNeeded,
-            'follow_up_note' => $this->followUpNote ?: null,
-            'submitted_at' => now(),
-        ]);
+            VisitReport::create([
+                'visit_id' => $this->visit->id,
+                'summary' => $this->summary,
+                'customer_feedback' => $this->customerFeedback ?: null,
+                'action_taken' => $this->actionTaken ?: null,
+                'follow_up_needed' => $this->followUpNeeded,
+                'follow_up_note' => $this->followUpNote ?: null,
+                'submitted_at' => now(),
+            ]);
 
-        $this->visit->update(['status' => 'closed']);
+            $this->visit->update(['status' => 'closed']);
+        });
 
         $this->step = 'done';
     }

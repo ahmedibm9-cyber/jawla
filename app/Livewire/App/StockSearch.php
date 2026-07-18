@@ -23,7 +23,7 @@ class StockSearch extends Component
                         ->orWhere('name_en', 'ilike', "%{$this->search}%");
                 })
                 ->where('is_active', true)
-                ->with(['stocks' => fn ($q) => $q->where('quantity', '>', 0)])
+                ->with(['stocks' => fn ($q) => $q->where('quantity', '>', 0)->with('warehouse')])
                 ->limit(20)
                 ->get();
         }
