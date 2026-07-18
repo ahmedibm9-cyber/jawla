@@ -96,7 +96,7 @@ class PurchaseRequestResource extends Resource
                     ->label($l('موافقة Sales', 'Sales Approve'))
                     ->icon('heroicon-o-check')
                     ->color('info')
-                    ->visible(fn (PurchaseRequest $r) => $r->status === 'pending')
+                    ->visible(fn (PurchaseRequest $r) => $r->status === 'pending' && auth()->user()->hasAnyRole(['admin', 'sales_manager']))
                     ->action(function (PurchaseRequest $r) {
                         $r->update([
                             'status' => 'sales_approved',
@@ -109,7 +109,7 @@ class PurchaseRequestResource extends Resource
                     ->label($l('رفض Sales', 'Sales Reject'))
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
-                    ->visible(fn (PurchaseRequest $r) => $r->status === 'pending')
+                    ->visible(fn (PurchaseRequest $r) => $r->status === 'pending' && auth()->user()->hasAnyRole(['admin', 'sales_manager']))
                     ->action(function (PurchaseRequest $r) {
                         $r->update([
                             'status' => 'rejected_by_sales',
@@ -122,7 +122,7 @@ class PurchaseRequestResource extends Resource
                     ->label($l('موافقة Purchasing', 'Purchasing Approve'))
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn (PurchaseRequest $r) => $r->status === 'sales_approved')
+                    ->visible(fn (PurchaseRequest $r) => $r->status === 'sales_approved' && auth()->user()->hasAnyRole(['admin', 'purchasing']))
                     ->action(function (PurchaseRequest $r) {
                         $r->update([
                             'status' => 'purchasing_approved',
@@ -135,7 +135,7 @@ class PurchaseRequestResource extends Resource
                     ->label($l('رفض Purchasing', 'Purchasing Reject'))
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
-                    ->visible(fn (PurchaseRequest $r) => $r->status === 'sales_approved')
+                    ->visible(fn (PurchaseRequest $r) => $r->status === 'sales_approved' && auth()->user()->hasAnyRole(['admin', 'purchasing']))
                     ->action(function (PurchaseRequest $r) {
                         $r->update([
                             'status' => 'rejected_by_purchasing',

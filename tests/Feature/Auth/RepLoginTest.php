@@ -58,7 +58,7 @@ class RepLoginTest extends TestCase
     {
         $rep = $this->makeUser('rep');
 
-        $response = $this->actingAs($rep)->get('/admin');
+        $response = $this->actingAs($rep)->get('/alarms');
 
         $response->assertRedirect('/app');
     }

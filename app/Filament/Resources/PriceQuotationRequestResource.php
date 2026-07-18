@@ -7,6 +7,7 @@ use App\Models\PriceQuotation;
 use App\Models\PriceQuotationRequest;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -37,6 +38,27 @@ class PriceQuotationRequestResource extends Resource
         return app()->getLocale() === 'ar' ? 'عروض الأسعار' : 'Quotations';
     }
 
+    public static function form(Schema $schema): Schema
+    {
+        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
+
+        return $schema->schema([
+            Forms\Components\Section::make($l('طلب عرض سعر', 'Quotation Request'))->schema([
+                Forms\Components\Select::make('customer_id')->label($l('العميل', 'Customer'))
+                    ->relationship('customer', 'name_ar')->preload()->required(),
+                Forms\Components\Select::make('product_id')->label($l('المنتج', 'Product'))
+                    ->relationship('product', 'name_ar')->preload()->required(),
+                Forms\Components\Select::make('user_id')->label($l('المندوب', 'Rep'))
+                    ->relationship('user', 'name')->preload()->required(),
+                Forms\Components\TextInput::make('quantity_requested')->label($l('الكمية المطلوبة', 'Qty'))
+                    ->numeric()->required()->minValue(0),
+                Forms\Components\Select::make('status')->label($l('الحالة', 'Status'))
+                    ->options(['requested' => 'Requested', 'priced' => 'Priced', 'confirmed' => 'Confirmed', 'cancelled' => 'Cancelled'])
+                    ->default('requested'),
+            ])->columns(2),
+        ]);
+    }
+
     public static function table(Table $table): Table
     {
         return $table
@@ -57,7 +79,7 @@ class PriceQuotationRequestResource extends Resource
                 Filament\Actions\Action::make('set_price')
                     ->label(app()->getLocale() === 'ar' ? 'تسعير' : 'Set Price')
                     ->icon('heroicon-o-pencil-square')
-                    ->visible(fn (PriceQuotationRequest $r) => $r->status === 'requested')
+                    ->visible(fn (PriceQuotationRequest $r) => $r->status === 'requested' && auth()->user()->hasAnyRole(['admin', 'accounts']))
                     ->form([
                         Forms\Components\TextInput::make('base_price')->label(app()->getLocale() === 'ar' ? 'السعر الأساسي' : 'Base Price')->numeric()->required(),
                         Forms\Components\TextInput::make('manager_plus')->label(app()->getLocale() === 'ar' ? 'الحد الأعلى (±)' : 'Plus Range')->numeric()->default(0),
@@ -86,6 +108,8 @@ class PriceQuotationRequestResource extends Resource
     {
         return [
             'index' => Pages\ListQuotationRequests::route('/'),
+            'create' => Pages\CreateQuotationRequest::route('/create'),
+            'edit' => Pages\EditQuotationRequest::route('/{record}/edit'),
         ];
     }
 }

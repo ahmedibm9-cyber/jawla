@@ -147,7 +147,7 @@ class CustomerResource extends Resource
                     ->label($l('اعتماد', 'Approve'))
                     ->icon('heroicon-o-check')
                     ->color('success')
-                    ->visible(fn (Customer $c) => $c->status === 'pending' && $c->added_by !== auth()->id())
+                    ->visible(fn (Customer $c) => $c->status === 'pending' && $c->added_by !== auth()->id() && auth()->user()->hasAnyRole(['admin', 'sales_manager']))
                     ->action(fn (Customer $c) => $c->update([
                         'status' => 'approved',
                         'approved_by' => auth()->id(),
@@ -158,7 +158,7 @@ class CustomerResource extends Resource
                     ->label($l('رفض', 'Reject'))
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
-                    ->visible(fn (Customer $c) => $c->status === 'pending' && $c->added_by !== auth()->id())
+                    ->visible(fn (Customer $c) => $c->status === 'pending' && $c->added_by !== auth()->id() && auth()->user()->hasAnyRole(['admin', 'sales_manager']))
                     ->form([
                         Forms\Components\Textarea::make('rejection_reason')
                             ->label($l('سبب الرفض', 'Rejection Reason'))

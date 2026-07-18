@@ -98,7 +98,7 @@ class InvoiceService implements InvoiceContract
         });
     }
 
-    public function submit($invoice): Invoice
+    public function submit(Invoice $invoice): Invoice
     {
         return DB::transaction(function () use ($invoice): Invoice {
             if ($invoice->status !== InvoiceStatus::Draft) {
@@ -114,7 +114,7 @@ class InvoiceService implements InvoiceContract
         });
     }
 
-    public function cancel($invoice, int $userId, string $reason): Invoice
+    public function cancel(Invoice $invoice, int $userId, string $reason): Invoice
     {
         return DB::transaction(function () use ($invoice, $userId): Invoice {
             $invoice->update([
@@ -148,7 +148,7 @@ class InvoiceService implements InvoiceContract
         });
     }
 
-    public function amend($invoice): Invoice
+    public function amend(Invoice $invoice): Invoice
     {
         return DB::transaction(function () use ($invoice): Invoice {
             $this->cancel($invoice, auth()->id(), 'Amendment requested');
@@ -166,7 +166,7 @@ class InvoiceService implements InvoiceContract
                 'remaining_amount' => $invoice->total,
                 'amended_from' => $invoice->id,
                 'posting_date' => today(),
-                'issued_at' => now(),
+                'issued_at' => null,
             ]);
 
             foreach ($invoice->items as $item) {

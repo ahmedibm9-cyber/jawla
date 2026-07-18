@@ -83,6 +83,7 @@ class StockResource extends Resource
                     ->label($l('تسوية', 'Adjust'))
                     ->icon('heroicon-o-adjustments-horizontal')
                     ->color('warning')
+                    ->visible(fn () => auth()->user()->hasAnyRole(['admin', 'warehouse_keeper']))
                     ->requiresConfirmation()
                     ->modalDescription(fn () => app()->getLocale() === 'ar'
                         ? 'سيقوم هذا بإنشاء حركة مخزون مطابقة. لا يمكن التراجع.'
