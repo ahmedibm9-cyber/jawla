@@ -43,6 +43,8 @@ class SalesFlow extends Component
         if ($customer) {
             $this->customerId = $customer;
         }
+
+        $this->recalcCart();
     }
 
     public function selectCustomer(int $id): void
@@ -107,7 +109,41 @@ class SalesFlow extends Component
         $this->recalcCart();
     }
 
-    public function recalcCart(): void {}
+    public float $cartSubtotal = 0.0;
+
+    public float $cartVatAmount = 0.0;
+
+    public float $cartTotal = 0.0;
+
+    public function updatedCart(): void
+    {
+        $this->recalcCart();
+    }
+
+    public function recalcCart(): void
+    {
+        $subtotal = 0.0;
+        $vatAmount = 0.0;
+        $vatPercent = (float) (auth()->user()?->company?->vat_percent ?? 0);
+
+        foreach ($this->cart as &$item) {
+            $lineTotal = round($item['quantity'] * $item['price'], 2);
+            $item['line_total'] = $lineTotal;
+            $subtotal += $lineTotal;
+
+            if ($item['vat_applicable'] && $vatPercent > 0) {
+                $item['vat_amount'] = round($lineTotal * ($vatPercent / 100), 2);
+                $vatAmount += $item['vat_amount'];
+            } else {
+                $item['vat_amount'] = 0.0;
+            }
+        }
+        unset($item);
+
+        $this->cartSubtotal = round($subtotal, 2);
+        $this->cartVatAmount = round($vatAmount, 2);
+        $this->cartTotal = round($subtotal + $vatAmount, 2);
+    }
 
     public function submit(): void
     {

@@ -64,11 +64,13 @@
                     <button type="button" class="btn btn-outline text-sm w-full" wire:click="addItem">{{ __('app.add_item') }}</button>
                 </div>
 
-                <button type="submit" wire:loading.attr="disabled" class="btn btn-primary w-full mt-3">
+                <button type="submit" wire:loading.attr="disabled" wire:confirm="{{ app()->getLocale() === 'ar' ? 'سيتم تسجيل المرتجع. هل أنت متأكد؟' : 'Return will be logged. Are you sure?' }}" class="btn btn-primary w-full mt-3">
                     <span wire:loading.remove>{{ __('app.log_return') }}</span>
                     <span wire:loading>{{ __('app.saving') }}&hellip;</span>
                 </button>
             </form>
         @endif
     </div>
+
+    <x-tab-bar active="more" />
 </div>

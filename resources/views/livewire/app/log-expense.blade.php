@@ -43,11 +43,13 @@
                     <textarea wire:model="note" id="note" rows="2" autocomplete="off" class="form-textarea"></textarea>
                 </div>
 
-                <button type="submit" wire:loading.attr="disabled" class="btn btn-primary w-full">
+                <button type="submit" wire:loading.attr="disabled" wire:confirm="{{ app()->getLocale() === 'ar' ? 'سيتم تسجيل المصروف. هل أنت متأكد؟' : 'Expense will be logged. Are you sure?' }}" class="btn btn-primary w-full">
                     <span wire:loading.remove>{{ __('app.log_expense') }}</span>
                     <span wire:loading>{{ __('app.saving') }}&hellip;</span>
                 </button>
             </form>
         @endif
     </div>
+
+    <x-tab-bar active="more" />
 </div>

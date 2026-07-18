@@ -61,11 +61,13 @@
                     @error('notes') <small class="form-error">{{ $message }}</small> @enderror
                 </div>
 
-                <button type="submit" wire:loading.attr="disabled" class="btn btn-primary w-full">
+                <button type="submit" wire:loading.attr="disabled" wire:confirm="{{ app()->getLocale() === 'ar' ? 'سيتم تحصيل المبلغ. هل أنت متأكد؟' : 'Payment will be collected. Are you sure?' }}" class="btn btn-primary w-full">
                     <span wire:loading.remove>{{ __('app.collect') }}</span>
                     <span wire:loading>{{ __('app.saving') }}&hellip;</span>
                 </button>
             </form>
         @endif
     </div>
+
+    <x-tab-bar active="more" />
 </div>

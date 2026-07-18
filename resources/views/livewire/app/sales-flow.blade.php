@@ -20,7 +20,10 @@
         </div>
 
         @if($errorMessage)
-            <div class="card bg-danger/10 text-danger mb-4">{{ $errorMessage }}</div>
+            <div class="card bg-danger/10 text-danger mb-4 flex justify-between items-center" aria-live="polite">
+                <span>{{ $errorMessage }}</span>
+                <button type="button" wire:click="$set('errorMessage', '')" class="text-danger bg-transparent border-0 cursor-pointer text-lg px-2">&times;</button>
+            </div>
         @endif
 
         @if($step === 'cart')
@@ -95,14 +98,32 @@
                             </div>
                             <div class="text-right">
                                 <span class="text-xs text-text-secondary">{{ __('app.total') }}</span>
-                                <span class="block font-semibold">{{ number_format($item['quantity'] * $item['price'], 2) }}</span>
+                                <span class="block font-semibold">{{ number_format($item['line_total'] ?? ($item['quantity'] * $item['price']), 2) }}</span>
                             </div>
                         </div>
                     @endforeach
+
+                    {{-- Cart Summary --}}
+                    <div class="card bg-surface-alt">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="text-text-secondary">{{ __('app.subtotal') ?? 'Subtotal' }}</span>
+                            <span class="font-medium">{{ number_format($cartSubtotal, 2) }}</span>
+                        </div>
+                        @if($cartVatAmount > 0)
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-text-secondary">{{ __('app.vat') ?? 'VAT' }}</span>
+                                <span class="font-medium">{{ number_format($cartVatAmount, 2) }}</span>
+                            </div>
+                        @endif
+                        <div class="flex justify-between font-bold border-t border-border-light pt-2 mt-2">
+                            <span>{{ __('app.grand_total') ?? 'Grand Total' }}</span>
+                            <span class="text-accent">{{ number_format($cartTotal, 2) }}</span>
+                        </div>
+                    </div>
                 </div>
 
                 @if($selectedCustomer && !empty($cart))
-                    <button type="button" wire:click="submit" class="btn btn-primary w-full">
+                    <button type="button" wire:click="submit" wire:confirm="{{ app()->getLocale() === 'ar' ? 'سيتم إنشاء فاتورة بمبلغ ' . number_format($cartTotal, 2) . ' هل أنت متأكد؟' : 'Invoice for ' . number_format($cartTotal, 2) . ' will be created. Are you sure?' }}" class="btn btn-primary w-full">
                         {{ __('app.submit') }}
                     </button>
                 @endif

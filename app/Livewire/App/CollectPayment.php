@@ -91,7 +91,6 @@ class CollectPayment extends Component
                 ->whereIn('status', ['submitted', 'partially_paid'])
                 ->whereRaw('remaining_amount > 0')
                 ->orderBy('issued_at', 'desc')
-            ->limit(200)
                 ->limit(100)
                 ->get();
         }

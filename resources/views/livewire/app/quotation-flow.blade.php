@@ -8,7 +8,10 @@
     <div class="page-body">
 
     @if($errorMessage)
-        <div class="card bg-red-50 text-danger mb-3" aria-live="polite">{{ $errorMessage }}</div>
+        <div class="card bg-red-50 text-danger mb-3 flex justify-between items-center" aria-live="polite">
+            <span>{{ $errorMessage }}</span>
+            <button type="button" wire:click="$set('errorMessage', '')" class="text-danger bg-transparent border-0 cursor-pointer text-lg px-2">&times;</button>
+        </div>
     @endif
 
     @if($successMessage)

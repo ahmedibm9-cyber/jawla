@@ -50,7 +50,7 @@
                 </x-filament::section>
             @empty
                 <x-filament::section>
-                    <x-filament::empty-state icon="heroicon-o-clock" :title="app()->getLocale() === 'ar' ? 'لا يوجد أنشطة' : 'No activities'" />
+                    <x-filament::empty-state icon="heroicon-o-clock" :heading="app()->getLocale() === 'ar' ? 'لا يوجد أنشطة' : 'No activities'" />
                 </x-filament::section>
             @endforelse
         </div>
