@@ -110,6 +110,23 @@ class InvoiceService implements InvoiceContract
                 'issued_at' => now(),
             ]);
 
+            $vanWarehouse = Warehouse::where('user_id', $invoice->user_id)
+                ->where('type', 'van')->first();
+
+            if ($vanWarehouse) {
+                foreach ($invoice->items as $item) {
+                    $this->stock->decrement(
+                        $vanWarehouse->id,
+                        $item->product_id,
+                        $item->batch_id,
+                        (float) $item->quantity,
+                        StockReason::Sale,
+                        $invoice,
+                        $invoice->user_id,
+                    );
+                }
+            }
+
             return $invoice->fresh();
         });
     }
