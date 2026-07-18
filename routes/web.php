@@ -35,6 +35,8 @@ Route::get('/admin', function () {
 
 Route::get('/up', fn () => response('ok', 200));
 
+Route::get('/offline', fn () => view('vendor.laravel.offline'));
+
 Route::get('/health', function () {
     return response()->json([
         'status' => 'ok',

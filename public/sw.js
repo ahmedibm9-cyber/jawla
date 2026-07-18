@@ -1,11 +1,22 @@
-// Jawla service worker — app-shell cache only in v1.
-// Full offline data sync is out of scope for v1 (see main guide §12).
-const CACHE = 'jawla-shell-v1';
-const SHELL = ['/', '/app', '/manifest.json'];
+const CACHE = 'jawla-shell-v2';
+const SHELL = ['/', '/app', '/manifest.json', '/offline'];
+
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)));
+  self.skipWaiting();
 });
+
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))));
+});
+
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  if (e.request.mode === 'navigate') {
+    e.respondWith(
+      fetch(e.request).catch(() => caches.match('/offline'))
+    );
+    return;
+  }
   e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
 });
