@@ -8,12 +8,26 @@ const pageLoadMs = new Trend('page_load_ms');
 
 const ADMIN = { email: 'admin@jawla.test', password: 'password' };
 
+function unescapeHtml(str) {
+  return str
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'");
+}
+
 function csrf(html) {
   const m = html.match(/<meta name="csrf-token" content="([^"]+)"/);
   return m ? m[1] : '';
 }
 
-// ─── HEALTH ────────────────────────────────────────────────
+function extractSnapshot(html) {
+  const m = html.match(/wire:snapshot="([^"]+)"/);
+  if (!m) return null;
+  return unescapeHtml(m[1]);
+}
+
 function checkHealth() {
   group('health', () => {
     let r = http.get(`${BASE_URL}/up`);
@@ -25,7 +39,6 @@ function checkHealth() {
   });
 }
 
-// ─── ADMIN LOGIN (Livewire POST) ───────────────────────────
 function adminSession() {
   group('admin-login', () => {
     let r = http.get(`${BASE_URL}/admin/login`);
@@ -33,23 +46,52 @@ function adminSession() {
     pageLoadMs.add(r.timings.duration);
     httpErrorRate.add(r.status !== 200);
 
-    // Livewire POST to authenticate
     const token = csrf(r.body);
-    r = http.post(`${BASE_URL}/livewire/message/filament.core.auth.login`, {
+    const snapshot = extractSnapshot(r.body);
+    check(r, { 'snapshot extracted': (x) => snapshot !== null });
+    if (!snapshot) return;
+
+    const payload = JSON.stringify({
       _token: token,
-      email: ADMIN.email,
-      password: ADMIN.password,
-      remember: 'on',
-    }, {
+      components: [{
+        snapshot: snapshot,
+        updates: {
+          'data.email': ADMIN.email,
+          'data.password': ADMIN.password,
+          'data.remember': true,
+        },
+        calls: [{
+          method: 'authenticate',
+          params: [],
+          path: '',
+        }],
+      }],
+    });
+
+    r = http.post(`${BASE_URL}/livewire/update`, payload, {
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Type': 'application/json',
         'X-Livewire': 'true',
-        'X-CSRF-TOKEN': token,
-        'Accept': 'text/html,application/xhtml+xml,application/json',
+        'Accept': 'application/json',
       },
     });
-    check(r, { 'login POST responded': (x) => x.status < 500 });
+
+    check(r, { 'login POST 200': (x) => x.status === 200 });
     httpErrorRate.add(r.status >= 500);
+
+    if (r.status === 200) {
+      try {
+        const body = JSON.parse(r.body);
+        const redirectUrl = body?.components?.[0]?.effects?.redirect;
+        check(r, { 'login redirect received': !!redirectUrl });
+        if (redirectUrl) {
+          http.get(redirectUrl.startsWith('http') ? redirectUrl : `${BASE_URL}${redirectUrl}`);
+        }
+      } catch (e) {
+        console.log('Parse error:', e);
+      }
+    }
+
     sleep(0.5);
   });
 }
@@ -57,7 +99,7 @@ function adminSession() {
 function adminBrowse() {
   group('admin-dashboard', () => {
     let r = http.get(`${BASE_URL}/admin`);
-    check(r, { 'dashboard': (x) => x.status === 200 || x.status === 302 });
+    check(r, { 'dashboard 200': (x) => x.status === 200 });
     pageLoadMs.add(r.timings.duration);
     httpErrorRate.add(r.status >= 500);
     sleep(1);
@@ -67,6 +109,7 @@ function adminBrowse() {
                  '/admin/reports-page', '/admin/stocks', '/admin/daily-visit-assignments',
                  '/admin/companies', '/admin/routes', '/admin/purchase-requests',
                  '/admin/alarms', '/admin/complaints'];
+
   for (const p of pages) {
     group(`admin-${p.replace('/admin/', '')}`, () => {
       let r = http.get(`${BASE_URL}${p}`);

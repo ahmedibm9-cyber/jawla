@@ -14,6 +14,21 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect('/admin/login'));
 
+// Catch /admin root — Filament registers sub-pages but not the bare prefix
+Route::get('/admin', function () {
+    $user = auth()->user();
+
+    if ($user && $user->hasRole('rep')) {
+        return redirect('/app');
+    }
+
+    if ($user && method_exists($user, 'canAccessPanel')) {
+        return redirect('/admin/dashboard');
+    }
+
+    return redirect('/admin/login');
+});
+
 Route::get('/up', fn () => response('ok', 200));
 
 Route::get('/health', function () {
