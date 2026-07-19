@@ -18,6 +18,7 @@ class Visit extends Model
         'daily_visit_assignment_id',
         'purpose', 'status', 'is_out_of_route',
         'arrival_confirmed', 'arrival_confirmed_at',
+        'arrival_flag', 'checkin_distance_m', 'checkin_accuracy_m',
         'checkin_latitude', 'checkin_longitude', 'checkin_at',
         'checkout_latitude', 'checkout_longitude', 'checkout_at', 'notes',
     ];

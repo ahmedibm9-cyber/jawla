@@ -15,6 +15,7 @@ class Company extends Model
         'tax_number', 'commercial_registration_number',
         'address', 'phone', 'logo_path', 'currency', 'vat_percent',
         'bank_name', 'bank_account', 'bank_iban', 'rep_discount_percent', 'is_active',
+        'geofence_radius_m',
         'country', 'zatca_enabled', 'zatca_csid', 'zatca_secret', 'zatca_environment',
     ];
 

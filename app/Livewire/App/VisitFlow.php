@@ -2,6 +2,7 @@
 
 namespace App\Livewire\App;
 
+use App\Models\Activity;
 use App\Models\Visit;
 use App\Models\VisitReport;
 use App\Support\GpsCoordinate;
@@ -33,11 +34,13 @@ class VisitFlow extends Component
 
     public ?float $userLng = null;
 
+    public ?float $userAccuracy = null;
+
     public ?float $distanceMeters = null;
 
     public bool $withinRange = false;
 
-    public bool $outOfRangeConfirmed = false;
+    public bool $gpsDenied = false;
 
     public string $errorMessage = '';
 
@@ -45,7 +48,7 @@ class VisitFlow extends Component
     {
         abort_unless($visit->user_id === auth()->id(), 403);
 
-        $this->visit = $visit->load('customer');
+        $this->visit = $visit->load('customer.company');
 
         if ($visit->arrival_confirmed) {
             $this->step = 'report';
@@ -54,6 +57,8 @@ class VisitFlow extends Component
 
     public function checkGps(): void
     {
+        $this->gpsDenied = false;
+
         // GPS coordinates come from JavaScript callback
         if ($this->userLat === null || $this->userLng === null) {
             $this->errorMessage = app()->getLocale() === 'ar'
@@ -63,23 +68,54 @@ class VisitFlow extends Component
             return;
         }
 
-        $userPos = new GpsCoordinate($this->userLat, $this->userLng);
-        $customerPos = new GpsCoordinate(
-            (float) ($this->visit->customer->latitude ?? 0),
-            (float) ($this->visit->customer->longitude ?? 0),
-        );
-
-        $this->distanceMeters = round($userPos->metersTo($customerPos));
-        $this->withinRange = $userPos->within($customerPos, 1500);
+        $distance = $this->distanceToCustomer();
+        $this->distanceMeters = round($distance);
+        $this->withinRange = $distance <= $this->geofenceRadius();
 
         if ($this->withinRange) {
             $this->confirmArrival();
+        } else {
+            $this->logDeclinedAttempt($distance);
         }
+    }
+
+    public function markGpsDenied(): void
+    {
+        $this->gpsDenied = true;
+        $this->userLat = null;
+        $this->userLng = null;
+        $this->withinRange = false;
     }
 
     public function confirmArrival(): void
     {
-        if (! $this->withinRange && ! $this->outOfRangeConfirmed) {
+        // Idempotent: an already-confirmed visit just resumes at the report step.
+        if ($this->visit->arrival_confirmed) {
+            $this->step = 'report';
+
+            return;
+        }
+
+        // D-02: GPS is mandatory — no coordinates, no check-in.
+        if ($this->userLat === null || $this->userLng === null) {
+            $this->gpsDenied = true;
+
+            return;
+        }
+
+        // D-02: server-side recompute — never trust client-set withinRange.
+        $distance = $this->distanceToCustomer();
+        $radius = $this->geofenceRadius();
+
+        if ($distance > $radius) {
+            $this->withinRange = false;
+            $this->distanceMeters = round($distance);
+            $this->logDeclinedAttempt($distance);
+            $this->errorMessage = __('app.out_of_range_blocked', [
+                'distance' => round($distance),
+                'radius' => $radius,
+            ]);
+
             return;
         }
 
@@ -89,16 +125,14 @@ class VisitFlow extends Component
             'checkin_at' => now(),
             'arrival_confirmed' => true,
             'arrival_confirmed_at' => now(),
+            'arrival_flag' => 'in_range',
+            'checkin_distance_m' => (int) round($distance),
+            'checkin_accuracy_m' => $this->userAccuracy !== null ? (int) round($this->userAccuracy) : null,
             'status' => 'open',
         ]);
 
+        $this->withinRange = true;
         $this->step = 'report';
-    }
-
-    public function skipGpsAndConfirm(): void
-    {
-        $this->outOfRangeConfirmed = true;
-        $this->confirmArrival();
     }
 
     public function submitReport(): void
@@ -133,6 +167,37 @@ class VisitFlow extends Component
         });
 
         $this->step = 'done';
+    }
+
+    private function distanceToCustomer(): float
+    {
+        $userPos = new GpsCoordinate((float) $this->userLat, (float) $this->userLng);
+        $customerPos = new GpsCoordinate(
+            (float) ($this->visit->customer->latitude ?? 0),
+            (float) ($this->visit->customer->longitude ?? 0),
+        );
+
+        return $userPos->metersTo($customerPos);
+    }
+
+    private function geofenceRadius(): int
+    {
+        return (int) ($this->visit->customer->company?->geofence_radius_m ?? 500);
+    }
+
+    private function logDeclinedAttempt(float $distance): void
+    {
+        Activity::log('geofence_declined', $this->visit, sprintf(
+            'Check-in declined: %dm from customer (radius %dm)',
+            (int) round($distance),
+            $this->geofenceRadius(),
+        ), [
+            'latitude' => $this->userLat,
+            'longitude' => $this->userLng,
+            'accuracy_m' => $this->userAccuracy,
+            'distance_m' => (int) round($distance),
+            'radius_m' => $this->geofenceRadius(),
+        ]);
     }
 
     public function render()

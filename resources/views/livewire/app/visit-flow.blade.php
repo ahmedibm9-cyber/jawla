@@ -6,22 +6,35 @@
         online: navigator.onLine,
         draftKey: 'visit_draft_{{ $visit->id }}',
         draftInterval: null,
+        requestGps() {
+            if (!('geolocation' in navigator)) {
+                $wire.markGpsDenied();
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    this.userLat = pos.coords.latitude;
+                    this.userLng = pos.coords.longitude;
+                    $wire.set('userLat', this.userLat, false);
+                    $wire.set('userLng', this.userLng, false);
+                    $wire.set('userAccuracy', pos.coords.accuracy, false);
+                    $wire.checkGps();
+                },
+                (err) => {
+                    if (err.code === 1) {
+                        $wire.markGpsDenied();
+                    } else {
+                        $wire.set('errorMessage', 'GPS {{ app()->getLocale() === "ar" ? "غير متوفر" : "unavailable" }}');
+                    }
+                },
+                { enableHighAccuracy: true, timeout: 15000 }
+            );
+        },
         init() {
             window.addEventListener('online', () => this.online = true);
             window.addEventListener('offline', () => this.online = false);
 
-            if ('geolocation' in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        this.userLat = pos.coords.latitude;
-                        this.userLng = pos.coords.longitude;
-                        $wire.set('userLat', this.userLat);
-                        $wire.set('userLng', this.userLng);
-                        $wire.checkGps();
-                    },
-                    () => $wire.set('errorMessage', 'GPS {{ app()->getLocale() === "ar" ? "غير متوفر" : "unavailable" }}')
-                );
-            }
+            this.requestGps();
 
             const saved = localStorage.getItem(this.draftKey);
             if (saved) {
@@ -52,12 +65,10 @@
     />
 
     <div class="page-body">
-    @if(!$online)
-        <div class="card bg-amber-50 text-amber-800 mb-3 flex items-center gap-2">
-            <svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728M5.636 18.364a9 9 0 010-12.728M15.536 8.464a5 5 0 010 7.072M8.464 15.536a5 5 0 010-7.072"/></svg>
-            <span>{{ app()->getLocale() === 'ar' ? 'غير متصل — سيتم حفظ المسودة' : 'Offline — draft will be saved' }}</span>
-        </div>
-    @endif
+    <div x-show="!online" x-cloak class="card bg-amber-50 text-amber-800 mb-3 flex items-center gap-2">
+        <svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728M5.636 18.364a9 9 0 010-12.728M15.536 8.464a5 5 0 010 7.072M8.464 15.536a5 5 0 010-7.072"/></svg>
+        <span>{{ app()->getLocale() === 'ar' ? 'غير متصل — سيتم حفظ المسودة' : 'Offline — draft will be saved' }}</span>
+    </div>
 
     {{-- Stepper --}}
     <div class="stepper">
@@ -98,11 +109,22 @@
             </div>
         @endif
 
-        @if(!$withinRange && $distanceMeters !== null)
-            <div class="card mb-4 border-2 border-amber-400">
-                <p class="m-0 mb-3 text-amber-800 font-semibold">{{ __('app.out_of_range_warning') }}: {{ round($distanceMeters) }}m</p>
-                <button class="btn btn-outline w-full" wire:click="skipGpsAndConfirm">
-                    {{ __('app.confirm_anyway') }}
+        @if($gpsDenied)
+            <div class="card mb-4 border-2 border-danger bg-red-50" role="alert">
+                <p class="m-0 mb-1 text-danger font-bold">{{ __('app.gps_required_title') }}</p>
+                <p class="m-0 mb-3 text-sm text-text-secondary">{{ __('app.gps_required_help') }}</p>
+                <button type="button" class="btn btn-outline w-full" @click="requestGps()">
+                    {{ __('app.retry') }}
+                </button>
+            </div>
+        @elseif(!$withinRange && $distanceMeters !== null)
+            <div class="card mb-4 border-2 border-danger bg-red-50" role="alert">
+                <p class="m-0 mb-1 text-danger font-bold">{{ __('app.out_of_range') }}</p>
+                <p class="m-0 mb-3 text-sm text-text-secondary">
+                    {{ __('app.out_of_range_blocked', ['distance' => round($distanceMeters), 'radius' => $customer->company?->geofence_radius_m ?? 500]) }}
+                </p>
+                <button type="button" class="btn btn-outline w-full" @click="requestGps()">
+                    {{ __('app.retry') }}
                 </button>
             </div>
         @elseif($withinRange)

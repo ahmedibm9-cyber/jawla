@@ -18,6 +18,8 @@ class WorkSessionFactory extends Factory
             'route_id' => Route::factory(),
             'started_at' => now()->subHours(2),
             'ended_at' => now(),
+            'start_latitude' => 24.7136,
+            'start_longitude' => 46.6753,
         ];
     }
 }

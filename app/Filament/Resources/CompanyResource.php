@@ -73,6 +73,18 @@ class CompanyResource extends Resource
                         Forms\Components\TextInput::make('phone')
                             ->label(app()->getLocale() === 'ar' ? 'الهاتف' : 'Phone')
                             ->tel(),
+                        Forms\Components\TextInput::make('geofence_radius_m')
+                            ->label(app()->getLocale() === 'ar' ? 'نطاق تأكيد الزيارة (متر)' : 'Visit Geofence Radius (m)')
+                            ->helperText(app()->getLocale() === 'ar'
+                                ? 'المسافة القصوى المسموح بها لتأكيد وصول المندوب'
+                                : 'Maximum distance allowed for rep arrival confirmation')
+                            ->numeric()
+                            ->integer()
+                            ->minValue(50)
+                            ->maxValue(5000)
+                            ->default(500)
+                            ->required()
+                            ->suffix('m'),
                         Forms\Components\Textarea::make('address')
                             ->label(app()->getLocale() === 'ar' ? 'العنوان' : 'Address')
                             ->columnSpanFull(),
