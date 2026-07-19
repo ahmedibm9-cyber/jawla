@@ -70,6 +70,7 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/customers', TodaysCustomers::class)->name('customers');
     Route::get('/visits', App\Livewire\App\Visits::class)->name('visits');
     Route::get('/orders', App\Livewire\App\Orders::class)->name('orders');
+    Route::get('/notifications', App\Livewire\App\Notifications::class)->name('notifications');
     Route::get('/quotations', QuotationFlow::class)->name('quotations');
     Route::get('/stock', StockSearch::class)->name('stock');
     Route::get('/more', MorePage::class)->name('more');

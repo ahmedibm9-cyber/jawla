@@ -151,11 +151,16 @@ class CustomerResource extends Resource
                     ->icon('heroicon-o-check')
                     ->color('success')
                     ->visible(fn (Customer $c) => $c->status === 'pending' && $c->added_by !== auth()->id() && auth()->user()->hasAnyRole(['admin', 'sales_manager']))
-                    ->action(fn (Customer $c) => $c->update([
-                        'status' => 'approved',
-                        'approved_by' => auth()->id(),
-                        'approved_at' => now(),
-                    ]))
+                    ->action(function (Customer $c): void {
+                        $c->update([
+                            'status' => 'approved',
+                            'approved_by' => auth()->id(),
+                            'approved_at' => now(),
+                        ]);
+
+                        \App\Models\User::find($c->added_by)
+                            ?->notify(new \App\Notifications\CustomerApprovalOutcome($c, 'approved'));
+                    })
                     ->requiresConfirmation(),
                 Action::make('reject')
                     ->label($l('رفض', 'Reject'))
@@ -176,6 +181,9 @@ class CustomerResource extends Resource
                             'rejected_at' => now(),
                             'rejection_reason' => $data['rejection_reason'],
                         ]);
+
+                        \App\Models\User::find($c->added_by)
+                            ?->notify(new \App\Notifications\CustomerApprovalOutcome($c, 'rejected', $data['rejection_reason']));
                     })
                     ->requiresConfirmation(),
                 EditAction::make(),

@@ -69,6 +69,8 @@ return [
     'no_visits_yet' => 'لا توجد زيارات بعد — ابدأ يومك من الرئيسية',
     'no_orders_yet' => 'لا توجد مستندات بعد — أنشئ أول فاتورة',
     'share_whatsapp' => 'مشاركة عبر واتساب',
+    'notifications' => 'الإشعارات',
+    'no_notifications' => 'لا توجد إشعارات بعد',
     'today' => 'اليوم',
     'status_draft' => 'مسودة',
     'status_submitted' => 'مُصدرة',

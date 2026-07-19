@@ -75,6 +75,11 @@ class OutOfStockService implements OutOfStockServiceContract
                 $userId,
             ));
 
+            // afterCommit: a rolled-back fulfilment must never notify the rep.
+            DB::afterCommit(function () use ($request): void {
+                $request->user?->notify(new \App\Notifications\OutOfStockResolved($request));
+            });
+
             return $request;
         });
     }

@@ -69,6 +69,8 @@ return [
     'no_visits_yet' => 'No visits yet — start your day from Home',
     'no_orders_yet' => 'No documents yet — create your first invoice',
     'share_whatsapp' => 'Share via WhatsApp',
+    'notifications' => 'Notifications',
+    'no_notifications' => 'No notifications yet',
     'today' => 'Today',
     'status_draft' => 'Draft',
     'status_submitted' => 'Submitted',

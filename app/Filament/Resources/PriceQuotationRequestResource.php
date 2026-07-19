@@ -101,6 +101,8 @@ class PriceQuotationRequestResource extends Resource
                             'priced_at' => now(),
                         ]);
                         $r->update(['status' => 'priced']);
+
+                        $r->user?->notify(new \App\Notifications\QuotationOutcome($r, 'priced'));
                     }),
                 EditAction::make(),
             ]);

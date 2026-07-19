@@ -16,6 +16,25 @@
 </head>
 <body>
   <a href="#main" class="skip-link">{{ __('app.skip_to_content') }}</a>
+  @auth
+    @php
+      $unreadNotificationCount = auth()->user()->unreadNotifications()->count();
+      $hasCriticalNotification = $unreadNotificationCount > 0
+          && auth()->user()->unreadNotifications()->where('data', 'like', '%"severity":"critical"%')->exists();
+    @endphp
+    <header style="position:sticky;top:0;z-index:40;display:flex;justify-content:flex-end;padding:6px 12px;background:transparent;pointer-events:none">
+      <a href="/app/notifications" aria-label="{{ __('app.notifications') }}"
+         style="pointer-events:auto;position:relative;display:inline-flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 1px 4px rgba(0,0,0,.15);color:#1F2937;text-decoration:none">
+        <svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        @if($unreadNotificationCount > 0)
+          <span aria-live="polite"
+                style="position:absolute;top:-4px;inset-inline-end:-4px;min-width:18px;height:18px;padding:0 4px;border-radius:9px;font-size:11px;font-weight:700;line-height:18px;text-align:center;color:#fff;background:{{ $hasCriticalNotification ? '#DC2626' : '#4DB848' }}">
+            {{ $unreadNotificationCount > 99 ? '99+' : $unreadNotificationCount }}
+          </span>
+        @endif
+      </a>
+    </header>
+  @endauth
   <main id="main">{!! $slot !!}</main>
   @livewireScripts
   @filamentScripts

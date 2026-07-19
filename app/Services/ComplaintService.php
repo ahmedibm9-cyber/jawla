@@ -46,6 +46,11 @@ class ComplaintService
                 'resolved_at' => now(),
             ]);
 
+            // afterCommit: a rolled-back resolution must never notify the rep.
+            DB::afterCommit(function () use ($complaint, $resolution): void {
+                $complaint->user?->notify(new \App\Notifications\ComplaintResolved($complaint, $resolution));
+            });
+
             return $complaint;
         });
     }
