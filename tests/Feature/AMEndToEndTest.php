@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Alarm;
 use App\Models\AlarmRead;
+use App\Models\CompanyBankAccount;
 use App\Models\Customer;
 use App\Models\DailyVisitAssignment;
 use App\Models\OutOfStockRequest;
@@ -136,6 +137,8 @@ class AMEndToEndTest extends TestCase
         $floor = 1000 - 100;
         $this->assertGreaterThanOrEqual($floor, 950);
 
+        $bankAccount = CompanyBankAccount::where('company_id', $rep->company_id)->first();
+
         $proforma = ProformaInvoice::create([
             'company_id' => $rep->company_id,
             'customer_id' => $customer->id,
@@ -146,7 +149,7 @@ class AMEndToEndTest extends TestCase
             'subtotal' => 4750.00,
             'vat_amount' => 665.00,
             'total' => 5415.00,
-            'company_bank_account_id' => 1,
+            'company_bank_account_id' => $bankAccount?->id,
             'status' => 'sent',
             'posting_date' => today(),
         ]);
