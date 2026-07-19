@@ -1,9 +1,8 @@
 <div>
 <div class="main-content">
-    <x-page-header
-        :title="__('app.quotations')"
-        :icon="'<svg fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" width=\"22\" height=\"22\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z\"/></svg>'"
-    />
+    <x-page-header :title="__('app.quotations')">
+        <x-slot:icon><svg fill='none' stroke='currentColor' viewBox='0 0 24 24' width='22' height='22'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z'/></svg></x-slot:icon>
+    </x-page-header>
 
     <div class="page-body">
 
@@ -21,8 +20,14 @@
     {{-- List View --}}
     @if($step === 'list')
         <h4 class="text-text-secondary m-0 mb-2">{{ __('app.pending_quotations') }}</h4>
+
+        <div wire:loading.delay wire:target="step" class="space-y-2 mb-3" aria-hidden="true">
+            <x-ds.skeleton height="56px" />
+            <x-ds.skeleton height="56px" />
+        </div>
+
         @forelse($priced as $r)
-            <button class="card w-full text-left" wire:click="selectQuotation({{ $r->id }})">
+            <button type="button" class="card w-full text-start" wire:click="selectQuotation({{ $r->id }})">
                 <div class="flex justify-between items-center">
                     <div>
                         <strong>{{ $r->product?->name_ar }}</strong>
@@ -34,7 +39,7 @@
                 </div>
             </button>
         @empty
-            <div class="card text-center p-6 text-text-muted">{{ __('app.no_quotations') }}</div>
+            <x-ds.empty icon="heroicon-o-document-text" :message="__('app.no_quotations')" />
         @endforelse
     @endif
 
@@ -56,12 +61,26 @@
                 </div>
             </div>
 
-            <label class="font-semibold block mb-1">{{ __('app.your_price') }}</label>
+            <label for="negotiatedPrice" class="font-semibold block mb-1">{{ __('app.your_price') }}</label>
             <input type="number" step="0.01" id="negotiatedPrice" name="negotiatedPrice" wire:model.live="negotiatedPrice" autocomplete="off" class="form-input text-lg">
 
             <div class="mt-3 flex gap-2">
-                <button class="btn btn-primary flex-1" wire:click="confirmPrice">{{ __('app.confirm_price') }}</button>
-                <button class="btn btn-primary flex-1 bg-accent-blue" wire:click="createProforma">{{ __('app.create_proforma') }}</button>
+                <x-ds.modal :title="__('app.confirm_price_title') ?? 'Confirm price?'" :message="__('app.confirm_price_msg') ?? 'This price will be confirmed and the customer will be notified.'">
+                    <x-slot:trigger>
+                        <button type="button" class="btn btn-outline flex-1">{{ __('app.confirm_price') }}</button>
+                    </x-slot:trigger>
+                    <x-slot:confirm>
+                        <button type="button" wire:click="confirmPrice" class="btn btn-primary flex-1">{{ __('app.confirm') }}</button>
+                    </x-slot:confirm>
+                </x-ds.modal>
+                <x-ds.modal :title="__('app.confirm_proforma_title') ?? 'Create proforma?'" :message="__('app.confirm_proforma_msg') ?? 'A proforma invoice will be created with the negotiated price.'">
+                    <x-slot:trigger>
+                        <button type="button" class="btn btn-primary flex-1">{{ __('app.create_proforma') }}</button>
+                    </x-slot:trigger>
+                    <x-slot:confirm>
+                        <button type="button" wire:click="createProforma" class="btn btn-primary flex-1">{{ __('app.confirm') }}</button>
+                    </x-slot:confirm>
+                </x-ds.modal>
             </div>
             <button class="btn btn-outline w-full mt-2" wire:click="$set('step', 'list')">{{ __('app.back') }}</button>
         </div>

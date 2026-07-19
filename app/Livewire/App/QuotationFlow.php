@@ -36,13 +36,6 @@ class QuotationFlow extends Component
 
     public string $step = 'list'; // list, detail, proforma, done
 
-    public function __construct(
-        private readonly DocumentNumberService $numbers,
-        private readonly InvoiceCalculationService $calc,
-    ) {
-        parent::__construct();
-    }
-
     public function mount(): void
     {
         $this->step = 'list';
@@ -81,7 +74,7 @@ class QuotationFlow extends Component
         $this->step = 'detail';
     }
 
-    public function createProforma(): void
+    public function createProforma(DocumentNumberService $numbers, InvoiceCalculationService $calc): void
     {
         if (! $this->quotation || ! $this->request) {
             return;
@@ -101,10 +94,10 @@ class QuotationFlow extends Component
         $qty = (float) $this->request->quantity_requested;
         $unitPrice = $this->negotiatedPrice;
 
-        $proformaNumber = $this->numbers->generate('proforma_invoice', $company->id);
+        $proformaNumber = $numbers->generate('proforma_invoice', $company->id);
         $bank = CompanyBankAccount::where('company_id', $company->id)->where('is_default', true)->first();
 
-        $calculation = $this->calc->calculate(
+        $calculation = $calc->calculate(
             [new LineItemInput(qty: $qty, unitPrice: $unitPrice, vatApplicable: $product->vat_applicable)],
             (float) $company->vat_percent,
         );

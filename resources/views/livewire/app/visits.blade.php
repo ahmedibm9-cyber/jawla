@@ -3,6 +3,11 @@
     <x-page-header :title="__('app.visits')" />
 
     <div class="page-body">
+        <div wire:loading.delay class="space-y-2 mb-3" aria-hidden="true">
+            <x-ds.skeleton height="72px" />
+            <x-ds.skeleton height="72px" />
+        </div>
+
         @if($visits->isEmpty())
             <x-ds.empty icon="heroicon-o-map-pin" :message="__('app.no_visits_yet')">
                 <x-slot:action>

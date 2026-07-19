@@ -33,13 +33,6 @@ class SalesFlow extends Component
 
     public int $createdInvoiceId = 0;
 
-    public function __construct(
-        private readonly InvoiceService $invoices,
-        private readonly InvoiceCalculationService $calc,
-    ) {
-        parent::__construct();
-    }
-
     public function mount(?int $customer = null, ?int $visitId = null): void
     {
         if ($customer) {
@@ -156,7 +149,7 @@ class SalesFlow extends Component
         $this->cartTotal = round($subtotal + $vatAmount, 2);
     }
 
-    public function submit(): void
+    public function submit(InvoiceService $invoices): void
     {
         if ($this->customerId <= 0) {
             $this->errorMessage = app()->getLocale() === 'ar' ? 'اختر عميلاً' : 'Select a customer';
@@ -187,7 +180,7 @@ class SalesFlow extends Component
         }
 
         try {
-            $invoice = $this->invoices->create([
+            $invoice = $invoices->create([
                 'company_id' => auth()->user()->company_id,
                 'customer_id' => $this->customerId,
                 'visit_id' => $this->visitId,

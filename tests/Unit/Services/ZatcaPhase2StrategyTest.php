@@ -6,10 +6,13 @@ use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\ProformaInvoice;
 use App\Services\ZatcaPhase2Strategy;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ZatcaPhase2StrategyTest extends TestCase
 {
+    use RefreshDatabase;
+
     private ZatcaPhase2Strategy $strategy;
 
     protected function setUp(): void

@@ -34,14 +34,20 @@
         <div class="home-section">
             <h3 class="home-section-title">{{ __('app.todays_plan') }}</h3>
 
+            <div wire:loading.delay class="space-y-2 mb-3" aria-hidden="true">
+                <x-ds.skeleton height="72px" />
+                <x-ds.skeleton height="72px" />
+            </div>
+
             @if($todayVisits->isEmpty())
-                <div class="home-empty">
-                    <svg aria-hidden="true" class="home-empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                    <p>{{ __('app.no_visits') }}</p>
-                </div>
+                <x-ds.empty icon="heroicon-o-map-pin" :message="__('app.no_visits_yet')">
+                    <x-slot:action>
+                        <a href="/app" class="btn btn-primary no-underline">{{ __('app.back_home') }}</a>
+                    </x-slot:action>
+                </x-ds.empty>
             @else
                 @foreach($todayVisits as $assignment)
-                    <div class="visit-card clickable-card" wire:click="goToVisit({{ $assignment->id }})" role="button" tabindex="0" @keydown.enter="goToVisit({{ $assignment->id }})">
+                    <button type="button" class="visit-card clickable-card w-full text-start border-0" wire:click="goToVisit({{ $assignment->id }})">
                         <div class="visit-card-status visit-status-{{ $assignment->status }}"></div>
                         <div class="visit-card-body">
                             <div class="visit-card-top">
@@ -53,13 +59,13 @@
                             <p class="visit-card-address">{{ $assignment->customer?->address }}</p>
                             @if($assignment->customer?->latitude && $assignment->customer?->longitude)
                                 <a href="https://www.google.com/maps/dir/?api=1&destination={{ $assignment->customer->latitude }},{{ $assignment->customer->longitude }}"
-                                   target="_blank" class="maps-link" onclick="event.stopPropagation()">
+                                   target="_blank" rel="noopener" class="maps-link" onclick="event.stopPropagation()">
                                     <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 9m-6-2l6-3m6 10V9m-6 10V9"/></svg>
-                                    {{ app()->getLocale() === 'ar' ? 'اتجاهات' : 'Directions' }}
+                                    {{ __('app.directions') }}
                                 </a>
                             @endif
                         </div>
-                    </div>
+                    </button>
                 @endforeach
             @endif
         </div>
@@ -79,7 +85,7 @@
                                 <small class="block text-text-secondary">{{ $task->customer->name_ar }}</small>
                             @endif
                             @if($task->due_date)
-                                <small class="block text-warning text-xs">{{ app()->getLocale() === 'ar' ? 'تاريخ الاستحقاق: ' : 'Due: ' }}{{ $task->due_date->format('Y-m-d') }}</small>
+                                <small class="block text-warning text-xs">{{ __('app.due', ['date' => $task->due_date->translatedFormat('j F Y')]) }}</small>
                             @endif
                         </div>
                         <button wire:click="completeTask({{ $task->id }})" class="btn btn-outline text-success text-sm" aria-label="{{ __('app.done') }}">

@@ -1,8 +1,7 @@
 <div class="main-content">
-    <x-page-header
-        :title="__('app.log_expense')"
-        :icon="'<svg fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" width=\"22\" height=\"22\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z\"/></svg>'"
-    />
+    <x-page-header :title="__('app.log_expense')">
+        <x-slot:icon><svg fill='none' stroke='currentColor' viewBox='0 0 24 24' width='22' height='22'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'/></svg></x-slot:icon>
+    </x-page-header>
 
     <div class="page-body">
         <div class="card bg-amber-50 text-amber-800 mb-4 flex items-center gap-2">
@@ -43,10 +42,17 @@
                     <textarea wire:model="note" id="note" rows="2" autocomplete="off" class="form-textarea"></textarea>
                 </div>
 
-                <button type="submit" wire:loading.attr="disabled" wire:confirm="{{ app()->getLocale() === 'ar' ? 'سيتم تسجيل المصروف. هل أنت متأكد؟' : 'Expense will be logged. Are you sure?' }}" class="btn btn-primary w-full">
-                    <span wire:loading.remove>{{ __('app.log_expense') }}</span>
-                    <span wire:loading>{{ __('app.saving') }}&hellip;</span>
-                </button>
+                <x-ds.modal :title="__('app.confirm_expense_title')" :message="__('app.confirm_expense_msg')">
+                    <x-slot:trigger>
+                        <button type="button" class="btn btn-primary w-full">
+                            <span wire:loading.remove>{{ __('app.log_expense') }}</span>
+                            <span wire:loading>{{ __('app.saving') }}&hellip;</span>
+                        </button>
+                    </x-slot:trigger>
+                    <x-slot:confirm>
+                        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary w-full">{{ __('app.confirm') }}</button>
+                    </x-slot:confirm>
+                </x-ds.modal>
             </form>
         @endif
     </div>

@@ -13,7 +13,7 @@
 
     {{-- Sales Actions --}}
     <div class="more-section">
-        <h4 class="more-section-title">{{ app()->getLocale() === 'ar' ? 'المبيعات' : 'Sales' }}</h4>
+        <h4 class="more-section-title">{{ __('app.sales') }}</h4>
 
         <a href="/app/sell" class="more-item">
             <div class="more-item-icon more-icon-green">
@@ -21,7 +21,7 @@
             </div>
             <div class="more-item-body">
                 <span class="more-item-label">{{ __('app.create_invoice') }}</span>
-                <span class="more-item-desc">{{ app()->getLocale() === 'ar' ? 'إنشاء فاتورة جديدة' : 'Create a new invoice' }}</span>
+                <span class="more-item-desc">{{ __('app.create_new_invoice') }}</span>
             </div>
             <svg class="more-item-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
@@ -32,7 +32,7 @@
             </div>
             <div class="more-item-body">
                 <span class="more-item-label">{{ __('app.stock') }}</span>
-                <span class="more-item-desc">{{ app()->getLocale() === 'ar' ? 'البحث في المخزون والإبلاغ عن النفاد' : 'Search stock & report shortages' }}</span>
+                <span class="more-item-desc">{{ __('app.search_stock_report_shortages') }}</span>
             </div>
             <svg class="more-item-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
@@ -43,7 +43,7 @@
             </div>
             <div class="more-item-body">
                 <span class="more-item-label">{{ __('app.quotations') }}</span>
-                <span class="more-item-desc">{{ app()->getLocale() === 'ar' ? 'عرض أسعار' : 'Price quotations' }}</span>
+                <span class="more-item-desc">{{ __('app.price_quotations') }}</span>
             </div>
             <svg class="more-item-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
@@ -54,7 +54,7 @@
             </div>
             <div class="more-item-body">
                 <span class="more-item-label">{{ __('app.log_return') }}</span>
-                <span class="more-item-desc">{{ app()->getLocale() === 'ar' ? 'تسجيل مرتجع' : 'Log a product return' }}</span>
+                <span class="more-item-desc">{{ __('app.log_product_return') }}</span>
             </div>
             <svg class="more-item-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
@@ -62,7 +62,7 @@
 
     {{-- Finance --}}
     <div class="more-section">
-        <h4 class="more-section-title">{{ app()->getLocale() === 'ar' ? 'المالية' : 'Finance' }}</h4>
+        <h4 class="more-section-title">{{ __('app.finance') }}</h4>
 
         <a href="/app/collect-payment" class="more-item">
             <div class="more-item-icon more-icon-emerald">
@@ -70,7 +70,7 @@
             </div>
             <div class="more-item-body">
                 <span class="more-item-label">{{ __('app.collect_payment') }}</span>
-                <span class="more-item-desc">{{ app()->getLocale() === 'ar' ? 'تحصيل مبلغ من عميل' : 'Collect payment from customer' }}</span>
+                <span class="more-item-desc">{{ __('app.collect_payment_from_customer') }}</span>
             </div>
             <svg class="more-item-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
@@ -81,7 +81,7 @@
             </div>
             <div class="more-item-body">
                 <span class="more-item-label">{{ __('app.log_expense') }}</span>
-                <span class="more-item-desc">{{ app()->getLocale() === 'ar' ? 'تسجيل مصروف' : 'Log an expense' }}</span>
+                <span class="more-item-desc">{{ __('app.log_an_expense') }}</span>
             </div>
             <svg class="more-item-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
@@ -89,15 +89,15 @@
 
     {{-- Other --}}
     <div class="more-section">
-        <h4 class="more-section-title">{{ app()->getLocale() === 'ar' ? 'أخرى' : 'Other' }}</h4>
+        <h4 class="more-section-title">{{ __('app.other') }}</h4>
 
         <a href="/app/customers/create" class="more-item">
             <div class="more-item-icon more-icon-purple">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
             </div>
             <div class="more-item-body">
-                <span class="more-item-label">{{ app()->getLocale() === 'ar' ? 'إضافة عميل' : 'Add Customer' }}</span>
-                <span class="more-item-desc">{{ app()->getLocale() === 'ar' ? 'عميل جديد' : 'Register a new customer' }}</span>
+                <span class="more-item-label">{{ __('app.add_customer') }}</span>
+                <span class="more-item-desc">{{ __('app.register_new_customer') }}</span>
             </div>
             <svg class="more-item-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
@@ -107,8 +107,8 @@
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
             </div>
             <div class="more-item-body">
-                <span class="more-item-label">{{ app()->getLocale() === 'ar' ? 'تسجيل شكوى' : 'Log Complaint' }}</span>
-                <span class="more-item-desc">{{ app()->getLocale() === 'ar' ? 'شكوى من عميل' : 'Report a customer complaint' }}</span>
+                <span class="more-item-label">{{ __('app.log_complaint') }}</span>
+                <span class="more-item-desc">{{ __('app.report_customer_complaint') }}</span>
             </div>
             <svg class="more-item-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
@@ -118,8 +118,8 @@
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
             </div>
             <div class="more-item-body">
-                <span class="more-item-label">{{ app()->getLocale() === 'ar' ? 'عرض شراء' : 'Purchase Offer' }}</span>
-                <span class="more-item-desc">{{ app()->getLocale() === 'ar' ? 'تقديم عرض شراء' : 'Submit a purchase offer' }}</span>
+                <span class="more-item-label">{{ __('app.purchase_offer') }}</span>
+                <span class="more-item-desc">{{ __('app.submit_purchase_offer') }}</span>
             </div>
             <svg class="more-item-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>

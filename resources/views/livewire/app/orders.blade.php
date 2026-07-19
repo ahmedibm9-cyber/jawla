@@ -17,6 +17,11 @@
             </button>
         </div>
 
+        <div wire:loading.delay class="space-y-2 mb-3" aria-hidden="true">
+            <x-ds.skeleton height="72px" />
+            <x-ds.skeleton height="72px" />
+        </div>
+
         @if($documents->isEmpty())
             <x-ds.empty icon="heroicon-o-document-text" :message="__('app.no_orders_yet')">
                 <x-slot:action>
@@ -39,7 +44,7 @@
                             <small class="text-text-secondary block truncate">{{ $doc->customer?->name_ar }}</small>
                             <small class="text-text-muted">{{ $doc->created_at->format('Y-m-d H:i') }}</small>
                         </div>
-                        <div class="text-left shrink-0" dir="ltr">
+                        <div class="text-start shrink-0" dir="ltr">
                             <strong class="block text-accent">{{ number_format((float) $doc->total, 2) }} EGP</strong>
                             @if($isInvoice && (float) $doc->remaining_amount > 0)
                                 <small class="text-warning">{{ __('app.remaining') }}: {{ number_format((float) $doc->remaining_amount, 2) }}</small>

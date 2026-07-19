@@ -1,9 +1,8 @@
 <div>
 <div class="main-content">
-    <x-page-header
-        :title="__('app.stock')"
-        :icon="'<svg fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" width=\"22\" height=\"22\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4\"/></svg>'"
-    />
+    <x-page-header :title="__('app.stock')">
+        <x-slot:icon><svg fill='none' stroke='currentColor' viewBox='0 0 24 24' width='22' height='22'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'/></svg></x-slot:icon>
+    </x-page-header>
 
     <div class="page-body">
         <div class="form-group">
@@ -18,15 +17,15 @@
             </div>
         @endif
 
+        <div wire:loading.delay wire:target="search" class="space-y-2 mb-3" aria-hidden="true">
+            <x-ds.skeleton height="72px" />
+            <x-ds.skeleton height="72px" />
+        </div>
+
         @if(strlen($search) < 2)
-            <div class="card text-center p-8 text-text-muted">
-                <svg aria-hidden="true" class="size-10 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                <p class="m-0">{{ app()->getLocale() === 'ar' ? 'ابحث عن منتج' : 'Search for a product' }}</p>
-            </div>
+            <x-ds.empty icon="heroicon-o-magnifying-glass" :message="app()->getLocale() === 'ar' ? 'ابحث عن منتج' : 'Search for a product'" />
         @elseif($results->isEmpty())
-            <div class="card text-center p-6 text-text-muted">
-                {{ app()->getLocale() === 'ar' ? 'لا نتائج' : 'No results' }}
-            </div>
+            <x-ds.empty icon="heroicon-o-cube-transparent" :message="app()->getLocale() === 'ar' ? 'لا نتائج' : 'No results'" />
         @else
             @foreach($results as $product)
                 <div class="card">

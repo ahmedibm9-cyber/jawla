@@ -1,9 +1,8 @@
 <div>
 <div class="main-content">
-    <x-page-header
-        :title="__('app.create_invoice')"
-        :icon="'<svg fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" width=\"22\" height=\"22\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4\"/></svg>'"
-    />
+    <x-page-header :title="__('app.create_invoice')">
+        <x-slot:icon><svg fill='none' stroke='currentColor' viewBox='0 0 24 24' width='22' height='22'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'/></svg></x-slot:icon>
+    </x-page-header>
 
     <div class="page-body">
         {{-- Stepper --}}
@@ -22,27 +21,27 @@
         @if($errorMessage)
             <div class="card bg-danger/10 text-danger mb-4 flex justify-between items-center" aria-live="polite">
                 <span>{{ $errorMessage }}</span>
-                <button type="button" wire:click="$set('errorMessage', '')" class="text-danger bg-transparent border-0 cursor-pointer text-lg px-2">&times;</button>
+                <button type="button" wire:click="$set('errorMessage', '')" aria-label="{{ __('app.clear') }}" class="text-danger bg-transparent border-0 cursor-pointer text-lg px-2">&times;</button>
             </div>
         @endif
 
         @if($step === 'cart')
             {{-- Customer selection --}}
             <div class="form-group">
-                <label class="form-label">{{ __('app.customer') }}</label>
+                <label for="customerSearch" class="form-label">{{ __('app.customer') }}</label>
                 @if($selectedCustomer)
                     <div class="card flex justify-between items-center">
                         <span>{{ $selectedCustomer->name_ar }}</span>
                         <button type="button" wire:click="$set('customerId', 0)" class="text-danger text-sm bg-transparent border-0 cursor-pointer">{{ __('app.change') }}</button>
                     </div>
                 @else
-                    <input type="text" wire:model.live.debounce.300ms="customerSearch" class="form-input"
+                    <input type="text" id="customerSearch" wire:model.live.debounce.300ms="customerSearch" autocomplete="off" class="form-input"
                         placeholder="{{ app()->getLocale() === 'ar' ? 'ابحث عن عميل…' : 'Search customer…' }}">
                     @if($customers->isNotEmpty())
                         <div class="mt-2 space-y-1">
                             @foreach($customers as $c)
                                 <button type="button" wire:click="selectCustomer({{ $c->id }})"
-                                    class="w-full text-left p-3 rounded-lg border border-border bg-white hover:bg-surface-hover cursor-pointer">
+                                    class="w-full text-start p-3 rounded-lg border border-border bg-white hover:bg-surface-hover cursor-pointer">
                                     <strong class="block">{{ $c->name_ar }}</strong>
                                     <small class="text-text-secondary">{{ $c->phone }}</small>
                                 </button>
@@ -54,14 +53,18 @@
 
             {{-- Product search --}}
             <div class="form-group">
-                <label class="form-label">{{ __('app.products') }}</label>
-                <input type="text" wire:model.live.debounce.300ms="productSearch" class="form-input"
-                    placeholder="{{ app()->getLocale() === 'ar' ? 'ابحث عن منتج…' : 'Search product…' }}">
+                <label for="productSearch" class="form-label">{{ __('app.products') }}</label>
+                <input type="text" id="productSearch" wire:model.live.debounce.300ms="productSearch" autocomplete="off" class="form-input"
+                    placeholder="{{ __('app.search_product') }}">
+                <div wire:loading.delay wire:target="productSearch" class="space-y-1 mt-2" aria-hidden="true">
+                    <x-ds.skeleton height="56px" />
+                    <x-ds.skeleton height="56px" />
+                </div>
                 @if($products->isNotEmpty())
                     <div class="mt-2 space-y-1">
                         @foreach($products as $p)
                             <button type="button" wire:click="addToCart({{ $p->id }})"
-                                class="w-full text-left p-3 rounded-lg border border-border bg-white hover:bg-surface-hover cursor-pointer flex justify-between items-center">
+                                class="w-full text-start p-3 rounded-lg border border-border bg-white hover:bg-surface-hover cursor-pointer flex justify-between items-center">
                                 <div>
                                     <strong class="block">{{ $p->name_ar }}</strong>
                                     <small class="text-text-secondary">{{ $p->sku }}</small>
@@ -88,12 +91,12 @@
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label class="form-label">{{ __('app.quantity') }}</label>
-                                    <input type="number" wire:model.live="cart.{{ $i }}.quantity" min="0.001" step="0.001" inputmode="decimal" class="form-input">
+                                    <label for="cart-qty-{{ $i }}" class="form-label">{{ __('app.quantity') }}</label>
+                                    <input type="number" id="cart-qty-{{ $i }}" wire:model.live="cart.{{ $i }}.quantity" min="0.001" step="0.001" inputmode="decimal" class="form-input">
                                 </div>
                                 <div class="form-group">
-                                    <label class="form-label">{{ __('app.price') }}</label>
-                                    <input type="number" wire:model.live="cart.{{ $i }}.price" min="0" step="0.01" inputmode="decimal" class="form-input">
+                                    <label for="cart-price-{{ $i }}" class="form-label">{{ __('app.price') }}</label>
+                                    <input type="number" id="cart-price-{{ $i }}" wire:model.live="cart.{{ $i }}.price" min="0" step="0.01" inputmode="decimal" class="form-input">
                                 </div>
                             </div>
                             <div class="text-right">
@@ -123,9 +126,14 @@
                 </div>
 
                 @if($selectedCustomer && !empty($cart))
-                    <button type="button" wire:click="submit" wire:confirm="{{ app()->getLocale() === 'ar' ? 'سيتم إنشاء فاتورة بمبلغ ' . number_format($cartTotal, 2) . ' هل أنت متأكد؟' : 'Invoice for ' . number_format($cartTotal, 2) . ' will be created. Are you sure?' }}" class="btn btn-primary w-full">
-                        {{ __('app.submit') }}
-                    </button>
+                    <x-ds.modal :title="__('app.confirm_invoice_title')" :message="__('app.confirm_invoice_msg', ['total' => number_format($cartTotal, 2)])">
+                        <x-slot:trigger>
+                            <button type="button" class="btn btn-primary w-full">{{ __('app.submit') }}</button>
+                        </x-slot:trigger>
+                        <x-slot:confirm>
+                            <button type="button" wire:click="submit" wire:loading.attr="disabled" class="btn btn-primary w-full">{{ __('app.confirm') }}</button>
+                        </x-slot:confirm>
+                    </x-ds.modal>
                 @endif
             @endif
         @endif

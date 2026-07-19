@@ -1,8 +1,7 @@
 <div class="main-content">
-    <x-page-header
-        :title="__('app.log_return')"
-        :icon="'<svg fill=\"none\" stroke=\"currentColor\" viewBox=\"0 0 24 24\" width=\"22\" height=\"22\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6\"/></svg>'"
-    />
+    <x-page-header :title="__('app.log_return')">
+        <x-slot:icon><svg fill='none' stroke='currentColor' viewBox='0 0 24 24' width='22' height='22'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6'/></svg></x-slot:icon>
+    </x-page-header>
 
     <div class="page-body">
         @if($success)
@@ -64,10 +63,17 @@
                     <button type="button" class="btn btn-outline text-sm w-full" wire:click="addItem">{{ __('app.add_item') }}</button>
                 </div>
 
-                <button type="submit" wire:loading.attr="disabled" wire:confirm="{{ app()->getLocale() === 'ar' ? 'سيتم تسجيل المرتجع. هل أنت متأكد؟' : 'Return will be logged. Are you sure?' }}" class="btn btn-primary w-full mt-3">
-                    <span wire:loading.remove>{{ __('app.log_return') }}</span>
-                    <span wire:loading>{{ __('app.saving') }}&hellip;</span>
-                </button>
+                <x-ds.modal class="mt-3" :title="__('app.confirm_return_title')" :message="__('app.confirm_return_msg')">
+                    <x-slot:trigger>
+                        <button type="button" class="btn btn-primary w-full">
+                            <span wire:loading.remove>{{ __('app.log_return') }}</span>
+                            <span wire:loading>{{ __('app.saving') }}&hellip;</span>
+                        </button>
+                    </x-slot:trigger>
+                    <x-slot:confirm>
+                        <button type="submit" wire:loading.attr="disabled" class="btn btn-primary w-full">{{ __('app.confirm') }}</button>
+                    </x-slot:confirm>
+                </x-ds.modal>
             </form>
         @endif
     </div>

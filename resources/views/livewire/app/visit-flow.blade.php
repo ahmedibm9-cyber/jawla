@@ -56,6 +56,9 @@
                     localStorage.setItem(this.draftKey, JSON.stringify(d));
                 }
             }, 3000);
+        },
+        destroy() {
+            if (this.draftInterval) clearInterval(this.draftInterval);
         }
      }">
 
@@ -105,7 +108,7 @@
         @if($errorMessage)
             <div class="card bg-red-50 text-danger mb-4 flex justify-between items-center" aria-live="polite">
                 <span>{{ $errorMessage }}</span>
-                <button type="button" wire:click="$set('errorMessage', '')" class="text-danger bg-transparent border-0 cursor-pointer text-lg px-2">&times;</button>
+                <button type="button" wire:click="$set('errorMessage', '')" aria-label="{{ __('app.clear') }}" class="text-danger bg-transparent border-0 cursor-pointer text-lg px-2">&times;</button>
             </div>
         @endif
 
@@ -163,13 +166,14 @@
                 <span class="font-semibold">{{ __('app.follow_up_needed') }}</span>
             </label>
             @if($followUpNeeded)
-                <textarea wire:model="followUpNote" rows="2" class="form-textarea mt-2" placeholder="{{ __('app.follow_up_placeholder') }}"></textarea>
+                <textarea wire:model="followUpNote" rows="2" class="form-textarea mt-2" aria-label="{{ __('app.follow_up_needed') }}" placeholder="{{ __('app.follow_up_placeholder') }}"></textarea>
             @endif
         </div>
 
         {{-- Signature --}}
         <div class="card">
-            <label class="font-semibold block mb-2">{{ __('app.signature') }}</label>
+            <label class="font-semibold block mb-1">{{ __('app.signature') }}</label>
+            <p class="m-0 mb-2 text-xs text-text-muted">{{ app()->getLocale() === 'ar' ? 'التوقيع اختياري — إذا تعذر التوقيع باللمس، دوّن اسم العميل في ملخص الزيارة.' : 'Signature is optional — if touch signing is not possible, note the customer name in the visit summary.' }}</p>
             <canvas id="sigCanvas" width="340" height="140" aria-label="{{ __('app.signature') }}" role="img"
                 class="border-2 border-dashed border-border rounded-lg block w-full touch-none"
                 x-data="{ drawing:false, ctx:null }"
@@ -185,10 +189,17 @@
             <button class="btn btn-outline mt-2 text-sm" x-on:click="()=>{let c=$event.target.closest('div').querySelector('#sigCanvas').getContext('2d');c.clearRect(0,0,340,140);$wire.set('signature','')}" aria-label="{{ __('app.clear') }}">{{ __('app.clear') }}</button>
         </div>
 
-        <button class="btn btn-primary w-full" wire:click="submitReport" wire:loading.attr="disabled">
-            <span wire:loading.remove>{{ __('app.submit_report') }}</span>
-            <span wire:loading>{{ __('app.saving') }}&hellip;</span>
-        </button>
+        <x-ds.modal :title="__('app.confirm_report_title') ?? 'Submit visit report?'" :message="__('app.confirm_report_msg') ?? 'This visit report will be submitted permanently. You cannot edit it after submission.'">
+            <x-slot:trigger>
+                <button type="button" class="btn btn-primary w-full">
+                    <span wire:loading.remove>{{ __('app.submit_report') }}</span>
+                    <span wire:loading>{{ __('app.saving') }}&hellip;</span>
+                </button>
+            </x-slot:trigger>
+            <x-slot:confirm>
+                <button type="button" wire:click="submitReport" wire:loading.attr="disabled" class="btn btn-primary w-full">{{ __('app.confirm') }}</button>
+            </x-slot:confirm>
+        </x-ds.modal>
     @endif
 
     {{-- Step: Done --}}
