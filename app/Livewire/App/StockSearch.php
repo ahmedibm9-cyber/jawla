@@ -3,6 +3,7 @@
 namespace App\Livewire\App;
 
 use App\Models\Product;
+use App\Services\Contracts\OutOfStockService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -10,6 +11,70 @@ use Livewire\Component;
 class StockSearch extends Component
 {
     public string $search = '';
+
+    public ?int $flagProductId = null;
+
+    public string $flagQuantity = '';
+
+    public string $flagNotes = '';
+
+    public string $flagMessage = '';
+
+    public string $flagMessageType = 'success';
+
+    public function startFlag(int $productId): void
+    {
+        abort_unless(auth()->user()->can('alarms.flag_out_of_stock'), 403);
+
+        $this->flagProductId = $productId;
+        $this->flagQuantity = '';
+        $this->flagNotes = '';
+        $this->flagMessage = '';
+        $this->resetErrorBag();
+    }
+
+    public function cancelFlag(): void
+    {
+        $this->flagProductId = null;
+        $this->resetErrorBag();
+    }
+
+    public function submitFlag(OutOfStockService $service): void
+    {
+        abort_unless(auth()->user()->can('alarms.flag_out_of_stock'), 403);
+
+        if ($this->flagProductId === null) {
+            return;
+        }
+
+        $this->validate([
+            'flagQuantity' => 'required|numeric|min:0.001|max:999999',
+            'flagNotes' => 'nullable|string|max:500',
+        ], [], [
+            'flagQuantity' => __('app.flag_quantity'),
+            'flagNotes' => __('app.flag_notes'),
+        ]);
+
+        $request = $service->raise(
+            auth()->user(),
+            $this->flagProductId,
+            (float) $this->flagQuantity,
+            null,
+            $this->flagNotes !== '' ? $this->flagNotes : null,
+        );
+
+        if ($request->wasRecentlyCreated) {
+            $this->flagMessage = __('app.flag_success');
+            $this->flagMessageType = 'success';
+        } else {
+            $this->flagMessage = __('app.flag_duplicate');
+            $this->flagMessageType = 'info';
+        }
+
+        $this->flagProductId = null;
+        $this->flagQuantity = '';
+        $this->flagNotes = '';
+    }
 
     public function render()
     {

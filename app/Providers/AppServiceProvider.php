@@ -44,6 +44,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PricingService::class, fn () => app(\App\Services\PricingService::class));
         $this->app->bind(DocumentNumberService::class, fn () => app(NumberSequenceService::class));
         $this->app->bind(AlarmService::class, fn () => app(\App\Services\AlarmService::class));
+        $this->app->bind(\App\Services\Contracts\OutOfStockService::class, fn () => app(\App\Services\OutOfStockService::class));
         $this->app->singleton(ComplaintService::class);
         $this->app->bind(VanTransferServiceContract::class, fn () => app(\App\Services\VanTransferService::class));
     }
