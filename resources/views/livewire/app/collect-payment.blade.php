@@ -19,12 +19,7 @@
             <form wire:submit="submit">
                 <div class="form-group">
                     <label for="customer_id" class="form-label">{{ __('app.customer') }} *</label>
-                    <select wire:model="customer_id" id="customer_id" autocomplete="off" class="form-select">
-                        <option value="">{{ __('app.select') ?? '---' }}</option>
-                        @foreach($customers as $c)
-                            <option value="{{ $c->id }}">{{ $c->name_ar }}</option>
-                        @endforeach
-                    </select>
+                    <x-ds.autocomplete wire:model.live="customer_id" id="customer_id" :options="$customers" :placeholder="__('app.search_customer')" required />
                     @error('customer_id') <small class="form-error">{{ $message }}</small> @enderror
                 </div>
 

@@ -23,7 +23,7 @@
   <meta name="robots" content="noindex, nofollow">
   @filamentStyles
   @vite('resources/css/app.css')
-  <style>:root{-webkit-tap-highlight-color:transparent}</style>
+  <style>:root{-webkit-tap-highlight-color:transparent}[x-cloak]{display:none!important}</style>
   @livewireStyles
 </head>
 <body>

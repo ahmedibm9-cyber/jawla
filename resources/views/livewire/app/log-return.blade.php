@@ -18,12 +18,7 @@
             <form wire:submit="submit">
                 <div class="form-group">
                     <label for="customer_id" class="form-label">{{ __('app.customer') }} *</label>
-                    <select wire:model="customer_id" id="customer_id" autocomplete="off" class="form-select">
-                        <option value="">---</option>
-                        @foreach($customers as $c)
-                            <option value="{{ $c->id }}">{{ $c->name_ar }}</option>
-                        @endforeach
-                    </select>
+                    <x-ds.autocomplete wire:model="customer_id" id="customer_id" :options="$customers" :placeholder="__('app.search_customer')" required />
                     @error('customer_id') <small class="form-error">{{ $message }}</small> @enderror
                 </div>
 
@@ -38,12 +33,7 @@
                         <div class="border border-border rounded-lg p-3 mb-3">
                             <div class="form-group">
                                 <label for="item_{{ $i }}_product" class="form-label">{{ __('app.product') }}</label>
-                                <select wire:model="items.{{ $i }}.product_id" id="item_{{ $i }}_product" autocomplete="off" class="form-select">
-                                    <option value="">---</option>
-                                    @foreach($products as $p)
-                                        <option value="{{ $p->id }}" @if(isset($stockLookup[$p->id])) data-stock="{{ $stockLookup[$p->id] }}" @endif>{{ $p->name_ar }} @if(isset($stockLookup[$p->id]))({{ $stockLookup[$p->id] }})@endif</option>
-                                    @endforeach
-                                </select>
+                                <x-ds.autocomplete wire:model="items.{{ $i }}.product_id" id="item_{{ $i }}_product" :options="$products" :placeholder="__('app.search_product')" wire:key="ac-product-{{ $i }}" />
                             </div>
                             <div class="form-row">
                                 <div class="form-group">

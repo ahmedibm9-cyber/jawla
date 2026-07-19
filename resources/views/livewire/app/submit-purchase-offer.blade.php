@@ -23,23 +23,13 @@
         <form wire:submit="submit">
             <div class="form-group">
                 <label for="product_id" class="form-label">{{ __('app.product') }}</label>
-                <select id="product_id" wire:model="product_id" class="form-select">
-                    <option value="">{{ __('app.select') }}</option>
-                    @foreach($products as $p)
-                        <option value="{{ $p->id }}">{{ $p->name_ar }}</option>
-                    @endforeach
-                </select>
+                <x-ds.autocomplete wire:model="product_id" id="product_id" :options="$products" :placeholder="__('app.search_product')" required />
                 @error('product_id') <small class="form-error">{{ $message }}</small> @enderror
             </div>
 
             <div class="form-group">
                 <label for="supplier_id" class="form-label">{{ __('app.supplier_optional') }}</label>
-                <select id="supplier_id" wire:model="supplier_id" class="form-select">
-                    <option value="">{{ __('app.na') }}</option>
-                    @foreach($suppliers as $s)
-                        <option value="{{ $s->id }}">{{ $s->name_ar ?? $s->name_en }}</option>
-                    @endforeach
-                </select>
+                <x-ds.autocomplete wire:model="supplier_id" id="supplier_id" :options="$suppliers" :placeholder="__('app.search_supplier')" />
             </div>
 
             <div class="form-row">

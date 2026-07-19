@@ -144,11 +144,9 @@
     "src": "node_modules/leaflet/dist/images/marker-icon.png"
   },
   "resources/css/app.css": {
-    "file": "assets/app-DhtOnBo1.css",
+    "file": "assets/app-NjLS8nAS.css",
     "name": "app",
-    "names": [
-      "app.css"
-    ],
+    "names": ["app.css"],
     "src": "resources/css/app.css",
     "isEntry": true,
     "assets": [
