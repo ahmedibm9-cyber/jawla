@@ -40,9 +40,19 @@ class ZatcaPhase1Strategy implements QrStrategy
 
     private function generateProformaQr(ProformaInvoice $proforma): string
     {
-        // For proforma invoices, use simplified format for Egypt
-        // Phase 1: QR encodes invoice_number|total
-        return $proforma->proforma_number . '|' . number_format((float) $proforma->total, 2, '.', '');
+        $sellerName = $proforma->company?->name_ar ?? '';
+        $vatNumber = $proforma->company?->tax_number ?? '';
+        $timestamp = $proforma->posting_date?->toIso8601String() ?? now()->toIso8601String();
+        $totalWithVat = (string) number_format((float) $proforma->total, 2, '.', '');
+        $vatAmount = (string) number_format((float) $proforma->vat_amount, 2, '.', '');
+
+        return $this->encodeTlv([
+            1 => $sellerName,
+            2 => $vatNumber,
+            3 => $timestamp,
+            4 => $totalWithVat,
+            5 => $vatAmount,
+        ]);
     }
 
     private function encodeTlv(array $fields): string

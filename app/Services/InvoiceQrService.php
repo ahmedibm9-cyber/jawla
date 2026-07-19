@@ -23,7 +23,7 @@ class InvoiceQrService
         return $strategy->generate($proforma);
     }
 
-    private function resolveStrategy(Company $company, string $documentType): QrStrategy
+    public function resolveStrategy(Company $company, string $documentType): QrStrategy
     {
         $country = $company->country ?? 'EG';
         

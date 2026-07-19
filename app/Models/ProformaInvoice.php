@@ -70,4 +70,9 @@ class ProformaInvoice extends Model
     {
         return $this->hasMany(ProformaInvoiceItem::class);
     }
+
+    public function bankAccount(): BelongsTo
+    {
+        return $this->belongsTo(CompanyBankAccount::class, 'company_bank_account_id');
+    }
 }
