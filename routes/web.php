@@ -68,6 +68,8 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/', Home::class)->name('home');
     Route::get('/visit/{visit}', VisitFlow::class)->name('visit');
     Route::get('/customers', TodaysCustomers::class)->name('customers');
+    Route::get('/visits', App\Livewire\App\Visits::class)->name('visits');
+    Route::get('/orders', App\Livewire\App\Orders::class)->name('orders');
     Route::get('/quotations', QuotationFlow::class)->name('quotations');
     Route::get('/stock', StockSearch::class)->name('stock');
     Route::get('/more', MorePage::class)->name('more');

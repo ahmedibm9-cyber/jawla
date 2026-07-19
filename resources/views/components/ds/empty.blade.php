@@ -8,7 +8,7 @@
     @if($message)
         <p class="mb-4 text-lg text-text-secondary">{{ $message }}</p>
     @endif
-    @if($action && $actionLabel)
+    @if($action)
         {{ $action }}
     @endif
 </div>
