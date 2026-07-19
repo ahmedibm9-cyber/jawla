@@ -9,6 +9,17 @@
             <div class="toast toast-success relative top-0 mb-4" aria-live="polite" style="transform:none">{{ $successMessage }}</div>
         @endif
 
+        @if($resubmit)
+            <div class="card mb-4 border-warning" role="status">
+                <strong class="block">{{ __('app.editing_rejected_offer') }}</strong>
+                @if($rejectionNotes)
+                    <small class="text-text-secondary block mt-1">{{ __('app.review_notes') }}: {{ $rejectionNotes }}</small>
+                @endif
+            </div>
+        @endif
+
+        @error('resubmit') <div class="toast toast-error relative top-0 mb-4" role="alert" style="transform:none">{{ $message }}</div> @enderror
+
         <form wire:submit="submit">
             <div class="form-group">
                 <label for="product_id" class="form-label">{{ __('app.product') }}</label>
@@ -47,6 +58,12 @@
             <div class="form-group">
                 <label for="payment_terms" class="form-label">{{ __('app.payment_terms') }}</label>
                 <textarea id="payment_terms" wire:model="payment_terms" rows="2" autocomplete="off" class="form-textarea"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="expires_at" class="form-label">{{ __('app.expires_at') }} <span class="text-text-muted">({{ __('app.optional') }})</span></label>
+                <input type="date" id="expires_at" wire:model="expires_at" min="{{ now()->toDateString() }}" class="form-input">
+                @error('expires_at') <small class="form-error">{{ $message }}</small> @enderror
             </div>
 
             <x-ds.modal :title="__('app.confirm_purchase_title') ?? 'Submit offer?'" :message="__('app.confirm_purchase_msg') ?? 'This purchase offer will be submitted to the sales manager for review.'">

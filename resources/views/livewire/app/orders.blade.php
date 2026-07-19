@@ -15,6 +15,11 @@
                 wire:click="setType('proformas')">
                 {{ __('app.proformas') }}
             </button>
+            <button type="button" role="tab" aria-selected="{{ $type === 'offers' ? 'true' : 'false' }}"
+                class="btn flex-1 {{ $type === 'offers' ? 'btn-primary' : 'btn-outline' }}"
+                wire:click="setType('offers')">
+                {{ __('app.offers') }}
+            </button>
         </div>
 
         <div wire:loading.delay class="space-y-2 mb-3" aria-hidden="true">
@@ -23,11 +28,70 @@
         </div>
 
         @if($documents->isEmpty())
-            <x-ds.empty icon="heroicon-o-document-text" :message="__('app.no_orders_yet')">
-                <x-slot:action>
-                    <a href="/app/sell" class="btn btn-primary no-underline">{{ __('app.create_invoice') }}</a>
-                </x-slot:action>
-            </x-ds.empty>
+            @if($type === 'offers')
+                <x-ds.empty icon="heroicon-o-shopping-cart" :message="__('app.no_offers_yet')">
+                    <x-slot:action>
+                        <a href="/app/purchase-offer" class="btn btn-primary no-underline">{{ __('app.submit_purchase_offer') }}</a>
+                    </x-slot:action>
+                </x-ds.empty>
+            @else
+                <x-ds.empty icon="heroicon-o-document-text" :message="__('app.no_orders_yet')">
+                    <x-slot:action>
+                        <a href="/app/sell" class="btn btn-primary no-underline">{{ __('app.create_invoice') }}</a>
+                    </x-slot:action>
+                </x-ds.empty>
+            @endif
+        @elseif($type === 'offers')
+            @foreach($documents as $offer)
+                @php
+                    $offerRejected = in_array($offer->status, ['rejected_by_sales', 'rejected_by_purchasing'], true);
+                    $offerBadge = match($offer->status) {
+                        'pending' => 'bg-amber-100 text-amber-700',
+                        'sales_approved' => 'bg-blue-100 text-blue-700',
+                        'purchasing_approved' => 'bg-green-100 text-green-700',
+                        default => 'bg-red-100 text-red-700',
+                    };
+                    $offerNotes = $offer->status === 'rejected_by_sales' ? $offer->sales_review_notes : ($offer->status === 'rejected_by_purchasing' ? $offer->purchasing_review_notes : null);
+                @endphp
+                <div class="card mb-2">
+                    <div class="flex justify-between items-start gap-2">
+                        <div class="min-w-0">
+                            <strong class="block truncate">{{ $offer->product?->name_ar }}</strong>
+                            <small class="text-text-secondary block truncate">{{ $offer->supplier?->name_ar ?? $offer->supplier?->name_en ?? __('app.na') }}</small>
+                            <small class="text-text-muted">{{ $offer->created_at->format('Y-m-d H:i') }}</small>
+                        </div>
+                        <div class="text-start shrink-0" dir="ltr">
+                            <strong class="block text-accent">{{ number_format((float) $offer->offered_price, 2) }} {{ $offer->currency }}</strong>
+                            <small class="text-text-muted">× {{ rtrim(rtrim(number_format((float) $offer->quantity, 3), '0'), '.') }}</small>
+                        </div>
+                    </div>
+
+                    @if($offer->status === 'purchasing_approved' && $offer->purchaseOrder)
+                        <small class="text-text-secondary block mt-1">{{ __('app.po_number') }}: <span dir="ltr">{{ $offer->purchaseOrder->order_number }}</span></small>
+                    @endif
+
+                    @if($offerNotes)
+                        <small class="text-text-secondary block mt-1">{{ __('app.review_notes') }}: {{ $offerNotes }}</small>
+                    @endif
+
+                    <div class="flex items-center gap-2 mt-2 pt-2 border-t border-surface-hover">
+                        <span class="badge {{ $offerBadge }}">{{ __("app.status_{$offer->status}") }}</span>
+                        @if($offer->isExpired())
+                            <span class="badge bg-red-100 text-red-700">{{ __('app.expired') }}</span>
+                        @elseif($offer->expires_at)
+                            <small class="text-text-muted">{{ __('app.expires_at') }}: {{ $offer->expires_at->format('Y-m-d') }}</small>
+                        @endif
+                        <span class="flex-1"></span>
+                        @if($offerRejected)
+                            <a href="/app/purchase-offer?resubmit={{ $offer->id }}" class="btn btn-outline text-sm no-underline">{{ __('app.resubmit_offer') }}</a>
+                        @endif
+                    </div>
+                </div>
+            @endforeach
+
+            <div class="mt-4">
+                {{ $documents->links() }}
+            </div>
         @else
             @foreach($documents as $doc)
                 @php

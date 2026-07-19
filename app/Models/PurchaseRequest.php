@@ -15,7 +15,7 @@ class PurchaseRequest extends Model
     protected $fillable = [
         'company_id', 'user_id', 'supplier_id', 'product_id',
         'quantity', 'offered_price', 'currency', 'payment_terms',
-        'status',
+        'status', 'expires_at', 'purchase_order_id',
         'sales_reviewed_by', 'sales_reviewed_at', 'sales_review_notes',
         'purchasing_reviewed_by', 'purchasing_reviewed_at', 'purchasing_review_notes',
     ];
@@ -23,9 +23,15 @@ class PurchaseRequest extends Model
     protected $casts = [
         'quantity' => 'decimal:3',
         'offered_price' => 'decimal:2',
+        'expires_at' => 'date',
         'sales_reviewed_at' => 'datetime',
         'purchasing_reviewed_at' => 'datetime',
     ];
+
+    public function isExpired(): bool
+    {
+        return $this->expires_at !== null && $this->expires_at->endOfDay()->isPast();
+    }
 
     public function user(): BelongsTo
     {
@@ -50,5 +56,10 @@ class PurchaseRequest extends Model
     public function purchasingReviewedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'purchasing_reviewed_by');
+    }
+
+    public function purchaseOrder(): BelongsTo
+    {
+        return $this->belongsTo(PurchaseOrder::class);
     }
 }

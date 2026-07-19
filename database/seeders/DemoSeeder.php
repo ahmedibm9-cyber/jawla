@@ -83,6 +83,7 @@ class DemoSeeder extends Seeder
         foreach ([
             ['name' => 'sales_invoice', 'prefix' => 'INV', 'series_format' => 'INV-GPC-{YYYY}-{#####}', 'current_number' => 0],
             ['name' => 'proforma_invoice', 'prefix' => 'PF', 'series_format' => 'PF-GPC-{YYYY}-{#####}', 'current_number' => 0],
+            ['name' => 'purchase_order', 'prefix' => 'PO', 'series_format' => 'PO-GPC-{YYYY}-{#####}', 'current_number' => 0],
         ] as $ns) {
             NamingSeries::create($ns + ['company_id' => $company->id]);
         }
