@@ -4,7 +4,6 @@ namespace App\Livewire\App;
 
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\Payment;
 use App\Services\PaymentService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -38,6 +37,7 @@ class CollectPayment extends Component
     {
         if (! $value) {
             $this->amount = null;
+
             return;
         }
 
@@ -68,7 +68,7 @@ class CollectPayment extends Component
 
         $this->lastPaymentId = $payment->id;
         $this->success = true;
-        $this->successMessage = __('app.payment_collected') . ' — ' . number_format((float) $payment->amount, 2);
+        $this->successMessage = __('app.payment_collected').' — '.number_format((float) $payment->amount, 2);
 
         $this->reset(['customer_id', 'invoice_id', 'amount', 'method', 'notes']);
         $this->method = 'cash';

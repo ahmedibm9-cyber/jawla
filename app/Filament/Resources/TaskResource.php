@@ -7,9 +7,9 @@ use App\Models\Task;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 
 class TaskResource extends Resource
 {
@@ -84,7 +84,9 @@ class TaskResource extends Resource
                 TextColumn::make('status')
                     ->label($l('الحالة', 'Status'))
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) { 'done' => 'success', default => 'warning' }),
+                    ->color(fn (string $state): string => match ($state) {
+                        'done' => 'success', default => 'warning'
+                    }),
                 TextColumn::make('due_date')->label($l('تاريخ الاستحقاق', 'Due Date'))->date(),
                 TextColumn::make('created_at')->label($l('تاريخ الإنشاء', 'Created'))->dateTime(),
             ])

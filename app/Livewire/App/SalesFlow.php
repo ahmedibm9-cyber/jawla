@@ -4,11 +4,7 @@ namespace App\Livewire\App;
 
 use App\Models\Customer;
 use App\Models\Product;
-use App\Models\ProformaInvoice;
-use App\Services\Contracts\DocumentNumberService;
-use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\InvoiceService;
-use App\Services\Contracts\LineItemInput;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 

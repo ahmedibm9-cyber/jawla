@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
-use App\Services\Contracts\QrStrategy;
 use App\Models\Invoice;
 use App\Models\ProformaInvoice;
+use App\Services\Contracts\QrStrategy;
 
 class ZatcaPhase1Strategy implements QrStrategy
 {
@@ -61,12 +61,12 @@ class ZatcaPhase1Strategy implements QrStrategy
         foreach ($fields as $tag => $value) {
             $valueBytes = mb_convert_encoding($value, 'UTF-8');
             $length = strlen($valueBytes);
-            
+
             if ($length > 255) {
                 throw new \RuntimeException("TLV field $tag exceeds 255 bytes");
             }
 
-            $tlv .= chr($tag) . chr($length) . $valueBytes;
+            $tlv .= chr($tag).chr($length).$valueBytes;
         }
 
         return base64_encode($tlv);

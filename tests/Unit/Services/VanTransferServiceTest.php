@@ -2,12 +2,17 @@
 
 namespace Tests\Unit\Services;
 
+use App\Enums\StockReason;
 use App\Enums\VanTransferStatus;
+use App\Exceptions\Domain\InsufficientStockException;
 use App\Models\Company;
 use App\Models\Product;
+use App\Models\StockMovement;
 use App\Models\User;
 use App\Models\VanTransfer;
 use App\Models\Warehouse;
+use App\Services\Contracts\StockService;
+use App\Services\Contracts\VanTransferService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -22,7 +27,7 @@ class VanTransferServiceTest extends TestCase
         $toUser = User::factory()->create(['company_id' => $company->id]);
         $product = Product::factory()->create(['company_id' => $company->id]);
 
-        $service = app(\App\Services\Contracts\VanTransferService::class);
+        $service = app(VanTransferService::class);
 
         $transfer = $service->create(
             companyId: $company->id,
@@ -53,12 +58,12 @@ class VanTransferServiceTest extends TestCase
             'company_id' => $company->id, 'type' => 'main',
         ]);
 
-        $service = app(\App\Services\Contracts\VanTransferService::class);
+        $service = app(VanTransferService::class);
 
         // Seed stock in main warehouse
-        app(\App\Services\Contracts\StockService::class)->increment(
+        app(StockService::class)->increment(
             $mainWarehouse->id, $product->id, null, 50.0,
-            \App\Enums\StockReason::Initial, $product,
+            StockReason::Initial, $product,
         );
 
         $transfer = $service->create(
@@ -71,10 +76,10 @@ class VanTransferServiceTest extends TestCase
 
         $shipped = $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
 
-        $this->assertSame(\App\Enums\VanTransferStatus::Shipped, $shipped->status);
+        $this->assertSame(VanTransferStatus::Shipped, $shipped->status);
         $this->assertNotNull($shipped->shipped_at);
-        $this->assertSame(40.0, (float) app(\App\Services\Contracts\StockService::class)->balance($mainWarehouse->id, $product->id));
-        $this->assertSame(10.0, (float) app(\App\Services\Contracts\StockService::class)->balance($inTransitWarehouse->id, $product->id));
+        $this->assertSame(40.0, (float) app(StockService::class)->balance($mainWarehouse->id, $product->id));
+        $this->assertSame(10.0, (float) app(StockService::class)->balance($inTransitWarehouse->id, $product->id));
         $this->assertDatabaseHas('stock_movements', [
             'warehouse_id' => $mainWarehouse->id,
             'product_id' => $product->id,
@@ -98,11 +103,11 @@ class VanTransferServiceTest extends TestCase
             'company_id' => $company->id, 'type' => 'van', 'user_id' => $toUser->id,
         ]);
 
-        $service = app(\App\Services\Contracts\VanTransferService::class);
+        $service = app(VanTransferService::class);
 
-        app(\App\Services\Contracts\StockService::class)->increment(
+        app(StockService::class)->increment(
             $mainWarehouse->id, $product->id, null, 50.0,
-            \App\Enums\StockReason::Initial, $product,
+            StockReason::Initial, $product,
         );
 
         $transfer = $service->create(
@@ -116,11 +121,11 @@ class VanTransferServiceTest extends TestCase
         $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
         $received = $service->receive($transfer->id, $toUser->id);
 
-        $this->assertSame(\App\Enums\VanTransferStatus::Received, $received->status);
+        $this->assertSame(VanTransferStatus::Received, $received->status);
         $this->assertNotNull($received->received_at);
-        $this->assertSame(40.0, (float) app(\App\Services\Contracts\StockService::class)->balance($mainWarehouse->id, $product->id));
-        $this->assertSame(0.0, (float) app(\App\Services\Contracts\StockService::class)->balance($inTransitWarehouse->id, $product->id));
-        $this->assertSame(10.0, (float) app(\App\Services\Contracts\StockService::class)->balance($vanWarehouse->id, $product->id));
+        $this->assertSame(40.0, (float) app(StockService::class)->balance($mainWarehouse->id, $product->id));
+        $this->assertSame(0.0, (float) app(StockService::class)->balance($inTransitWarehouse->id, $product->id));
+        $this->assertSame(10.0, (float) app(StockService::class)->balance($vanWarehouse->id, $product->id));
     }
 
     public function test_reject_pending_transfer(): void
@@ -130,7 +135,7 @@ class VanTransferServiceTest extends TestCase
         $toUser = User::factory()->create(['company_id' => $company->id]);
         $product = Product::factory()->create(['company_id' => $company->id]);
 
-        $service = app(\App\Services\Contracts\VanTransferService::class);
+        $service = app(VanTransferService::class);
 
         $transfer = $service->create(
             companyId: $company->id,
@@ -141,7 +146,7 @@ class VanTransferServiceTest extends TestCase
 
         $rejected = $service->reject($transfer->id, $toUser->id);
 
-        $this->assertSame(\App\Enums\VanTransferStatus::Rejected, $rejected->status);
+        $this->assertSame(VanTransferStatus::Rejected, $rejected->status);
     }
 
     public function test_cancel_pending_transfer(): void
@@ -151,7 +156,7 @@ class VanTransferServiceTest extends TestCase
         $toUser = User::factory()->create(['company_id' => $company->id]);
         $product = Product::factory()->create(['company_id' => $company->id]);
 
-        $service = app(\App\Services\Contracts\VanTransferService::class);
+        $service = app(VanTransferService::class);
 
         $transfer = $service->create(
             companyId: $company->id,
@@ -162,7 +167,7 @@ class VanTransferServiceTest extends TestCase
 
         $cancelled = $service->cancel($transfer->id, $fromUser->id);
 
-        $this->assertSame(\App\Enums\VanTransferStatus::Cancelled, $cancelled->status);
+        $this->assertSame(VanTransferStatus::Cancelled, $cancelled->status);
     }
 
     public function test_cannot_ship_without_stock(): void
@@ -178,7 +183,7 @@ class VanTransferServiceTest extends TestCase
             'company_id' => $company->id, 'type' => 'main',
         ]);
 
-        $service = app(\App\Services\Contracts\VanTransferService::class);
+        $service = app(VanTransferService::class);
 
         $transfer = $service->create(
             companyId: $company->id,
@@ -188,7 +193,7 @@ class VanTransferServiceTest extends TestCase
             inTransitWarehouseId: $inTransitWarehouse->id,
         );
 
-        $this->expectException(\App\Exceptions\Domain\InsufficientStockException::class);
+        $this->expectException(InsufficientStockException::class);
         $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
     }
 
@@ -206,12 +211,12 @@ class VanTransferServiceTest extends TestCase
             'company_id' => $company->id, 'type' => 'main',
         ]);
 
-        $service = app(\App\Services\Contracts\VanTransferService::class);
+        $service = app(VanTransferService::class);
 
         // Seed stock for product but NOT product2
-        app(\App\Services\Contracts\StockService::class)->increment(
+        app(StockService::class)->increment(
             $mainWarehouse->id, $product->id, null, 50.0,
-            \App\Enums\StockReason::Initial, $product,
+            StockReason::Initial, $product,
         );
 
         $transfer = $service->create(
@@ -227,11 +232,11 @@ class VanTransferServiceTest extends TestCase
 
         try {
             $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
-        } catch (\App\Exceptions\Domain\InsufficientStockException $e) {
+        } catch (InsufficientStockException $e) {
         }
 
-        $this->assertSame(50.0, (float) app(\App\Services\Contracts\StockService::class)->balance($mainWarehouse->id, $product->id));
-        $this->assertSame(0, \App\Models\StockMovement::where('warehouse_id', $inTransitWarehouse->id)->count());
-        $this->assertSame(\App\Enums\VanTransferStatus::Pending, $transfer->fresh()->status);
+        $this->assertSame(50.0, (float) app(StockService::class)->balance($mainWarehouse->id, $product->id));
+        $this->assertSame(0, StockMovement::where('warehouse_id', $inTransitWarehouse->id)->count());
+        $this->assertSame(VanTransferStatus::Pending, $transfer->fresh()->status);
     }
 }

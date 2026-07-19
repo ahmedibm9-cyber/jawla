@@ -8,7 +8,7 @@ class Dashboard extends BaseDashboard
 {
     protected static string $routePath = '/dashboard';
 
-    public function getColumns(): int | array
+    public function getColumns(): int|array
     {
         return 2;
     }

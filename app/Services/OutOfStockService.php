@@ -2,18 +2,18 @@
 
 namespace App\Services;
 
+use App\Models\Activity;
 use App\Models\OutOfStockRequest;
 use App\Models\Product;
 use App\Models\User;
+use App\Notifications\OutOfStockResolved;
 use App\Services\Contracts\AlarmService;
 use App\Services\Contracts\OutOfStockService as OutOfStockServiceContract;
 use Illuminate\Support\Facades\DB;
 
 class OutOfStockService implements OutOfStockServiceContract
 {
-    public function __construct(private readonly AlarmService $alarms)
-    {
-    }
+    public function __construct(private readonly AlarmService $alarms) {}
 
     public function raise(User $rep, int $productId, float $quantity, ?int $customerId = null, ?string $notes = null): OutOfStockRequest
     {
@@ -69,7 +69,7 @@ class OutOfStockService implements OutOfStockServiceContract
 
             $request->update(['status' => 'fulfilled']);
 
-            \App\Models\Activity::log('out_of_stock_fulfilled', $request, sprintf(
+            Activity::log('out_of_stock_fulfilled', $request, sprintf(
                 'Out-of-stock request #%d fulfilled by user #%d',
                 $request->id,
                 $userId,
@@ -77,7 +77,7 @@ class OutOfStockService implements OutOfStockServiceContract
 
             // afterCommit: a rolled-back fulfilment must never notify the rep.
             DB::afterCommit(function () use ($request): void {
-                $request->user?->notify(new \App\Notifications\OutOfStockResolved($request));
+                $request->user?->notify(new OutOfStockResolved($request));
             });
 
             return $request;

@@ -42,6 +42,7 @@ class ActivityLog extends Page
 
         if (! $user->hasRole(['system_viewer', 'sales_manager'])) {
             Notification::make()->danger()->title(__('Unauthorized'))->send();
+
             return;
         }
 
@@ -76,5 +77,4 @@ class ActivityLog extends Page
 
         return $q->paginate(50);
     }
-
 }

@@ -2,10 +2,8 @@
 
 namespace App\Services;
 
-use App\Enums\StockReason;
 use App\Models\Product;
 use App\Models\Stock;
-use App\Models\StockMovement;
 use App\Models\Warehouse;
 use App\Models\WarehouseImportLog;
 use App\Services\Contracts\StockService as StockServiceContract;
@@ -26,9 +24,7 @@ class StockImportService
 
     private const OPTIONAL_HEADINGS = ['transit_quantity'];
 
-    public function __construct(private readonly StockServiceContract $stock)
-    {
-    }
+    public function __construct(private readonly StockServiceContract $stock) {}
 
     /**
      * Validate the file without mutating anything.

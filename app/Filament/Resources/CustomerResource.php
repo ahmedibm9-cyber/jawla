@@ -4,12 +4,14 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CustomerResource\Pages;
 use App\Models\Customer;
-use Filament\Forms;
-use Filament\Resources\Resource;
-use Filament\Schemas\Schema;
+use App\Models\User;
+use App\Notifications\CustomerApprovalOutcome;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\HtmlString;
@@ -158,8 +160,8 @@ class CustomerResource extends Resource
                             'approved_at' => now(),
                         ]);
 
-                        \App\Models\User::find($c->added_by)
-                            ?->notify(new \App\Notifications\CustomerApprovalOutcome($c, 'approved'));
+                        User::find($c->added_by)
+                            ?->notify(new CustomerApprovalOutcome($c, 'approved'));
                     })
                     ->requiresConfirmation(),
                 Action::make('reject')
@@ -182,8 +184,8 @@ class CustomerResource extends Resource
                             'rejection_reason' => $data['rejection_reason'],
                         ]);
 
-                        \App\Models\User::find($c->added_by)
-                            ?->notify(new \App\Notifications\CustomerApprovalOutcome($c, 'rejected', $data['rejection_reason']));
+                        User::find($c->added_by)
+                            ?->notify(new CustomerApprovalOutcome($c, 'rejected', $data['rejection_reason']));
                     })
                     ->requiresConfirmation(),
                 EditAction::make(),

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Resources\CustomerResource\Pages\ListCustomers;
+use App\Livewire\App\Notifications;
 use App\Models\Company;
 use App\Models\Complaint;
 use App\Models\Customer;
@@ -163,7 +164,7 @@ class RepNotificationsTest extends TestCase
         $this->assertSame(1, $this->rep->unreadNotifications()->count());
 
         Livewire::actingAs($this->rep)
-            ->test(\App\Livewire\App\Notifications::class)
+            ->test(Notifications::class)
             ->assertSee(__('app.notifications'));
 
         $this->assertSame(0, $this->rep->fresh()->unreadNotifications()->count());
@@ -173,7 +174,7 @@ class RepNotificationsTest extends TestCase
     public function test_notifications_page_shows_empty_state(): void
     {
         Livewire::actingAs($this->rep)
-            ->test(\App\Livewire\App\Notifications::class)
+            ->test(Notifications::class)
             ->assertSee(__('app.no_notifications'));
     }
 }

@@ -71,7 +71,7 @@ class ReturnService
 
     public function cancel(ReturnRecord $return, int $userId, string $reason): ReturnRecord
     {
-        return DB::transaction(function () use ($return, $userId, $reason): ReturnRecord {
+        return DB::transaction(function () use ($return, $userId): ReturnRecord {
             $return->update([
                 'status' => 'cancelled',
                 'cancelled_at' => now(),

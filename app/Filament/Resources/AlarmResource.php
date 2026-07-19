@@ -4,7 +4,9 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AlarmResource\Pages;
 use App\Models\Alarm;
+use App\Models\OutOfStockRequest;
 use App\Services\Contracts\AlarmService as AlarmServiceContract;
+use App\Services\Contracts\OutOfStockService;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
@@ -120,13 +122,13 @@ class AlarmResource extends Resource
 
                         app(AlarmServiceContract::class)->resolve($a, auth()->id());
 
-                        if ($a->reference_type === \App\Models\OutOfStockRequest::class) {
-                            $request = \App\Models\OutOfStockRequest::withoutGlobalScopes()
+                        if ($a->reference_type === OutOfStockRequest::class) {
+                            $request = OutOfStockRequest::withoutGlobalScopes()
                                 ->where('company_id', $a->company_id)
                                 ->find($a->reference_id);
 
                             if ($request !== null) {
-                                app(\App\Services\Contracts\OutOfStockService::class)->resolve($request, auth()->id());
+                                app(OutOfStockService::class)->resolve($request, auth()->id());
                             }
                         }
 

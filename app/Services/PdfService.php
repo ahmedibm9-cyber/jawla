@@ -155,7 +155,7 @@ HTML;
         $rows = '';
         foreach ($items as $item) {
             $pName = $lang === 'ar' ? ($item->product?->name_ar ?? '') : ($item->product?->name_en ?? '');
-            $rows .= "<tr><td>".e($pName)."</td><td>{$item->quantity}</td><td>".number_format((float) $item->unit_price, 2).'</td><td>'.number_format((float) $item->line_total, 2).'</td></tr>';
+            $rows .= '<tr><td>'.e($pName)."</td><td>{$item->quantity}</td><td>".number_format((float) $item->unit_price, 2).'</td><td>'.number_format((float) $item->line_total, 2).'</td></tr>';
         }
 
         $bank = $doc instanceof ProformaInvoice && $doc->company_bank_account_id

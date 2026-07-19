@@ -4,8 +4,9 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ReturnRecordResource\Pages;
 use App\Models\ReturnRecord;
-use Filament\Resources\Resource;
+use App\Services\ReturnService;
 use Filament\Actions\Action;
+use Filament\Resources\Resource;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -55,7 +56,7 @@ class ReturnRecordResource extends Resource
                     ->color('danger')
                     ->visible(fn (ReturnRecord $r) => $r->status === 'submitted')
                     ->requiresConfirmation()
-                    ->action(fn (ReturnRecord $r) => app(\App\Services\ReturnService::class)->cancel($r, auth()->id(), __('app.admin_cancelled'))),
+                    ->action(fn (ReturnRecord $r) => app(ReturnService::class)->cancel($r, auth()->id(), __('app.admin_cancelled'))),
             ])
             ->bulkActions([]);
     }

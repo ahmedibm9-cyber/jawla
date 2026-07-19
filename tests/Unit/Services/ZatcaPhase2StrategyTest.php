@@ -5,6 +5,7 @@ namespace Tests\Unit\Services;
 use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\ProformaInvoice;
+use App\Services\ZatcaPhase1Strategy;
 use App\Services\ZatcaPhase2Strategy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -18,7 +19,7 @@ class ZatcaPhase2StrategyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->strategy = new ZatcaPhase2Strategy();
+        $this->strategy = new ZatcaPhase2Strategy;
     }
 
     /** @test */
@@ -120,7 +121,7 @@ class ZatcaPhase2StrategyTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Unsupported document type');
 
-        $this->strategy->generate(new \stdClass());
+        $this->strategy->generate(new \stdClass);
     }
 
     /** @test */
@@ -143,8 +144,8 @@ class ZatcaPhase2StrategyTest extends TestCase
         ]);
         $invoice->setRelation('company', $company);
 
-        $phase1 = new \App\Services\ZatcaPhase1Strategy();
-        $phase2 = new \App\Services\ZatcaPhase2Strategy();
+        $phase1 = new ZatcaPhase1Strategy;
+        $phase2 = new ZatcaPhase2Strategy;
 
         $qr1 = $phase1->generate($invoice);
         $qr2 = $phase2->generate($invoice);

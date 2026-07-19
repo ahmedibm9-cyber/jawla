@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Enums\StockReason;
 use App\Models\Company;
 use App\Models\CompanyBankAccount;
 use App\Models\Customer;
@@ -12,13 +13,12 @@ use App\Models\NamingSeries;
 use App\Models\PriceList;
 use App\Models\Product;
 use App\Models\Route;
-use App\Enums\StockReason;
-use App\Services\Contracts\StockService as StockServiceContract;
 use App\Models\TaxTemplate;
 use App\Models\TaxTemplateLine;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WorkSession;
+use App\Services\Contracts\StockService as StockServiceContract;
 use Illuminate\Database\Seeder;
 
 class DemoSeeder extends Seeder

@@ -3,8 +3,10 @@
 namespace Tests\Unit\Services;
 
 use App\Models\Company;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\ProformaInvoice;
+use App\Models\User;
 use App\Services\EgyptQrStrategy;
 use App\Services\InvoiceQrService;
 use App\Services\ZatcaPhase1Strategy;
@@ -111,11 +113,11 @@ class InvoiceQrServiceTest extends TestCase
             'tax_number' => '200000000000002',
         ]);
 
-        $customer = \App\Models\Customer::factory()->create([
+        $customer = Customer::factory()->create([
             'company_id' => $company->id,
         ]);
 
-        $user = \App\Models\User::factory()->create([
+        $user = User::factory()->create([
             'company_id' => $company->id,
         ]);
 
@@ -146,11 +148,11 @@ class InvoiceQrServiceTest extends TestCase
             'tax_number' => '200000000000002',
         ]);
 
-        $customer = \App\Models\Customer::factory()->create([
+        $customer = Customer::factory()->create([
             'company_id' => $company->id,
         ]);
 
-        $user = \App\Models\User::factory()->create([
+        $user = User::factory()->create([
             'company_id' => $company->id,
         ]);
 

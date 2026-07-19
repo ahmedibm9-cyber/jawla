@@ -9,7 +9,6 @@ use App\Models\ProformaInvoice;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -27,6 +26,7 @@ class ReportsPageTest extends TestCase
     {
         $u = User::factory()->create();
         $u->assignRole('admin');
+
         return $u;
     }
 

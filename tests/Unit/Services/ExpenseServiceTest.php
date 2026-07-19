@@ -4,7 +4,6 @@ namespace Tests\Unit\Services;
 
 use App\Models\CashBox;
 use App\Models\Company;
-use App\Models\Expense;
 use App\Models\User;
 use App\Services\ExpenseService;
 use Illuminate\Foundation\Testing\RefreshDatabase;

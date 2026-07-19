@@ -18,7 +18,7 @@ class EgyptQrStrategyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->strategy = new EgyptQrStrategy();
+        $this->strategy = new EgyptQrStrategy;
     }
 
     /** @test */
@@ -78,6 +78,6 @@ class EgyptQrStrategyTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Unsupported document type');
 
-        $this->strategy->generate(new \stdClass());
+        $this->strategy->generate(new \stdClass);
     }
 }

@@ -58,7 +58,7 @@ class LowStockAlertWidget extends StatsOverviewWidget
 
         return [
             Stat::make($labels[$lang][0], $totalAlerts)
-                ->description("{$labels[$lang][1]}: " . ($mainLowStock + $vanLowStock) . " · {$labels[$lang][2]}: " . ($mainOutOfStock + $vanOutOfStock))
+                ->description("{$labels[$lang][1]}: ".($mainLowStock + $vanLowStock)." · {$labels[$lang][2]}: ".($mainOutOfStock + $vanOutOfStock))
                 ->icon('heroicon-o-exclamation-triangle')
                 ->color($color),
         ];

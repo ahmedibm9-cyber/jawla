@@ -6,7 +6,6 @@ use Closure;
 use Filament\Facades\Filament;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
-use Illuminate\Http\Request;
 
 class FilamentAuthenticate extends Middleware
 {

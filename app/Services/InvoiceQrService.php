@@ -12,27 +12,27 @@ class InvoiceQrService
     public function generateForInvoice(Invoice $invoice): string
     {
         $strategy = $this->resolveStrategy($invoice->company, 'invoice');
-        
+
         return $strategy->generate($invoice);
     }
 
     public function generateForProforma(ProformaInvoice $proforma): string
     {
         $strategy = $this->resolveStrategy($proforma->company, 'proforma');
-        
+
         return $strategy->generate($proforma);
     }
 
     public function resolveStrategy(Company $company, string $documentType): QrStrategy
     {
         $country = $company->country ?? 'EG';
-        
+
         if ($country === 'SA' && $company->zatca_enabled) {
             // ZATCA Phase 2 requires cryptographic stamp - check if CSID is available
             if (! empty($company->zatca_csid)) {
                 return app(ZatcaPhase2Strategy::class);
             }
-            
+
             // Fallback to Phase 1 if CSID not yet available
             return app(ZatcaPhase1Strategy::class);
         }

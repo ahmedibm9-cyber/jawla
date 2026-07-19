@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\Contracts\OutOfStockService;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -175,7 +176,7 @@ class OutOfStockBroadcastTest extends TestCase
             'company_id' => Company::factory()->create()->id,
         ]);
 
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
 
         app(OutOfStockService::class)->raise($this->rep, $otherProduct->id, 1.0);
     }

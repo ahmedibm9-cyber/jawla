@@ -5,11 +5,13 @@ namespace Tests\Feature;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\ProformaInvoice;
+use App\Models\InvoiceItem;
+use App\Models\Payment;
 use App\Models\Product;
+use App\Models\ProformaInvoice;
 use App\Models\User;
-use App\Services\InvoiceService;
 use App\Services\PdfService;
+use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -65,7 +67,7 @@ class PdfQrCodeTest extends TestCase
         ]);
 
         // Create invoice item
-        \App\Models\InvoiceItem::factory()->create([
+        InvoiceItem::factory()->create([
             'invoice_id' => $invoice->id,
             'product_id' => $product->id,
             'quantity' => 1,
@@ -82,7 +84,7 @@ class PdfQrCodeTest extends TestCase
 
     public function test_invoice_pdf_contains_qr_for_saudi_phase2_company(): void
     {
-        $this->seed(\Database\Seeders\DemoSeeder::class);
+        $this->seed(DemoSeeder::class);
 
         $invoice = $this->createInvoice([
             'company_country' => 'SA',
@@ -226,7 +228,7 @@ class PdfQrCodeTest extends TestCase
             'remaining_amount' => 0,
         ]);
 
-        $payment = \App\Models\Payment::factory()->create([
+        $payment = Payment::factory()->create([
             'company_id' => $company->id,
             'customer_id' => $customer->id,
             'invoice_id' => $invoice->id,
@@ -295,7 +297,7 @@ class PdfQrCodeTest extends TestCase
         ]);
 
         // Egypt format: invoice_number|total
-        $expectedFormat = "INV-EG-00001|1140.00";
+        $expectedFormat = 'INV-EG-00001|1140.00';
         $this->assertEquals($expectedFormat, $invoice->zatca_qr);
     }
 

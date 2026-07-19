@@ -5,11 +5,12 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PriceQuotationRequestResource\Pages;
 use App\Models\PriceQuotation;
 use App\Models\PriceQuotationRequest;
+use App\Notifications\QuotationOutcome;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Actions\Action;
-use Filament\Actions\EditAction;
 use Filament\Tables;
 use Filament\Tables\Table;
 
@@ -102,7 +103,7 @@ class PriceQuotationRequestResource extends Resource
                         ]);
                         $r->update(['status' => 'priced']);
 
-                        $r->user?->notify(new \App\Notifications\QuotationOutcome($r, 'priced'));
+                        $r->user?->notify(new QuotationOutcome($r, 'priced'));
                     }),
                 EditAction::make(),
             ]);

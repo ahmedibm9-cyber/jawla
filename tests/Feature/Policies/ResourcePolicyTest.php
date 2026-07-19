@@ -28,6 +28,7 @@ class ResourcePolicyTest extends TestCase
     {
         $u = User::factory()->create();
         $u->assignRole($role);
+
         return $u;
     }
 

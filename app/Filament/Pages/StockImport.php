@@ -11,6 +11,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class StockImport extends Page
@@ -21,7 +22,7 @@ class StockImport extends Page
 
     public ?int $warehouse_id = null;
 
-    /** @var array<int, \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|string> */
+    /** @var array<int, TemporaryUploadedFile|string> */
     public array $file = [];
 
     public ?array $preview = null;
@@ -128,7 +129,7 @@ class StockImport extends Page
     public function downloadTemplate(): StreamedResponse
     {
         return response()->streamDownload(
-            fn () => print(app(StockImportService::class)->template()),
+            fn () => print (app(StockImportService::class)->template()),
             'stock-import-template.csv',
             ['Content-Type' => 'text/csv'],
         );

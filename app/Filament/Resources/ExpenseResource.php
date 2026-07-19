@@ -4,8 +4,9 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\ExpenseResource\Pages;
 use App\Models\Expense;
-use Filament\Resources\Resource;
+use App\Services\ExpenseService;
 use Filament\Actions\Action;
+use Filament\Resources\Resource;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -54,7 +55,7 @@ class ExpenseResource extends Resource
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->action(fn (Expense $r) => app(\App\Services\ExpenseService::class)->cancel($r, auth()->id())),
+                    ->action(fn (Expense $r) => app(ExpenseService::class)->cancel($r, auth()->id())),
             ])
             ->bulkActions([]);
     }

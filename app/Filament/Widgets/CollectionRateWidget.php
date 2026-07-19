@@ -39,8 +39,8 @@ class CollectionRateWidget extends StatsOverviewWidget
             ->sum('remaining_amount');
 
         // Collection rate
-        $collectionRate = $totalInvoiced > 0 
-            ? round(($totalCollected / $totalInvoiced) * 100, 1) 
+        $collectionRate = $totalInvoiced > 0
+            ? round(($totalCollected / $totalInvoiced) * 100, 1)
             : 0;
 
         $labels = [
@@ -51,8 +51,8 @@ class CollectionRateWidget extends StatsOverviewWidget
         $rateColor = $collectionRate >= 90 ? 'success' : ($collectionRate >= 70 ? 'warning' : 'danger');
 
         return [
-            Stat::make($labels[$lang][0], $collectionRate . '%')
-                ->description("{$labels[$lang][1]}: " . number_format((float) $totalInvoiced, 2) . " · {$labels[$lang][2]}: " . number_format((float) $totalCollected, 2) . " · {$labels[$lang][3]}: " . number_format((float) $outstandingThisMonth, 2))
+            Stat::make($labels[$lang][0], $collectionRate.'%')
+                ->description("{$labels[$lang][1]}: ".number_format((float) $totalInvoiced, 2)." · {$labels[$lang][2]}: ".number_format((float) $totalCollected, 2)." · {$labels[$lang][3]}: ".number_format((float) $outstandingThisMonth, 2))
                 ->icon('heroicon-o-chart-bar')
                 ->color($rateColor),
         ];

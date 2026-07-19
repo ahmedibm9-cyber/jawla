@@ -7,13 +7,13 @@ use App\Filament\Resources\VanTransferResource\Pages;
 use App\Models\VanTransfer;
 use App\Models\Warehouse;
 use App\Services\Contracts\VanTransferService;
+use Filament\Actions\Action;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Actions\Action;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Notifications\Notification;
 
 class VanTransferResource extends Resource
 {

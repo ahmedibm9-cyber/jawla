@@ -5,32 +5,10 @@ namespace App\Filament\Auth\Pages;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use Filament\Auth\MultiFactor\Contracts\HasBeforeChallengeHook;
-use Filament\Auth\MultiFactor\Contracts\MultiFactorAuthenticationProvider;
 use Filament\Auth\Pages\Login as BaseLogin;
 use Filament\Facades\Filament;
-use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Actions;
-use Filament\Schemas\Components\Component;
-use Filament\Schemas\Components\EmbeddedSchema;
-use Filament\Schemas\Components\Form;
-use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\RenderHook;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Concerns\RestrictsFileUploadsToSchemaComponents;
-use Filament\Schemas\Schema;
-use Filament\View\PanelsRenderHook;
-use Illuminate\Auth\Events\Attempting;
-use Illuminate\Auth\Events\Failed;
-use Illuminate\Auth\SessionGuard;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\Guard;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Timebox;
-use Illuminate\Validation\ValidationException;
-use Livewire\Attributes\Locked;
-use SensitiveParameter;
 
 class Login extends BaseLogin
 {

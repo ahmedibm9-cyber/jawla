@@ -9,7 +9,7 @@ use Livewire\Features\SupportRedirects\Redirector;
 
 class LoginResponse implements Responsable
 {
-    public function toResponse($request): RedirectResponse | Redirector
+    public function toResponse($request): RedirectResponse|Redirector
     {
         $user = Filament::auth()->user();
 

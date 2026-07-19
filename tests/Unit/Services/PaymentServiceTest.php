@@ -2,10 +2,11 @@
 
 namespace Tests\Unit\Services;
 
+use App\Enums\InvoiceStatus;
+use App\Enums\StockReason;
 use App\Models\CashBox;
 use App\Models\Company;
 use App\Models\Customer;
-use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -71,7 +72,7 @@ class PaymentServiceTest extends TestCase
 
         app(StockService::class)->increment(
             $van->id, $product->id, null, 50.0,
-            \App\Enums\StockReason::Initial, $product,
+            StockReason::Initial, $product,
         );
 
         $invoice = app(InvoiceService::class)->create([
@@ -94,7 +95,7 @@ class PaymentServiceTest extends TestCase
         );
 
         $invoice->refresh();
-        $this->assertSame(\App\Enums\InvoiceStatus::Paid, $invoice->status);
+        $this->assertSame(InvoiceStatus::Paid, $invoice->status);
         $this->assertSame(0.0, (float) $invoice->remaining_amount);
         $this->assertSame($total, (float) $invoice->paid_amount);
     }
@@ -113,7 +114,7 @@ class PaymentServiceTest extends TestCase
 
         app(StockService::class)->increment(
             $van->id, $product->id, null, 50.0,
-            \App\Enums\StockReason::Initial, $product,
+            StockReason::Initial, $product,
         );
 
         $invoice = app(InvoiceService::class)->create([
@@ -144,7 +145,7 @@ class PaymentServiceTest extends TestCase
         $this->assertSame(0.0, $cashBoxAfter);
 
         $invoice->refresh();
-        $this->assertSame(\App\Enums\InvoiceStatus::PartiallyPaid, $invoice->status);
+        $this->assertSame(InvoiceStatus::PartiallyPaid, $invoice->status);
         $this->assertSame(0.0, (float) $invoice->paid_amount);
         $this->assertSame($total, (float) $invoice->remaining_amount);
 

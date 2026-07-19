@@ -4,11 +4,12 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\PaymentResource\Pages;
 use App\Models\Payment;
-use Filament\Resources\Resource;
+use App\Services\PaymentService;
 use Filament\Actions\Action;
-use Filament\Tables\Table;
+use Filament\Resources\Resource;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
 class PaymentResource extends Resource
 {
@@ -60,7 +61,7 @@ class PaymentResource extends Resource
                     ->color('danger')
                     ->visible(fn (Payment $r) => ! $r->cancelled_at)
                     ->requiresConfirmation()
-                    ->action(fn (Payment $r) => app(\App\Services\PaymentService::class)->cancel($r, auth()->id(), 'Admin cancelled')),
+                    ->action(fn (Payment $r) => app(PaymentService::class)->cancel($r, auth()->id(), 'Admin cancelled')),
             ])
             ->bulkActions([]);
     }

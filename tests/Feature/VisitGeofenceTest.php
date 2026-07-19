@@ -4,11 +4,11 @@ namespace Tests\Feature;
 
 use App\Enums\VisitStatus;
 use App\Livewire\App\VisitFlow;
-use App\Models\Activity;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\User;
 use App\Models\Visit;
+use App\Models\WorkSession;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -47,7 +47,7 @@ class VisitGeofenceTest extends TestCase
         ]);
 
         $this->visit = Visit::factory()->create([
-            'work_session_id' => \App\Models\WorkSession::factory()->create(['user_id' => $this->rep->id])->id,
+            'work_session_id' => WorkSession::factory()->create(['user_id' => $this->rep->id])->id,
             'user_id' => $this->rep->id,
             'customer_id' => $this->customer->id,
             'status' => VisitStatus::Open,

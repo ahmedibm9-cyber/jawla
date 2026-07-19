@@ -3,8 +3,6 @@
 namespace App\Filament\Widgets;
 
 use App\Models\Invoice;
-use App\Models\Payment;
-use App\Models\Customer;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
@@ -33,8 +31,8 @@ class OutstandingBalanceWidget extends StatsOverviewWidget
         ];
 
         return [
-            Stat::make($labels[$lang][0], number_format((float) $outstanding, 2) . ' EGP')
-                ->description($labels[$lang][1] . ': ' . $overdueCount)
+            Stat::make($labels[$lang][0], number_format((float) $outstanding, 2).' EGP')
+                ->description($labels[$lang][1].': '.$overdueCount)
                 ->icon('heroicon-o-currency-dollar')
                 ->color($outstanding > 0 ? 'warning' : 'success'),
         ];

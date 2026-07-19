@@ -18,7 +18,7 @@ class ZatcaPhase1StrategyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->strategy = new ZatcaPhase1Strategy();
+        $this->strategy = new ZatcaPhase1Strategy;
     }
 
     /** @test */
@@ -169,7 +169,7 @@ class ZatcaPhase1StrategyTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Unsupported document type');
 
-        $this->strategy->generate(new \stdClass());
+        $this->strategy->generate(new \stdClass);
     }
 
     /**

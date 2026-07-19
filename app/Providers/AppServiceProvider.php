@@ -16,8 +16,11 @@ use App\Services\Contracts\StockService;
 use App\Services\Contracts\VanTransferService as VanTransferServiceContract;
 use App\Services\InvoiceCalculationService as InvoiceCalculationServiceImpl;
 use App\Services\NumberSequenceService;
+use App\Services\OutOfStockService;
 use App\Services\StockService as StockServiceImpl;
+use App\Services\VanTransferService;
 use App\Support\ActiveCompanyContext;
+use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use Filament\Events\Auth\Login as FilamentLogin;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
@@ -34,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ActiveCompanyContext::class);
 
         $this->app->bind(
-            \Filament\Auth\Http\Responses\Contracts\LoginResponse::class,
+            LoginResponse::class,
             \App\Filament\Auth\Http\Responses\LoginResponse::class,
         );
 
@@ -44,9 +47,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PricingService::class, fn () => app(\App\Services\PricingService::class));
         $this->app->bind(DocumentNumberService::class, fn () => app(NumberSequenceService::class));
         $this->app->bind(AlarmService::class, fn () => app(\App\Services\AlarmService::class));
-        $this->app->bind(\App\Services\Contracts\OutOfStockService::class, fn () => app(\App\Services\OutOfStockService::class));
+        $this->app->bind(\App\Services\Contracts\OutOfStockService::class, fn () => app(OutOfStockService::class));
         $this->app->singleton(ComplaintService::class);
-        $this->app->bind(VanTransferServiceContract::class, fn () => app(\App\Services\VanTransferService::class));
+        $this->app->bind(VanTransferServiceContract::class, fn () => app(VanTransferService::class));
     }
 
     /**

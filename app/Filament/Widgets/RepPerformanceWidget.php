@@ -2,9 +2,7 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Invoice;
 use App\Models\User;
-use App\Models\Visit;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
@@ -44,7 +42,7 @@ class RepPerformanceWidget extends StatsOverviewWidget
 
         return [
             Stat::make($labels[$lang][1], $totalVisits)
-                ->description("{$labels[$lang][3]}: {$activeReps}/{$totalReps} · {$labels[$lang][2]}: " . number_format((float) $totalSales, 2))
+                ->description("{$labels[$lang][3]}: {$activeReps}/{$totalReps} · {$labels[$lang][2]}: ".number_format((float) $totalSales, 2))
                 ->icon('heroicon-o-users')
                 ->color('primary'),
         ];

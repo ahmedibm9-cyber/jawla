@@ -38,7 +38,7 @@ class LogExpense extends Component
         );
 
         $this->success = true;
-        $this->successMessage = __('app.expense_logged') . ' — ' . number_format((float) $expense->amount, 2);
+        $this->successMessage = __('app.expense_logged').' — '.number_format((float) $expense->amount, 2);
 
         $this->reset(['category', 'amount', 'note']);
     }

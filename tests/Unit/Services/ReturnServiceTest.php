@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\Enums\StockReason;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Product;
@@ -28,7 +29,7 @@ class ReturnServiceTest extends TestCase
 
         app(StockService::class)->increment(
             $van->id, $product->id, null, 50.0,
-            \App\Enums\StockReason::Initial, $product,
+            StockReason::Initial, $product,
         );
 
         $stockBefore = app(StockService::class)->balance($van->id, $product->id);
@@ -63,7 +64,7 @@ class ReturnServiceTest extends TestCase
 
         app(StockService::class)->increment(
             $van->id, $product->id, null, 20.0,
-            \App\Enums\StockReason::Initial, $product,
+            StockReason::Initial, $product,
         );
 
         $return = app(ReturnService::class)->create(

@@ -1,19 +1,23 @@
 <?php
 
+use App\Http\Controllers\App\LoginController;
 use App\Http\Controllers\App\PdfController;
 use App\Livewire\App\AddCustomer;
-use App\Livewire\App\Home;
 use App\Livewire\App\CollectPayment;
+use App\Livewire\App\Home;
 use App\Livewire\App\LogComplaint;
-use App\Livewire\App\SalesFlow;
 use App\Livewire\App\LogExpense;
 use App\Livewire\App\LogReturn;
 use App\Livewire\App\MorePage;
+use App\Livewire\App\Notifications;
+use App\Livewire\App\Orders;
 use App\Livewire\App\QuotationFlow;
+use App\Livewire\App\SalesFlow;
 use App\Livewire\App\StockSearch;
 use App\Livewire\App\SubmitPurchaseOffer;
 use App\Livewire\App\TodaysCustomers;
 use App\Livewire\App\VisitFlow;
+use App\Livewire\App\Visits;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect('/admin/login'));
@@ -68,9 +72,9 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/', Home::class)->name('home');
     Route::get('/visit/{visit}', VisitFlow::class)->name('visit');
     Route::get('/customers', TodaysCustomers::class)->name('customers');
-    Route::get('/visits', App\Livewire\App\Visits::class)->name('visits');
-    Route::get('/orders', App\Livewire\App\Orders::class)->name('orders');
-    Route::get('/notifications', App\Livewire\App\Notifications::class)->name('notifications');
+    Route::get('/visits', Visits::class)->name('visits');
+    Route::get('/orders', Orders::class)->name('orders');
+    Route::get('/notifications', Notifications::class)->name('notifications');
     Route::get('/quotations', QuotationFlow::class)->name('quotations');
     Route::get('/stock', StockSearch::class)->name('stock');
     Route::get('/more', MorePage::class)->name('more');
@@ -85,5 +89,5 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])->name('pdf.proforma');
     Route::get('/pdf/invoice/{invoice}', [PdfController::class, 'invoice'])->name('pdf.invoice');
     Route::get('/pdf/receipt/{payment}', [PdfController::class, 'receipt'])->name('pdf.receipt');
-    Route::match(['get', 'post'], '/logout', [App\Http\Controllers\App\LoginController::class, 'destroy'])->name('logout');
+    Route::match(['get', 'post'], '/logout', [LoginController::class, 'destroy'])->name('logout');
 });

@@ -2,18 +2,19 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Auth\Pages\Login;
 use App\Filament\AvatarProviders\CompanyAvatarProvider;
 use App\Filament\Pages\CollectPayment;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ReportsPage;
+use App\Filament\Widgets\CollectionRateWidget;
+use App\Filament\Widgets\LowStockAlertWidget;
 use App\Filament\Widgets\OpenAlarmsWidget;
+use App\Filament\Widgets\OutstandingBalanceWidget;
 use App\Filament\Widgets\PendingQuotationsWidget;
+use App\Filament\Widgets\RepPerformanceWidget;
 use App\Filament\Widgets\SalesTodayWidget;
 use App\Filament\Widgets\VisitsTodayWidget;
-use App\Filament\Widgets\OutstandingBalanceWidget;
-use App\Filament\Widgets\LowStockAlertWidget;
-use App\Filament\Widgets\CollectionRateWidget;
-use App\Filament\Widgets\RepPerformanceWidget;
 use App\Http\Middleware\FilamentAuthenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -23,7 +24,6 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
-
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -39,7 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->login(\App\Filament\Auth\Pages\Login::class)
+            ->login(Login::class)
             ->colors([
                 'primary' => Color::hex('#4DB848'),
             ])
