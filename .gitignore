@@ -24,6 +24,7 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+.mimocode/
 .obsidian/
 .opencode/
 .playwright-cli/

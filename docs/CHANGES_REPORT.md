@@ -1112,7 +1112,59 @@ The investigation files from the brainstorming session contained **many false po
 
 ---
 
+---
+
 **Report Generated:** July 19, 2026
 **Session:** UI Gap Coverage & Investigation Audit (Session 4)
 **Tests:** 26 passed (focused test suites)
+**Stress Tests:** 2 runs completed
+
+---
+
+## 📋 Phase Roadmap — Remaining Tracks
+
+| Track                   | Phase                               | Status              | Key Items                                                                |
+| ----------------------- | ----------------------------------- | ------------------- | ------------------------------------------------------------------------ |
+| **Beta Core**           | B7 — Purchase Requests              | 🔄 In Progress      | Dual review (Sales Mgr + Purchasing), PO generation, supplier comparison |
+| **Beta Core**           | B8 — Demo & Regression              | ⏳ Pending          | AM1→AM9 end-to-end, hard rules + states regression                       |
+| **v1.0 (Go-Live Gate)** | Returns                             | ⏳ Deferred         | ReturnRecordResource (admin), rep-side returns flow                      |
+| **v1.0**                | Cash Reconciliation UI              | ⏳ Deferred         | Daily cashbox reconciliation workflow                                    |
+| **v1.0**                | Expenses (admin)                    | ⏳ Deferred         | ExpenseResource approval queue                                           |
+| **v1.0**                | Van Transfers                       | ⏳ Deferred         | VanTransferResource (ship/receive)                                       |
+| **v1.0**                | Supplier Comparison + POs           | ⏳ Deferred         | Multi-supplier PO workflow                                               |
+| **v1.0**                | Transit + Landed Cost               | ⏳ Deferred         | In-transit qty column, customs/freight allocation                        |
+| **v1.0**                | Batch/COA/Expiry + Backfill         | ⏳ Deferred         | Lot tracking, expiry alerts, historical backfill                         |
+| **v1.0**                | ETA Full Compliance (ZATCA Phase 2) | 🚨 **Go-Live Gate** | QR Phase 2, CSID, cryptographic stamp                                    |
+| **v1.0**                | Reports/Exports/Map                 | ⏳ Deferred         | Filament export, route map, PDF batch                                    |
+| **v1.0**                | Odoo Migration                      | ⏳ Deferred         | Data import scripts, mapping validation                                  |
+| **v1.1**                | Nested Range Delegation (PRC-3)     | ⏳ Deferred         | Manager → rep sub-ranges                                                 |
+| **v1.1**                | Offline Architecture Decision       | 🔴 **Top Priority** | IndexedDB + background sync design                                       |
+| **v1.1**                | Push Notifications                  | ⏳ Deferred         | FCM integration, alarm bell push                                         |
+| **v1.1**                | Onboarding Walkthrough              | ⏳ Deferred         | First-run guided tour                                                    |
+| **v1.1**                | Barcode/QR Product Lookup           | ⏳ Deferred         | Camera scan → product                                                    |
+| **v1.1**                | Biometric / 2FA                     | ⏳ Deferred         | Fingerprint/FaceID + TOTP                                                |
+| **v1.1**                | Rep Dark Mode                       | ⏳ Deferred         | Tailwind dark variant for PWA                                            |
+| **v1.1**                | Bulk Actions (rep)                  | ⏳ Deferred         | Multi-select on lists                                                    |
+| **v1.1**                | Sync Discovery                      | ⏳ Deferred         | Conflict resolution UX                                                   |
+| **v1.2 / v2**           | STK-3 Automation                    | ⏳ Deferred         | ERP/warehouse integration                                                |
+| **v1.2 / v2**           | Route Optimization                  | ⏳ Deferred         | OSRM/Google OR-Tools                                                     |
+| **v1.2 / v2**           | OCR Receipts                        | ⏳ Deferred         | Expense receipt scanning                                                 |
+| **v1.2 / v2**           | ZATCA/SA/Inter-Company              | ⏳ Deferred         | Multi-entity, Saudi compliance                                           |
+| **v1.2 / v2**           | Gamification                        | ⏳ Deferred         | Leaderboards, achievements                                               |
+| **v1.2 / v2**           | AI Assistant                        | ⏳ Deferred         | Copilot for reps/managers                                                |
+| **v1.2 / v2**           | Form Builder                        | ⏳ Deferred         | Dynamic forms for visits                                                 |
+
+---
+
+### 🎯 Next Immediate Actions
+
+1. **B7 Completion** — Finish PurchaseRequestResource dual review + PO generation
+2. **ZATCA Phase 2 (Go-Live Gate)** — Architecture decision for CSID + cryptographic stamp
+3. **Offline Architecture (v1.1 Top Priority)** — Design IndexedDB + background sync
+
+---
+
+**Report Generated:** July 19, 2026
+**Session:** Phase Roadmap Documentation (Session 5)
+**Tests:** 60+ passed (combined suites)
 **Stress Tests:** 2 runs completed

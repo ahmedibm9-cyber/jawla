@@ -56,3 +56,19 @@
 - Primary suspected component: Rep PWA shell (16 Livewire pages) + translation layer (`lang/en/app.php`, `lang/ar/app.php`).
 - Case file: bmad-output/investigation-missing-ui-elements-2026-07-19.md (v2.0 update)
 - Recommended response: Option A — 7 low-priority fix stories (P1-P7) for remaining polish items; Option B for notification bell story — mark it completed (already built).
+
+## Investigation: rep-native-select-to-autocomplete — 2026-07-19
+
+- Symptom: Four REP pages use native `<select>` dropdowns with 50-100 items, violating accepted D5 decision (2026-07-18) to replace with searchable autocomplete.
+- Primary hypothesis: D5 accepted but autocomplete component never built; four pages never migrated.
+- Primary suspected component: New Autocomplete component (to be created) + 4 REP pages (collect-payment, log-return, log-complaint, submit-purchase-offer).
+- Case file: bmad-output/investigation-rep-native-select-to-autocomplete-2026-07-19.md
+- Recommended response: Option A — create fix story: build autocomplete component + migrate 8 dropdowns across 4 pages.
+
+## Investigation: rep-ds-card-button-tooltip-adoption — 2026-07-19
+
+- Symptom: Three DS components (`x-ds.card`, `x-ds.button`, `x-ds.tooltip`) exist but have zero usage across all 16 REP pages; raw HTML used instead.
+- Primary hypothesis: D6 was scoped to "critical path" components only (modal, skeleton, empty); card/button/tooltip deemed non-blocking and deferred.
+- Primary suspected component: DS components (existing) + all 16 REP page views (migration targets).
+- Case file: bmad-output/investigation-rep-ds-card-button-tooltip-adoption-2026-07-19.md
+- Recommended response: Option A — create fix story: migrate ~80 cards, ~50 buttons, add tooltips to icon-only actions across 16 pages.
