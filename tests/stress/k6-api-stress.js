@@ -26,10 +26,10 @@ const BASE_URL = __ENV.BASE_URL || "http://localhost:8000";
 
 export default function () {
   group("Health Check", () => {
-    const healthRes = http.get(`${BASE_URL}/health`);
+    const healthRes = http.get(`${BASE_URL}/up`);
     check(healthRes, {
       "health status is 200": (r) => r.status === 200,
-      "health response time < 500ms": (r) => r.timings.duration < 500,
+      "health response time < 250ms": (r) => r.timings.duration < 250,
     }) || errorRate.add(1);
   });
 
@@ -37,8 +37,10 @@ export default function () {
     const loginPage = http.get(`${BASE_URL}/admin/login`);
     check(loginPage, {
       "login page status is 200": (r) => r.status === 200,
-      "login page has CSRF token": (r) =>
-        r.html('input[name="_token"]') !== null,
+      "login page has csrf meta": (r) =>
+        /<meta name="csrf-token" content="[^"]+"/.test(r.body),
+      "login page has livewire snapshot": (r) =>
+        /wire:snapshot="[^"]+"/.test(r.body),
       "login page response time < 1000ms": (r) => r.timings.duration < 1000,
     }) || errorRate.add(1);
   });

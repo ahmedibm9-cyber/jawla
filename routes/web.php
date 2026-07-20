@@ -37,15 +37,12 @@ Route::get('/admin', function () {
     return redirect('/admin/login');
 });
 
-Route::get('/up', fn () => response('ok', 200));
-
 Route::get('/offline', fn () => view('vendor.laravel.offline'));
 
 Route::get('/health', function () {
-    return response()->json([
-        'status' => 'ok',
-        'timestamp' => now()->toIso8601String(),
-    ]);
+    return response('ok', 200)
+        ->header('Content-Type', 'text/plain; charset=UTF-8')
+        ->header('Cache-Control', 'no-store, private');
 });
 
 Route::get('/locale/{locale}', function (string $locale) {

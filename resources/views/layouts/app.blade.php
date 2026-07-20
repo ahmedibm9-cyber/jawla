@@ -30,9 +30,13 @@
   <a href="#main" class="skip-link">{{ __('app.skip_to_content') }}</a>
   @auth
     @php
-      $unreadNotificationCount = auth()->user()->unreadNotifications()->count();
-      $hasCriticalNotification = $unreadNotificationCount > 0
-          && auth()->user()->unreadNotifications()->where('data', 'like', '%"severity":"critical"%')->exists();
+      $notificationSummary = auth()->user()->unreadNotifications()
+          ->reorder()
+          ->toBase()
+          ->selectRaw("COUNT(*) as total, MAX(CASE WHEN data LIKE ? THEN 1 ELSE 0 END) as has_critical", ['%"severity":"critical"%'])
+          ->first();
+      $unreadNotificationCount = (int) ($notificationSummary->total ?? 0);
+      $hasCriticalNotification = (bool) ($notificationSummary->has_critical ?? false);
     @endphp
     <header style="position:sticky;top:0;z-index:40;display:flex;justify-content:flex-end;padding:6px 12px;background:transparent;pointer-events:none">
       <a href="/app/notifications" aria-label="{{ __('app.notifications') }}"

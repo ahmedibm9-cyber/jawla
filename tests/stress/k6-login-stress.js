@@ -24,47 +24,90 @@ export const options = {
 
 const BASE_URL = __ENV.BASE_URL || "http://localhost:8000";
 
+function extractFirst(text, pattern) {
+  const match = text.match(pattern);
+  return match ? match[1] : null;
+}
+
+function decodeHtml(value) {
+  if (!value) return value;
+
+  return value
+    .replace(/&quot;/g, '"')
+    .replace(/&#039;/g, "'")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&#123;/g, "{")
+    .replace(/&#125;/g, "}");
+}
+
 // Login credentials
-const credentials = [
-  { email: "admin@jawla.test", password: "password" },
-  { email: "manager@jawla.test", password: "password" },
-  { email: "rep@jawla.test", password: "password" },
-];
+const credentials =
+  __ENV.LOGIN_EMAIL && __ENV.LOGIN_PASSWORD
+    ? [{ email: __ENV.LOGIN_EMAIL, password: __ENV.LOGIN_PASSWORD }]
+    : [
+        { email: "admin@jawla.test", password: "password" },
+        { email: "manager@jawla.test", password: "password" },
+        { email: "rep@jawla.test", password: "password" },
+      ];
 
 export default function () {
-  // Get CSRF token
   const loginPage = http.get(`${BASE_URL}/admin/login`);
-  const csrfToken = loginPage.html('input[name="_token"]');
+  const csrfToken = extractFirst(
+    loginPage.body,
+    /<meta name="csrf-token" content="([^"]+)"/
+  );
+  const snapshot = decodeHtml(
+    extractFirst(loginPage.body, /wire:snapshot="([^"]+)"/)
+  );
 
-  if (!csrfToken) {
+  if (!csrfToken || !snapshot) {
     errorRate.add(1);
-    console.error("Failed to get CSRF token");
+    console.error("Failed to get Livewire login payload");
     return;
   }
 
   // Pick random credential
   const cred = credentials[Math.floor(Math.random() * credentials.length)];
 
-  // Login request
-  const startTime = Date.now();
-  const loginResponse = http.post(
-    `${BASE_URL}/admin/login`,
-    {
-      _token: csrfToken,
-      email: cred.email,
-      password: cred.password,
-    },
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+  const payload = JSON.stringify({
+    _token: csrfToken,
+    components: [
+      {
+        snapshot,
+        updates: {
+          "data.email": cred.email,
+          "data.password": cred.password,
+          "data.remember": false,
+        },
+        calls: [{ path: "", method: "authenticate", params: [] }],
       },
-    }
-  );
+    ],
+  });
+
+  const startTime = Date.now();
+  const loginResponse = http.post(`${BASE_URL}/livewire/update`, payload, {
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      "X-CSRF-TOKEN": csrfToken,
+      "X-Livewire": "true",
+      Referer: `${BASE_URL}/admin/login`,
+    },
+  });
   loginDuration.add(Date.now() - startTime);
 
-  // Check response
+  let redirectUrl = "";
+  try {
+    redirectUrl = loginResponse.json("components.0.effects.redirect") || "";
+  } catch (_) {
+    redirectUrl = "";
+  }
+
   const success = check(loginResponse, {
-    "login status is 200 or 302": (r) => r.status === 200 || r.status === 302,
+    "login status is 200": (r) => r.status === 200,
+    "login redirects to admin": () => redirectUrl.includes("/admin"),
     "login response time < 2000ms": (r) => r.timings.duration < 2000,
   });
 
