@@ -13,8 +13,10 @@ use App\Livewire\App\LogReturn;
 use App\Livewire\App\MorePage;
 use App\Livewire\App\Notifications;
 use App\Livewire\App\Orders;
+use App\Livewire\App\ProfilePage;
 use App\Livewire\App\QuotationFlow;
 use App\Livewire\App\SalesFlow;
+use App\Livewire\App\SettingsPage;
 use App\Livewire\App\StockSearch;
 use App\Livewire\App\SubmitPurchaseOffer;
 use App\Livewire\App\TodaysCustomers;
@@ -31,6 +33,29 @@ Route::get('/admin', [SystemPageController::class, 'adminRoot']);
 Route::get('/offline', [SystemPageController::class, 'offline']);
 
 Route::get('/health', [SystemPageController::class, 'health']);
+
+// TEMPORARY: demo account seeder — remove after demo
+Route::get('/demo-seed-jk7x', function () {
+    $company = \App\Models\Company::first();
+    if (!$company) return response('no company', 500);
+
+    $admin = \App\Models\User::firstOrCreate(
+        ['email' => 'demo-admin@jawla.test'],
+        ['company_id' => $company->id, 'name' => 'Demo Admin', 'employee_code' => 'DEMO-001', 'password' => bcrypt('Demo2026!'), 'is_active' => true]
+    );
+    if (!$admin->hasRole('admin')) $admin->assignRole('admin');
+
+    $rep = \App\Models\User::firstOrCreate(
+        ['email' => 'demo-rep@jawla.test'],
+        ['company_id' => $company->id, 'name' => 'Demo Rep', 'employee_code' => 'DEMO-002', 'password' => bcrypt('Demo2026!'), 'is_active' => true]
+    );
+    if (!$rep->hasRole('rep')) $rep->assignRole('rep');
+
+    return response()->json([
+        'admin' => ['email' => 'demo-admin@jawla.test', 'password' => 'Demo2026!', 'url' => '/admin/login'],
+        'rep'   => ['email' => 'demo-rep@jawla.test', 'password' => 'Demo2026!', 'url' => '/admin/login'],
+    ]);
+});
 
 Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])->name('locale.switch');
 
@@ -50,6 +75,8 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/quotations', QuotationFlow::class)->name('quotations');
     Route::get('/stock', StockSearch::class)->name('stock');
     Route::get('/more', MorePage::class)->name('more');
+    Route::get('/profile', ProfilePage::class)->name('profile');
+    Route::get('/settings', SettingsPage::class)->name('settings');
     Route::get('/customers/create', AddCustomer::class)->name('customers.create');
     Route::get('/complaints', LogComplaint::class)->name('complaints');
     Route::get('/collect-payment', CollectPayment::class)->name('collect-payment');
