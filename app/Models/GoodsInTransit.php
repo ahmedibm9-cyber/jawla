@@ -13,6 +13,8 @@ class GoodsInTransit extends Model
     use BelongsToCompany;
     use HasFactory;
 
+    protected $table = 'goods_in_transit';
+
     protected $fillable = [
         'company_id', 'purchase_order_id', 'supplier_id', 'shipment_number',
         'status', 'estimated_arrival_date',
@@ -43,5 +45,10 @@ class GoodsInTransit extends Model
     public function items(): HasMany
     {
         return $this->hasMany(GoodsInTransitItem::class);
+    }
+
+    public function landedCosts(): HasMany
+    {
+        return $this->hasMany(LandedCost::class);
     }
 }
