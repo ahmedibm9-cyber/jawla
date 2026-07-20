@@ -2,13 +2,20 @@
 preDeployCommand = "php artisan migrate --force && php artisan config:cache && php artisan view:cache"
 startCommand = "php artisan serve --host=0.0.0.0 --port=$PORT"
 healthcheckPath = "/up"
+numReplicas = 2
 
 [deploy.env]
 APP_ENV = "production"
 APP_DEBUG = "false"
 APP_URL = "https://jawla-production.up.railway.app"
-SESSION_DRIVER = "database"
+SESSION_DRIVER = "redis"
+SESSION_CONNECTION = "default"
+SESSION_STORE = "redis"
 SESSION_SECURE_COOKIE = "true"
 SESSION_HTTP_ONLY = "true"
-CACHE_STORE = "database"
+CACHE_STORE = "redis"
+QUEUE_CONNECTION = "redis"
+REDIS_CLIENT = "phpredis"
+REDIS_URL = "${{Redis.REDIS_URL}}"
+PHP_CLI_SERVER_WORKERS = "4"
 FILESYSTEM_DISK = "local"
