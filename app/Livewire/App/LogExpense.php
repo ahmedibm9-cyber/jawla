@@ -43,6 +43,21 @@ class LogExpense extends Component
         $this->reset(['category', 'amount', 'note']);
     }
 
+    /**
+     * Offline path: the client has already enqueued the expense to the outbox
+     * (IndexedDB) and will sync it when back online. Show the queued confirmation
+     * and clear the form — no server write happens here.
+     */
+    public function queueOffline(): void
+    {
+        $this->success = true;
+        $this->successMessage = app()->getLocale() === 'ar'
+            ? 'تم حفظ المصروف دون اتصال وستتم مزامنته تلقائيًا عند عودة الاتصال.'
+            : 'Expense saved offline — it will sync automatically when you are back online.';
+
+        $this->reset(['category', 'amount', 'note']);
+    }
+
     public function render()
     {
         $cashBox = CashBox::where('user_id', auth()->id())->first();

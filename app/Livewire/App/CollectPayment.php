@@ -94,6 +94,22 @@ class CollectPayment extends Component
         $this->method = 'cash';
     }
 
+    /**
+     * Offline path: the client has already enqueued the payment to the outbox
+     * (IndexedDB) and will sync it when back online. Show the queued confirmation
+     * and clear the form — no server write happens here.
+     */
+    public function queueOffline(): void
+    {
+        $this->success = true;
+        $this->successMessage = app()->getLocale() === 'ar'
+            ? 'تم حفظ الدفعة دون اتصال وستتم مزامنتها تلقائيًا عند عودة الاتصال.'
+            : 'Payment saved offline — it will sync automatically when you are back online.';
+
+        $this->reset(['customer_id', 'invoice_id', 'amount', 'method', 'notes']);
+        $this->method = 'cash';
+    }
+
     public function render()
     {
         $user = auth()->user();
