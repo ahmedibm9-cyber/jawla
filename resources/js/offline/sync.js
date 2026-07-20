@@ -100,6 +100,7 @@ window.jawlaSync = {
   flush,
   retry,
   discard: (id) => outbox.remove(id).then(emitStatus),
+  all: outbox.all,
   pending: outbox.pending,
   failed: outbox.failed,
 };
