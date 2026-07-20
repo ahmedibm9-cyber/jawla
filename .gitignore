@@ -31,3 +31,5 @@ Thumbs.db
 .playwright-mcp/
 .agents/
 *.png
+!public/images/*.png
+!public/icons/*.png
