@@ -3,6 +3,7 @@ FROM php:8.3-fpm-alpine
 WORKDIR /app
 
 RUN apk add --no-cache \
+    $PHPIZE_DEPS \
     nginx \
     libpng-dev \
     libjpeg-turbo-dev \
