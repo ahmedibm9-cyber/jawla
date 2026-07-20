@@ -41,10 +41,11 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login(Login::class)
             ->colors([
-                'primary' => Color::hex('#4DB848'),
+                'primary' => Color::hex('#6DB83B'),
             ])
             ->font('IBM Plex Sans Arabic')
             ->brandName('Jawla')
+            ->brandLogo(asset('images/black-j.png'))
             ->defaultAvatarProvider(CompanyAvatarProvider::class)
             ->spa()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')

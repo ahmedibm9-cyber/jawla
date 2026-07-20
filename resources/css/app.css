@@ -19,13 +19,13 @@
   --text-3xl: 1.875rem;
 
   /* ---- Brand palette ---- */
-  --color-brand: #059669;
-  --color-brand-light: #10b981;
-  --color-brand-dark: #047857;
+  --color-brand: #6db83b;
+  --color-brand-light: #8bc954;
+  --color-brand-dark: #5ba82e;
 
-  --color-accent: #059669;
-  --color-accent-light: #10b981;
-  --color-accent-dark: #047857;
+  --color-accent: #6db83b;
+  --color-accent-light: #8bc954;
+  --color-accent-dark: #5ba82e;
 
   --color-accent-warm: #d97706;
   --color-accent-warm-light: #f59e0b;
@@ -47,7 +47,7 @@
   --color-border-light: #e2e8f0;
 
   /* ---- Status ---- */
-  --color-success: #059669;
+  --color-success: #6db83b;
   --color-warning: #d97706;
   --color-danger: #dc2626;
   --color-info: #2563eb;

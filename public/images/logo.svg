@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 40" fill="none">
-  <rect width="40" height="40" rx="10" fill="#4DB848"/>
-  <path d="M12 28V12l8 8 8-8v16" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-  <text x="50" y="27" font-family="IBM Plex Sans Arabic, system-ui, sans-serif" font-size="20" font-weight="700" fill="#1F2937">Jawla</text>
-</svg>

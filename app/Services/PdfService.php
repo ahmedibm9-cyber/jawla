@@ -93,8 +93,8 @@ class PdfService
 body{font-family:system-ui,sans-serif;margin:32px;text-align:$textAlign}
 table{width:100%;border-collapse:collapse;margin-top:12px}
 th,td{border:1px solid #ccc;padding:8px;text-align:$textAlign}
-th{background:#4DB848;color:#fff}
-h1{color:#4DB848;margin:0}
+th{background:#6DB83B;color:#fff}
+h1{color:#6DB83B;margin:0}
 .header{display:flex;justify-content:space-between;margin-bottom:16px}
 .qr{width:100px;height:100px;margin:8px 0}
 .detail-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee}
