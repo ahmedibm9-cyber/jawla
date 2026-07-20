@@ -11,6 +11,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -48,7 +49,7 @@ class GoodsInTransitResource extends Resource
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Forms\Components\Section::make($l('الشحنة', 'Shipment'))->schema([
+            Section::make($l('الشحنة', 'Shipment'))->schema([
                 Forms\Components\TextInput::make('shipment_number')->label($l('رقم الشحنة', 'Shipment #'))->required(),
                 Forms\Components\Select::make('supplier_id')->label($l('المورد', 'Supplier'))->relationship('supplier', 'name_ar')->searchable()->required(),
                 Forms\Components\Select::make('status')->label($l('الحالة', 'Status'))->options([
@@ -61,7 +62,7 @@ class GoodsInTransitResource extends Resource
                 Forms\Components\DatePicker::make('estimated_arrival_date')->label($l('الوصول المتوقع', 'ETA')),
                 Forms\Components\DatePicker::make('posting_date')->label($l('تاريخ القيد', 'Posting Date'))->required()->default(now()),
             ])->columns(2),
-            Forms\Components\Section::make($l('تكاليف الوصول', 'Landed Costs'))->schema([
+            Section::make($l('تكاليف الوصول', 'Landed Costs'))->schema([
                 Forms\Components\TextInput::make('shipping_cost')->label($l('الشحن', 'Shipping'))->numeric()->default(0),
                 Forms\Components\TextInput::make('freight_cost')->label($l('النقل', 'Freight'))->numeric()->default(0),
                 Forms\Components\TextInput::make('customs_cost')->label($l('الجمارك', 'Customs'))->numeric()->default(0),

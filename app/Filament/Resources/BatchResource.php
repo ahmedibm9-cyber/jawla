@@ -9,6 +9,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -55,7 +56,7 @@ class BatchResource extends Resource
         $companyId = Auth::user()?->company_id;
 
         return $schema->schema([
-            Forms\Components\Section::make($l('بيانات الدفعة', 'Batch Details'))->schema([
+            Section::make($l('بيانات الدفعة', 'Batch Details'))->schema([
                 Forms\Components\Select::make('product_id')->label($l('المنتج', 'Product'))
                     ->options(fn () => Product::where('company_id', $companyId)->pluck('name_ar', 'id'))
                     ->searchable()->required(),
