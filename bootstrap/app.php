@@ -38,5 +38,11 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*'),
         );
 
-        Integration::handles($exceptions);
+        // Guard the Sentry hook: if the package is absent from the built vendor
+        // (e.g. a stale/cached deploy), an unguarded call here makes EVERY handled
+        // exception fatal — turning proper 401/404/500 responses into raw 500s
+        // app-wide. class_exists keeps error handling working with or without it.
+        if (class_exists(Integration::class)) {
+            Integration::handles($exceptions);
+        }
     })->create();
