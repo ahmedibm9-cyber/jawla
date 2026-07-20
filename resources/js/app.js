@@ -1,4 +1,5 @@
 import "./pwa-register.js";
+import "./offline/sync.js";
 import L from "leaflet";
 
 const PRINTER_STORAGE_KEY = "jawla.bluetooth-printer";
