@@ -34,9 +34,6 @@ Route::get('/offline', [SystemPageController::class, 'offline']);
 
 Route::get('/health', [SystemPageController::class, 'health']);
 
-// TEMPORARY: demo account seeder — remove after demo
-Route::get('/demo-seed-jk7x', [SystemPageController::class, 'demoSeed']);
-
 Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])->name('locale.switch');
 
 // Admin (Filament) is auto-registered by the panel provider.
