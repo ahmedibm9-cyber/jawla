@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\App\LoginController;
 use App\Http\Controllers\App\PdfController;
+use App\Http\Controllers\SystemPageController;
 use App\Livewire\App\AddCustomer;
 use App\Livewire\App\CashReconcile;
 use App\Livewire\App\CollectPayment;
@@ -22,49 +23,21 @@ use App\Livewire\App\VisitFlow;
 use App\Livewire\App\Visits;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect('/admin/login'));
+Route::get('/', [SystemPageController::class, 'root']);
 
 // Catch /admin root — Filament registers sub-pages but not the bare prefix
-Route::get('/admin', function () {
-    $user = auth()->user();
+Route::get('/admin', [SystemPageController::class, 'adminRoot']);
 
-    if ($user && $user->hasRole('rep')) {
-        return redirect('/app');
-    }
+Route::get('/offline', [SystemPageController::class, 'offline']);
 
-    if ($user && method_exists($user, 'canAccessPanel')) {
-        return redirect('/admin/dashboard');
-    }
+Route::get('/health', [SystemPageController::class, 'health']);
 
-    return redirect('/admin/login');
-});
-
-Route::get('/offline', fn () => view('vendor.laravel.offline'));
-
-Route::get('/health', function () {
-    return response('ok', 200)
-        ->header('Content-Type', 'text/plain; charset=UTF-8')
-        ->header('Cache-Control', 'no-store, private');
-});
-
-Route::get('/locale/{locale}', function (string $locale) {
-    abort_unless(in_array($locale, ['en', 'ar'], true), 404);
-
-    session(['locale' => $locale]);
-
-    return back();
-})->name('locale.switch');
+Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])->name('locale.switch');
 
 // Admin (Filament) is auto-registered by the panel provider.
 
 // Handle GET /admin/logout — Filament registers POST only
-Route::get('/admin/logout', function () {
-    auth()->logout();
-    session()->invalidate();
-    session()->regenerateToken();
-
-    return redirect('/admin/login');
-});
+Route::get('/admin/logout', [SystemPageController::class, 'adminLogout']);
 
 // Rep PWA route group (protected)
 Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->group(function () {
