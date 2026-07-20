@@ -5,6 +5,7 @@ namespace App\Livewire\App;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Services\PaymentService;
+use App\Support\ThermalPrintFormatter;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -27,6 +28,10 @@ class CollectPayment extends Component
 
     public ?int $lastPaymentId = null;
 
+    public array $paymentPrintPayload = [];
+
+    public ?string $printNotice = null;
+
     public function updatedCustomerId(): void
     {
         $this->invoice_id = null;
@@ -47,7 +52,7 @@ class CollectPayment extends Component
         }
     }
 
-    public function submit(): void
+    public function submit(ThermalPrintFormatter $printer): void
     {
         $this->validate([
             'customer_id' => 'required|exists:customers,id',
@@ -56,19 +61,34 @@ class CollectPayment extends Component
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $payment = app(PaymentService::class)->collect(
-            companyId: auth()->user()->company_id,
-            userId: auth()->id(),
-            customerId: $this->customer_id,
-            amount: (float) $this->amount,
-            method: $this->method,
-            invoiceId: $this->invoice_id ?: null,
-            notes: $this->notes ?: null,
-        );
+        try {
+            $payment = app(PaymentService::class)->collect(
+                companyId: auth()->user()->company_id,
+                userId: auth()->id(),
+                customerId: $this->customer_id,
+                amount: (float) $this->amount,
+                method: $this->method,
+                invoiceId: $this->invoice_id ?: null,
+                notes: $this->notes ?: null,
+            );
+        } catch (\Throwable $e) {
+            $this->addError('amount', $e->getMessage());
+
+            return;
+        }
 
         $this->lastPaymentId = $payment->id;
         $this->success = true;
         $this->successMessage = __('app.payment_collected').' — '.number_format((float) $payment->amount, 2);
+
+        try {
+            $this->paymentPrintPayload = $printer->paymentPayload($payment);
+        } catch (\Throwable) {
+            $this->paymentPrintPayload = [];
+            $this->printNotice = app()->getLocale() === 'ar'
+                ? 'تم تحصيل الدفعة لكن تعذر تجهيز بيانات الطباعة. استخدم الإيصال PDF.'
+                : 'Payment was collected, but the print payload could not be prepared. Use the PDF receipt instead.';
+        }
 
         $this->reset(['customer_id', 'invoice_id', 'amount', 'method', 'notes']);
         $this->method = 'cash';

@@ -145,7 +145,11 @@
                 </div>
                 <h3 class="success-title">{{ __('app.invoice_created') }}</h3>
                 <p class="success-message">{{ $successMessage }}</p>
+                @if($printNotice)
+                    <small class="text-text-secondary block mb-2" aria-live="polite">{{ $printNotice }}</small>
+                @endif
                 <div class="success-actions">
+                    <x-ds.bluetooth-print-button :payload="$invoicePrintPayload" :label="__('app.print_invoice')" />
                     <a href="/app/pdf/invoice/{{ $createdInvoiceId }}" class="btn btn-primary w-full no-underline text-center" target="_blank">
                         {{ __('app.view_pdf') }}
                     </a>

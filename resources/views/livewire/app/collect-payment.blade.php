@@ -10,7 +10,11 @@
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                 </div>
                 <h3 class="success-title" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ $successMessage }}</h3>
+                @if($printNotice)
+                    <small class="text-text-secondary block mb-2" aria-live="polite">{{ $printNotice }}</small>
+                @endif
                 <div class="success-actions">
+                    <x-ds.bluetooth-print-button :payload="$paymentPrintPayload" :label="__('app.print_receipt')" />
                     <a href="/app/pdf/receipt/{{ $lastPaymentId }}" target="_blank" class="btn btn-primary no-underline text-center">{{ __('app.view_receipt') }}</a>
                     <button class="btn btn-outline" wire:click="$set('success', false)">{{ __('app.collect_another') ?? __('app.collect_payment') }}</button>
                 </div>

@@ -5,6 +5,7 @@ namespace App\Livewire\App;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Services\Contracts\InvoiceService;
+use App\Support\ThermalPrintFormatter;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -28,6 +29,10 @@ class SalesFlow extends Component
     public ?string $successMessage = null;
 
     public int $createdInvoiceId = 0;
+
+    public array $invoicePrintPayload = [];
+
+    public ?string $printNotice = null;
 
     public function mount(?int $customer = null, ?int $visitId = null): void
     {
@@ -145,7 +150,7 @@ class SalesFlow extends Component
         $this->cartTotal = round($subtotal + $vatAmount, 2);
     }
 
-    public function submit(InvoiceService $invoices): void
+    public function submit(InvoiceService $invoices, ThermalPrintFormatter $printer): void
     {
         if ($this->customerId <= 0) {
             $this->errorMessage = app()->getLocale() === 'ar' ? 'اختر عميلاً' : 'Select a customer';
@@ -182,12 +187,23 @@ class SalesFlow extends Component
                 'visit_id' => $this->visitId,
                 'items' => $items,
             ]);
-
-            $this->createdInvoiceId = $invoice->id;
-            $this->step = 'done';
-            $this->successMessage = __('app.invoice_created').' #'.$invoice->invoice_number;
         } catch (\Throwable $e) {
             $this->errorMessage = $e->getMessage();
+
+            return;
+        }
+
+        $this->createdInvoiceId = $invoice->id;
+        $this->step = 'done';
+        $this->successMessage = __('app.invoice_created').' #'.$invoice->invoice_number;
+
+        try {
+            $this->invoicePrintPayload = $printer->invoicePayload($invoice);
+        } catch (\Throwable) {
+            $this->invoicePrintPayload = [];
+            $this->printNotice = app()->getLocale() === 'ar'
+                ? 'تم إنشاء الفاتورة لكن تعذر تجهيز بيانات الطباعة. استخدم PDF.'
+                : 'Invoice was created, but the print payload could not be prepared. Use the PDF instead.';
         }
     }
 

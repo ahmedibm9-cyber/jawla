@@ -22,7 +22,7 @@
   <meta name="description" content="{{ app()->getLocale() === 'ar' ? 'تطبيق إدارة المبيعات الميدانية - Jawla' : 'Field Sales Management PWA - Jawla' }}">
   <meta name="robots" content="noindex, nofollow">
   @filamentStyles
-  @vite('resources/css/app.css')
+  @vite(['resources/css/app.css', 'resources/js/app.js'])
   <style>:root{-webkit-tap-highlight-color:transparent}[x-cloak]{display:none!important}</style>
   @livewireStyles
 </head>
@@ -70,7 +70,10 @@
     window.addEventListener('appinstalled', () => { document.getElementById('pwa-install-banner')?.remove(); });
   </script>
   <script>
-    if ('serviceWorker' in navigator) {
+    // Skip the service worker under automated browsers (navigator.webdriver):
+    // its shell caching keeps the page from reaching network-idle, which hangs
+    // E2E tests. Real users are unaffected.
+    if ('serviceWorker' in navigator && !navigator.webdriver) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').catch(() => {});
       });
