@@ -4,7 +4,7 @@
         <x-slot:icon><x-heroicon-o-cloud-arrow-up width="22" height="22" /></x-slot:icon>
     </x-page-header>
 
-    <div class="page-body" x-data="jawlaSyncQueue()" x-init="refresh()">
+    <div class="page-body" x-data="jawlaSyncQueue">
         {{-- Summary + retry-all --}}
         <div class="card mb-4 flex items-center justify-between gap-3">
             <div>
@@ -58,58 +58,3 @@
 
     <x-tab-bar active="more" />
 </div>
-
-@push('scripts')
-<script>
-    window.jawlaSyncQueue = () => ({
-        pending: [],
-        failed: [],
-        busy: false,
-
-        get items() {
-            return [...this.pending, ...this.failed].sort((a, b) => a.createdAt - b.createdAt);
-        },
-
-        async refresh() {
-            if (!window.jawlaSync) return;
-            this.pending = await window.jawlaSync.pending();
-            this.failed = await window.jawlaSync.failed();
-        },
-
-        label(type) {
-            const map = {
-                sale: '{{ $isAr ? "فاتورة" : "Sale" }}',
-                payment: '{{ $isAr ? "دفعة" : "Payment" }}',
-                return: '{{ $isAr ? "مرتجع" : "Return" }}',
-                expense: '{{ $isAr ? "مصروف" : "Expense" }}',
-                complaint: '{{ $isAr ? "شكوى" : "Complaint" }}',
-                visit_report: '{{ $isAr ? "تقرير زيارة" : "Visit report" }}',
-            };
-            return map[type] || type;
-        },
-
-        when(ts) {
-            try { return new Date(ts).toLocaleString(); } catch { return ''; }
-        },
-
-        async retryItem(id) {
-            this.busy = true;
-            try { await window.jawlaSync.retry(id); } finally { this.busy = false; await this.refresh(); }
-        },
-
-        async discardItem(id) {
-            this.busy = true;
-            try { await window.jawlaSync.discard(id); } finally { this.busy = false; await this.refresh(); }
-        },
-
-        async retryAll() {
-            this.busy = true;
-            try { await window.jawlaSync.flush(); } finally { this.busy = false; await this.refresh(); }
-        },
-
-        init() {
-            window.addEventListener('jawla-sync-status', () => this.refresh());
-        },
-    });
-</script>
-@endpush

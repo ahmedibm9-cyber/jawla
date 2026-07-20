@@ -7,6 +7,7 @@ use App\Livewire\App\LogComplaint;
 use App\Livewire\App\LogExpense;
 use App\Livewire\App\LogReturn;
 use App\Livewire\App\SalesFlow;
+use App\Livewire\App\SyncQueue;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\User;
@@ -107,5 +108,12 @@ class RepFlowOfflineUxTest extends TestCase
             ->call('queueOffline')
             ->assertSet('customer_id', null)
             ->assertOk();
+    }
+
+    public function test_sync_queue_page_renders_for_a_rep(): void
+    {
+        $this->get('/app/sync-queue')
+            ->assertOk()
+            ->assertSee('jawlaSyncQueue', false);
     }
 }

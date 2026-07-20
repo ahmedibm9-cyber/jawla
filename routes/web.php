@@ -19,6 +19,7 @@ use App\Livewire\App\SalesFlow;
 use App\Livewire\App\SettingsPage;
 use App\Livewire\App\StockSearch;
 use App\Livewire\App\SubmitPurchaseOffer;
+use App\Livewire\App\SyncQueue;
 use App\Livewire\App\TodaysCustomers;
 use App\Livewire\App\VanTransfers;
 use App\Livewire\App\VisitFlow;
@@ -51,6 +52,7 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/notifications', Notifications::class)->name('notifications');
     Route::get('/quotations', QuotationFlow::class)->name('quotations');
     Route::get('/stock', StockSearch::class)->name('stock');
+    Route::get('/sync-queue', SyncQueue::class)->name('sync-queue');
     Route::get('/more', MorePage::class)->name('more');
     Route::get('/profile', ProfilePage::class)->name('profile');
     Route::get('/settings', SettingsPage::class)->name('settings');

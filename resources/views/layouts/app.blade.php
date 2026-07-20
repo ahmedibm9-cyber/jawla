@@ -41,6 +41,19 @@
       $hasCriticalNotification = (bool) ($notificationSummary->has_critical ?? false);
     @endphp
     <header class="notification-header">
+      {{-- CG2 offline sync-status badge: pending/failed count from the outbox --}}
+      <a href="/app/sync-queue" aria-label="{{ app()->getLocale() === 'ar' ? 'قائمة المزامنة' : 'Sync queue' }}"
+         class="notification-fab"
+         x-data="{ pending: 0, failed: 0 }"
+         x-init="window.addEventListener('jawla-sync-status', e => { pending = e.detail.pending; failed = e.detail.failed; })"
+         x-show="pending > 0 || failed > 0"
+         style="display:none">
+        <svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12a9 9 0 019-9 9.75 9.75 0 016.74 2.74L21 8m0 0V3m0 5h-5M21 12a9 9 0 01-9 9 9.75 9.75 0 01-6.74-2.74L3 16m0 0v5m0-5h5"/></svg>
+        <span aria-live="polite"
+              class="notification-badge {{ 'notification-badge-normal' }}"
+              :class="failed > 0 ? 'notification-badge-critical' : 'notification-badge-normal'"
+              x-text="(pending + failed) > 99 ? '99+' : (pending + failed)"></span>
+      </a>
       <a href="/app/notifications" aria-label="{{ __('app.notifications') }}"
          class="notification-fab">
         <svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>

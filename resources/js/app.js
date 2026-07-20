@@ -444,4 +444,84 @@ window.jawlaAutocompleteFinalize = function jawlaAutocompleteFinalize(id) {
   hidden.dispatchEvent(new Event("change", { bubbles: true }));
 };
 
+// CG2.3 — offline sync-queue viewer. Registered on alpine:init so the component
+// is defined before Alpine walks the DOM (avoids the @script ordering hazard).
+// The queue lives in the IndexedDB outbox; all data comes from window.jawlaSync.
+document.addEventListener("alpine:init", () => {
+  const isAr = document.documentElement.lang === "ar";
+  const labels = {
+    sale: isAr ? "فاتورة" : "Sale",
+    payment: isAr ? "دفعة" : "Payment",
+    return: isAr ? "مرتجع" : "Return",
+    expense: isAr ? "مصروف" : "Expense",
+    complaint: isAr ? "شكوى" : "Complaint",
+    visit_report: isAr ? "تقرير زيارة" : "Visit report",
+  };
+
+  window.Alpine.data("jawlaSyncQueue", () => ({
+    pending: [],
+    failed: [],
+    busy: false,
+
+    get items() {
+      return [...this.pending, ...this.failed].sort(
+        (a, b) => a.createdAt - b.createdAt
+      );
+    },
+
+    async refresh() {
+      if (!window.jawlaSync) return;
+      this.pending = await window.jawlaSync.pending();
+      this.failed = await window.jawlaSync.failed();
+    },
+
+    label(type) {
+      return labels[type] || type;
+    },
+
+    when(ts) {
+      try {
+        return new Date(ts).toLocaleString();
+      } catch {
+        return "";
+      }
+    },
+
+    async retryItem(id) {
+      this.busy = true;
+      try {
+        await window.jawlaSync.retry(id);
+      } finally {
+        this.busy = false;
+        await this.refresh();
+      }
+    },
+
+    async discardItem(id) {
+      this.busy = true;
+      try {
+        await window.jawlaSync.discard(id);
+      } finally {
+        this.busy = false;
+        await this.refresh();
+      }
+    },
+
+    async retryAll() {
+      this.busy = true;
+      try {
+        await window.jawlaSync.flush();
+      } finally {
+        this.busy = false;
+        await this.refresh();
+      }
+    },
+
+    init() {
+      this.refresh();
+      window.addEventListener("jawla-sync-status", () => this.refresh());
+    },
+  }));
+});
+
 window.L = L;
