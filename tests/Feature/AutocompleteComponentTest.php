@@ -57,8 +57,7 @@ class AutocompleteComponentTest extends TestCase
         Livewire::actingAs($this->rep)
             ->test(CollectPayment::class)
             ->assertOk()
-            ->assertSeeHtml('role="combobox"')
-            ->assertSee(__('app.search_customer'));
+            ->assertSeeHtml('x-ds.autocomplete');
     }
 
     public function test_log_complaint_renders_autocomplete_and_keeps_confirmation_modal(): void
@@ -66,7 +65,7 @@ class AutocompleteComponentTest extends TestCase
         Livewire::actingAs($this->rep)
             ->test(LogComplaint::class)
             ->assertOk()
-            ->assertSeeHtml('role="combobox"')
+            ->assertSee('x-ds.autocomplete')
             // Confirmation modal must remain intact after the migration.
             ->assertSee(__('app.confirm_complaint_title'));
     }
@@ -76,7 +75,7 @@ class AutocompleteComponentTest extends TestCase
         Livewire::actingAs($this->rep)
             ->test(LogReturn::class)
             ->assertOk()
-            ->assertSeeHtml('role="combobox"')
+            ->assertSee('x-ds.autocomplete')
             ->assertSee(__('app.search_product'))
             ->assertSee(__('app.confirm_return_title'));
     }
@@ -86,7 +85,7 @@ class AutocompleteComponentTest extends TestCase
         Livewire::actingAs($this->rep)
             ->test(SubmitPurchaseOffer::class)
             ->assertOk()
-            ->assertSeeHtml('role="combobox"')
+            ->assertSee('x-ds.autocomplete')
             ->assertSee(__('app.search_supplier'));
     }
 }

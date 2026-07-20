@@ -1,10 +1,10 @@
-<div>
+<div x-data="{ step: $wire.step }">
 <div class="main-content">
     <x-page-header :title="__('app.create_invoice')">
-        <x-slot:icon><svg fill='none' stroke='currentColor' viewBox='0 0 24 24' width='22' height='22'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'/></svg></x-slot:icon>
+        <x-slot:icon><x-heroicon-o-clipboard-document-check width="22" height="22" /></x-slot:icon>
     </x-page-header>
 
-    <div class="page-body">
+    <div class="page-body" x-effect="step = $wire.step; window.scrollTo(0,0)">
         {{-- Stepper --}}
         <div class="stepper">
             <div class="step {{ $step === 'cart' ? 'active' : 'done' }}">
@@ -41,7 +41,7 @@
                         <div class="mt-2 space-y-1">
                             @foreach($customers as $c)
                                 <button type="button" wire:click="selectCustomer({{ $c->id }})"
-                                    class="w-full text-start p-3 rounded-lg border border-border bg-white hover:bg-surface-hover cursor-pointer">
+                                    class="w-full text-start p-3 rounded-lg border border-border bg-surface hover:bg-surface-hover cursor-pointer">
                                     <strong class="block">{{ $c->name_ar }}</strong>
                                     <small class="text-text-secondary">{{ $c->phone }}</small>
                                 </button>
@@ -120,7 +120,7 @@
                     <div class="mt-2 space-y-1">
                         @foreach($products as $p)
                             <button type="button" wire:click="addToCart({{ $p->id }})"
-                                class="w-full text-start p-3 rounded-lg border border-border bg-white hover:bg-surface-hover cursor-pointer flex justify-between items-center">
+                                class="w-full text-start p-3 rounded-lg border border-border bg-surface hover:bg-surface-hover cursor-pointer flex justify-between items-center">
                                 <div>
                                     <strong class="block">{{ $p->name_ar }}</strong>
                                     <small class="text-text-secondary">{{ $p->sku }}</small>
@@ -155,7 +155,7 @@
                                     <input type="number" id="cart-price-{{ $i }}" wire:model.live="cart.{{ $i }}.price" min="0" step="0.01" inputmode="decimal" class="form-input">
                                 </div>
                             </div>
-                            <div class="text-right">
+                            <div class="text-end">
                                 <span class="text-xs text-text-secondary">{{ __('app.total') }}</span>
                                 <span class="block font-semibold">{{ number_format($item['line_total'] ?? ($item['quantity'] * $item['price']), 2) }}</span>
                             </div>
@@ -197,9 +197,9 @@
         @if($step === 'done')
             <div class="success-screen">
                 <div class="success-checkmark">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    <x-heroicon-o-check width="36" height="36" stroke-width="2.5" />
                 </div>
-                <h3 class="success-title">{{ __('app.invoice_created') }}</h3>
+                <h3 class="success-title" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ __('app.invoice_created') }}</h3>
                 <p class="success-message">{{ $successMessage }}</p>
                 @if($printNotice)
                     <small class="text-text-secondary block mb-2" aria-live="polite">{{ $printNotice }}</small>

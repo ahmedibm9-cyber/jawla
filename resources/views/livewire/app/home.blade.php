@@ -60,7 +60,7 @@
                             @if($assignment->customer?->latitude && $assignment->customer?->longitude)
                                 <a href="https://www.google.com/maps/dir/?api=1&destination={{ $assignment->customer->latitude }},{{ $assignment->customer->longitude }}"
                                    target="_blank" rel="noopener" class="maps-link" onclick="event.stopPropagation()">
-                                    <svg aria-hidden="true" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 9m-6-2l6-3m6 10V9m-6 10V9"/></svg>
+                                    <x-heroicon-o-map width="14" height="14" />
                                     {{ __('app.directions') }}
                                 </a>
                             @endif

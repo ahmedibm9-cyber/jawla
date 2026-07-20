@@ -12,4 +12,4 @@
         $styles = 'height: ' . $height . '; width: ' . $width;
     }
 @endphp
-<div class="{{ $classes }}" style="{{ $styles }}"></div>
+<div class="{{ $classes }}" style="{{ $styles }}" aria-hidden="true"></div>

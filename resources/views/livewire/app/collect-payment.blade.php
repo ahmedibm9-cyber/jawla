@@ -1,13 +1,13 @@
 <div class="main-content">
     <x-page-header :title="__('app.collect_payment')">
-        <x-slot:icon><svg fill='none' stroke='currentColor' viewBox='0 0 24 24' width='22' height='22'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z'/></svg></x-slot:icon>
+        <x-slot:icon><x-heroicon-o-banknotes width="22" height="22" /></x-slot:icon>
     </x-page-header>
 
     <div class="page-body">
         @if($success)
             <div class="success-screen" aria-live="polite">
                 <div class="success-checkmark">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    <x-heroicon-o-check width="36" height="36" stroke-width="2.5" />
                 </div>
                 <h3 class="success-title" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ $successMessage }}</h3>
                 @if($printNotice)

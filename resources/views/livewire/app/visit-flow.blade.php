@@ -67,9 +67,9 @@
         :subtitle="$customer->address"
     />
 
-    <div class="page-body">
+    <div class="page-body" x-effect="step = $wire.step; window.scrollTo(0,0)">
     <div x-show="!online" x-cloak class="card bg-amber-50 text-amber-800 mb-3 flex items-center gap-2">
-        <svg aria-hidden="true" width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728M5.636 18.364a9 9 0 010-12.728M15.536 8.464a5 5 0 010 7.072M8.464 15.536a5 5 0 010-7.072"/></svg>
+        <x-heroicon-o-signal-slash width="18" height="18" aria-hidden="true" />
         <span>{{ app()->getLocale() === 'ar' ? 'غير متصل — سيتم حفظ المسودة' : 'Offline — draft will be saved' }}</span>
     </div>
 
@@ -106,14 +106,14 @@
     {{-- Step: Check-in with GPS --}}
     @if($step === 'checkin')
         @if($errorMessage)
-            <div class="card bg-red-50 text-danger mb-4 flex justify-between items-center" aria-live="polite">
+            <div class="card bg-danger/10 text-danger mb-4 flex justify-between items-center" aria-live="polite">
                 <span>{{ $errorMessage }}</span>
                 <button type="button" wire:click="$set('errorMessage', '')" aria-label="{{ __('app.clear') }}" class="text-danger bg-transparent border-0 cursor-pointer text-lg px-2">&times;</button>
             </div>
         @endif
 
         @if($gpsDenied)
-            <div class="card mb-4 border-2 border-danger bg-red-50" role="alert">
+            <div class="card mb-4 border-2 border-danger bg-danger/10" role="alert">
                 <p class="m-0 mb-1 text-danger font-bold">{{ __('app.gps_required_title') }}</p>
                 <p class="m-0 mb-3 text-sm text-text-secondary">{{ __('app.gps_required_help') }}</p>
                 <button type="button" class="btn btn-outline w-full" @click="requestGps()">
@@ -121,7 +121,7 @@
                 </button>
             </div>
         @elseif(!$withinRange && $distanceMeters !== null)
-            <div class="card mb-4 border-2 border-danger bg-red-50" role="alert">
+            <div class="card mb-4 border-2 border-danger bg-danger/10" role="alert">
                 <p class="m-0 mb-1 text-danger font-bold">{{ __('app.out_of_range') }}</p>
                 <p class="m-0 mb-3 text-sm text-text-secondary">
                     {{ __('app.out_of_range_blocked', ['distance' => round($distanceMeters), 'radius' => $customer->company?->geofence_radius_m ?? 500]) }}
@@ -131,9 +131,9 @@
                 </button>
             </div>
         @elseif($withinRange)
-            <div class="card text-center p-6 bg-green-50 border-2 border-success">
-                <svg aria-hidden="true" class="size-12 text-success mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                <p class="font-bold text-green-700 my-2">{{ __('app.arrived_confirmed') }}</p>
+            <div class="card text-center p-6 bg-success/10 border-2 border-success">
+                <x-heroicon-o-check-circle class="size-12 text-success mx-auto mb-2" stroke-width="2.5" />
+                <p class="font-bold text-success my-2">{{ __('app.arrived_confirmed') }}</p>
             </div>
         @else
             <div class="card text-center p-6 text-text-secondary">
@@ -146,8 +146,8 @@
     @if($step === 'report')
         <div class="card">
             <label for="summary" class="font-semibold block mb-1">{{ __('app.report_summary') }} *</label>
-            <textarea wire:model="summary" rows="3" autocomplete="off" id="summary" class="form-textarea" required></textarea>
-            @error('summary') <small class="text-danger">{{ $message }}</small> @enderror
+            <textarea wire:model="summary" rows="3" autocomplete="off" id="summary" class="form-textarea" required @error('summary') aria-invalid="true" aria-describedby="summary-error" @enderror></textarea>
+            @error('summary') <small id="summary-error" class="text-danger">{{ $message }}</small> @enderror
         </div>
 
         <div class="card">
@@ -174,10 +174,22 @@
         <div class="card">
             <label class="font-semibold block mb-1">{{ __('app.signature') }}</label>
             <p class="m-0 mb-2 text-xs text-text-muted">{{ app()->getLocale() === 'ar' ? 'التوقيع اختياري — إذا تعذر التوقيع باللمس، دوّن اسم العميل في ملخص الزيارة.' : 'Signature is optional — if touch signing is not possible, note the customer name in the visit summary.' }}</p>
-            <canvas id="sigCanvas" width="340" height="140" aria-label="{{ __('app.signature') }}" role="img"
+            <canvas id="sigCanvas" aria-label="{{ __('app.signature') }}" role="img"
                 class="border-2 border-dashed border-border rounded-lg block w-full touch-none"
                 x-data="{ drawing:false, ctx:null }"
-                x-init="ctx = $el.getContext('2d'); ctx.strokeStyle='#1f2937';ctx.lineWidth=2;ctx.lineCap='round'"
+                x-init="
+                    const r = $el.getBoundingClientRect();
+                    const dpr = window.devicePixelRatio || 1;
+                    $el.width = r.width * dpr;
+                    $el.height = 140 * dpr;
+                    $el.style.width = r.width + 'px';
+                    $el.style.height = '140px';
+                    ctx = $el.getContext('2d');
+                    ctx.scale(dpr, dpr);
+                    ctx.strokeStyle='#1f2937';
+                    ctx.lineWidth=2;
+                    ctx.lineCap='round';
+                "
                 @mousedown="drawing=true;ctx.beginPath();ctx.moveTo($event.offsetX,$event.offsetY)"
                 @mousemove="if(drawing){ctx.lineTo($event.offsetX,$event.offsetY);ctx.stroke()}"
                 @mouseup="drawing=false;$wire.set('signature', $el.toDataURL())"
@@ -186,7 +198,7 @@
                 @touchmove.prevent="if(drawing){ctx.lineTo($event.touches[0].clientX-$el.getBoundingClientRect().left,$event.touches[0].clientY-$el.getBoundingClientRect().top);ctx.stroke()}"
                 @touchend="drawing=false;$wire.set('signature', $el.toDataURL())">
             </canvas>
-            <button class="btn btn-outline mt-2 text-sm" x-on:click="()=>{let c=$event.target.closest('div').querySelector('#sigCanvas').getContext('2d');c.clearRect(0,0,340,140);$wire.set('signature','')}" aria-label="{{ __('app.clear') }}">{{ __('app.clear') }}</button>
+            <button class="btn btn-outline mt-2 text-sm" x-on:click="()=>{let c=$event.target.closest('div').querySelector('#sigCanvas').getContext('2d');c.clearRect(0,0,$event.target.closest('div').querySelector('#sigCanvas').width,$event.target.closest('div').querySelector('#sigCanvas').height);$wire.set('signature','')}" aria-label="{{ __('app.clear') }}">{{ __('app.clear') }}</button>
         </div>
 
         <x-ds.modal :title="__('app.confirm_report_title') ?? 'Submit visit report?'" :message="__('app.confirm_report_msg') ?? 'This visit report will be submitted permanently. You cannot edit it after submission.'">
@@ -204,9 +216,9 @@
 
     {{-- Step: Done --}}
     @if($step === 'done')
-        <div class="card text-center p-8 bg-green-50">
-            <svg aria-hidden="true" class="size-16 text-success mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-            <h2 class="text-green-700 my-3 mb-1">{{ __('app.report_submitted') }}</h2>
+        <div class="card text-center p-8 bg-success/10">
+            <x-heroicon-o-check-circle class="size-16 text-success mx-auto mb-2" stroke-width="2.5" />
+            <h2 class="text-success my-3 mb-1" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ __('app.report_submitted') }}</h2>
             <p class="text-text-secondary m-0">{{ __('app.visit_complete') }}</p>
             <a href="/app" class="btn btn-primary inline-block mt-4 no-underline">{{ __('app.back_home') }}</a>
         </div>
