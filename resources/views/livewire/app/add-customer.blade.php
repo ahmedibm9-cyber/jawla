@@ -31,20 +31,20 @@
         <form wire:submit="submit">
             <div class="form-group">
                 <label for="name_ar" class="form-label">{{ __('app.name_ar') }}</label>
-                <input type="text" id="name_ar" name="name_ar" wire:model="name_ar" autocomplete="off" class="form-input">
-                @error('name_ar') <small class="form-error">{{ $message }}</small> @enderror
+                <input type="text" id="name_ar" name="name_ar" wire:model="name_ar" autocomplete="off" class="form-input" @error('name_ar') aria-invalid="true" aria-describedby="name_ar-error" @enderror>
+                @error('name_ar') <small id="name_ar-error" class="form-error">{{ $message }}</small> @enderror
             </div>
 
             <div class="form-group">
                 <label for="name_en" class="form-label">{{ __('app.name_en') }}</label>
-                <input type="text" id="name_en" name="name_en" wire:model="name_en" autocomplete="off" class="form-input">
-                @error('name_en') <small class="form-error">{{ $message }}</small> @enderror
+                <input type="text" id="name_en" name="name_en" wire:model="name_en" autocomplete="off" class="form-input" @error('name_en') aria-invalid="true" aria-describedby="name_en-error" @enderror>
+                @error('name_en') <small id="name_en-error" class="form-error">{{ $message }}</small> @enderror
             </div>
 
             <div class="form-group">
                 <label for="phone" class="form-label">{{ __('app.phone') }}</label>
-                <input type="tel" id="phone" name="phone" wire:model="phone" autocomplete="tel" inputmode="tel" class="form-input">
-                @error('phone') <small class="form-error">{{ $message }}</small> @enderror
+                <input type="tel" id="phone" name="phone" wire:model="phone" autocomplete="tel" inputmode="tel" class="form-input" @error('phone') aria-invalid="true" aria-describedby="phone-error" @enderror>
+                @error('phone') <small id="phone-error" class="form-error">{{ $message }}</small> @enderror
             </div>
 
             <div class="form-group">

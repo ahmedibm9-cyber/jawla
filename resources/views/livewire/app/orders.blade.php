@@ -71,7 +71,7 @@
                     @endif
 
                     @if($offerNotes)
-                        <small class="text-text-secondary block mt-1">{{ __('app.review_notes') }}: {{ $offerNotes }}</small>
+                        <small class="text-text-secondary block mt-1">{{ __('app.review_notes') }}: <span class="line-clamp-2">{{ $offerNotes }}</span></small>
                     @endif
 
                     <div class="flex items-center gap-2 mt-2 pt-2 border-t border-surface-hover">

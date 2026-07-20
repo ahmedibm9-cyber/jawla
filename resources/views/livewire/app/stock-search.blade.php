@@ -53,12 +53,12 @@
                         @if($flagProductId === $product->id)
                             <div class="mt-3 pt-3 border-t border-surface-hover">
                                 <label for="flagQuantity-{{ $product->id }}" class="font-semibold block mb-1 text-sm">{{ __('app.flag_quantity') }} *</label>
-                                <input type="number" step="0.001" min="0.001" id="flagQuantity-{{ $product->id }}" wire:model="flagQuantity" class="form-input mb-1" autocomplete="off">
-                                @error('flagQuantity') <small class="text-danger block mb-1">{{ $message }}</small> @enderror
+                                <input type="number" step="0.001" min="0.001" id="flagQuantity-{{ $product->id }}" wire:model="flagQuantity" class="form-input mb-1" autocomplete="off" @error('flagQuantity') aria-invalid="true" aria-describedby="flagQuantity-error" @enderror>
+                                @error('flagQuantity') <small id="flagQuantity-error" class="text-danger block mb-1">{{ $message }}</small> @enderror
 
                                 <label for="flagNotes-{{ $product->id }}" class="font-semibold block mb-1 text-sm">{{ __('app.flag_notes') }}</label>
-                                <textarea rows="2" id="flagNotes-{{ $product->id }}" wire:model="flagNotes" class="form-textarea mb-2"></textarea>
-                                @error('flagNotes') <small class="text-danger block mb-1">{{ $message }}</small> @enderror
+                                <textarea rows="2" id="flagNotes-{{ $product->id }}" wire:model="flagNotes" class="form-textarea mb-2" @error('flagNotes') aria-invalid="true" aria-describedby="flagNotes-error" @enderror></textarea>
+                                @error('flagNotes') <small id="flagNotes-error" class="text-danger block mb-1">{{ $message }}</small> @enderror
 
                                 <div class="flex gap-2">
                                     <button type="button" class="btn btn-primary flex-1" wire:click="submitFlag" wire:loading.attr="disabled">

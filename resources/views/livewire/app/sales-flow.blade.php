@@ -187,11 +187,39 @@
                             <button type="button" class="btn btn-primary w-full">{{ __('app.submit') }}</button>
                         </x-slot:trigger>
                         <x-slot:confirm>
-                            <button type="button" wire:click="submit" wire:loading.attr="disabled" class="btn btn-primary w-full">{{ __('app.confirm') }}</button>
+                            {{-- Online: submit normally. Offline: queue to the outbox (CG2) and show the queued screen. --}}
+                            <button type="button" wire:loading.attr="disabled" class="btn btn-primary w-full"
+                                x-data
+                                x-on:click="
+                                    if (navigator.onLine) {
+                                        $wire.submit();
+                                    } else {
+                                        window.jawlaSync.enqueue('sale', {
+                                            customer_id: $wire.customerId,
+                                            visit_id: $wire.visitId,
+                                            items: ($wire.cart || []).map(i => ({ product_id: i.product_id, quantity: i.quantity, unit_price: i.price })),
+                                        });
+                                        $wire.queueOffline();
+                                    }
+                                ">{{ __('app.confirm') }}</button>
                         </x-slot:confirm>
                     </x-ds.modal>
                 @endif
             @endif
+        @endif
+
+        @if($step === 'queued')
+            <div class="success-screen">
+                <div class="success-checkmark" style="background:var(--color-warning,#B45309)">
+                    <x-heroicon-o-cloud-arrow-up width="36" height="36" stroke-width="2.5" />
+                </div>
+                <h3 class="success-title" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ app()->getLocale() === 'ar' ? 'بانتظار المزامنة' : 'Queued to sync' }}</h3>
+                <p class="success-message">{{ $successMessage }}</p>
+                <div class="success-actions">
+                    <a href="/app/sell" class="btn btn-primary w-full no-underline text-center">{{ __('app.new_invoice') }}</a>
+                    <a href="/app" class="btn w-full no-underline text-center text-text-secondary">{{ __('app.home') }}</a>
+                </div>
+            </div>
         @endif
 
         @if($step === 'done')

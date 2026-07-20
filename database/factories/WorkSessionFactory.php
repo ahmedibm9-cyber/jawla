@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Company;
 use App\Models\Route;
 use App\Models\User;
 use App\Models\WorkSession;
@@ -14,6 +15,7 @@ class WorkSessionFactory extends Factory
     public function definition(): array
     {
         return [
+            'company_id' => Company::factory(),
             'user_id' => User::factory(),
             'route_id' => Route::factory(),
             'started_at' => now()->subHours(2),

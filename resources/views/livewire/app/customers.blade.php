@@ -28,9 +28,9 @@
         @else
             @forelse($customers as $customer)
                 <div class="card min-w-0">
-                    <strong class="block">{{ $customer->name_ar }}</strong>
+                    <strong class="block truncate">{{ $customer->name_ar }}</strong>
                     <small class="text-text-secondary">{{ $customer->code }} · {{ $customer->phone }}</small>
-                    <p class="mt-1 text-sm text-text-muted">{{ $customer->address }}</p>
+                    <p class="mt-1 text-sm text-text-muted line-clamp-2">{{ $customer->address }}</p>
                     @if($customer->latitude && $customer->longitude)
                         <a href="https://www.google.com/maps/dir/?api=1&destination={{ $customer->latitude }},{{ $customer->longitude }}"
                            target="_blank" rel="noopener" class="maps-link">

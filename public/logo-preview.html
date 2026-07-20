@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jawla Logo — Final Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif; background: #F8FAFC; padding: 40px 20px; }
+    h1 { text-align: center; color: #0F172A; font-size: 1.75rem; margin-bottom: 8px; }
+    .sub { text-align: center; color: #64748B; font-size: 0.85rem; margin-bottom: 48px; }
+
+    /* Logo showcase */
+    .showcase { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; max-width: 960px; margin: 0 auto 56px; }
+    .logo-box { width: 160px; height: 160px; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); position: relative; }
+    .logo-box img { width: 100px; height: auto; }
+    .logo-box .tag { position: absolute; bottom: 8px; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 3px 8px; border-radius: 6px; }
+    .logo-box .tag-dark { background: rgba(0,0,0,0.7); color: #fff; }
+    .logo-box .tag-light { background: rgba(255,255,255,0.9); color: #64748B; }
+
+    .section { text-align: center; color: #0F172A; font-size: 1.05rem; font-weight: 600; margin: 0 0 20px; }
+    .row { display: flex; gap: 32px; justify-content: center; flex-wrap: wrap; max-width: 960px; margin: 0 auto 56px; }
+
+    /* Login */
+    .login { background: #fff; border-radius: 20px; padding: 40px 32px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.08); width: 320px; }
+    .login .logo-wrap { width: 72px; height: 72px; margin: 0 auto 16px; display: flex; align-items: center; justify-content: center; }
+    .login .logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .login h3 { color: #0F172A; font-size: 1.1rem; margin-bottom: 4px; }
+    .login .tag { color: #64748B; font-size: 0.8rem; margin-bottom: 24px; }
+    .login .field { background: #F8FAFC; border: 1.5px solid #E2E8F0; border-radius: 10px; padding: 12px 14px; text-align: left; margin-bottom: 12px; font-size: 0.85rem; color: #94A3B8; }
+    .login .btn { background: #6DB83B; color: #fff; border: none; border-radius: 10px; padding: 12px; font-weight: 600; font-size: 0.95rem; width: 100%; cursor: pointer; }
+
+    /* PWA */
+    .pwa { background: #fff; border-radius: 24px; box-shadow: 0 4px 24px rgba(0,0,0,0.1); overflow: hidden; width: 320px; }
+    .pwa-hero { padding: 24px 20px; display: flex; align-items: center; gap: 14px; }
+    .pwa-hero .logo-wrap { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .pwa-hero .logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .pwa-hero-text { color: #fff; }
+    .pwa-hero-text strong { font-size: 1rem; display: block; }
+    .pwa-hero-text small { font-size: 0.75rem; opacity: 0.85; }
+    .pwa-body { padding: 16px; }
+    .vc { background: #F1F5F9; border-radius: 12px; padding: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .vc-name { font-size: 0.85rem; font-weight: 600; }
+    .vc-addr { font-size: 0.75rem; color: #64748B; }
+
+    /* Admin */
+    .admin { background: #fff; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); overflow: hidden; width: 380px; }
+    .admin-top { background: #fff; border-bottom: 1px solid #E5E7EB; padding: 14px 20px; display: flex; align-items: center; gap: 10px; }
+    .admin-top .logo-wrap { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .admin-top .logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .admin-top span { font-weight: 700; color: #0F172A; font-size: 0.95rem; }
+    .admin-body { padding: 20px; }
+    .stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat { background: #F8FAFC; border-radius: 10px; padding: 16px; text-align: center; }
+    .stat-num { font-size: 1.5rem; font-weight: 700; color: #0F172A; }
+    .stat-lbl { font-size: 0.72rem; color: #64748B; margin-top: 2px; }
+
+    /* Tab */
+    .tab { width: 360px; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); overflow: hidden; }
+    .tab-bar { background: #E5E7EB; padding: 8px 12px; display: flex; align-items: center; gap: 6px; }
+    .tab-active { background: #fff; border-radius: 8px; padding: 6px 14px; display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: #0F172A; font-weight: 500; }
+    .tab-active .favicon { width: 14px; height: 14px; border-radius: 3px; background: #0F172A; display: flex; align-items: center; justify-content: center; }
+    .tab-active .favicon img { width: 10px; height: 10px; object-fit: contain; }
+  </style>
+</head>
+<body>
+  <h1>Jawla Logo — Final</h1>
+  <p class="sub">black-j.png, green-j.png, white-j.png</p>
+
+  <!-- Logo showcase -->
+  <div class="showcase">
+    <div class="logo-box" style="background:#0F172A">
+      <img src="white-j.png" alt="">
+      <span class="tag tag-dark">White J — dark bg</span>
+    </div>
+    <div class="logo-box" style="background:#fff; border:1px solid #E2E8F0">
+      <img src="green-j.png" alt="">
+      <span class="tag tag-light">Green J — light bg</span>
+    </div>
+    <div class="logo-box" style="background:#fff; border:1px solid #E2E8F0">
+      <img src="black-j.png" alt="">
+      <span class="tag tag-light">Black J — admin</span>
+    </div>
+  </div>
+
+  <!-- Login -->
+  <p class="section">Login Page — Green J on white</p>
+  <div class="row">
+    <div class="login">
+      <div class="logo-wrap"><img src="green-j.png" alt="Jawla"></div>
+      <h3>Jawla</h3>
+      <p class="tag">Field Sales Management</p>
+      <div class="field">Email</div>
+      <div class="field">Password</div>
+      <button class="btn">Sign In</button>
+    </div>
+  </div>
+
+  <!-- PWA -->
+  <p class="section">Rep PWA — White J on green hero</p>
+  <div class="row">
+    <div class="pwa">
+      <div class="pwa-hero" style="background:linear-gradient(135deg,#6DB83B,#4A9624)">
+        <div class="logo-wrap"><img src="white-j.png" alt=""></div>
+        <div class="pwa-hero-text">
+          <strong>Good morning, Ahmed</strong>
+          <small>5 visits today</small>
+        </div>
+      </div>
+      <div class="pwa-body">
+        <div class="vc"><div class="dot" style="background:#D97706"></div><div><div class="vc-name">Al-Futtaim Trading</div><div class="vc-addr">Nasr City</div></div></div>
+        <div class="vc"><div class="dot" style="background:#059669"></div><div><div class="vc-name">Oasis Computers</div><div class="vc-addr">Heliopolis</div></div></div>
+        <div class="vc"><div class="dot" style="background:#D97706"></div><div><div class="vc-name">Cairo Textiles</div><div class="vc-addr">Shubra</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin -->
+  <p class="section">Filament Admin — Black J on white header</p>
+  <div class="row">
+    <div class="admin">
+      <div class="admin-top">
+        <div class="logo-wrap"><img src="black-j.png" alt=""></div>
+        <span>Jawla</span>
+      </div>
+      <div class="admin-body">
+        <div class="stat-row">
+          <div class="stat"><div class="stat-num">12</div><div class="stat-lbl">Visits Today</div></div>
+          <div class="stat"><div class="stat-num">8</div><div class="stat-lbl">Invoices</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab -->
+  <p class="section">Browser Tab — White J on dark favicon</p>
+  <div class="row">
+    <div class="tab">
+      <div class="tab-bar">
+        <div class="tab-active">
+          <div class="favicon"><img src="white-j.png" alt=""></div> Jawla
+        </div>
+        <span style="font-size:0.75rem;color:#64748B;padding:6px 14px">Gmail</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

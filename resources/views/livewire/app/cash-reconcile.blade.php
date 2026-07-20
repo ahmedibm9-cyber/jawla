@@ -18,14 +18,14 @@
         <form wire:submit="submit">
             <div class="form-group">
                 <label for="counted_amount" class="form-label">{{ __('app.counted_amount') }} *</label>
-                <input type="number" step="0.01" min="0" inputmode="decimal" autocomplete="off" wire:model="counted_amount" id="counted_amount" class="form-input">
-                @error('counted_amount') <small class="form-error">{{ $message }}</small> @enderror
+                <input type="number" step="0.01" min="0" inputmode="decimal" autocomplete="off" wire:model="counted_amount" id="counted_amount" class="form-input" @error('counted_amount') aria-invalid="true" aria-describedby="counted_amount-error" @enderror>
+                @error('counted_amount') <small id="counted_amount-error" class="form-error">{{ $message }}</small> @enderror
             </div>
 
             <div class="form-group">
                 <label for="notes" class="form-label">{{ __('app.notes') }} <span class="text-text-muted">({{ __('app.optional') }})</span></label>
-                <textarea wire:model="notes" id="notes" rows="2" autocomplete="off" class="form-textarea"></textarea>
-                @error('notes') <small class="form-error">{{ $message }}</small> @enderror
+                <textarea wire:model="notes" id="notes" rows="2" autocomplete="off" class="form-textarea" @error('notes') aria-invalid="true" aria-describedby="notes-error" @enderror></textarea>
+                @error('notes') <small id="notes-error" class="form-error">{{ $message }}</small> @enderror
             </div>
 
             <x-ds.modal :title="__('app.confirm_recon_title')" :message="__('app.confirm_recon_msg')">

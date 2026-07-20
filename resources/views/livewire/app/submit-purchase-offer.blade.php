@@ -23,8 +23,8 @@
         <form wire:submit="submit">
             <div class="form-group">
                 <label for="product_id" class="form-label">{{ __('app.product') }}</label>
-                <x-ds.autocomplete wire:model="product_id" id="product_id" :options="$products" :placeholder="__('app.search_product')" required />
-                @error('product_id') <small class="form-error">{{ $message }}</small> @enderror
+                <x-ds.autocomplete wire:model="product_id" id="product_id" :options="$products" :placeholder="__('app.search_product')" required @error('product_id') aria-invalid="true" aria-describedby="product_id-error" @enderror />
+                @error('product_id') <small id="product_id-error" class="form-error">{{ $message }}</small> @enderror
             </div>
 
             <div class="form-group">
@@ -35,13 +35,13 @@
             <div class="form-row">
                 <div class="form-group">
                     <label for="quantity" class="form-label">{{ __('app.quantity') }}</label>
-                    <input type="number" step="0.001" id="quantity" name="quantity" wire:model="quantity" autocomplete="off" class="form-input">
-                    @error('quantity') <small class="form-error">{{ $message }}</small> @enderror
+                    <input type="number" step="0.001" id="quantity" name="quantity" wire:model="quantity" autocomplete="off" class="form-input" @error('quantity') aria-invalid="true" aria-describedby="quantity-error" @enderror>
+                    @error('quantity') <small id="quantity-error" class="form-error">{{ $message }}</small> @enderror
                 </div>
                 <div class="form-group">
                     <label for="offered_price" class="form-label">{{ __('app.offered_price') }}</label>
-                    <input type="number" step="0.01" id="offered_price" name="offered_price" wire:model="offered_price" autocomplete="off" class="form-input">
-                    @error('offered_price') <small class="form-error">{{ $message }}</small> @enderror
+                    <input type="number" step="0.01" id="offered_price" name="offered_price" wire:model="offered_price" autocomplete="off" class="form-input" @error('offered_price') aria-invalid="true" aria-describedby="offered_price-error" @enderror>
+                    @error('offered_price') <small id="offered_price-error" class="form-error">{{ $message }}</small> @enderror
                 </div>
             </div>
 
@@ -52,8 +52,8 @@
 
             <div class="form-group">
                 <label for="expires_at" class="form-label">{{ __('app.expires_at') }} <span class="text-text-muted">({{ __('app.optional') }})</span></label>
-                <input type="date" id="expires_at" wire:model="expires_at" min="{{ now()->toDateString() }}" class="form-input">
-                @error('expires_at') <small class="form-error">{{ $message }}</small> @enderror
+                <input type="date" id="expires_at" wire:model="expires_at" min="{{ now()->toDateString() }}" class="form-input" @error('expires_at') aria-invalid="true" aria-describedby="expires_at-error" @enderror>
+                @error('expires_at') <small id="expires_at-error" class="form-error">{{ $message }}</small> @enderror
             </div>
 
             <x-ds.modal :title="__('app.confirm_purchase_title') ?? 'Submit offer?'" :message="__('app.confirm_purchase_msg') ?? 'This purchase offer will be submitted to the sales manager for review.'">

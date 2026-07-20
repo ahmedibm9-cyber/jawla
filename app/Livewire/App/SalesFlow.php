@@ -236,6 +236,21 @@ class SalesFlow extends Component
         }
     }
 
+    /**
+     * Offline path: the client has already enqueued the sale to the outbox
+     * (IndexedDB) and will sync it when back online. Show the queued confirmation
+     * and clear the cart — no server write happens here.
+     */
+    public function queueOffline(): void
+    {
+        $this->step = 'queued';
+        $this->successMessage = app()->getLocale() === 'ar'
+            ? 'تم حفظ الفاتورة دون اتصال وستتم مزامنتها تلقائيًا عند عودة الاتصال.'
+            : 'Invoice saved offline — it will sync automatically when you are back online.';
+        $this->reset(['cart', 'customerId', 'visitId']);
+        $this->recalcCart();
+    }
+
     public function render()
     {
         $customers = collect();

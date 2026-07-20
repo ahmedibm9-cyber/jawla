@@ -72,3 +72,15 @@
 - Primary suspected component: DS components (existing) + all 16 REP page views (migration targets).
 - Case file: bmad-output/investigation-rep-ds-card-button-tooltip-adoption-2026-07-19.md
 - Recommended response: Option A — create fix story: migrate ~80 cards, ~50 buttons, add tooltips to icon-only actions across 16 pages.
+
+## Brainstorm: top-5-competitive-gaps-roadmap — 2026-07-20
+
+- Topic: Convert the top 5 competitive gaps from `docs/competitor-research-2026-07-20-rep-in.md` into roadmap-ready epics and stories.
+- Techniques used: Mind Mapping + Reverse Brainstorming + Starbursting.
+- Chosen epics: CG1 portable printing, CG2 true offline transactions, CG3 live rep tracking, CG4 API + ERP ecosystem, CG5 sales targets & attainment.
+- Primary insight: The five gaps cluster into three strategic advantages — field execution (CG1+CG2), manager visibility (CG3+CG5), and enterprise/platform trust (CG4).
+- Artifacts:
+  - `bmad-output/brainstorming-report-top-5-competitive-gaps-2026-07-20.md`
+  - `bmad-output/epics-top-5-competitive-gaps-2026-07-20.md`
+  - `bmad-output/stories/CG1.1.bluetooth-print-transport.story.md` ... `CG5.3.rep-target-progress-and-reports.story.md`
+- Recommended next step: execute CG1 then CG5, then CG2, CG3, CG4 in order.
