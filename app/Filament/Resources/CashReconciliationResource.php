@@ -9,6 +9,7 @@ use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -52,7 +53,7 @@ class CashReconciliationResource extends Resource
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Forms\Components\Section::make($l('التفاصيل', 'Details'))->schema([
+            Section::make($l('التفاصيل', 'Details'))->schema([
                 Forms\Components\TextInput::make('expected_amount')->label($l('المتوقع', 'Expected'))->disabled(),
                 Forms\Components\TextInput::make('counted_amount')->label($l('المعدود', 'Counted'))->disabled(),
                 Forms\Components\TextInput::make('variance')->label($l('الفرق', 'Variance'))->disabled(),

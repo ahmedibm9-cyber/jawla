@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -39,7 +40,7 @@ class ProformaInvoiceResource extends Resource
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Forms\Components\Section::make($l('بيانات', 'Info'))->schema([
+            Section::make($l('بيانات', 'Info'))->schema([
                 Forms\Components\TextInput::make('proforma_number')->label($l('رقم', 'Number'))->disabled(),
                 Forms\Components\Select::make('customer_id')->label($l('العميل', 'Customer'))
                     ->relationship('customer', 'name_ar'),

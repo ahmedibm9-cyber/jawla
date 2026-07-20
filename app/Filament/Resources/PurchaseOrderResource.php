@@ -7,6 +7,7 @@ use App\Models\PurchaseOrder;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -50,7 +51,7 @@ class PurchaseOrderResource extends Resource
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Forms\Components\Section::make($l('بيانات أمر الشراء', 'Purchase Order Info'))->schema([
+            Section::make($l('بيانات أمر الشراء', 'Purchase Order Info'))->schema([
                 Forms\Components\TextInput::make('order_number')->label($l('رقم الأمر', 'Order Number'))->disabled(),
                 Forms\Components\TextInput::make('status')->label($l('الحالة', 'Status'))->disabled(),
                 Forms\Components\Select::make('supplier_id')->label($l('المورد', 'Supplier'))

@@ -11,6 +11,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -48,7 +49,7 @@ class CustomerResource extends Resource
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Forms\Components\Section::make($l('البيانات الأساسية', 'Basic Information'))->schema([
+            Section::make($l('البيانات الأساسية', 'Basic Information'))->schema([
                 Forms\Components\TextInput::make('name_ar')->label($l('الاسم (عربي)', 'Name (Arabic)'))->required()->maxLength(255),
                 Forms\Components\TextInput::make('name_en')->label($l('الاسم (إنجليزي)', 'Name (English)'))->required()->maxLength(255),
                 Forms\Components\TextInput::make('code')->label($l('الكود', 'Code'))->required()->unique(ignoreRecord: true),
@@ -60,7 +61,7 @@ class CustomerResource extends Resource
                     ->default('approved')->required(),
             ])->columns(3),
 
-            Forms\Components\Section::make('GPS')->schema([
+            Section::make('GPS')->schema([
                 Forms\Components\TextInput::make('latitude')
                     ->label($l('خط العرض', 'Latitude'))
                     ->numeric()
@@ -119,7 +120,7 @@ class CustomerResource extends Resource
                     )),
             ])->columns(2),
 
-            Forms\Components\Section::make($l('الإعدادات المالية', 'Financial Settings'))->schema([
+            Section::make($l('الإعدادات المالية', 'Financial Settings'))->schema([
                 Forms\Components\TextInput::make('credit_limit')->label($l('حد الائتمان', 'Credit Limit'))->numeric()->default(0),
                 Forms\Components\TextInput::make('balance')->label($l('الرصيد', 'Balance'))->numeric()->default(0)->disabled(),
             ])->columns(2),

@@ -11,6 +11,7 @@ use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -47,7 +48,7 @@ class VanTransferResource extends Resource
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Forms\Components\Section::make($l('بيانات التحويل', 'Transfer Info'))->schema([
+            Section::make($l('بيانات التحويل', 'Transfer Info'))->schema([
                 Forms\Components\Select::make('from_user_id')
                     ->label($l('من مستخدم', 'From User'))
                     ->relationship('fromUser', 'name')

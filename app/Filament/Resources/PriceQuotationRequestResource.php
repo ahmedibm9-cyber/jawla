@@ -10,6 +10,7 @@ use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -46,7 +47,7 @@ class PriceQuotationRequestResource extends Resource
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Forms\Components\Section::make($l('طلب عرض سعر', 'Quotation Request'))->schema([
+            Section::make($l('طلب عرض سعر', 'Quotation Request'))->schema([
                 Forms\Components\Select::make('customer_id')->label($l('العميل', 'Customer'))
                     ->relationship('customer', 'name_ar')->preload()->required(),
                 Forms\Components\Select::make('product_id')->label($l('المنتج', 'Product'))

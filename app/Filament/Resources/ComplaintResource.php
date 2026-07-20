@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -44,7 +45,7 @@ class ComplaintResource extends Resource
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Forms\Components\Section::make($l('الشكوى', 'Complaint'))->schema([
+            Section::make($l('الشكوى', 'Complaint'))->schema([
                 Forms\Components\Select::make('customer_id')->label($l('العميل', 'Customer'))
                     ->relationship('customer', 'name_ar')->preload()->required(),
                 Forms\Components\Select::make('user_id')->label($l('المندوب', 'Rep'))

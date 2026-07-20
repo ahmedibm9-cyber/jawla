@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -45,7 +46,7 @@ class ProductResource extends Resource
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Forms\Components\Section::make($l('البيانات الأساسية', 'Basic Information'))->schema([
+            Section::make($l('البيانات الأساسية', 'Basic Information'))->schema([
                 Forms\Components\TextInput::make('sku')->label('SKU')->required()->unique(ignoreRecord: true),
                 Forms\Components\TextInput::make('name_ar')->label($l('الاسم (عربي)', 'Name (Arabic)'))->required(),
                 Forms\Components\TextInput::make('name_en')->label($l('الاسم (إنجليزي)', 'Name (English)'))->required(),
@@ -61,7 +62,7 @@ class ProductResource extends Resource
                 Forms\Components\Toggle::make('vat_applicable')->label($l('خاضع للضريبة', 'VAT Applicable'))->default(true),
             ])->columns(3),
 
-            Forms\Components\Section::make($l('التسعير', 'Pricing'))->schema([
+            Section::make($l('التسعير', 'Pricing'))->schema([
                 Forms\Components\TextInput::make('price')->label($l('سعر البيع', 'Selling Price'))->numeric()->required()
                     ->visible(fn () => Gate::allows('products.manage_prices')),
                 Forms\Components\TextInput::make('cost')->label($l('سعر التكلفة', 'Cost Price'))->numeric()->required()

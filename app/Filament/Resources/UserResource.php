@@ -9,6 +9,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -46,7 +47,7 @@ class UserResource extends Resource
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Forms\Components\Section::make($l('بيانات المستخدم', 'User Info'))->schema([
+            Section::make($l('بيانات المستخدم', 'User Info'))->schema([
                 Forms\Components\TextInput::make('name')->label($l('الاسم', 'Name'))->required(),
                 Forms\Components\TextInput::make('email')->label($l('البريد الإلكتروني', 'Email'))->email()->required()->unique(ignoreRecord: true),
                 Forms\Components\TextInput::make('phone')->label($l('الهاتف', 'Phone'))->tel(),

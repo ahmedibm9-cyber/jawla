@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -44,7 +45,7 @@ class DailyVisitAssignmentResource extends Resource
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Forms\Components\Section::make($l('بيانات', 'Info'))->schema([
+            Section::make($l('بيانات', 'Info'))->schema([
                 Forms\Components\Select::make('user_id')
                     ->label($l('المندوب', 'Rep'))
                     ->relationship('user', 'name')

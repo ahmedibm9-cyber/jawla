@@ -8,6 +8,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -43,7 +44,7 @@ class CompanyResource extends Resource
     {
         return $schema
             ->schema([
-                Forms\Components\Section::make(app()->getLocale() === 'ar' ? 'البيانات الأساسية' : 'Basic Information')
+                Section::make(app()->getLocale() === 'ar' ? 'البيانات الأساسية' : 'Basic Information')
                     ->schema([
                         Forms\Components\TextInput::make('name_ar')
                             ->label(app()->getLocale() === 'ar' ? 'الاسم (عربي)' : 'Name (Arabic)')
@@ -91,7 +92,7 @@ class CompanyResource extends Resource
                     ])
                     ->columns(3),
 
-                Forms\Components\Section::make(app()->getLocale() === 'ar' ? 'الإعدادات المالية' : 'Financial Settings')
+                Section::make(app()->getLocale() === 'ar' ? 'الإعدادات المالية' : 'Financial Settings')
                     ->schema([
                         Forms\Components\TextInput::make('currency')
                             ->label(app()->getLocale() === 'ar' ? 'العملة' : 'Currency')
@@ -105,7 +106,7 @@ class CompanyResource extends Resource
                     ])
                     ->columns(2),
 
-                Forms\Components\Section::make(app()->getLocale() === 'ar' ? 'الحساب البنكي' : 'Bank Account')
+                Section::make(app()->getLocale() === 'ar' ? 'الحساب البنكي' : 'Bank Account')
                     ->schema([
                         Forms\Components\TextInput::make('bank_name')->label(app()->getLocale() === 'ar' ? 'اسم البنك' : 'Bank Name'),
                         Forms\Components\TextInput::make('bank_account')->label(app()->getLocale() === 'ar' ? 'رقم الحساب' : 'Account Number'),

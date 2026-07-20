@@ -6,6 +6,7 @@ use App\Filament\Resources\TaskResource\Pages;
 use App\Models\Task;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -43,7 +44,7 @@ class TaskResource extends Resource
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Forms\Components\Section::make($l('تفاصيل المهمة', 'Task Details'))->schema([
+            Section::make($l('تفاصيل المهمة', 'Task Details'))->schema([
                 Forms\Components\Select::make('assigned_to')
                     ->label($l('مسند إلى', 'Assigned To'))
                     ->relationship('assignedTo', 'name')
