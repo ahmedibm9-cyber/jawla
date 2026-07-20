@@ -69,6 +69,22 @@ class LogReturn extends Component
         $this->items[] = ['product_id' => '', 'quantity' => 1, 'unit_price' => 0];
     }
 
+    /**
+     * Offline path: the client has already enqueued the return to the outbox
+     * (IndexedDB) and will sync it when back online. Show the queued confirmation
+     * and clear the form — no server write happens here.
+     */
+    public function queueOffline(): void
+    {
+        $this->success = true;
+        $this->successMessage = app()->getLocale() === 'ar'
+            ? 'تم حفظ المرتجع دون اتصال وستتم مزامنته تلقائيًا عند عودة الاتصال.'
+            : 'Return saved offline — it will sync automatically when you are back online.';
+
+        $this->reset(['customer_id', 'reason', 'items']);
+        $this->items[] = ['product_id' => '', 'quantity' => 1, 'unit_price' => 0];
+    }
+
     public function render()
     {
         $user = auth()->user();

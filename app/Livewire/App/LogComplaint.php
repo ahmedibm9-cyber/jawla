@@ -42,6 +42,19 @@ class LogComplaint extends Component
             : 'Complaint logged';
     }
 
+    /**
+     * Offline path: the client has already enqueued the complaint to the outbox
+     * (IndexedDB) and will sync it when back online. Show the queued confirmation
+     * and clear the form — no server write happens here.
+     */
+    public function queueOffline(): void
+    {
+        $this->reset(['customer_id', 'complaint_type', 'description']);
+        $this->successMessage = app()->getLocale() === 'ar'
+            ? 'تم حفظ الشكوى دون اتصال وستتم مزامنتها تلقائيًا عند عودة الاتصال.'
+            : 'Complaint saved offline — it will sync automatically when you are back online.';
+    }
+
     public function render()
     {
         return view('livewire.app.log-complaint', [

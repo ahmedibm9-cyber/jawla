@@ -41,7 +41,21 @@
                     </button>
                 </x-slot:trigger>
                 <x-slot:confirm>
-                    <button type="button" wire:click="submit" wire:loading.attr="disabled" class="btn btn-primary w-full">{{ __('app.confirm') }}</button>
+                    {{-- Online: submit normally. Offline: queue to the outbox (CG2) and show the queued screen. --}}
+                    <button type="button" wire:loading.attr="disabled" class="btn btn-primary w-full"
+                        x-data
+                        x-on:click="
+                            if (navigator.onLine) {
+                                $wire.submit();
+                            } else {
+                                window.jawlaSync.enqueue('complaint', {
+                                    customer_id: $wire.customer_id,
+                                    type: $wire.complaint_type,
+                                    description: $wire.description,
+                                });
+                                $wire.queueOffline();
+                            }
+                        ">{{ __('app.confirm') }}</button>
                 </x-slot:confirm>
             </x-ds.modal>
         </form>

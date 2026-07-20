@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Livewire\App\CollectPayment;
+use App\Livewire\App\LogComplaint;
 use App\Livewire\App\LogExpense;
+use App\Livewire\App\LogReturn;
 use App\Livewire\App\SalesFlow;
 use App\Models\Customer;
 use App\Models\Product;
@@ -81,6 +83,29 @@ class RepFlowOfflineUxTest extends TestCase
             ->call('queueOffline')
             ->assertSet('success', true)
             ->assertSet('amount', null)
+            ->assertOk();
+    }
+
+    public function test_return_flow_queues_offline(): void
+    {
+        Livewire::test(LogReturn::class)
+            ->set('customer_id', $this->customer->id)
+            ->set('items.0.product_id', $this->product->id)
+            ->set('items.0.quantity', 2)
+            ->call('queueOffline')
+            ->assertSet('success', true)
+            ->assertSet('customer_id', null)
+            ->assertOk();
+    }
+
+    public function test_complaint_flow_queues_offline(): void
+    {
+        Livewire::test(LogComplaint::class)
+            ->set('customer_id', $this->customer->id)
+            ->set('complaint_type', 'quality_issue')
+            ->set('description', 'Damaged goods on arrival')
+            ->call('queueOffline')
+            ->assertSet('customer_id', null)
             ->assertOk();
     }
 }
