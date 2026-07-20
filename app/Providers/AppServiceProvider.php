@@ -14,6 +14,8 @@ use App\Services\Contracts\InvoiceService;
 use App\Services\Contracts\PricingService;
 use App\Services\Contracts\StockService;
 use App\Services\Contracts\VanTransferService as VanTransferServiceContract;
+use App\Services\Eta\Contracts\EtaClient;
+use App\Services\Eta\NullEtaClient;
 use App\Services\InvoiceCalculationService as InvoiceCalculationServiceImpl;
 use App\Services\NumberSequenceService;
 use App\Services\OutOfStockService;
@@ -50,6 +52,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(\App\Services\Contracts\OutOfStockService::class, fn () => app(OutOfStockService::class));
         $this->app->singleton(ComplaintService::class);
         $this->app->bind(VanTransferServiceContract::class, fn () => app(VanTransferService::class));
+
+        // ETA e-invoicing: bound to the null client until real credentials +
+        // certificate are provisioned (go-live gate). Swap this binding for the
+        // HTTP client at that point — no call-site changes required.
+        $this->app->bind(EtaClient::class, NullEtaClient::class);
     }
 
     /**

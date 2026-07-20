@@ -22,6 +22,7 @@ class Invoice extends Model
         'eta_qr', 'zatca_qr', 'posting_date', 'issued_at',
         'cancelled_at', 'cancelled_by', 'amended_from',
         'uuid', 'hash_chain', 'cryptographic_stamp', 'zatca_status', 'zatca_submitted_at', 'zatca_response',
+        'eta_status', 'eta_submission_uuid', 'eta_long_id', 'eta_submitted_at', 'eta_response',
     ];
 
     protected $casts = [
@@ -36,6 +37,8 @@ class Invoice extends Model
         'cancelled_at' => 'datetime',
         'zatca_submitted_at' => 'datetime',
         'zatca_status' => 'string',
+        'eta_submitted_at' => 'datetime',
+        'eta_response' => 'array',
     ];
 
     protected static function boot(): void
