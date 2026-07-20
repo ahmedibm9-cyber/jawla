@@ -3,6 +3,7 @@
 use App\Http\Controllers\App\LoginController;
 use App\Http\Controllers\App\PdfController;
 use App\Livewire\App\AddCustomer;
+use App\Livewire\App\CashReconcile;
 use App\Livewire\App\CollectPayment;
 use App\Livewire\App\Home;
 use App\Livewire\App\LogComplaint;
@@ -82,6 +83,7 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/sell/{customer}', SalesFlow::class)->name('sell.customer');
     Route::get('/returns', LogReturn::class)->name('returns');
     Route::get('/expenses', LogExpense::class)->name('expenses');
+    Route::get('/reconcile', CashReconcile::class)->name('reconcile');
     Route::get('/purchase-offer', SubmitPurchaseOffer::class)->name('purchase-offer');
     Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])->name('pdf.proforma');
     Route::get('/pdf/invoice/{invoice}', [PdfController::class, 'invoice'])->name('pdf.invoice');

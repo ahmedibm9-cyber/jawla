@@ -85,6 +85,17 @@
             </div>
             <svg class="more-item-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         </a>
+
+        <a href="/app/reconcile" class="more-item">
+            <div class="more-item-icon more-icon-emerald">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            </div>
+            <div class="more-item-body">
+                <span class="more-item-label">{{ __('app.cash_reconciliation') }}</span>
+                <span class="more-item-desc">{{ __('app.reconcile_your_cashbox') }}</span>
+            </div>
+            <svg class="more-item-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24" width="16" height="16"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </a>
     </div>
 
     {{-- Other --}}
