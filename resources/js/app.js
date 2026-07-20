@@ -25,6 +25,78 @@ function chunkBytes(bytes, size = 180) {
   return chunks;
 }
 
+window.jawlaAutocomplete = ({ options, noResultsText }) => ({
+  open: false,
+  search: "",
+  highlighted: -1,
+  selected: "",
+  options,
+  noResultsText,
+
+  init() {
+    this.selected = this.$refs.hidden?.value
+      ? String(this.$refs.hidden.value)
+      : "";
+    this.search = this.labelFor(this.selected);
+  },
+
+  get filtered() {
+    if (!this.search) return this.options;
+    const q = this.search.toLowerCase();
+    return this.options.filter((o) => o.label.toLowerCase().includes(q));
+  },
+
+  labelFor(val) {
+    const option = this.options.find((o) => String(o.value) === String(val));
+    return option ? option.label : "";
+  },
+
+  syncHidden() {
+    if (!this.$refs.hidden) return;
+    this.$refs.hidden.value = this.selected;
+    this.$refs.hidden.dispatchEvent(new Event("input", { bubbles: true }));
+    this.$refs.hidden.dispatchEvent(new Event("change", { bubbles: true }));
+  },
+
+  choose(option) {
+    this.selected = String(option.value);
+    this.search = option.label;
+    this.syncHidden();
+    this.open = false;
+    this.highlighted = -1;
+  },
+
+  clear() {
+    this.selected = "";
+    this.search = "";
+    this.syncHidden();
+    this.open = false;
+    this.highlighted = -1;
+  },
+
+  closeList() {
+    this.open = false;
+    this.highlighted = -1;
+    this.search = this.labelFor(this.selected);
+  },
+
+  move(dir) {
+    if (!this.open) {
+      this.open = true;
+      return;
+    }
+    const count = this.filtered.length;
+    if (count === 0) return;
+    this.highlighted = (this.highlighted + dir + count) % count;
+  },
+
+  enter() {
+    if (this.open && this.highlighted >= 0 && this.filtered[this.highlighted]) {
+      this.choose(this.filtered[this.highlighted]);
+    }
+  },
+});
+
 function utf8Bytes(text) {
   return Array.from(new TextEncoder().encode(text));
 }
@@ -157,7 +229,15 @@ async function getSavedDevice() {
     return null;
   }
 
-  const { id } = JSON.parse(saved);
+  let id = null;
+
+  try {
+    ({ id } = JSON.parse(saved));
+  } catch {
+    window.localStorage.removeItem(PRINTER_STORAGE_KEY);
+    return null;
+  }
+
   const devices = await navigator.bluetooth.getDevices();
 
   return devices.find((device) => device.id === id) || null;
@@ -230,6 +310,14 @@ window.jawlaBluetoothPrinter = ({ payload }) => ({
       return;
     }
 
+    if (!this.payload?.lines?.length) {
+      this.message =
+        document.documentElement.lang === "ar"
+          ? "لا توجد بيانات للطباعة."
+          : "Nothing to print.";
+      return;
+    }
+
     this.busy = true;
     this.message =
       document.documentElement.lang === "ar"
@@ -284,5 +372,75 @@ window.jawlaBluetoothPrinter = ({ payload }) => ({
     }
   },
 });
+
+window.jawlaAutocompleteRegistry = window.jawlaAutocompleteRegistry || {};
+
+window.jawlaAutocompleteInit = function jawlaAutocompleteInit(id) {
+  const input = document.getElementById(id);
+  const hidden = document.getElementById(`${id}-hidden`);
+  const options = window.jawlaAutocompleteRegistry[id] || [];
+
+  if (!input || !hidden) return;
+
+  const current = options.find(
+    (option) => String(option.value) === String(hidden.value)
+  );
+  if (current) {
+    input.value = current.display || current.label;
+  }
+};
+
+window.jawlaAutocompleteSync = function jawlaAutocompleteSync(id) {
+  const input = document.getElementById(id);
+  const hidden = document.getElementById(`${id}-hidden`);
+  const options = window.jawlaAutocompleteRegistry[id] || [];
+
+  if (!input || !hidden) return;
+
+  const match = options.find(
+    (option) => (option.display || option.label) === input.value
+  );
+  hidden.value = match ? String(match.value) : "";
+  hidden.dispatchEvent(new Event("input", { bubbles: true }));
+  hidden.dispatchEvent(new Event("change", { bubbles: true }));
+};
+
+window.jawlaAutocompleteFinalize = function jawlaAutocompleteFinalize(id) {
+  const input = document.getElementById(id);
+  const hidden = document.getElementById(`${id}-hidden`);
+  const options = window.jawlaAutocompleteRegistry[id] || [];
+
+  if (!input || !hidden) return;
+
+  const match = options.find(
+    (option) => (option.display || option.label) === input.value
+  );
+
+  if (match) {
+    hidden.value = String(match.value);
+    input.value = match.display || match.label;
+  } else if (hidden.value) {
+    const current = options.find(
+      (option) => String(option.value) === String(hidden.value)
+    );
+    input.value = current ? current.display || current.label : "";
+    if (!current) hidden.value = "";
+  } else if (input.value.trim() !== "") {
+    input.value = "";
+  }
+
+  if (input.required && hidden.value === "") {
+    input.setCustomValidity(
+      document.documentElement.lang === "ar"
+        ? "اختر قيمة من القائمة."
+        : "Choose a value from the list."
+    );
+  } else {
+    input.setCustomValidity("");
+  }
+
+  hidden.dispatchEvent(new Event("input", { bubbles: true }));
+  hidden.dispatchEvent(new Event("change", { bubbles: true }));
+};
 
 window.L = L;

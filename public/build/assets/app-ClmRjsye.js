@@ -7915,6 +7915,68 @@ function m(e, t = 180) {
   for (let r = 0; r < e.length; r += t) n.push(e.slice(r, r + t));
   return n;
 }
+window.jawlaAutocomplete = ({ options: e, noResultsText: t }) => ({
+  open: !1,
+  search: ``,
+  highlighted: -1,
+  selected: ``,
+  options: e,
+  noResultsText: t,
+  init() {
+    ((this.selected = this.$refs.hidden?.value
+      ? String(this.$refs.hidden.value)
+      : ``),
+      (this.search = this.labelFor(this.selected)));
+  },
+  get filtered() {
+    if (!this.search) return this.options;
+    let e = this.search.toLowerCase();
+    return this.options.filter((t) => t.label.toLowerCase().includes(e));
+  },
+  labelFor(e) {
+    let t = this.options.find((t) => String(t.value) === String(e));
+    return t ? t.label : ``;
+  },
+  syncHidden() {
+    this.$refs.hidden &&
+      ((this.$refs.hidden.value = this.selected),
+      this.$refs.hidden.dispatchEvent(new Event(`input`, { bubbles: !0 })),
+      this.$refs.hidden.dispatchEvent(new Event(`change`, { bubbles: !0 })));
+  },
+  choose(e) {
+    ((this.selected = String(e.value)),
+      (this.search = e.label),
+      this.syncHidden(),
+      (this.open = !1),
+      (this.highlighted = -1));
+  },
+  clear() {
+    ((this.selected = ``),
+      (this.search = ``),
+      this.syncHidden(),
+      (this.open = !1),
+      (this.highlighted = -1));
+  },
+  closeList() {
+    ((this.open = !1),
+      (this.highlighted = -1),
+      (this.search = this.labelFor(this.selected)));
+  },
+  move(e) {
+    if (!this.open) {
+      this.open = !0;
+      return;
+    }
+    let t = this.filtered.length;
+    t !== 0 && (this.highlighted = (this.highlighted + e + t) % t);
+  },
+  enter() {
+    this.open &&
+      this.highlighted >= 0 &&
+      this.filtered[this.highlighted] &&
+      this.choose(this.filtered[this.highlighted]);
+  },
+});
 function h(e) {
   return Array.from(new TextEncoder().encode(e));
 }
@@ -8018,7 +8080,12 @@ async function ee(e) {
 async function te() {
   let e = window.localStorage.getItem(u);
   if (!e || !navigator.bluetooth?.getDevices) return null;
-  let { id: t } = JSON.parse(e);
+  let t = null;
+  try {
+    ({ id: t } = JSON.parse(e));
+  } catch {
+    return (window.localStorage.removeItem(u), null);
+  }
   return (
     (await navigator.bluetooth.getDevices()).find((e) => e.id === t) || null
   );
@@ -8077,6 +8144,13 @@ async function te() {
   },
   async printDocument() {
     if (this.supported) {
+      if (!this.payload?.lines?.length) {
+        this.message =
+          document.documentElement.lang === `ar`
+            ? `لا توجد بيانات للطباعة.`
+            : `Nothing to print.`;
+        return;
+      }
       ((this.busy = !0),
         (this.message =
           document.documentElement.lang === `ar`
@@ -8113,4 +8187,44 @@ async function te() {
     }
   },
 })),
+  (window.jawlaAutocompleteRegistry = window.jawlaAutocompleteRegistry || {}),
+  (window.jawlaAutocompleteInit = function (e) {
+    let t = document.getElementById(e),
+      n = document.getElementById(`${e}-hidden`),
+      r = window.jawlaAutocompleteRegistry[e] || [];
+    if (!t || !n) return;
+    let i = r.find((e) => String(e.value) === String(n.value));
+    i && (t.value = i.display || i.label);
+  }),
+  (window.jawlaAutocompleteSync = function (e) {
+    let t = document.getElementById(e),
+      n = document.getElementById(`${e}-hidden`),
+      r = window.jawlaAutocompleteRegistry[e] || [];
+    if (!t || !n) return;
+    let i = r.find((e) => (e.display || e.label) === t.value);
+    ((n.value = i ? String(i.value) : ``),
+      n.dispatchEvent(new Event(`input`, { bubbles: !0 })),
+      n.dispatchEvent(new Event(`change`, { bubbles: !0 })));
+  }),
+  (window.jawlaAutocompleteFinalize = function (e) {
+    let t = document.getElementById(e),
+      n = document.getElementById(`${e}-hidden`),
+      r = window.jawlaAutocompleteRegistry[e] || [];
+    if (!t || !n) return;
+    let i = r.find((e) => (e.display || e.label) === t.value);
+    if (i) ((n.value = String(i.value)), (t.value = i.display || i.label));
+    else if (n.value) {
+      let e = r.find((e) => String(e.value) === String(n.value));
+      ((t.value = e ? e.display || e.label : ``), e || (n.value = ``));
+    } else t.value.trim() !== `` && (t.value = ``);
+    (t.required && n.value === ``
+      ? t.setCustomValidity(
+          document.documentElement.lang === `ar`
+            ? `اختر قيمة من القائمة.`
+            : `Choose a value from the list.`
+        )
+      : t.setCustomValidity(``),
+      n.dispatchEvent(new Event(`input`, { bubbles: !0 })),
+      n.dispatchEvent(new Event(`change`, { bubbles: !0 })));
+  }),
   (window.L = l.default));

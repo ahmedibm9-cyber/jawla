@@ -14,112 +14,77 @@
 --}}
 @php
     $acId = $id ?: 'ac-'.\Illuminate\Support\Str::random(6);
-    $wireModel = $attributes->wire('model')->value();
+    $wireModelAttributes = $attributes->whereStartsWith('wire:model');
+    $passthroughAttributes = $attributes->except(array_keys($wireModelAttributes->getAttributes()));
 
     $normalized = collect($options)->map(function ($o) use ($optionValue, $optionLabel) {
         if (is_array($o)) {
-            return ['value' => (string) ($o['value'] ?? $o[$optionValue] ?? ''), 'label' => (string) ($o['label'] ?? $o[$optionLabel] ?? '')];
+            $label = (string) ($o['label'] ?? $o[$optionLabel] ?? '');
+            $hint = (string) ($o['hint'] ?? $o['code'] ?? $o['sku'] ?? $o['phone'] ?? '');
+
+            return ['value' => (string) ($o['value'] ?? $o[$optionValue] ?? ''), 'label' => $label, 'hint' => $hint];
         }
 
-        return ['value' => (string) $o->{$optionValue}, 'label' => (string) ($o->{$optionLabel} ?? '')];
+        $label = (string) ($o->{$optionLabel} ?? '');
+        $hint = (string) ($o->code ?? $o->sku ?? $o->phone ?? '');
+
+        return ['value' => (string) $o->{$optionValue}, 'label' => $label, 'hint' => $hint];
+    });
+
+    $labelCounts = $normalized->countBy('label');
+    $normalized = $normalized->map(function ($option) use ($labelCounts) {
+        $display = $option['label'];
+
+        if (($labelCounts[$option['label']] ?? 0) > 1) {
+            $display .= $option['hint'] !== ''
+                ? ' — '.$option['hint']
+                : ' — #'.$option['value'];
+        }
+
+        $option['display'] = $display;
+
+        return $option;
     })->values();
 @endphp
 
-<div
-    x-data="{
-        open: false,
-        search: '',
-        highlighted: -1,
-        selected: @js($wireModel) ? $wire.entangle(@js($wireModel)) : null,
-        options: {{ \Illuminate\Support\Js::from($normalized) }},
-        get filtered() {
-            if (! this.search) return this.options;
-            const q = this.search.toLowerCase();
-            return this.options.filter(o => o.label.toLowerCase().includes(q));
-        },
-        labelFor(val) {
-            const o = this.options.find(o => String(o.value) === String(val));
-            return o ? o.label : '';
-        },
-        init() {
-            this.search = this.labelFor(this.selected);
-            this.$watch('selected', v => { if (! this.open) this.search = this.labelFor(v); });
-        },
-        choose(o) {
-            this.selected = o.value;
-            this.search = o.label;
-            this.open = false;
-            this.highlighted = -1;
-        },
-        closeList() {
-            this.open = false;
-            this.highlighted = -1;
-            this.search = this.labelFor(this.selected);
-        },
-        move(dir) {
-            if (! this.open) { this.open = true; return; }
-            const n = this.filtered.length;
-            if (n === 0) return;
-            this.highlighted = (this.highlighted + dir + n) % n;
-        },
-        enter() {
-            if (this.open && this.highlighted >= 0 && this.filtered[this.highlighted]) {
-                this.choose(this.filtered[this.highlighted]);
-            }
-        }
-    }"
-    x-on:keydown.escape.prevent.stop="closeList()"
-    x-on:click.outside="closeList()"
-    class="relative"
->
+<div id="{{ $acId }}-root" class="relative">
+    <input type="hidden" id="{{ $acId }}-hidden" {{ $wireModelAttributes }}>
     <input
         type="text"
         id="{{ $acId }}"
         role="combobox"
         aria-autocomplete="list"
-        :aria-expanded="open.toString()"
+        aria-expanded="false"
         aria-controls="{{ $acId }}-listbox"
-        :aria-activedescendant="highlighted >= 0 ? '{{ $acId }}-opt-' + highlighted : null"
         autocomplete="off"
         @if($required) aria-required="true" @endif
         placeholder="{{ $placeholder ?? __('app.search') }}"
-        {{ $attributes->except(['wire:model'])->merge(['class' => 'form-input w-full']) }}
-        x-model="search"
-        x-on:focus="open = true"
-        x-on:click="open = true"
-        x-on:input="open = true; highlighted = -1"
-        x-on:keydown.arrow-down.prevent="move(1)"
-        x-on:keydown.arrow-up.prevent="move(-1)"
-        x-on:keydown.enter.prevent="enter()"
+        {{ $passthroughAttributes->merge(['class' => 'form-input w-full']) }}
+        list="{{ $acId }}-listbox"
+        oninput="window.jawlaAutocompleteSync && window.jawlaAutocompleteSync('{{ $acId }}')"
+        onchange="window.jawlaAutocompleteSync && window.jawlaAutocompleteSync('{{ $acId }}')"
+        onblur="window.jawlaAutocompleteFinalize && window.jawlaAutocompleteFinalize('{{ $acId }}')"
     >
 
-    <ul
-        x-show="open"
-        x-cloak
-        x-transition.opacity.duration.100ms
-        id="{{ $acId }}-listbox"
-        role="listbox"
-        class="card"
-        style="position:absolute;z-index:60;inset-inline:0;margin-top:4px;padding:4px;max-height:240px;overflow-y:auto;overscroll-behavior:contain"
-    >
-        <template x-for="(o, i) in filtered" :key="o.value">
-            <li
-                :id="'{{ $acId }}-opt-' + i"
-                role="option"
-                :aria-selected="(String(o.value) === String(selected)).toString()"
-                x-text="o.label"
-                x-on:click="choose(o)"
-                x-on:mouseenter="highlighted = i"
-                :class="{ 'bg-surface-hover': highlighted === i, 'font-semibold': String(o.value) === String(selected) }"
-                class="rounded-md cursor-pointer"
-                style="padding:10px 12px;text-align:start"
-            ></li>
-        </template>
-        <li
-            x-show="filtered.length === 0"
-            class="text-text-muted"
-            style="padding:10px 12px;text-align:start"
-            x-text="@js(__('app.no_results'))"
-        ></li>
-    </ul>
+    <datalist id="{{ $acId }}-listbox">
+        @foreach($normalized as $option)
+            <option value="{{ $option['display'] }}"></option>
+        @endforeach
+    </datalist>
+
+    <script>
+        window.jawlaAutocompleteRegistry = window.jawlaAutocompleteRegistry || {};
+        window.jawlaAutocompleteRegistry[@js($acId)] = @json($normalized);
+        const jawlaInit{{ str_replace('-', '_', $acId) }} = () => {
+            if (window.jawlaAutocompleteInit) {
+                window.jawlaAutocompleteInit(@js($acId));
+            }
+        };
+
+        if (window.jawlaAutocompleteInit) {
+            jawlaInit{{ str_replace('-', '_', $acId) }}();
+        } else {
+            window.addEventListener('load', jawlaInit{{ str_replace('-', '_', $acId) }}, { once: true });
+        }
+    </script>
 </div>

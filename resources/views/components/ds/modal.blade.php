@@ -5,22 +5,28 @@
     props). `trigger` slot = the visible button (type=button); `confirm` slot
     = the real action button, executed only after explicit confirmation.
 --}}
-<div x-data="{ open: false }" {{ $attributes->merge(['style' => 'overscroll-behavior:contain']) }}>
-    <div x-on:click="open = true">{{ $trigger }}</div>
+@php($modalId = 'modal-'.\Illuminate\Support\Str::random(8))
 
-    <div x-show="open" x-cloak x-trap.noscroll="open"
-         style="position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5);padding:16px"
-         role="dialog" aria-modal="true" aria-label="{{ $title }}"
-         x-on:keydown.escape.window="open = false">
-        <div class="card" style="max-width:360px;width:100%;margin:0" x-on:click.outside="open = false">
+<div {{ $attributes->merge(['style' => 'overscroll-behavior:contain']) }}>
+    <div onclick="document.body.style.overflow='hidden';document.getElementById('{{ $modalId }}').showModal()">{{ $trigger }}</div>
+
+    <dialog id="{{ $modalId }}"
+            role="dialog" aria-modal="true" aria-label="{{ $title }}"
+            onclose="document.body.style.overflow='';"
+            oncancel="document.body.style.overflow='';"
+            onclick="if(event.target===this){this.close();document.body.style.overflow='';}"
+            style="padding:0;border:none;background:transparent;max-width:none;width:auto;overflow:visible">
+        <div class="card" style="max-width:360px;width:calc(100vw - 32px);margin:0 auto">
             <h3 class="m-0 mb-2">{{ $title }}</h3>
             <p class="m-0 mb-4 text-text-secondary">{{ $message }}</p>
             <div class="flex gap-2">
-                <button type="button" class="btn btn-outline flex-1" x-on:click="open = false">
+                <button type="button" class="btn btn-outline flex-1"
+                        onclick="document.getElementById('{{ $modalId }}').close();document.body.style.overflow='';">
                     {{ $cancelLabel ?? __('app.cancel') }}
                 </button>
-                <div class="flex-1" x-on:click="open = false">{{ $confirm }}</div>
+                <div class="flex-1"
+                     onclick="document.getElementById('{{ $modalId }}').close();document.body.style.overflow='';">{{ $confirm }}</div>
             </div>
         </div>
-    </div>
+    </dialog>
 </div>
