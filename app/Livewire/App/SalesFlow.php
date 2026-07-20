@@ -81,6 +81,35 @@ class SalesFlow extends Component
         $this->recalcCart();
     }
 
+    /**
+     * Resolve a scanned/entered code to a product and add it to the cart.
+     * Matches the product's barcode first, then falls back to SKU. Company
+     * scoping is enforced by the BelongsToCompany global scope.
+     */
+    public function scanBarcode(string $code): void
+    {
+        $code = trim($code);
+        if ($code === '') {
+            return;
+        }
+
+        $product = Product::query()
+            ->where('is_active', true)
+            ->where(fn ($q) => $q->where('barcode', $code)->orWhere('sku', $code))
+            ->first();
+
+        if (! $product) {
+            $this->errorMessage = app()->getLocale() === 'ar'
+                ? "لا يوجد منتج بهذا الباركود: {$code}"
+                : "No product found for barcode: {$code}";
+
+            return;
+        }
+
+        $this->errorMessage = '';
+        $this->addToCart($product->id);
+    }
+
     public function updateQty(int $index, float $qty): void
     {
         if (! isset($this->cart[$index])) {

@@ -48,6 +48,9 @@ class ProductResource extends Resource
         return $schema->schema([
             Section::make($l('البيانات الأساسية', 'Basic Information'))->schema([
                 Forms\Components\TextInput::make('sku')->label('SKU')->required()->unique(ignoreRecord: true),
+                Forms\Components\TextInput::make('barcode')->label($l('الباركود', 'Barcode'))
+                    ->helperText($l('امسح أو أدخل باركود المنتج للبيع السريع', 'Scan or enter the product barcode for quick sales'))
+                    ->maxLength(64),
                 Forms\Components\TextInput::make('name_ar')->label($l('الاسم (عربي)', 'Name (Arabic)'))->required(),
                 Forms\Components\TextInput::make('name_en')->label($l('الاسم (إنجليزي)', 'Name (English)'))->required(),
                 Forms\Components\Select::make('category_id')->label($l('الفئة', 'Category'))->relationship('category', 'name_ar')->preload()->required(),

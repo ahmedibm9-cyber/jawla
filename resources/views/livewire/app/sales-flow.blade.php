@@ -56,6 +56,62 @@
                 <label for="productSearch" class="form-label">{{ __('app.products') }}</label>
                 <input type="text" id="productSearch" wire:model.live.debounce.300ms="productSearch" autocomplete="off" class="form-input"
                     placeholder="{{ __('app.search_product') }}">
+
+                {{-- Barcode scan (BarcodeDetector API) with a manual-entry fallback --}}
+                @php($arScan = app()->getLocale() === 'ar')
+                <div class="mt-2" x-data="{
+                    open: false,
+                    supported: (typeof window.BarcodeDetector !== 'undefined'),
+                    stream: null, detector: null, raf: null,
+                    async start() {
+                        if (!this.supported || !navigator.mediaDevices) { this.manual(); return; }
+                        try {
+                            this.detector = new window.BarcodeDetector({ formats: ['ean_13','ean_8','upc_a','upc_e','code_128','code_39','qr_code'] });
+                            this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                            this.open = true;
+                            await this.$nextTick();
+                            this.$refs.video.srcObject = this.stream;
+                            await this.$refs.video.play();
+                            this.loop();
+                        } catch (e) { this.stop(); this.manual(); }
+                    },
+                    async loop() {
+                        if (!this.open) return;
+                        try {
+                            const codes = await this.detector.detect(this.$refs.video);
+                            if (codes && codes.length) { const v = codes[0].rawValue; this.stop(); this.$wire.scanBarcode(v); return; }
+                        } catch (e) {}
+                        this.raf = requestAnimationFrame(() => this.loop());
+                    },
+                    manual() {
+                        const v = window.prompt(@js($arScan ? 'أدخل الباركود' : 'Enter barcode'));
+                        if (v) this.$wire.scanBarcode(v);
+                    },
+                    stop() {
+                        this.open = false;
+                        if (this.raf) cancelAnimationFrame(this.raf);
+                        if (this.stream) { this.stream.getTracks().forEach(t => t.stop()); this.stream = null; }
+                    },
+                }">
+                    <div class="flex gap-2">
+                        <button type="button" wire:loading.attr="disabled" x-on:click="start()"
+                            class="btn btn-secondary flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2v16H3V4zm4 0h1v16H7V4zm3 0h2v16h-2V4zm4 0h1v16h-1V4zm3 0h2v16h-2V4z"/></svg>
+                            {{ $arScan ? 'مسح باركود' : 'Scan barcode' }}
+                        </button>
+                        <button type="button" x-on:click="manual()" class="btn btn-ghost">
+                            {{ $arScan ? 'إدخال يدوي' : 'Enter code' }}
+                        </button>
+                    </div>
+
+                    <div x-show="open" x-cloak class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-4"
+                        x-on:keydown.escape.window="stop()">
+                        <video x-ref="video" playsinline muted class="w-full max-h-[70vh] rounded-lg object-cover"></video>
+                        <p class="text-white text-sm mt-3">{{ $arScan ? 'وجّه الكاميرا نحو الباركود' : 'Point the camera at the barcode' }}</p>
+                        <button type="button" x-on:click="stop()" class="btn btn-secondary mt-4">{{ $arScan ? 'إلغاء' : 'Cancel' }}</button>
+                    </div>
+                </div>
+
                 <div wire:loading.delay wire:target="productSearch" class="space-y-1 mt-2" aria-hidden="true">
                     <x-ds.skeleton height="56px" />
                     <x-ds.skeleton height="56px" />
