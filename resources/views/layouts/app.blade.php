@@ -83,5 +83,9 @@
       });
     }
   </script>
+  @auth
+    {{-- On-shift rep location beacon (CG3). Server enforces on-shift + dedupe. --}}
+    <livewire:app.location-tracker />
+  @endauth
 </body>
 </html>
