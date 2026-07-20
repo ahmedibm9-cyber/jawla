@@ -20,6 +20,7 @@ use App\Services\InvoiceCalculationService as InvoiceCalculationServiceImpl;
 use App\Services\NumberSequenceService;
 use App\Services\OutOfStockService;
 use App\Services\StockService as StockServiceImpl;
+use App\Services\Sync\SyncHandlerRegistry;
 use App\Services\VanTransferService;
 use App\Support\ActiveCompanyContext;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse;
@@ -38,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(ActiveCompanyContext::class);
+        $this->app->singleton(SyncHandlerRegistry::class);
 
         $this->app->bind(
             LoginResponse::class,
@@ -100,6 +102,12 @@ class AppServiceProvider extends ServiceProvider
         Route::middleware('api')
             ->prefix('api')
             ->group(base_path('routes/api.php'));
+
+        // Rep offline-sync endpoint (CG2), same guard stack as the rep PWA group.
+        Route::middleware(['web', 'auth', 'ensure.rep'])
+            ->prefix('app')
+            ->name('app.')
+            ->group(base_path('routes/rep-sync.php'));
 
         Event::listen(FilamentLogin::class, function (FilamentLogin $event): void {
             Activity::log('login', $event->user, "Admin login: {$event->user->email}");
