@@ -4,10 +4,8 @@ namespace App\Livewire\App;
 
 use App\Models\Activity;
 use App\Models\Visit;
-use App\Models\VisitReport;
+use App\Services\VisitReportService;
 use App\Support\GpsCoordinate;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -141,30 +139,13 @@ class VisitFlow extends Component
             'summary' => 'required|string|min:5',
         ]);
 
-        DB::transaction(function () {
-            $signaturePath = null;
-
-            if ($this->signature) {
-                $path = 'signatures/'.$this->visit->id.'_'.time().'.png';
-                $data = explode(',', $this->signature, 2);
-                $imgData = base64_decode($data[1] ?? '');
-                Storage::disk('private')->put($path, $imgData);
-                $signaturePath = $path;
-            }
-
-            VisitReport::create([
-                'visit_id' => $this->visit->id,
-                'summary' => $this->summary,
-                'customer_feedback' => $this->customerFeedback ?: null,
-                'action_taken' => $this->actionTaken ?: null,
-                'follow_up_needed' => $this->followUpNeeded,
-                'follow_up_note' => $this->followUpNote ?: null,
-                'submitted_at' => now(),
-                'signature_path' => $signaturePath,
-            ]);
-
-            $this->visit->update(['status' => 'closed']);
-        });
+        app(VisitReportService::class)->submit($this->visit, [
+            'summary' => $this->summary,
+            'customer_feedback' => $this->customerFeedback ?: null,
+            'action_taken' => $this->actionTaken ?: null,
+            'follow_up_needed' => $this->followUpNeeded,
+            'follow_up_note' => $this->followUpNote ?: null,
+        ], $this->signature ?: null);
 
         $this->step = 'done';
     }
