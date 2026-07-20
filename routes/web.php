@@ -17,6 +17,7 @@ use App\Livewire\App\SalesFlow;
 use App\Livewire\App\StockSearch;
 use App\Livewire\App\SubmitPurchaseOffer;
 use App\Livewire\App\TodaysCustomers;
+use App\Livewire\App\VanTransfers;
 use App\Livewire\App\VisitFlow;
 use App\Livewire\App\Visits;
 use Illuminate\Support\Facades\Route;
@@ -84,6 +85,7 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/returns', LogReturn::class)->name('returns');
     Route::get('/expenses', LogExpense::class)->name('expenses');
     Route::get('/reconcile', CashReconcile::class)->name('reconcile');
+    Route::get('/transfers', VanTransfers::class)->name('transfers');
     Route::get('/purchase-offer', SubmitPurchaseOffer::class)->name('purchase-offer');
     Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])->name('pdf.proforma');
     Route::get('/pdf/invoice/{invoice}', [PdfController::class, 'invoice'])->name('pdf.invoice');
