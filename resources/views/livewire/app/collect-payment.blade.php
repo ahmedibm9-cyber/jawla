@@ -23,8 +23,8 @@
             <form wire:submit="submit">
                 <div class="form-group">
                     <label for="customer_id" class="form-label">{{ __('app.customer') }} *</label>
-                    <x-ds.autocomplete wire:model.live="customer_id" id="customer_id" :options="$customers" :placeholder="__('app.search_customer')" required />
-                    @error('customer_id') <small class="form-error">{{ $message }}</small> @enderror
+                    <x-ds.autocomplete wire:model.live="customer_id" id="customer_id" :options="$customers" :placeholder="__('app.search_customer')" required @error('customer_id') aria-invalid="true" aria-describedby="customer_id-error" @enderror />
+                    @error('customer_id') <small id="customer_id-error" class="form-error">{{ $message }}</small> @enderror
                 </div>
 
                 <div class="form-group">
@@ -39,8 +39,8 @@
 
                 <div class="form-group">
                     <label for="amount" class="form-label">{{ __('app.amount') }} *</label>
-                    <input type="number" step="0.01" min="0.01" inputmode="decimal" autocomplete="off" wire:model="amount" id="amount" class="form-input">
-                    @error('amount') <small class="form-error">{{ $message }}</small> @enderror
+                    <input type="number" step="0.01" min="0.01" inputmode="decimal" autocomplete="off" wire:model="amount" id="amount" class="form-input" @error('amount') aria-invalid="true" aria-describedby="amount-error" @enderror>
+                    @error('amount') <small id="amount-error" class="form-error">{{ $message }}</small> @enderror
                 </div>
 
                 <div class="form-group">
@@ -55,8 +55,8 @@
 
                 <div class="form-group">
                     <label for="notes" class="form-label">{{ __('app.notes') }}</label>
-                    <textarea wire:model="notes" id="notes" rows="2" autocomplete="off" class="form-textarea"></textarea>
-                    @error('notes') <small class="form-error">{{ $message }}</small> @enderror
+                    <textarea wire:model="notes" id="notes" rows="2" autocomplete="off" class="form-textarea" @error('notes') aria-invalid="true" aria-describedby="notes-error" @enderror></textarea>
+                    @error('notes') <small id="notes-error" class="form-error">{{ $message }}</small> @enderror
                 </div>
 
                 <x-ds.modal :title="__('app.confirm_collect_title')" :message="__('app.confirm_collect_msg')">

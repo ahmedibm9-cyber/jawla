@@ -33,8 +33,8 @@
 
                 <div class="form-group">
                     <label for="amount" class="form-label">{{ __('app.expense_amount') }} *</label>
-                    <input type="number" step="0.01" inputmode="decimal" autocomplete="off" wire:model="amount" id="amount" class="form-input">
-                    @error('amount') <small class="form-error">{{ $message }}</small> @enderror
+                    <input type="number" step="0.01" inputmode="decimal" autocomplete="off" wire:model="amount" id="amount" class="form-input" @error('amount') aria-invalid="true" aria-describedby="amount-error" @enderror>
+                    @error('amount') <small id="amount-error" class="form-error">{{ $message }}</small> @enderror
                 </div>
 
                 <div class="form-group">

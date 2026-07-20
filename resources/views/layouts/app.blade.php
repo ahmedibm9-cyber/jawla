@@ -14,7 +14,7 @@
         'notifications' => 'notifications', 'quotations' => 'quotations',
         'sell' => 'create_invoice', 'sell.customer' => 'create_invoice',
         'collect-payment' => 'collect_payment', 'returns' => 'log_return',
-        'expenses' => 'log_expense',
+        'expenses' => 'log_expense', 'profile' => 'profile', 'settings' => 'settings',
     ];
     $pageKey = \Illuminate\Support\Str::after(request()->route()?->getName() ?? '', 'app.');
   @endphp
