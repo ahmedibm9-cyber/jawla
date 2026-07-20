@@ -29,6 +29,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -85,6 +86,20 @@ class AppServiceProvider extends ServiceProvider
 
             return Limit::perMinute(60)->by($key);
         });
+
+        // Public API v1: throttled per token (falls back to IP for unauthenticated
+        // hits on auth:sanctum). Routes registered here rather than in
+        // bootstrap/app.php to keep the API surface self-contained.
+        RateLimiter::for('api', function (Request $request) {
+            $token = $request->user()?->currentAccessToken();
+            $key = $token ? 'token:'.$token->getKey() : 'ip:'.$request->ip();
+
+            return Limit::perMinute(60)->by($key);
+        });
+
+        Route::middleware('api')
+            ->prefix('api')
+            ->group(base_path('routes/api.php'));
 
         Event::listen(FilamentLogin::class, function (FilamentLogin $event): void {
             Activity::log('login', $event->user, "Admin login: {$event->user->email}");
