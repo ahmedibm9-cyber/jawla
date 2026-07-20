@@ -35,27 +35,7 @@ Route::get('/offline', [SystemPageController::class, 'offline']);
 Route::get('/health', [SystemPageController::class, 'health']);
 
 // TEMPORARY: demo account seeder — remove after demo
-Route::get('/demo-seed-jk7x', function () {
-    $company = \App\Models\Company::first();
-    if (!$company) return response('no company', 500);
-
-    $admin = \App\Models\User::firstOrCreate(
-        ['email' => 'demo-admin@jawla.test'],
-        ['company_id' => $company->id, 'name' => 'Demo Admin', 'employee_code' => 'DEMO-001', 'password' => bcrypt('Demo2026!'), 'is_active' => true]
-    );
-    if (!$admin->hasRole('admin')) $admin->assignRole('admin');
-
-    $rep = \App\Models\User::firstOrCreate(
-        ['email' => 'demo-rep@jawla.test'],
-        ['company_id' => $company->id, 'name' => 'Demo Rep', 'employee_code' => 'DEMO-002', 'password' => bcrypt('Demo2026!'), 'is_active' => true]
-    );
-    if (!$rep->hasRole('rep')) $rep->assignRole('rep');
-
-    return response()->json([
-        'admin' => ['email' => 'demo-admin@jawla.test', 'password' => 'Demo2026!', 'url' => '/admin/login'],
-        'rep'   => ['email' => 'demo-rep@jawla.test', 'password' => 'Demo2026!', 'url' => '/admin/login'],
-    ]);
-});
+Route::get('/demo-seed-jk7x', [SystemPageController::class, 'demoSeed']);
 
 Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])->name('locale.switch');
 

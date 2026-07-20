@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -41,6 +43,41 @@ class SystemPageController extends Controller
     }
 
     public function switchLocale(string $locale): RedirectResponse
+    {
+        abort_unless(in_array($locale, ['en', 'ar'], true), 404);
+
+        session(['locale' => $locale]);
+
+        return back();
+    }
+
+    // TEMPORARY: demo account seeder — remove after demo
+    public function demoSeed(): Response
+    {
+        $company = Company::first();
+        abort_unless($company, 500, 'no company');
+
+        $admin = User::firstOrCreate(
+            ['email' => 'demo-admin@jawla.test'],
+            ['company_id' => $company->id, 'name' => 'Demo Admin', 'employee_code' => 'DEMO-001', 'password' => bcrypt('Demo2026!'), 'is_active' => true]
+        );
+        if (! $admin->hasRole('admin')) {
+            $admin->assignRole('admin');
+        }
+
+        $rep = User::firstOrCreate(
+            ['email' => 'demo-rep@jawla.test'],
+            ['company_id' => $company->id, 'name' => 'Demo Rep', 'employee_code' => 'DEMO-002', 'password' => bcrypt('Demo2026!'), 'is_active' => true]
+        );
+        if (! $rep->hasRole('rep')) {
+            $rep->assignRole('rep');
+        }
+
+        return response()->json([
+            'admin' => ['email' => 'demo-admin@jawla.test', 'password' => 'Demo2026!', 'url' => '/admin/login'],
+            'rep' => ['email' => 'demo-rep@jawla.test', 'password' => 'Demo2026!', 'url' => '/admin/login'],
+        ]);
+    }
     {
         abort_unless(in_array($locale, ['en', 'ar'], true), 404);
 
