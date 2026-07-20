@@ -42,6 +42,8 @@ class VisitFlow extends Component
 
     public string $errorMessage = '';
 
+    public bool $queuedOffline = false;
+
     public function mount(Visit $visit): void
     {
         abort_unless($visit->user_id === auth()->id(), 403);
@@ -147,6 +149,19 @@ class VisitFlow extends Component
             'follow_up_note' => $this->followUpNote ?: null,
         ], $this->signature ?: null);
 
+        $this->step = 'done';
+    }
+
+    /**
+     * Offline path: the client has already enqueued the visit report to the
+     * outbox (IndexedDB) with the signature data URL, and will sync it when back
+     * online. Show the done screen in its "queued" variant — no server write.
+     * Check-in already happened online (arrival_confirmed), so only the report
+     * submission is deferred.
+     */
+    public function queueOffline(): void
+    {
+        $this->queuedOffline = true;
         $this->step = 'done';
     }
 

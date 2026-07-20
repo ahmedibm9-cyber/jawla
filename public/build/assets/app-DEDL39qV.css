@@ -1590,6 +1590,18 @@
   .bg-warning {
     background-color: var(--color-warning);
   }
+  .bg-warning\/10 {
+    background-color: #d977061a;
+  }
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-warning\/10 {
+      background-color: color-mix(
+        in oklab,
+        var(--color-warning) 10%,
+        transparent
+      );
+    }
+  }
   .bg-white {
     background-color: var(--color-white);
   }

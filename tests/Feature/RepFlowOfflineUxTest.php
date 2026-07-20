@@ -8,9 +8,12 @@ use App\Livewire\App\LogExpense;
 use App\Livewire\App\LogReturn;
 use App\Livewire\App\SalesFlow;
 use App\Livewire\App\SyncQueue;
+use App\Livewire\App\VisitFlow;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\User;
+use App\Models\Visit;
+use App\Models\WorkSession;
 use App\Support\ActiveCompanyContext;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -108,6 +111,35 @@ class RepFlowOfflineUxTest extends TestCase
             ->call('queueOffline')
             ->assertSet('customer_id', null)
             ->assertOk();
+    }
+
+    public function test_visit_report_queues_offline(): void
+    {
+        $workSession = WorkSession::factory()->create([
+            'company_id' => $this->rep->company_id,
+            'user_id' => $this->rep->id,
+            'route_id' => $this->customer->route_id,
+        ]);
+        $visit = Visit::create([
+            'user_id' => $this->rep->id,
+            'customer_id' => $this->customer->id,
+            'route_id' => $this->customer->route_id,
+            'work_session_id' => $workSession->id,
+            'status' => 'open',
+            'purpose' => 'sale',
+            'arrival_confirmed' => true,
+        ]);
+
+        Livewire::test(VisitFlow::class, ['visit' => $visit])
+            ->assertSet('step', 'report')
+            ->set('summary', 'Met the manager, restocked shelves.')
+            ->call('queueOffline')
+            ->assertSet('queuedOffline', true)
+            ->assertSet('step', 'done')
+            ->assertOk();
+
+        // Offline path must NOT write the report — sync applies it later.
+        $this->assertDatabaseMissing('visit_reports', ['visit_id' => $visit->id]);
     }
 
     public function test_sync_queue_page_renders_for_a_rep(): void

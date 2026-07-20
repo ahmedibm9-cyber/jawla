@@ -209,17 +209,43 @@
                 </button>
             </x-slot:trigger>
             <x-slot:confirm>
-                <button type="button" wire:click="submitReport" wire:loading.attr="disabled" class="btn btn-primary w-full">{{ __('app.confirm') }}</button>
+                {{-- Online: submit normally. Offline: queue the report (with signature) to the outbox (CG2). --}}
+                <button type="button" wire:loading.attr="disabled" class="btn btn-primary w-full"
+                    x-data
+                    x-on:click="
+                        if (navigator.onLine) {
+                            $wire.submitReport();
+                        } else if (($wire.summary || '').trim().length < 5) {
+                            alert(@js(app()->getLocale() === 'ar' ? 'يرجى كتابة ملخص الزيارة (5 أحرف على الأقل).' : 'Please write a visit summary (at least 5 characters).'));
+                        } else {
+                            window.jawlaSync.enqueue('visit_report', {
+                                visit_id: {{ $visit->id }},
+                                summary: $wire.summary,
+                                customer_feedback: $wire.customerFeedback,
+                                action_taken: $wire.actionTaken,
+                                follow_up_needed: $wire.followUpNeeded,
+                                follow_up_note: $wire.followUpNote,
+                                signature: $wire.signature,
+                            });
+                            $wire.queueOffline();
+                        }
+                    ">{{ __('app.confirm') }}</button>
             </x-slot:confirm>
         </x-ds.modal>
     @endif
 
     {{-- Step: Done --}}
     @if($step === 'done')
-        <div class="card text-center p-8 bg-success/10">
-            <x-heroicon-o-check-circle class="size-16 text-success mx-auto mb-2" stroke-width="2.5" />
-            <h2 class="text-success my-3 mb-1" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ __('app.report_submitted') }}</h2>
-            <p class="text-text-secondary m-0">{{ __('app.visit_complete') }}</p>
+        <div class="card text-center p-8 {{ $queuedOffline ? 'bg-warning/10' : 'bg-success/10' }}">
+            @if($queuedOffline)
+                <x-heroicon-o-cloud-arrow-up class="size-16 text-warning mx-auto mb-2" stroke-width="2.5" />
+                <h2 class="text-warning my-3 mb-1" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ app()->getLocale() === 'ar' ? 'بانتظار المزامنة' : 'Queued to sync' }}</h2>
+                <p class="text-text-secondary m-0">{{ app()->getLocale() === 'ar' ? 'تم حفظ تقرير الزيارة دون اتصال وستتم مزامنته تلقائيًا عند عودة الاتصال.' : 'Visit report saved offline — it will sync automatically when you are back online.' }}</p>
+            @else
+                <x-heroicon-o-check-circle class="size-16 text-success mx-auto mb-2" stroke-width="2.5" />
+                <h2 class="text-success my-3 mb-1" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ __('app.report_submitted') }}</h2>
+                <p class="text-text-secondary m-0">{{ __('app.visit_complete') }}</p>
+            @endif
             <a href="/app" class="btn btn-primary inline-block mt-4 no-underline">{{ __('app.back_home') }}</a>
         </div>
     @endif
