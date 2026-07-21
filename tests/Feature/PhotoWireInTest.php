@@ -13,6 +13,7 @@ use App\Models\User;
 use App\Support\ActiveCompanyContext;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -56,7 +57,7 @@ class PhotoWireInTest extends TestCase
             'company_id' => $this->rep->company_id,
             'user_id' => $this->rep->id,
             'disk' => 'public',
-            'path' => 'photos/'.\Illuminate\Support\Str::uuid().'.jpg',
+            'path' => 'photos/'.Str::uuid().'.jpg',
             'original_name' => 'evidence.jpg',
             'size' => 12345,
         ]);

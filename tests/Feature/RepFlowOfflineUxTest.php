@@ -7,7 +7,6 @@ use App\Livewire\App\LogComplaint;
 use App\Livewire\App\LogExpense;
 use App\Livewire\App\LogReturn;
 use App\Livewire\App\SalesFlow;
-use App\Livewire\App\SyncQueue;
 use App\Livewire\App\VisitFlow;
 use App\Models\Customer;
 use App\Models\Product;

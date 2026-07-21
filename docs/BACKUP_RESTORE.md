@@ -8,6 +8,21 @@
 >   managed Postgres backups** on the `jawla-db` volume, supplemented by the manual
 >   `pg_dump` procedure below. Do not cite the spatie pipeline as live.
 
+## Automated daily backup (Railway cron + scripts/backup.sh)
+
+A shell script at `scripts/backup.sh` performs a compressed `pg_dump` and
+retains 7 days of backups. To activate on Railway:
+
+1. Railway dashboard → New → Cron Service
+2. Schedule: `0 2 * * *` (daily 02:00 UTC)
+3. Start command: `bash scripts/backup.sh`
+4. Copy all `DB_*` env vars from the web service
+5. (Optional) Mount a persistent volume at `/tmp/backups`
+
+The script uses `pg_dump --format=custom --compress=9` and auto-prunes files
+older than 7 days. Railway's managed Postgres volume snapshots remain the
+primary recovery mechanism; this cron provides an off-volume logical backup.
+
 ## Current mechanism (interim, no extra packages)
 
 - **Railway managed Postgres** — the `jawla-db` service retains automated

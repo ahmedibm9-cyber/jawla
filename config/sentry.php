@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\SentryScrubber;
+
 /**
  * Sentry Laravel SDK configuration file.
  *
@@ -56,7 +58,7 @@ return [
     // Mask credentials/tokens/financial secrets in request bodies + extra context
     // before events are sent. String callable (not a closure) so config:cache
     // stays serializable — see App\Support\SentryScrubber.
-    'before_send' => [\App\Support\SentryScrubber::class, 'handle'],
+    'before_send' => [SentryScrubber::class, 'handle'],
 
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#ignore_exceptions
     // 'ignore_exceptions' => [],

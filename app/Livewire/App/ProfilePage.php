@@ -10,13 +10,21 @@ use Livewire\Component;
 class ProfilePage extends Component
 {
     public string $name = '';
+
     public string $email = '';
+
     public string $phone = '';
+
     public string $currentPassword = '';
+
     public string $newPassword = '';
+
     public string $newPasswordConfirmation = '';
+
     public bool $editing = false;
+
     public bool $success = false;
+
     public string $successMessage = '';
 
     public function mount(): void
@@ -29,13 +37,13 @@ class ProfilePage extends Component
 
     public function toggleEdit(): void
     {
-        $this->editing = !$this->editing;
+        $this->editing = ! $this->editing;
         $this->resetErrorBag();
         $this->currentPassword = '';
         $this->newPassword = '';
         $this->newPasswordConfirmation = '';
 
-        if (!$this->editing) {
+        if (! $this->editing) {
             $user = auth()->user();
             $this->name = $user->name;
             $this->email = $user->email;
@@ -49,7 +57,7 @@ class ProfilePage extends Component
 
         $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'phone' => ['nullable', 'string', 'max:20'],
             'currentPassword' => ['nullable', 'string'],
             'newPassword' => ['nullable', 'string', 'min:8', 'confirmed'],
@@ -58,10 +66,12 @@ class ProfilePage extends Component
         if ($this->newPassword !== '') {
             if ($this->currentPassword === '') {
                 $this->addError('currentPassword', __('app.current_password_required'));
+
                 return;
             }
-            if (!Hash::check($this->currentPassword, $user->password)) {
+            if (! Hash::check($this->currentPassword, $user->password)) {
                 $this->addError('currentPassword', __('app.current_password_incorrect'));
+
                 return;
             }
         }

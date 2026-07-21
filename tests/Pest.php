@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Pest\Browser\Playwright\Playwright;
 use Tests\TestCase;
 
 // Base Pest configuration — expanded in Phase 13.
@@ -9,8 +11,8 @@ uses(TestCase::class)->in('Feature', 'Unit');
 // The default 5s Playwright timeout is too tight for the first cold request
 // (kernel boot + first-hit view work), so raise it for the whole suite.
 uses(
-    Tests\TestCase::class,
-    Illuminate\Foundation\Testing\RefreshDatabase::class,
+    TestCase::class,
+    RefreshDatabase::class,
 )->beforeEach(function () {
-    \Pest\Browser\Playwright\Playwright::setTimeout(30_000);
+    Playwright::setTimeout(30_000);
 })->in('Browser');

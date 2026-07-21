@@ -112,5 +112,15 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(FilamentLogin::class, function (FilamentLogin $event): void {
             Activity::log('login', $event->user, "Admin login: {$event->user->email}");
         });
+
+        // Fail-fast: validate critical env vars in production
+        if (env('APP_ENV') === 'production') {
+            $required = ['APP_KEY', 'DB_HOST', 'DB_DATABASE', 'DB_USERNAME'];
+            foreach ($required as $var) {
+                if (empty(env($var))) {
+                    throw new \RuntimeException("Missing required environment variable: {$var}");
+                }
+            }
+        }
     }
 }

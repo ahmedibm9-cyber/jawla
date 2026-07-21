@@ -27,7 +27,7 @@
                 </x-slot:action>
             </x-ds.empty>
         @else
-            @forelse($customers as $customer)
+            @foreach($customers as $customer)
                 <div class="card min-w-0">
                     <strong class="block truncate">{{ $customer->name_ar }}</strong>
                     <small class="text-text-secondary">{{ $customer->code }} · {{ $customer->phone }}</small>
@@ -40,13 +40,7 @@
                         </a>
                     @endif
                 </div>
-            @empty
-                <x-ds.empty icon="heroicon-o-users" :message="__('app.no_customers_found')">
-                    <x-slot:action>
-                        <a href="/app/customers/create" class="btn btn-primary no-underline">{{ __('app.add_customer') }}</a>
-                    </x-slot:action>
-                </x-ds.empty>
-            @endforelse
+            @endforeach
         @endif
     </div>
 </div>

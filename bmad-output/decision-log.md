@@ -96,3 +96,11 @@
 - OPEN DECISION: is rep dark mode IN this release (QA it) or OUT (gate behind opt-in / revert media query)? It was previously N1 = v1.1.
 - Artifact: bmad-output/brainstorming-report-phase6-ui-polish-2026-07-21.md
 - Recommended next: bmad-epics-and-stories for B1 (undo) + B2 (dark-mode QA); order B2→B1→verify-close→style-guide→micro-fixes, deferring rep-blade edits until concurrent churn settles.
+
+## Investigation: rep-login-fragility — 2026-07-21
+
+- Symptom: Rep login broke twice; two parallel rep-login systems now coexist after a piecemeal rollback of the "unified login" refactor.
+- Primary hypothesis: Incomplete rollback of d3fddc6 ("unified login") — routes restored (57d460a) before controller methods (a0daf22), and redirectGuestsTo('/admin/login') + the Filament rep-login path were never reverted, leaving two sources of truth.
+- Primary suspected component: Auth entry points — routes/web.php + LoginController + bootstrap/app.php (redirectGuestsTo) + Filament Auth Login.php/LoginResponse.
+- Case file: bmad-output/investigation-rep-login-fragility-2026-07-21.md
+- Recommended response: Option C→A — decide ONE canonical rep-login path, delete the other, align redirectGuestsTo, add an end-to-end rep-login regression test. Concrete lingering bug: redirectGuestsTo points at /admin/login while /app/login is the restored rep page.

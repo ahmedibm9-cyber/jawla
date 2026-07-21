@@ -28,7 +28,7 @@ class PhotoCapture extends Component
     public function updatedPhoto(): void
     {
         $this->validate([
-            'photo' => ['required', 'image', 'max:5120'], // 5 MB
+            'photo' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'], // 5 MB
         ]);
 
         $rep = Auth::user();
