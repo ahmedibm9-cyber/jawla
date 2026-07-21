@@ -23,7 +23,12 @@
             <form wire:submit="submit">
                 <div class="form-group">
                     <label for="customer_id" class="form-label">{{ __('app.customer') }} *</label>
-                    <x-ds.autocomplete wire:model.live="customer_id" id="customer_id" :options="$customers" :placeholder="__('app.search_customer')" required @error('customer_id') aria-invalid="true" aria-describedby="customer_id-error" @enderror />
+                    <x-ds.autocomplete wire:model.live="customer_id" id="customer_id" :placeholder="__('app.search_customer')" required>
+                        <option value="">---</option>
+                        @foreach($customers as $c)
+                            <option value="{{ $c->id }}">{{ $c->name_ar }}</option>
+                        @endforeach
+                    </x-ds.autocomplete>
                     @error('customer_id') <small id="customer_id-error" class="form-error">{{ $message }}</small> @enderror
                 </div>
 

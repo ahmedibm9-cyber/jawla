@@ -2,33 +2,43 @@
   x-data="{
     open: false,
     search: '',
-    selected: {{ $selected ?? 'null' }},
-    options: {{ Js::from($options) }},
+    selectedId: $el.querySelector('select')?.value || '',
     get filtered() {
       const q = this.search.toLowerCase().trim();
-      if (!q) return this.options;
-      return this.options.filter(o =>
-        o.label.toLowerCase().includes(q)
-      ).slice(0, 20);
+      const opts = Array.from(this.$el.querySelectorAll('select option')).filter(o => o.value);
+      if (!q) return opts.map(o => ({value: o.value, label: o.textContent}));
+      return opts.filter(o => o.textContent.toLowerCase().includes(q))
+                 .map(o => ({value: o.value, label: o.textContent}))
+                 .slice(0, 20);
     },
-    select(opt) {
-      this.selected = opt;
+    select(val, label) {
+      this.selectedId = val;
       this.search = '';
       this.open = false;
-      $refs.input.value = opt.value;
-      $refs.input.dispatchEvent(new Event('input', { bubbles: true }));
+      const sel = this.$el.querySelector('select');
+      sel.value = val;
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+      sel.dispatchEvent(new Event('input', { bubbles: true }));
+      const hidden = this.$el.querySelector('input[type=hidden]');
+      if (hidden) hidden.value = val;
     },
     clear() {
-      this.selected = null;
+      this.selectedId = '';
       this.search = '';
-      $refs.input.value = '';
-      $refs.input.dispatchEvent(new Event('input', { bubbles: true }));
+      const sel = this.$el.querySelector('select');
+      sel.value = '';
+      sel.dispatchEvent(new Event('change', { bubbles: true }));
+      sel.dispatchEvent(new Event('input', { bubbles: true }));
+      const hidden = this.$el.querySelector('input[type=hidden]');
+      if (hidden) hidden.value = '';
     },
-    clickOutside() {
-      this.open = false;
+    selectedLabel() {
+      const sel = this.$el.querySelector('select');
+      const opt = sel.options[sel.selectedIndex];
+      return opt && opt.value ? opt.textContent : '';
     }
   }"
-  x-on:click-outside.window="clickOutside()"
+  x-on:click-outside.window="open = false"
   class="relative"
 >
   <label for="{{ $id ?? '' }}" class="form-label">{{ $label }}</label>
@@ -36,8 +46,9 @@
     <input
       type="text"
       x-model="search"
-      x-on:focus="open = true"
+      x-on:focus="open = true; if (!search) search = selectedLabel()"
       x-on:input="open = true"
+      x-on:keydown.escape="open = false; search = selectedLabel()"
       placeholder="{{ $placeholder ?? '' }}"
       class="form-input"
       autocomplete="off"
@@ -45,21 +56,14 @@
       aria-expanded="open"
       aria-haspopup="listbox"
     >
-    <template x-if="selected">
-      <div class="absolute inset-0 flex items-center px-3 pointer-events-none">
-        <span x-text="selected.label" class="text-sm"></span>
-      </div>
-    </template>
     <button
       type="button"
-      x-show="selected"
+      x-show="selectedId"
       x-on:click="clear()"
       class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
       aria-label="{{ __('app.clear') }}"
     >&times;</button>
   </div>
-
-  <input type="hidden" x-ref="input" name="{{ $name }}" value="{{ $value ?? '' }}">
 
   <div
     x-show="open && filtered.length > 0"
@@ -68,15 +72,14 @@
   >
     <template x-for="opt in filtered" :key="opt.value">
       <div
-        x-on:click="select(opt)"
-        x-on:keydown.enter="select(opt)"
+        x-on:click="select(opt.value, opt.label)"
+        x-on:keydown.enter="select(opt.value, opt.label)"
         class="px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm"
-        :class="{'bg-green-50': selected && selected.value === opt.value}"
+        :class="{'bg-green-50': selectedId === opt.value}"
         role="option"
         tabindex="0"
       >
         <span x-text="opt.label"></span>
-        <span x-show="opt.sub" class="text-gray-400 text-xs ml-2" x-text="opt.sub"></span>
       </div>
     </template>
   </div>
@@ -87,4 +90,10 @@
   >
     {{ $emptyText ?? 'No results' }}
   </div>
+
+  <input type="hidden" x-ref="input" id="{{ $id ?? '' }}-hidden" name="{{ $name ?? $id ?? '' }}" value="{{ $value ?? '' }}">
+
+  <select style="display:none" {{ $attributes }}>
+    {{ $slot }}
+  </select>
 </div>

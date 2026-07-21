@@ -1,4 +1,5 @@
 <div>
+<x-pull-to-refresh>
     <div class="main-content">
         {{-- Hero Header --}}
         <div class="home-hero">
@@ -105,4 +106,5 @@
     </div>
 
     <x-tab-bar active="home" />
+</x-pull-to-refresh>
 </div>

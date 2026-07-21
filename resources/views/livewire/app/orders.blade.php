@@ -1,4 +1,5 @@
 <div>
+<x-pull-to-refresh>
 <div class="main-content">
     <x-page-header :title="__('app.orders')" />
 
@@ -137,4 +138,5 @@
 </div>
 
 <x-tab-bar active="orders" />
+</x-pull-to-refresh>
 </div>

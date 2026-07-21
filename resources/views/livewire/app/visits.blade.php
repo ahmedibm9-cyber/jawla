@@ -1,4 +1,5 @@
 <div>
+<x-pull-to-refresh>
 <div class="main-content">
     <x-page-header :title="__('app.visits')" />
 
@@ -48,4 +49,5 @@
 </div>
 
 <x-tab-bar active="visits" />
+</x-pull-to-refresh>
 </div>

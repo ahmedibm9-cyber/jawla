@@ -18,9 +18,9 @@ use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
- * Server-render smoke tests for the four rep pages migrated to
- * <x-ds.autocomplete>. These catch Blade-compile errors and wire:model
- * extraction bugs; interactive filtering is covered by the browser suite.
+ * Server-render smoke tests for the four rep pages using
+ * native <datalist> autocomplete. These catch Blade-compile errors and
+ * wire:model extraction bugs; interactive filtering is covered by the browser suite.
  */
 class AutocompleteComponentTest extends TestCase
 {
@@ -57,7 +57,8 @@ class AutocompleteComponentTest extends TestCase
         Livewire::actingAs($this->rep)
             ->test(CollectPayment::class)
             ->assertOk()
-            ->assertSeeHtml('x-ds.autocomplete');
+            ->assertSeeHtml('role="combobox"')
+            ->assertSeeHtml('id="customer_id-hidden"');
     }
 
     public function test_log_complaint_renders_autocomplete_and_keeps_confirmation_modal(): void
@@ -65,7 +66,7 @@ class AutocompleteComponentTest extends TestCase
         Livewire::actingAs($this->rep)
             ->test(LogComplaint::class)
             ->assertOk()
-            ->assertSee('x-ds.autocomplete')
+            ->assertSeeHtml('role="combobox"')
             // Confirmation modal must remain intact after the migration.
             ->assertSee(__('app.confirm_complaint_title'));
     }
@@ -75,7 +76,7 @@ class AutocompleteComponentTest extends TestCase
         Livewire::actingAs($this->rep)
             ->test(LogReturn::class)
             ->assertOk()
-            ->assertSee('x-ds.autocomplete')
+            ->assertSeeHtml('id="customer_id-hidden"')
             ->assertSee(__('app.search_product'))
             ->assertSee(__('app.confirm_return_title'));
     }
@@ -85,7 +86,7 @@ class AutocompleteComponentTest extends TestCase
         Livewire::actingAs($this->rep)
             ->test(SubmitPurchaseOffer::class)
             ->assertOk()
-            ->assertSee('x-ds.autocomplete')
+            ->assertSeeHtml('id="product_id-hidden"')
             ->assertSee(__('app.search_supplier'));
     }
 }

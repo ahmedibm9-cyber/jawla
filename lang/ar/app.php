@@ -91,6 +91,8 @@ return [
     'status_sent' => 'مُرسلة',
     'status_converted_to_invoice' => 'حُولت إلى فاتورة',
     'skip_to_content' => 'تخطٍّ إلى المحتوى',
+    'pull_to_refresh' => 'اسحب للتحديث',
+    'refreshing' => 'جاري التحديث…',
     'collect_payment' => 'تحصيل دفعة',
     'payment_collected' => 'تم تحصيل الدفعة',
     'customer' => 'العميل',

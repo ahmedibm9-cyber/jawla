@@ -1,4 +1,5 @@
 <div>
+<x-pull-to-refresh>
 <div class="main-content">
     <x-page-header :title="__('app.notifications')" />
 
@@ -45,4 +46,5 @@
 </div>
 
 <x-tab-bar active="" />
+</x-pull-to-refresh>
 </div>

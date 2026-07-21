@@ -91,6 +91,8 @@ return [
     'status_sent' => 'Sent',
     'status_converted_to_invoice' => 'Converted to Invoice',
     'skip_to_content' => 'Skip to content',
+    'pull_to_refresh' => 'Pull to refresh',
+    'refreshing' => 'Refreshing…',
     'collect_payment' => 'Collect Payment',
     'payment_collected' => 'Payment collected',
     'customer' => 'Customer',
