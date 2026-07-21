@@ -226,6 +226,10 @@ class SalesFlow extends Component
         $this->step = 'done';
         $this->successMessage = __('app.invoice_created').' #'.$invoice->invoice_number;
 
+        // Offer a brief undo (B1) — reverses via InvoiceService::cancel.
+        $this->dispatch('action-completed', type: 'sale', id: $invoice->id,
+            message: __('app.invoice_created').' #'.$invoice->invoice_number);
+
         try {
             $this->invoicePrintPayload = $printer->invoicePayload($invoice);
         } catch (\Throwable) {

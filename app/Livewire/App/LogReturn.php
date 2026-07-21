@@ -70,6 +70,10 @@ class LogReturn extends Component
         $this->success = true;
         $this->successMessage = __('app.return_submitted').' — '.$return->return_number;
 
+        // Offer a brief undo (B1) — reverses via ReturnService::cancel.
+        $this->dispatch('action-completed', type: 'return', id: $return->id,
+            message: $this->successMessage);
+
         $this->reset(['customer_id', 'reason', 'items']);
         $this->items[] = ['product_id' => '', 'quantity' => 1, 'unit_price' => 0];
     }

@@ -101,6 +101,8 @@
     }
   </script>
   @auth
+    {{-- Global undo toast for reversible rep writes (Phase 6 / B1). --}}
+    <livewire:app.action-toast />
     {{-- On-shift rep location beacon (CG3). Server enforces on-shift + dedupe. --}}
     <livewire:app.location-tracker />
   @endauth
