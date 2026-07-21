@@ -180,8 +180,11 @@
         <div class="card">
             <label class="font-semibold block mb-1">{{ __('app.signature') }}</label>
             <p class="m-0 mb-2 text-xs text-text-muted">{{ app()->getLocale() === 'ar' ? 'التوقيع اختياري — إذا تعذر التوقيع باللمس، دوّن اسم العميل في ملخص الزيارة.' : 'Signature is optional — if touch signing is not possible, note the customer name in the visit summary.' }}</p>
+            {{-- bg-white is intentional in both themes: the signature area is "paper"
+                 so the dark ink stays visible while drawing on dark mode. The stored
+                 PNG (toDataURL) is transparent+ink and renders fine on the white PDF. --}}
             <canvas id="sigCanvas" aria-label="{{ __('app.signature') }}" role="img"
-                class="border-2 border-dashed border-border rounded-lg block w-full touch-none"
+                class="border-2 border-dashed border-border rounded-lg block w-full touch-none bg-white"
                 x-data="{ drawing:false, ctx:null }"
                 x-init="
                     const r = $el.getBoundingClientRect();

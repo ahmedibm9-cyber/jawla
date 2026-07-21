@@ -84,3 +84,15 @@
   - `bmad-output/epics-top-5-competitive-gaps-2026-07-20.md`
   - `bmad-output/stories/CG1.1.bluetooth-print-transport.story.md` ... `CG5.3.rep-target-progress-and-reports.story.md`
 - Recommended next step: execute CG1 then CG5, then CG2, CG3, CG4 in order.
+
+## Brainstorm: phase6-ui-polish — 2026-07-21
+
+- Topic: "Think about all tasks in Phase 6" (UI polish) from plans/whimsical-squishing-cosmos.md.
+- Techniques: Mind Mapping + SCAMPER + Reverse Brainstorming (inline, no subagents).
+- Method: live audit of app.css + ds/* + rep blades, not the stale review doc.
+- Primary finding: **Phase 6 is ~85% already done** by the concurrent effort — modal scrim, responsive breakpoints, landscape, dark mode (unverified), heroicons, 44px bell, focus mgmt, RTL text-end, scroll-to-top all shipped.
+- Genuinely remaining: B1 undo toast (reuse outbox discard() pre-sync + ReversalService post-sync, as one global action-toast — never delete()); B2 dark-mode QA (shipped but untested — the sleeper risk); B3 pull-to-refresh; micro-fixes (font scaling, skeleton aria, canvas DPR, token dedup); optional C1 style-guide route.
+- Top risk: untested dark mode reaching field reps + undo semantics vs. the immutable-reversal rule and the offline outbox.
+- OPEN DECISION: is rep dark mode IN this release (QA it) or OUT (gate behind opt-in / revert media query)? It was previously N1 = v1.1.
+- Artifact: bmad-output/brainstorming-report-phase6-ui-polish-2026-07-21.md
+- Recommended next: bmad-epics-and-stories for B1 (undo) + B2 (dark-mode QA); order B2→B1→verify-close→style-guide→micro-fixes, deferring rep-blade edits until concurrent churn settles.
