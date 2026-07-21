@@ -6,6 +6,7 @@ use App\Models\DailyVisitAssignment;
 use App\Models\Task;
 use App\Models\Visit;
 use App\Models\WorkSession;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -27,27 +28,44 @@ class Home extends Component
     public function goToVisit(int $assignmentId): void
     {
         $assignment = DailyVisitAssignment::where('user_id', auth()->id())->findOrFail($assignmentId);
-        // Find or create today's visit
-        $visit = Visit::firstOrCreate([
-            'user_id' => auth()->id(),
-            'customer_id' => $assignment->customer_id,
-            'work_session_id' => session('work_session_id'),
-        ], [
-            'purpose' => 'sale',
-            'status' => 'open',
-            'route_id' => $assignment->customer->route_id,
-            'daily_visit_assignment_id' => $assignment->id,
-        ]);
+
+        $visit = DB::transaction(function () use ($assignment) {
+            $existing = Visit::where('user_id', auth()->id())
+                ->where('customer_id', $assignment->customer_id)
+                ->where('work_session_id', session('work_session_id'))
+                ->first();
+
+            if ($existing) {
+                return $existing;
+            }
+
+            return Visit::create([
+                'user_id' => auth()->id(),
+                'customer_id' => $assignment->customer_id,
+                'work_session_id' => session('work_session_id'),
+                'purpose' => 'sale',
+                'status' => 'open',
+                'route_id' => $assignment->customer->route_id,
+                'daily_visit_assignment_id' => $assignment->id,
+            ]);
+        });
 
         $this->redirect(route('app.visit', $visit));
     }
 
     public function completeTask(int $taskId): void
     {
-        Task::where('id', $taskId)->where('assigned_to', auth()->id())->update([
-            'status' => 'done',
-            'completed_at' => now(),
-        ]);
+        try {
+            Task::where('id', $taskId)->where('assigned_to', auth()->id())->update([
+                'status' => 'done',
+                'completed_at' => now(),
+            ]);
+            $this->successMessage = app()->getLocale() === 'ar' ? 'تم إكمالة المهمة' : 'Task completed';
+        } catch (\Throwable $e) {
+            $this->errorMessage = app()->getLocale() === 'ar'
+                ? 'خطأ في إكمال المهمة'
+                : 'Error completing task';
+        }
     }
 
     public function startWork(): void

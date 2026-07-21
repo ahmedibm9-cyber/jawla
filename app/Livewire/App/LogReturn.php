@@ -53,29 +53,35 @@ class LogReturn extends Component
             'items.*.unit_price' => 'required|numeric|min:0',
         ]);
 
-        $return = app(ReturnService::class)->create(
-            companyId: auth()->user()->company_id,
-            userId: auth()->id(),
-            customerId: $this->customer_id,
-            items: array_map(fn ($item) => [
-                'product_id' => (int) $item['product_id'],
-                'quantity' => (float) $item['quantity'],
-                'unit_price' => (float) $item['unit_price'],
-            ], $this->items),
-            reason: $this->reason,
-        );
+        try {
+            $return = app(ReturnService::class)->create(
+                companyId: auth()->user()->company_id,
+                userId: auth()->id(),
+                customerId: $this->customer_id,
+                items: array_map(fn ($item) => [
+                    'product_id' => (int) $item['product_id'],
+                    'quantity' => (float) $item['quantity'],
+                    'unit_price' => (float) $item['unit_price'],
+                ], $this->items),
+                reason: $this->reason,
+            );
 
-        $this->attachPhotos($return);
+            $this->attachPhotos($return);
 
-        $this->success = true;
-        $this->successMessage = __('app.return_submitted').' — '.$return->return_number;
+            $this->success = true;
+            $this->successMessage = __('app.return_submitted').' — '.$return->return_number;
 
-        // Offer a brief undo (B1) — reverses via ReturnService::cancel.
-        $this->dispatch('action-completed', type: 'return', id: $return->id,
-            message: $this->successMessage);
+            // Offer a brief undo (B1) — reverses via ReturnService::cancel.
+            $this->dispatch('action-completed', type: 'return', id: $return->id,
+                message: $this->successMessage);
 
-        $this->reset(['customer_id', 'reason', 'items']);
-        $this->items[] = ['product_id' => '', 'quantity' => 1, 'unit_price' => 0];
+            $this->reset(['customer_id', 'reason', 'items']);
+            $this->items[] = ['product_id' => '', 'quantity' => 1, 'unit_price' => 0];
+        } catch (\Throwable $e) {
+            $this->errorMessage = app()->getLocale() === 'ar'
+                ? 'حدث خطأ أثناء إرسال المرتجع: '.$e->getMessage()
+                : 'Error submitting return: '.$e->getMessage();
+        }
     }
 
     /**

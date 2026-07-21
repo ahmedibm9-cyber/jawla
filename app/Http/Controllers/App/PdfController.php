@@ -14,7 +14,11 @@ class PdfController extends Controller
 {
     public function proforma(ProformaInvoice $proforma, PdfService $pdf): Response
     {
-        abort_unless($proforma->company_id === auth()->user()->company_id, 403);
+        abort_unless(
+            $proforma->company_id === auth()->user()->company_id
+            && $proforma->user_id === auth()->id(),
+            403
+        );
 
         $path = $pdf->generateProforma($proforma);
 
@@ -23,7 +27,11 @@ class PdfController extends Controller
 
     public function receipt(Payment $payment, PdfService $pdf): Response
     {
-        abort_unless($payment->company_id === auth()->user()->company_id, 403);
+        abort_unless(
+            $payment->company_id === auth()->user()->company_id
+            && $payment->user_id === auth()->id(),
+            403
+        );
 
         $path = $pdf->generateReceipt($payment);
 
@@ -32,7 +40,11 @@ class PdfController extends Controller
 
     public function invoice(Invoice $invoice, PdfService $pdf): Response
     {
-        abort_unless($invoice->company_id === auth()->user()->company_id, 403);
+        abort_unless(
+            $invoice->company_id === auth()->user()->company_id
+            && $invoice->user_id === auth()->id(),
+            403
+        );
 
         $path = $pdf->generateInvoice($invoice);
 

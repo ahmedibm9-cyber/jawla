@@ -31,7 +31,7 @@ class VanTransfers extends Component
         try {
             app(VanTransferService::class)->receive($transferId, auth()->id());
             $this->successMessage = __('app.transfer_received');
-        } catch (\RuntimeException $e) {
+        } catch (\Throwable $e) {
             $this->errorMessage = $e->getMessage();
         }
     }
@@ -45,6 +45,7 @@ class VanTransfers extends Component
                 ->with(['fromUser', 'items.product'])
                 ->whereIn('status', [VanTransferStatus::Shipped, VanTransferStatus::Pending])
                 ->latest()
+                ->limit(20)
                 ->get(),
             'outgoing' => VanTransfer::where('from_user_id', $userId)
                 ->with(['toUser', 'items.product'])

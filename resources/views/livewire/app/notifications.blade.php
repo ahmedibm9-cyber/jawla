@@ -22,8 +22,13 @@
                     $data = $notification->data;
                     $isNew = in_array($notification->id, $newIds, true);
                     $isCritical = ($data['severity'] ?? 'info') === 'critical';
+                    $notifUrl = $data['url'] ?? '/app';
+                    // Sanitize URL — only allow relative paths or http(s) URLs
+                    $notifUrl = (str_starts_with($notifUrl, '/') || str_starts_with($notifUrl, 'http'))
+                        ? $notifUrl
+                        : '/app';
                 @endphp
-                <a href="{{ $data['url'] ?? '/app' }}"
+                <a href="{{ $notifUrl }}"
                    class="card block no-underline text-inherit mb-2 {{ $isNew ? 'border-2 border-accent' : '' }}">
                     <div class="flex items-start gap-2">
                         @if($isCritical)

@@ -28,23 +28,40 @@ class LogExpense extends Component
             'note' => 'nullable|string|max:500',
         ]);
 
-        $expense = app(ExpenseService::class)->log(
-            companyId: auth()->user()->company_id,
-            userId: auth()->id(),
-            category: $this->category,
-            amount: (float) $this->amount,
-            note: $this->note,
-            workSessionId: session('work_session_id'),
-        );
+        // Guard against negative cash box balance
+        $cashBox = CashBox::where('user_id', auth()->id())->first();
+        $balance = $cashBox ? (float) $cashBox->balance : 0;
+        if ((float) $this->amount > $balance) {
+            $this->errorMessage = app()->getLocale() === 'ar'
+                ? 'المبلغ يتجاوز رصيد صندوق النقدية المتاح ('.number_format($balance, 2).')'
+                : 'Amount exceeds available cash box balance ('.number_format($balance, 2).')';
 
-        $this->success = true;
-        $this->successMessage = __('app.expense_logged').' — '.number_format((float) $expense->amount, 2);
+            return;
+        }
 
-        // Offer a brief undo (B1) — reverses via ExpenseService::cancel.
-        $this->dispatch('action-completed', type: 'expense', id: $expense->id,
-            message: $this->successMessage);
+        try {
+            $expense = app(ExpenseService::class)->log(
+                companyId: auth()->user()->company_id,
+                userId: auth()->id(),
+                category: $this->category,
+                amount: (float) $this->amount,
+                note: $this->note,
+                workSessionId: session('work_session_id'),
+            );
 
-        $this->reset(['category', 'amount', 'note']);
+            $this->success = true;
+            $this->successMessage = __('app.expense_logged').' — '.number_format((float) $expense->amount, 2);
+
+            // Offer a brief undo (B1) — reverses via ExpenseService::cancel.
+            $this->dispatch('action-completed', type: 'expense', id: $expense->id,
+                message: $this->successMessage);
+
+            $this->reset(['category', 'amount', 'note']);
+        } catch (\Throwable $e) {
+            $this->errorMessage = app()->getLocale() === 'ar'
+                ? 'حدث خطأ أثناء تسجيل المصروف: '.$e->getMessage()
+                : 'Error logging expense: '.$e->getMessage();
+        }
     }
 
     /**

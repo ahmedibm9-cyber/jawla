@@ -26,21 +26,27 @@ class CashReconcile extends Component
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $reconciliation = app(CashReconciliationService::class)->submit(
-            companyId: auth()->user()->company_id,
-            userId: auth()->id(),
-            countedAmount: (float) $this->counted_amount,
-            notes: $this->notes,
-            workSessionId: session('work_session_id'),
-        );
+        try {
+            $reconciliation = app(CashReconciliationService::class)->submit(
+                companyId: auth()->user()->company_id,
+                userId: auth()->id(),
+                countedAmount: (float) $this->counted_amount,
+                notes: $this->notes,
+                workSessionId: session('work_session_id'),
+            );
 
-        $variance = (float) $reconciliation->variance;
-        $this->success = true;
-        $this->successMessage = $variance === 0.0
-            ? __('app.recon_balanced')
-            : __('app.recon_variance_recorded', ['variance' => number_format($variance, 2)]);
+            $variance = (float) $reconciliation->variance;
+            $this->success = true;
+            $this->successMessage = $variance === 0.0
+                ? __('app.recon_balanced')
+                : __('app.recon_variance_recorded', ['variance' => number_format($variance, 2)]);
 
-        $this->reset(['counted_amount', 'notes']);
+            $this->reset(['counted_amount', 'notes']);
+        } catch (\Throwable $e) {
+            $this->errorMessage = app()->getLocale() === 'ar'
+                ? 'حدث خطأ أثناء التسوية: '.$e->getMessage()
+                : 'Error during reconciliation: '.$e->getMessage();
+        }
     }
 
     public function render()

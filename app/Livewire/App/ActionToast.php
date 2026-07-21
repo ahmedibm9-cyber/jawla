@@ -49,9 +49,11 @@ class ActionToast extends Component
 
     public function undo(): void
     {
-        if ($this->type === null || $this->id === null) {
+        if ($this->undone || $this->type === null || $this->id === null) {
             return;
         }
+
+        $this->undone = true;
 
         $userId = (int) auth()->id();
         $reason = app()->getLocale() === 'ar' ? 'تراجع بواسطة المندوب' : 'Undone by rep';

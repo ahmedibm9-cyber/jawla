@@ -1287,6 +1287,22 @@
   left: 0;
 }
 
+[dir="rtl"] .skip-link {
+  left: auto;
+  right: -9999px;
+  border-radius: 0 0 0 8px;
+}
+
+[dir="rtl"] .skip-link:focus {
+  right: 0;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  min-height: 32px;
+}
+
 /* ---- Modal Backdrop ---- */
 dialog::backdrop {
   background: rgba(0, 0, 0, 0.5);

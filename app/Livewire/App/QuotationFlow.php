@@ -71,7 +71,10 @@ class QuotationFlow extends Component
             return;
         }
 
-        $this->request->update(['status' => 'confirmed']);
+        $this->request->update([
+            'status' => 'confirmed',
+            'negotiated_price' => $this->negotiatedPrice,
+        ]);
         $this->successMessage = __('app.price_confirmed');
         $this->step = 'detail';
     }

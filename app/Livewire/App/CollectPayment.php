@@ -128,6 +128,7 @@ class CollectPayment extends Component
         $invoices = [];
         if ($this->customer_id) {
             $invoices = Invoice::query()
+                ->where('company_id', auth()->user()->company_id)
                 ->where('customer_id', $this->customer_id)
                 ->whereIn('status', ['submitted', 'partially_paid'])
                 ->whereRaw('remaining_amount > 0')
