@@ -1,4 +1,4 @@
-const CACHE = "jawla-shell-v4";
+const CACHE = "jawla-shell-v5";
 const SHELL = ["/", "/app", "/manifest.json", "/offline"];
 
 // Install: cache shell assets
@@ -29,16 +29,19 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
 
-  // Navigation: network-first, offline fallback
+  // Navigation: cache-first for cached pages, network-first for others
   if (e.request.mode === "navigate") {
     e.respondWith(
-      fetch(e.request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE).then((c) => c.put(e.request, clone));
-          return response;
-        })
-        .catch(() => caches.match("/offline"))
+      caches.match(e.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(e.request)
+          .then((response) => {
+            const clone = response.clone();
+            caches.open(CACHE).then((c) => c.put(e.request, clone));
+            return response;
+          })
+          .catch(() => caches.match("/offline"));
+      })
     );
     return;
   }
