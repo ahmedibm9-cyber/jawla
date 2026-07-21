@@ -47,7 +47,7 @@
                     </x-slot:action>
                 </x-ds.empty>
             @endforelse
-        </div>
+        @endif
     </div>
 </div>
 
