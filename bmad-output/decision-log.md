@@ -104,3 +104,10 @@
 - Primary suspected component: Auth entry points — routes/web.php + LoginController + bootstrap/app.php (redirectGuestsTo) + Filament Auth Login.php/LoginResponse.
 - Case file: bmad-output/investigation-rep-login-fragility-2026-07-21.md
 - Recommended response: Option C→A — decide ONE canonical rep-login path, delete the other, align redirectGuestsTo, add an end-to-end rep-login regression test. Concrete lingering bug: redirectGuestsTo points at /admin/login while /app/login is the restored rep page.
+
+## Go-live gates B2/B3 — 2026-07-21
+
+- B2 (durable photo storage): DECISION = Railway bucket. DONE — flysystem-s3 installed, PhotoService config-driven disk (PHOTO_DISK=s3), Photo::url() signed URLs for the private bucket, provisioned Railway bucket `jawla-photos` (ams), S3 creds set on the app service, round-trip validated (put/get/delete OK against the live bucket). Photos durable + replica-shared.
+- B3 (backups): DECISION = Railway managed Postgres backups sufficient for V1; spatie/laravel-backup NOT installed. Remaining: operator runs the pg_dump→restore drill once and records it.
+- B1 (ETA e-invoicing): status = credentials coming; held + correctly gated off. The one remaining hard go-live blocker.
+- B4 (live k6 + Burp): staging/manual passes remain.

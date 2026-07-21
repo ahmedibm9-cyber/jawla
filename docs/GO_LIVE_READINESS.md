@@ -39,25 +39,24 @@ Ordered by what actually blocks launch.
   e-invoicing path, submit a test document to ETA preprod, confirm acceptance.
 - **Risk if skipped:** non-compliant invoicing in Egypt → cannot legally operate.
 
-### B2. Durable photo storage
+### B2. Durable photo storage — ✅ DONE (2026-07-21)
 
-- **Blocked on:** a decision (object storage) + one approval.
-- **Minimal ask:** "Yes, use Railway bucket / Cloudflare R2 / S3" + confirm the
-  new package (`league/flysystem-aws-s3-v3`) is approved.
-- **Then (small):** add an `s3` disk (dormant until env vars set), point
-  `PhotoService` at it, `storage:link` becomes unnecessary. One-env-flip cutover.
-- **Risk if skipped:** photos are per-replica + lost on redeploy (2 replicas,
-  ephemeral FS). Acceptable only if photos are non-critical at launch.
+- **Decision:** Railway bucket (object storage).
+- **Delivered:** `league/flysystem-aws-s3-v3` installed; `PhotoService` writes to
+  a config-driven disk (`PHOTO_DISK=s3`); `Photo::url()` returns short-lived
+  signed URLs for the private bucket; provisioned Railway bucket `jawla-photos`
+  (ams); S3 creds set on the app service; **round-trip validated** against the
+  live bucket (put/get/delete OK). Photos are now durable + replica-shared.
+- **Remaining:** none for V1. Existing local-disk photos keep resolving via their
+  per-row disk; only new photos go to the bucket.
 
-### B3. Backup automation + a recorded restore drill
+### B3. Backups — ✅ DECIDED (2026-07-21)
 
-- **Blocked on:** package decision + an operator with DB creds running the drill.
-- **Minimal ask:** approve `spatie/laravel-backup` + an S3-compatible bucket, OR
-  confirm "Railway managed Postgres backups are sufficient for V1."
-- **Then (small):** if approved, add the package + schedule; either way, run the
-  documented `pg_dump`→restore drill once and record it in `BACKUP_RESTORE.md`.
-- **Risk if skipped:** unproven recovery path. The manual procedure exists; only
-  the _executed drill_ is missing.
+- **Decision:** Railway managed Postgres backups are sufficient for V1;
+  `spatie/laravel-backup` intentionally not installed. Recorded in `BACKUP_RESTORE.md`.
+- **Remaining (operator, pre-go-live):** run the documented `pg_dump`→restore
+  drill once against a scratch DB and record it in the backup log. Manual step,
+  needs DB creds.
 
 ### B4. Live performance + security passes
 
@@ -72,13 +71,16 @@ Ordered by what actually blocks launch.
 
 ## C. Recommended launch decision
 
-- **Egypt (ETA-regulated):** **do not launch** until B1 is closed — it's a legal gate.
-- **Non-ETA / pilot:** **launchable now** if B2 is accepted as a known limitation
-  (or closed) and B3 is answered ("Railway backups sufficient" is a valid V1 answer).
-- Either way, B4 should run against **staging** before a wide rollout.
+With B2 (photos) done and B3 (backups) decided, **only B1 and B4 remain**:
 
-**One input unblocks the most:** the ETA credentials (B1). Provide any of B1–B3's
-"minimal ask" and the follow-on work is small and already scoped above.
+- **Egypt (ETA-regulated):** **do not launch** until B1 (ETA e-invoicing) is
+  closed — it's a legal gate, pending client credentials (status: "coming").
+- **Non-ETA / pilot:** **launchable now** — the code is green, photos are durable,
+  the backup posture is decided. Run B4 against staging before a wide rollout, and
+  have an operator execute the backup restore drill once.
+
+**The one remaining hard blocker is B1** (ETA credentials). Everything else is
+either done or an operator/staging task.
 
 ---
 

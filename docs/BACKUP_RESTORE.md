@@ -54,12 +54,13 @@ This must be executed against a **scratch** database — never production.
 5. Record the date + outcome in the log below. **Do not** mark the drill done
    until steps 1–4 actually pass.
 
-## Decision needed
+## Decision (2026-07-21): Railway managed backups accepted for V1
 
-- Install `spatie/laravel-backup` for encrypted, scheduled, off-Railway archives
-  (nightly DB + weekly files, 30-day retention, S3-compatible bucket)? This is
-  the recommended production posture but requires package approval + bucket
-  credentials. Track under the ops backlog.
+The V1 backup posture is **Railway's managed Postgres backups** on the `jawla-db`
+volume (owner decision). `spatie/laravel-backup` is intentionally **not** installed
+for V1 — revisit post-launch if off-Railway/encrypted archives become a
+requirement. **Still required before go-live:** an operator runs the restore drill
+above once against a scratch DB and records the result in the log below.
 
 ## Restore log
 
