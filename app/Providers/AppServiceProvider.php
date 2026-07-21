@@ -56,10 +56,19 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ComplaintService::class);
         $this->app->bind(VanTransferServiceContract::class, fn () => app(VanTransferService::class));
 
-        // ETA e-invoicing: bound to the null client until real credentials +
-        // certificate are provisioned (go-live gate). Swap this binding for the
-        // HTTP client at that point — no call-site changes required.
-        $this->app->bind(EtaClient::class, NullEtaClient::class);
+        // ETA e-invoicing. The HTTP transport (OAuth + submission + response
+        // mapping) is built; it activates only when ETA is enabled AND base URLs
+        // are configured, so demo/UAT stays on the inert NullEtaClient. The
+        // document signer stays Unsigned until the taxpayer certificate is
+        // provisioned — the last go-live gate. No call-site changes required.
+        $this->app->bind(\App\Services\Eta\Contracts\EtaSigner::class, \App\Services\Eta\UnsignedEtaSigner::class);
+        $this->app->bind(EtaClient::class, function () {
+            $configured = (bool) config('eta.enabled')
+                && (string) config('eta.api_base_url') !== ''
+                && (string) config('eta.id_base_url') !== '';
+
+            return $configured ? app(\App\Services\Eta\HttpEtaClient::class) : app(NullEtaClient::class);
+        });
     }
 
     /**

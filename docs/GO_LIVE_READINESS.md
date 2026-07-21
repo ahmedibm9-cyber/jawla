@@ -32,11 +32,20 @@ Ordered by what actually blocks launch.
 
 ### B1. ETA Phase 2 e-invoicing — THE go-live gate (Egypt)
 
-- **Blocked on:** client's ETA credentials + signing certificate (production).
-- **Minimal ask:** ETA client ID/secret, the CSID/private-key material, and the
-  target environment (preprod vs prod).
-- **Then (small):** wire the credentials into the existing (already-gated)
-  e-invoicing path, submit a test document to ETA preprod, confirm acceptance.
+- **Built (autonomous, this session):** the full transport is now in place, not
+  just the gate — `HttpEtaClient` (OAuth client-credentials → `/documentsubmissions`
+  → response mapping), an `EtaSigner` seam (`UnsignedEtaSigner` default), and a
+  conditional binding that activates only when `eta.enabled` + base URLs are set
+  (else the inert `NullEtaClient`). `EtaDocumentBuilder` maps the invoice to the
+  ETA v1.0 shape. Unit-tested with faked HTTP (accept/reject/HTTP-error/auth-fail).
+- **Still blocked on (genuinely external):**
+  1. Client's ETA **credentials** (client id/secret, taxpayer RIN, base URLs).
+  2. The taxpayer **signing certificate** + a CAdES-BES `EtaSigner` implementation
+     — submitting unsigned is (correctly) rejected by ETA, never a false success.
+  3. **Preprod validation** of the produced document + endpoints against the
+     official ETA SDK before flipping to production.
+- **Then (small):** set the env config, implement the cert signer, run one preprod
+  submission, confirm acceptance. No call-site changes.
 - **Risk if skipped:** non-compliant invoicing in Egypt → cannot legally operate.
 
 ### B2. Durable photo storage — ✅ DONE (2026-07-21)
