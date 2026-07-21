@@ -38,11 +38,12 @@
                     }).addTo(this.map);
 
                 const bounds = [];
+                const esc = (s) => { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; };
                 this.points.forEach((p) => {
                     const marker = L.marker([p.lat, p.lng]).addTo(this.map);
-                    const parts = [`<strong>${p.name ?? ''}</strong>`];
-                    if (p.code) parts.push(`#${p.code}`);
-                    if (p.route) parts.push(p.route);
+                    const parts = [`<strong>${esc(p.name)}</strong>`];
+                    if (p.code) parts.push(`#${esc(p.code)}`);
+                    if (p.route) parts.push(esc(p.route));
                     marker.bindPopup(parts.join('<br>'));
                     bounds.push([p.lat, p.lng]);
                 });

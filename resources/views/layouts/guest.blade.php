@@ -7,8 +7,7 @@
   <link rel="icon" href="/images/green-j.png" type="image/png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="manifest" href="/manifest.json">
-  <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
-  <link rel="stylesheet" href="https://fonts.bunny.net/css?family=ibm-plex-sans-arabic:400,500,700&display=swap">
+  @vite(['resources/css/app.css'])
   <title>Jawla</title>
   <style>
     body { margin: 0; font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif; background: #F8FAFC; }

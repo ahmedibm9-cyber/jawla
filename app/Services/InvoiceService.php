@@ -149,39 +149,7 @@ class InvoiceService implements InvoiceContract
     public function cancel(Invoice $invoice, int $userId, string $reason): Invoice
     {
         return DB::transaction(function () use ($invoice, $userId, $reason): Invoice {
-            $invoice->update([
-                'status' => InvoiceStatus::Cancelled,
-                'cancelled_at' => now(),
-                'cancelled_by' => $userId,
-            ]);
-
-            // Reverse stock
-            $vanWarehouse = Warehouse::where('user_id', $invoice->user_id)
-                ->where('type', 'van')->first();
-
-            if ($vanWarehouse) {
-                foreach ($invoice->items as $item) {
-                    $this->stock->increment(
-                        $vanWarehouse->id,
-                        $item->product_id,
-                        $item->batch_id,
-                        (float) $item->quantity,
-                        StockReason::Adjustment,
-                        $invoice,
-                        $userId,
-                    );
-                }
-            }
-
-            // Reverse customer balance — only the unpaid portion
-            $unpaidAmount = (float) $invoice->total - (float) $invoice->paid_amount;
-            if ($unpaidAmount > 0) {
-                $invoice->customer->decrement('balance', $unpaidAmount);
-            }
-
-            // Log the reversal activity
-            Activity::log('invoice_reversed', $invoice, 'Invoice '.$invoice->invoice_number.' reversed: '.$reason);
-
+            $this->cancelWithoutTransaction($invoice, $userId, $reason);
             return $invoice;
         });
     }
@@ -189,8 +157,8 @@ class InvoiceService implements InvoiceContract
     public function amend(Invoice $invoice): Invoice
     {
         return DB::transaction(function () use ($invoice): Invoice {
-            // Cancel the original invoice and log the reversal
-            $this->cancel($invoice, auth()->id(), 'Amendment requested');
+            // Cancel the original invoice (no nested transaction)
+            $this->cancelWithoutTransaction($invoice, auth()->id(), 'Amendment requested');
 
             $company = $invoice->company;
             $newNumber = $this->numbers->generate('sales_invoice', $company->id);
@@ -224,5 +192,41 @@ class InvoiceService implements InvoiceContract
 
             return $draft->fresh(['items']);
         });
+    }
+
+    private function cancelWithoutTransaction(Invoice $invoice, int $userId, string $reason): void
+    {
+        $invoice->update([
+            'status' => InvoiceStatus::Cancelled,
+            'cancelled_at' => now(),
+            'cancelled_by' => $userId,
+        ]);
+
+        // Reverse stock
+        $vanWarehouse = Warehouse::where('user_id', $invoice->user_id)
+            ->where('type', 'van')->first();
+
+        if ($vanWarehouse) {
+            foreach ($invoice->items as $item) {
+                $this->stock->increment(
+                    $vanWarehouse->id,
+                    $item->product_id,
+                    $item->batch_id,
+                    (float) $item->quantity,
+                    StockReason::Adjustment,
+                    $invoice,
+                    $userId,
+                );
+            }
+        }
+
+        // Reverse customer balance — only the unpaid portion
+        $unpaidAmount = (float) $invoice->total - (float) $invoice->paid_amount;
+        if ($unpaidAmount > 0) {
+            $invoice->customer->decrement('balance', $unpaidAmount);
+        }
+
+        // Log the reversal activity
+        Activity::log('invoice_reversed', $invoice, 'Invoice '.$invoice->invoice_number.' reversed: '.$reason);
     }
 }
