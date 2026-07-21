@@ -31,6 +31,12 @@ class PdfService
 
     public function generateReceipt(Payment $payment): string
     {
+        // Payments are immutable, so a receipt PDF never changes — serve the
+        // cached render instead of rebuilding mPDF on every download.
+        if ($cached = $this->cached("receipt_{$payment->id}.pdf")) {
+            return $cached;
+        }
+
         $payment->load('invoice', 'customer', 'user');
         $qr = $this->qrSvg('RECEIPT|'.$payment->id.'|'.$payment->amount.'|'.$payment->collected_at?->format('Y-m-d H:i'));
 
@@ -39,8 +45,26 @@ class PdfService
         return $this->toPdf($html, "receipt_{$payment->id}.pdf");
     }
 
+    /**
+     * Return the stored path for an already-generated PDF, or null. Used to
+     * short-circuit re-rendering immutable documents (invoices, receipts) on
+     * repeat downloads — the expensive mPDF pass runs once per document.
+     */
+    private function cached(string $filename): ?string
+    {
+        $path = "pdfs/{$filename}";
+
+        return Storage::disk('private')->exists($path) ? $path : null;
+    }
+
     public function generateInvoice(Invoice $invoice): string
     {
+        // Invoices are immutable financial records (reversal is a compensating
+        // transaction, never an edit), so the PDF is stable once rendered.
+        if ($cached = $this->cached("invoice_{$invoice->invoice_number}.pdf")) {
+            return $cached;
+        }
+
         $invoice->load('items.product', 'company', 'customer', 'visit.report', 'user');
         $signaturePath = $invoice->visit?->report?->signature_path
             ?? $invoice->user?->name;

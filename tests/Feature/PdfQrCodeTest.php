@@ -13,11 +13,21 @@ use App\Models\User;
 use App\Services\PdfService;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PdfQrCodeTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        // Isolate the private disk so generated PDFs don't leak between tests
+        // (invoice numbers reset with the DB, but real files would persist and
+        // collide with the PdfService immutable-document cache).
+        Storage::fake('private');
+    }
 
     protected function createInvoice(array $overrides = []): Invoice
     {
