@@ -260,6 +260,7 @@ class SalesFlow extends Component
         $customers = collect();
         if (strlen($this->customerSearch) >= 2 && $this->customerId <= 0) {
             $customers = Customer::query()
+                ->where('company_id', auth()->user()->company_id)
                 ->where(function ($q) {
                     $q->where('name_ar', 'ilike', "%{$this->customerSearch}%")
                         ->orWhere('name_en', 'ilike', "%{$this->customerSearch}%")
@@ -273,6 +274,7 @@ class SalesFlow extends Component
         $products = collect();
         if (strlen($this->productSearch) >= 2) {
             $products = Product::query()
+                ->where('company_id', auth()->user()->company_id)
                 ->where(function ($q) {
                     $q->where('sku', 'ilike', "%{$this->productSearch}%")
                         ->orWhere('name_ar', 'ilike', "%{$this->productSearch}%")

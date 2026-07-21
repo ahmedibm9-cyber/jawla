@@ -34,18 +34,19 @@
             map: null,
             layer: null,
             init() {
-                if (typeof L === 'undefined') { console.error('Leaflet not loaded'); return; }
+                import('leaflet').then(mod => {
+                    window.L = mod.default;
+                    this.map = L.map('rep-live-map', { zoomControl: true });
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                        maxZoom: 19,
+                    }).addTo(this.map);
+                    this.layer = L.layerGroup().addTo(this.map);
 
-                this.map = L.map('rep-live-map', { zoomControl: true });
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                    maxZoom: 19,
-                }).addTo(this.map);
-                this.layer = L.layerGroup().addTo(this.map);
-
-                // Default view (Riyadh) until we have fixes.
-                this.map.setView([24.7136, 46.6753], 6);
-                this.draw(this.points, true);
+                    // Default view (Riyadh) until we have fixes.
+                    this.map.setView([24.7136, 46.6753], 6);
+                    this.draw(this.points, true);
+                }).catch(err => console.error('Leaflet load failed:', err));
             },
             refresh(points) {
                 this.points = points ?? [];

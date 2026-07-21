@@ -29,13 +29,13 @@
             points,
             map: null,
             initMap() {
-                if (typeof L === 'undefined') { console.error('Leaflet not loaded'); return; }
-
-                this.map = L.map('customer-map', { zoomControl: true });
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                    maxZoom: 19,
-                }).addTo(this.map);
+                import('leaflet').then(mod => {
+                    window.L = mod.default;
+                    this.map = L.map('customer-map', { zoomControl: true });
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                        maxZoom: 19,
+                    }).addTo(this.map);
 
                 const bounds = [];
                 this.points.forEach((p) => {
@@ -52,6 +52,7 @@
                 } else if (bounds.length > 1) {
                     this.map.fitBounds(bounds, { padding: [40, 40] });
                 }
+                }).catch(err => console.error('Leaflet load failed:', err));
             },
         };
     };

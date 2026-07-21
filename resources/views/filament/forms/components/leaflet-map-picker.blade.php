@@ -58,30 +58,27 @@
             online: navigator.onLine,
             
             initMap() {
-                // Check if Leaflet is loaded
-                if (typeof L === 'undefined') {
-                    console.error('Leaflet is not loaded');
-                    return;
-                }
+                import('leaflet').then(mod => {
+                    window.L = mod.default;
 
-                // Get initial values from hidden inputs
-                const latInput = document.getElementById(this.latitudeField + '_' + this.$id);
-                const lngInput = document.getElementById(this.longitudeField + '_' + this.$id);
-                
-                let initialLat = parseFloat(latInput?.value) || this.defaultLat;
-                let initialLng = parseFloat(lngInput?.value) || this.defaultLng;
+                    // Get initial values from hidden inputs
+                    const latInput = document.getElementById(this.latitudeField + '_' + this.$id);
+                    const lngInput = document.getElementById(this.longitudeField + '_' + this.$id);
+                    
+                    let initialLat = parseFloat(latInput?.value) || this.defaultLat;
+                    let initialLng = parseFloat(lngInput?.value) || this.defaultLng;
 
-                // Initialize map
-                this.map = L.map(this.$el.querySelector('[id^="leaflet-map-"]'), {
-                    center: [initialLat, initialLng],
-                    zoom: this.defaultZoom,
-                    zoomControl: true,
-                });
+                    // Initialize map
+                    this.map = L.map(this.$el.querySelector('[id^="leaflet-map-"]'), {
+                        center: [initialLat, initialLng],
+                        zoom: this.defaultZoom,
+                        zoomControl: true,
+                    });
 
-                // Add OpenStreetMap tiles
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                    maxZoom: 19,
+                    // Add OpenStreetMap tiles
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                        maxZoom: 19,
                 }).addTo(this.map);
 
                 // Add marker
@@ -107,6 +104,7 @@
 
                 // Locate user on init
                 this.locateUser();
+                }).catch(err => console.error('Leaflet load failed:', err));
             },
 
             locateUser() {

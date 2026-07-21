@@ -152,7 +152,7 @@ class QuotationFlow extends Component
                 ->where('status', 'priced')
                 ->with(['product', 'customer', 'quotation'])
                 ->latest()
-                ->paginate(20),
+                ->simplePaginate(20),
         ]);
     }
 }

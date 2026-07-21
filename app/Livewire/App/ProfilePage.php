@@ -81,7 +81,7 @@ class ProfilePage extends Component
         $user->phone = $this->phone ?: null;
 
         if ($this->newPassword !== '') {
-            $user->password = $this->newPassword;
+            $user->password = \Illuminate\Support\Facades\Hash::make($this->newPassword);
         }
 
         $user->save();

@@ -1,6 +1,6 @@
-import "./pwa-register.js";
 import "./offline/sync.js";
-import L from "leaflet";
+// Leaflet removed from main bundle — loaded dynamically on map pages only
+// SW registration handled in app.blade.php inline script (skips under navigator.webdriver)
 
 const PRINTER_STORAGE_KEY = "jawla.bluetooth-printer";
 const PRINTER_SERVICE_UUIDS = [
@@ -523,5 +523,3 @@ document.addEventListener("alpine:init", () => {
     },
   }));
 });
-
-window.L = L;

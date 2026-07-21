@@ -82,6 +82,7 @@ class StockSearch extends Component
 
         if (strlen($this->search) >= 2) {
             $results = Product::query()
+                ->where('company_id', auth()->user()->company_id)
                 ->where(function ($q) {
                     $q->where('sku', 'ilike', "%{$this->search}%")
                         ->orWhere('name_ar', 'ilike', "%{$this->search}%")
