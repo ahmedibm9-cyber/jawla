@@ -1,11 +1,17 @@
-const CACHE = "jawla-shell-v3";
+const CACHE = "jawla-shell-v4";
 const SHELL = ["/", "/app", "/manifest.json", "/offline"];
 
+// Install: cache shell assets
 self.addEventListener("install", (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)));
-  self.skipWaiting();
+  e.waitUntil(
+    caches
+      .open(CACHE)
+      .then((c) => c.addAll(SHELL))
+      .then(() => self.skipWaiting())
+  );
 });
 
+// Activate: clean old caches + claim clients
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches
@@ -15,16 +21,29 @@ self.addEventListener("activate", (e) => {
           keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))
         )
       )
+      .then(() => self.clients.claim())
   );
 });
 
+// Fetch: strategy per request type
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
+
+  // Navigation: network-first, offline fallback
   if (e.request.mode === "navigate") {
-    e.respondWith(fetch(e.request).catch(() => caches.match("/offline")));
+    e.respondWith(
+      fetch(e.request)
+        .then((response) => {
+          const clone = response.clone();
+          caches.open(CACHE).then((c) => c.put(e.request, clone));
+          return response;
+        })
+        .catch(() => caches.match("/offline"))
+    );
     return;
   }
-  // Cache-first for static assets
+
+  // Static assets: cache-first
   if (
     e.request.destination === "style" ||
     e.request.destination === "script" ||
@@ -44,7 +63,8 @@ self.addEventListener("fetch", (e) => {
     );
     return;
   }
-  // Network-first for other requests
+
+  // API / other: network-first
   e.respondWith(
     fetch(e.request)
       .then((r) => {
