@@ -26,7 +26,7 @@ class Home extends Component
 
     public function goToVisit(int $assignmentId): void
     {
-        $assignment = DailyVisitAssignment::findOrFail($assignmentId);
+        $assignment = DailyVisitAssignment::where('user_id', auth()->id())->findOrFail($assignmentId);
         // Find or create today's visit
         $visit = Visit::firstOrCreate([
             'user_id' => auth()->id(),

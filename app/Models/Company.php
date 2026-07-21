@@ -19,6 +19,11 @@ class Company extends Model
         'country', 'zatca_enabled', 'zatca_csid', 'zatca_secret', 'zatca_environment',
     ];
 
+    protected $hidden = [
+        'zatca_secret',
+        'zatca_csid',
+    ];
+
     protected $casts = [
         'vat_percent' => 'decimal:2',
         'rep_discount_percent' => 'decimal:2',

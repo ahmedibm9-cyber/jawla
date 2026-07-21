@@ -43,7 +43,9 @@ class QuotationFlow extends Component
 
     public function selectQuotation(int $id): void
     {
-        $this->request = PriceQuotationRequest::with(['product', 'customer', 'quotation', 'company'])->findOrFail($id);
+        $this->request = PriceQuotationRequest::with(['product', 'customer', 'quotation', 'company'])
+            ->where('user_id', auth()->id())
+            ->findOrFail($id);
         $q = $this->request->quotation;
         $this->quotation = $q;
         $this->negotiatedPrice = (float) $this->request->quotation?->base_price ?? 0;
