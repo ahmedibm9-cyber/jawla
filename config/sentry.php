@@ -53,6 +53,11 @@ return [
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#send_default_pii
     'send_default_pii' => env('SENTRY_SEND_DEFAULT_PII', false),
 
+    // Mask credentials/tokens/financial secrets in request bodies + extra context
+    // before events are sent. String callable (not a closure) so config:cache
+    // stays serializable — see App\Support\SentryScrubber.
+    'before_send' => [\App\Support\SentryScrubber::class, 'handle'],
+
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#ignore_exceptions
     // 'ignore_exceptions' => [],
 
