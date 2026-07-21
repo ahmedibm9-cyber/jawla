@@ -55,6 +55,8 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/admin/login');
+        // Canonical rep-login path (LOGIN.1): a rep logging out returns to the
+        // rep login, not the admin login.
+        return redirect()->route('app.login');
     }
 }
