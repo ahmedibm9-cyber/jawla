@@ -33,8 +33,20 @@ class Photo extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Display URL for the photo. Object-storage disks (s3 / Railway bucket) are
+     * private, so return a short-lived signed URL; the local 'public' disk
+     * returns a plain public URL. Keyed off the disk's driver so it follows
+     * whatever disk the row was stored on.
+     */
     public function url(): string
     {
-        return Storage::disk($this->disk)->url($this->path);
+        $disk = Storage::disk($this->disk);
+
+        if (config("filesystems.disks.{$this->disk}.driver") === 's3') {
+            return $disk->temporaryUrl($this->path, now()->addMinutes(30));
+        }
+
+        return $disk->url($this->path);
     }
 }
