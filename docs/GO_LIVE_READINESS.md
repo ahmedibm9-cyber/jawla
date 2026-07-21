@@ -58,14 +58,21 @@ Ordered by what actually blocks launch.
   drill once against a scratch DB and record it in the backup log. Manual step,
   needs DB creds.
 
-### B4. Live performance + security passes
+### B4. Live performance + security passes — 🟡 prep done, run pending
 
-- **Blocked on:** running against a live target (can't be done from the dev box).
-- **Minimal ask:** a green light to run k6 against staging (not prod), and a
-  scheduled Burp/IDOR pass on auth + invoice + PDF.
-- **Then (small):** expand the k6 credential pool, run the baseline, set read/write
-  p95 + error SLOs. Code-level IDOR review is already clean.
-- **Risk if skipped:** no measured SLOs; the code review substitutes partially.
+- **Done (autonomous):**
+  - k6 scripts fixed to gate on the **built-in** `http_req_failed` + `checks`
+    (not the misleading legacy `errors` metric, now diagnostic-only).
+  - **V1 SLOs defined** in the k6 thresholds:
+    - Reads/pages: `p95 < 1.5s`, `http_req_failed < 5%`, `checks > 95%`.
+    - Writes/auth: `p95 < 2.5s`, `http_req_failed < 5%`, `checks > 90%`.
+  - **Credential pool** added — `PerfUserSeeder` (perf-rep-1..N) + `PERF_POOL_SIZE`
+    so auth load spreads across accounts instead of tripping the 5/min throttle.
+  - Code-level IDOR review clean (visit/sell/PDF/undo enforce ownership/company).
+- **Remaining (needs a live target — not the dev box):**
+  - Run k6 against **staging** (seed `PerfUserSeeder` there first) to confirm the
+    SLOs hold, and a scheduled Burp/IDOR pass on auth + invoice + PDF.
+- **Risk if skipped:** SLOs are defined but not yet measured under load.
 
 ---
 

@@ -16,9 +16,15 @@ export const options = {
     { duration: "30s", target: 50 }, // Hold at 50 users
     { duration: "1m", target: 10 }, // Ramp down
   ],
+  // SLOs (read/page traffic). Pass/fail gates on the BUILT-IN metrics — the real
+  // transport error rate (http_req_failed) and the check pass-rate — not the
+  // legacy custom `errors` rate, which only counted check failures and misread
+  // actual HTTP errors. `errors` is kept below as a diagnostic trend only.
   thresholds: {
-    http_req_duration: ["p(95)<3000"], // 95% of requests under 3s
-    errors: ["rate<0.15"], // Error rate under 15%
+    http_req_duration: ["p(95)<1500"], // read p95 SLO: 1.5s (post-runtime-swap baseline was ~0.84s)
+    http_req_failed: ["rate<0.05"], // transport error SLO: <5% of requests fail
+    checks: ["rate>0.95"], // functional SLO: >95% of assertions pass
+    errors: ["rate<0.15"], // diagnostic only (check-failure rate)
   },
 };
 
