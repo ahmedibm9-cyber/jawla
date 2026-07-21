@@ -42,6 +42,14 @@ Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])->n
 // Handle GET /admin/logout — Filament registers POST only
 Route::get('/admin/logout', [SystemPageController::class, 'adminLogout']);
 
+// Rep PWA guest routes (login)
+Route::middleware(['web', 'guest'])->prefix('app')->name('app.')->group(function () {
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])
+        ->middleware('throttle:login')
+        ->name('login.store');
+});
+
 // Rep PWA route group (protected)
 Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->group(function () {
     Route::get('/', Home::class)->name('home');
