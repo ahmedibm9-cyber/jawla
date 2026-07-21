@@ -170,6 +170,12 @@
             @endif
         </div>
 
+        {{-- Photos (online only — capture uploads immediately) --}}
+        <div class="card">
+            <label class="font-semibold block mb-1">{{ app()->getLocale() === 'ar' ? 'صور' : 'Photos' }}</label>
+            <livewire:app.photo-capture />
+        </div>
+
         {{-- Signature --}}
         <div class="card">
             <label class="font-semibold block mb-1">{{ __('app.signature') }}</label>

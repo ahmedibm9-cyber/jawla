@@ -2,6 +2,7 @@
 
 namespace App\Livewire\App;
 
+use App\Livewire\Concerns\CapturesPhotos;
 use App\Models\Activity;
 use App\Models\Visit;
 use App\Services\VisitReportService;
@@ -12,6 +13,8 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class VisitFlow extends Component
 {
+    use CapturesPhotos;
+
     public Visit $visit;
 
     public string $step = 'checkin';
@@ -141,13 +144,15 @@ class VisitFlow extends Component
             'summary' => 'required|string|min:5',
         ]);
 
-        app(VisitReportService::class)->submit($this->visit, [
+        $report = app(VisitReportService::class)->submit($this->visit, [
             'summary' => $this->summary,
             'customer_feedback' => $this->customerFeedback ?: null,
             'action_taken' => $this->actionTaken ?: null,
             'follow_up_needed' => $this->followUpNeeded,
             'follow_up_note' => $this->followUpNote ?: null,
         ], $this->signature ?: null);
+
+        $this->attachPhotos($report);
 
         $this->step = 'done';
     }

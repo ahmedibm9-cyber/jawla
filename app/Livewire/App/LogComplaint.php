@@ -2,6 +2,7 @@
 
 namespace App\Livewire\App;
 
+use App\Livewire\Concerns\CapturesPhotos;
 use App\Models\Customer;
 use App\Services\ComplaintService;
 use Livewire\Attributes\Layout;
@@ -10,6 +11,8 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class LogComplaint extends Component
 {
+    use CapturesPhotos;
+
     public ?int $customer_id = null;
 
     public string $complaint_type = 'other';
@@ -28,13 +31,15 @@ class LogComplaint extends Component
 
         $user = auth()->user();
 
-        $service->log(
+        $complaint = $service->log(
             companyId: $user->company_id,
             userId: $user->id,
             customerId: $validated['customer_id'],
             type: $validated['complaint_type'],
             description: $validated['description'],
         );
+
+        $this->attachPhotos($complaint);
 
         $this->reset(['customer_id', 'complaint_type', 'description']);
         $this->successMessage = app()->getLocale() === 'ar'

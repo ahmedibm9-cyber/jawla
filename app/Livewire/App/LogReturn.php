@@ -2,6 +2,7 @@
 
 namespace App\Livewire\App;
 
+use App\Livewire\Concerns\CapturesPhotos;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Stock;
@@ -13,6 +14,8 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class LogReturn extends Component
 {
+    use CapturesPhotos;
+
     public ?int $customer_id = null;
 
     public string $reason = '';
@@ -61,6 +64,8 @@ class LogReturn extends Component
             ], $this->items),
             reason: $this->reason,
         );
+
+        $this->attachPhotos($return);
 
         $this->success = true;
         $this->successMessage = __('app.return_submitted').' — '.$return->return_number;

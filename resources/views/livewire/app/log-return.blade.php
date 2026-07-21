@@ -18,7 +18,12 @@
             <form wire:submit="submit">
                 <div class="form-group">
                     <label for="customer_id" class="form-label">{{ __('app.customer') }} *</label>
-                    <x-ds.autocomplete wire:model="customer_id" id="customer_id" :options="$customers" :placeholder="__('app.search_customer')" required @error('customer_id') aria-invalid="true" aria-describedby="customer_id-error" @enderror />
+                    <x-ds.autocomplete wire:model="customer_id" id="customer_id" :placeholder="__('app.search_customer')" required>
+                        <option value="">---</option>
+                        @foreach($customers as $c)
+                            <option value="{{ $c->id }}">{{ $c->name_ar }}</option>
+                        @endforeach
+                    </x-ds.autocomplete>
                     @error('customer_id') <small id="customer_id-error" class="form-error">{{ $message }}</small> @enderror
                 </div>
 
@@ -33,7 +38,12 @@
                         <div class="border border-border rounded-lg p-3 mb-3">
                             <div class="form-group">
                                 <label for="item_{{ $i }}_product" class="form-label">{{ __('app.product') }}</label>
-                                <x-ds.autocomplete wire:model="items.{{ $i }}.product_id" id="item_{{ $i }}_product" :options="$products" :placeholder="__('app.search_product')" wire:key="ac-product-{{ $i }}" />
+                                <x-ds.autocomplete wire:model="items.{{ $i }}.product_id" id="item_{{ $i }}_product" :placeholder="__('app.search_product')" wire:key="ac-product-{{ $i }}">
+                                    <option value="">---</option>
+                                    @foreach($products as $p)
+                                        <option value="{{ $p->id }}">{{ $p->name_ar }}</option>
+                                    @endforeach
+                                </x-ds.autocomplete>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
@@ -51,6 +61,12 @@
                         </div>
                     @endforeach
                     <button type="button" class="btn btn-outline text-sm w-full" wire:click="addItem">{{ __('app.add_item') }}</button>
+                </div>
+
+                {{-- Photos (online only — capture uploads immediately) --}}
+                <div class="card mt-3">
+                    <label class="font-semibold block mb-1">{{ app()->getLocale() === 'ar' ? 'صور' : 'Photos' }}</label>
+                    <livewire:app.photo-capture />
                 </div>
 
                 <x-ds.modal class="mt-3" :title="__('app.confirm_return_title')" :message="__('app.confirm_return_msg')">

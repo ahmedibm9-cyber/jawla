@@ -12,7 +12,12 @@
         <form wire:submit="submit">
             <div class="form-group">
                 <label for="customer_id" class="form-label">{{ __('app.customer') }} *</label>
-                <x-ds.autocomplete wire:model="customer_id" id="customer_id" :options="$customers" :placeholder="__('app.search_customer')" required @error('customer_id') aria-invalid="true" aria-describedby="customer_id-error" @enderror />
+                <x-ds.autocomplete wire:model="customer_id" id="customer_id" :placeholder="__('app.search_customer')" required>
+                    <option value="">---</option>
+                    @foreach($customers as $c)
+                        <option value="{{ $c->id }}">{{ $c->name_ar }}</option>
+                    @endforeach
+                </x-ds.autocomplete>
                 @error('customer_id') <small id="customer_id-error" class="form-error">{{ $message }}</small> @enderror
             </div>
 
@@ -31,6 +36,12 @@
                 <label for="description" class="form-label">{{ __('app.description') }} *</label>
                 <textarea id="description" wire:model="description" rows="3" autocomplete="off" class="form-textarea" @error('description') aria-invalid="true" aria-describedby="description-error" @enderror></textarea>
                 @error('description') <small id="description-error" class="form-error">{{ $message }}</small> @enderror
+            </div>
+
+            {{-- Photos (online only — capture uploads immediately) --}}
+            <div class="form-group">
+                <label class="form-label">{{ app()->getLocale() === 'ar' ? 'صور' : 'Photos' }}</label>
+                <livewire:app.photo-capture />
             </div>
 
             <x-ds.modal :title="__('app.confirm_complaint_title') ?? 'Log complaint?'" :message="__('app.confirm_complaint_msg') ?? 'This complaint will be recorded and sent to the sales manager for resolution.'">
