@@ -16,20 +16,30 @@ use Illuminate\Support\Facades\Storage;
  */
 class PhotoService
 {
-    private const DISK = 'public';
-
     private const DIRECTORY = 'photos';
+
+    /**
+     * Target disk for new photos, config-driven so prod can use durable object
+     * storage (Railway bucket / S3) while local/tests stay on 'public'. The disk
+     * name is recorded per Photo row, so existing photos keep resolving/deleting
+     * against whatever disk they were written to — a safe, gradual cutover.
+     */
+    private function disk(): string
+    {
+        return (string) config('filesystems.photo_disk', 'public');
+    }
 
     public function store(UploadedFile $file, User $rep, ?Model $photable = null): Photo
     {
-        $path = $file->store(self::DIRECTORY, self::DISK);
+        $disk = $this->disk();
+        $path = $file->store(self::DIRECTORY, $disk);
 
         return Photo::create([
             'company_id' => $rep->company_id,
             'user_id' => $rep->id,
             'photable_type' => $photable?->getMorphClass(),
             'photable_id' => $photable?->getKey(),
-            'disk' => self::DISK,
+            'disk' => $disk,
             'path' => $path,
             'original_name' => $file->getClientOriginalName(),
             'size' => $file->getSize(),

@@ -16,6 +16,13 @@ return [
     'default' => env('FILESYSTEM_DISK', 'local'),
 
     /*
+    | Disk for rep-captured photos. Defaults to the local 'public' disk; set
+    | PHOTO_DISK=s3 in production (with the s3/Railway-bucket credentials below)
+    | for durable, replica-shared storage. See docs/GO_LIVE_READINESS.md (B2).
+    */
+    'photo_disk' => env('PHOTO_DISK', 'public'),
+
+    /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
