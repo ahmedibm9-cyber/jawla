@@ -58,11 +58,15 @@ class QuotationFlow extends Component
 
     public function confirmPrice(): void
     {
+        $this->validate([
+            'negotiatedPrice' => 'required|numeric|min:0.01',
+        ]);
+
         if (! $this->quotation) {
             return;
         }
 
-        if ($this->negotiatedPrice < $this->floor) {
+        if ($this->negotiatedPrice < $this->floor || $this->negotiatedPrice > $this->ceiling) {
             $this->errorMessage = __('errors.price.out_of_range', [
                 'price' => $this->negotiatedPrice,
                 'product' => $this->request->product->name_ar ?? '',
@@ -81,11 +85,23 @@ class QuotationFlow extends Component
 
     public function createProforma(DocumentNumberService $numbers, InvoiceCalculationService $calc): void
     {
+        $this->validate([
+            'negotiatedPrice' => 'required|numeric|min:0.01',
+        ]);
+
         if (! $this->quotation || ! $this->request) {
             return;
         }
 
-        if ($this->negotiatedPrice < $this->floor) {
+        if ($this->request->status !== 'confirmed') {
+            $this->errorMessage = app()->getLocale() === 'ar'
+                ? 'يجب تأكيد السعر أولاً'
+                : 'Price must be confirmed first';
+
+            return;
+        }
+
+        if ($this->negotiatedPrice < $this->floor || $this->negotiatedPrice > $this->ceiling) {
             $this->errorMessage = __('errors.price.out_of_range', [
                 'price' => $this->negotiatedPrice,
                 'product' => $this->request->product->name_ar ?? '',

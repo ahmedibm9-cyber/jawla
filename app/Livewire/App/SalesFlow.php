@@ -191,6 +191,30 @@ class SalesFlow extends Component
 
     public function submit(InvoiceService $invoices, ThermalPrintFormatter $printer): void
     {
+        // Validate customer
+        $this->validate([
+            'customerId' => 'required|integer|exists:customers,id',
+        ]);
+
+        // Validate cart items
+        foreach ($this->cart as $index => $item) {
+            if (! isset($item['product_id']) || ! is_numeric($item['product_id'])) {
+                $this->errorMessage = app()->getLocale() === 'ar' ? 'منتج غير صالح في السلة' : 'Invalid product in cart';
+
+                return;
+            }
+            if (! isset($item['quantity']) || $item['quantity'] <= 0 || $item['quantity'] > 9999) {
+                $this->errorMessage = app()->getLocale() === 'ar' ? 'كمية غير صالحة' : 'Invalid quantity';
+
+                return;
+            }
+            if (! isset($item['price']) || $item['price'] <= 0) {
+                $this->errorMessage = app()->getLocale() === 'ar' ? 'سعر غير صالح' : 'Invalid price';
+
+                return;
+            }
+        }
+
         if ($this->customerId <= 0) {
             $this->errorMessage = app()->getLocale() === 'ar' ? 'اختر عميلاً' : 'Select a customer';
 

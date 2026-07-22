@@ -150,7 +150,11 @@ class VisitFlow extends Component
     public function submitReport(): void
     {
         $this->validate([
-            'summary' => 'required|string|min:5',
+            'summary' => 'required|string|min:5|max:2000',
+            'customerFeedback' => 'nullable|string|max:1000',
+            'actionTaken' => 'nullable|string|max:1000',
+            'followUpNote' => 'nullable|string|max:1000',
+            'signature' => 'nullable|string|max:50000',
         ]);
 
         $report = app(VisitReportService::class)->submit($this->visit, [

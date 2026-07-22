@@ -31,8 +31,8 @@ class AddCustomer extends Component
             'name_en' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
             'address' => 'nullable|string|max:500',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
         $user = auth()->user();

@@ -74,6 +74,11 @@ class Home extends Component
 
     public function startWork(): void
     {
+        $this->validate([
+            'startLat' => 'nullable|numeric|between:-90,90',
+            'startLng' => 'nullable|numeric|between:-180,180',
+        ]);
+
         if (! session('work_session_id')) {
             $session = WorkSession::create([
                 'user_id' => auth()->id(),

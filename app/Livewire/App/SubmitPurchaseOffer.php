@@ -68,8 +68,8 @@ class SubmitPurchaseOffer extends Component
         $validated = $this->validate([
             'product_id' => 'required|exists:products,id',
             'supplier_id' => 'nullable|exists:suppliers,id',
-            'quantity' => 'required|numeric|min:0.001',
-            'offered_price' => 'required|numeric|min:0.01',
+            'quantity' => 'required|numeric|min:0.001|max:99999',
+            'offered_price' => 'required|numeric|min:0.01|max:999999',
             'currency' => 'required|in:EGP,USD,EUR,SAR',
             'payment_terms' => 'nullable|string|max:500',
             'expires_at' => 'nullable|date|after_or_equal:today',

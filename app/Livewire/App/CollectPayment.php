@@ -56,6 +56,7 @@ class CollectPayment extends Component
     {
         $this->validate([
             'customer_id' => 'required|exists:customers,id',
+            'invoice_id' => 'nullable|integer|exists:invoices,id',
             'amount' => 'required|numeric|min:0.01',
             'method' => 'required|string|in:cash,cheque,transfer,other',
             'notes' => 'nullable|string|max:500',
