@@ -150,6 +150,7 @@ class InvoiceService implements InvoiceContract
     {
         return DB::transaction(function () use ($invoice, $userId, $reason): Invoice {
             $this->cancelWithoutTransaction($invoice, $userId, $reason);
+
             return $invoice;
         });
     }

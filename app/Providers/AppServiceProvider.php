@@ -15,7 +15,10 @@ use App\Services\Contracts\PricingService;
 use App\Services\Contracts\StockService;
 use App\Services\Contracts\VanTransferService as VanTransferServiceContract;
 use App\Services\Eta\Contracts\EtaClient;
+use App\Services\Eta\Contracts\EtaSigner;
+use App\Services\Eta\HttpEtaClient;
 use App\Services\Eta\NullEtaClient;
+use App\Services\Eta\UnsignedEtaSigner;
 use App\Services\InvoiceCalculationService as InvoiceCalculationServiceImpl;
 use App\Services\NumberSequenceService;
 use App\Services\OutOfStockService;
@@ -61,13 +64,13 @@ class AppServiceProvider extends ServiceProvider
         // are configured, so demo/UAT stays on the inert NullEtaClient. The
         // document signer stays Unsigned until the taxpayer certificate is
         // provisioned — the last go-live gate. No call-site changes required.
-        $this->app->bind(\App\Services\Eta\Contracts\EtaSigner::class, \App\Services\Eta\UnsignedEtaSigner::class);
+        $this->app->bind(EtaSigner::class, UnsignedEtaSigner::class);
         $this->app->bind(EtaClient::class, function () {
             $configured = (bool) config('eta.enabled')
                 && (string) config('eta.api_base_url') !== ''
                 && (string) config('eta.id_base_url') !== '';
 
-            return $configured ? app(\App\Services\Eta\HttpEtaClient::class) : app(NullEtaClient::class);
+            return $configured ? app(HttpEtaClient::class) : app(NullEtaClient::class);
         });
     }
 

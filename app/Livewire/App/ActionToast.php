@@ -53,8 +53,6 @@ class ActionToast extends Component
             return;
         }
 
-        $this->undone = true;
-
         $userId = (int) auth()->id();
         $reason = app()->getLocale() === 'ar' ? 'تراجع بواسطة المندوب' : 'Undone by rep';
 

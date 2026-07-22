@@ -5,7 +5,7 @@
         <div class="home-hero">
             <div class="home-hero-content">
                 <div class="home-hero-brand">
-                    <img src="/images/logo.svg" alt="Jawla" class="home-hero-logo" width="100" height="33">
+                    <img src="/images/logo-transparent-light.png" alt="Jawla" class="home-hero-logo" width="100" height="33">
                 </div>
                 <div class="home-hero-top">
                     <div>

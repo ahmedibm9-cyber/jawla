@@ -11,7 +11,7 @@ interface EtaSigner
 {
     /**
      * @param  array<string, mixed>  $document  the built, unsigned ETA document
-     * @return array<string, mixed>  the document with a `signatures` array attached
+     * @return array<string, mixed> the document with a `signatures` array attached
      */
     public function sign(array $document): array;
 }

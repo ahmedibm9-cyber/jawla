@@ -22,7 +22,7 @@
     "laravel/framework": "^13.8",
     "laravel/sanctum": "*",
     "laravel/tinker": "^3.0",
-    "league/flysystem-aws-s3-v3": "*",
+    "league/flysystem-aws-s3-v3": "^3.35",
     "mpdf/mpdf": "*",
     "sentry/sentry-laravel": "*",
     "simplesoftwareio/simple-qrcode": "*",
