@@ -166,6 +166,7 @@ class SalesFlow extends Component
             $this->errorMessage = app()->getLocale() === 'ar'
                 ? 'حدث خطأ — يرجى إعادة تسجيل الدخول'
                 : 'Session error — please log in again';
+
             return;
         }
 

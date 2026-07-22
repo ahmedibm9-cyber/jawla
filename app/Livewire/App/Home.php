@@ -14,7 +14,9 @@ use Livewire\Component;
 class Home extends Component
 {
     public int $visitCount = 0;
+
     public ?float $startLat = null;
+
     public ?float $startLng = null;
 
     public function mount(): void

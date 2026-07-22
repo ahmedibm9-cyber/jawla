@@ -127,6 +127,7 @@ class VisitFlow extends Component
             $this->errorMessage = app()->getLocale() === 'ar'
                 ? 'إحداثيات GPS غير صحيحة'
                 : 'Invalid GPS coordinates';
+
             return;
         }
 
