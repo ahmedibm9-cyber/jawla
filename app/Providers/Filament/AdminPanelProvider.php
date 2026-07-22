@@ -45,7 +45,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->font('IBM Plex Sans Arabic')
             ->brandName('Jawla')
-            ->brandLogo(asset('images/green-j.png'))
+            ->brandLogo(asset('images/black-j.png'))
             ->darkModeBrandLogo(asset('images/white-j.png'))
             ->brandLogoHeight('4rem')
             ->defaultAvatarProvider(CompanyAvatarProvider::class)

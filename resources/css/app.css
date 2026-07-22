@@ -20,12 +20,8 @@
 
   /* ---- Brand palette ---- */
   --color-brand: #6db83b;
-  --color-brand-light: #8bc954;
+  --color-brand-light: #7ec54e;
   --color-brand-dark: #5ba82e;
-
-  --color-accent: #6db83b;
-  --color-accent-light: #8bc954;
-  --color-accent-dark: #5ba82e;
 
   --color-accent-warm: #d97706;
   --color-accent-warm-light: #f59e0b;
@@ -165,7 +161,7 @@
 }
 
 .tab-item.active {
-  color: var(--color-accent);
+  color: var(--color-brand);
 }
 
 .tab-item.active::after {
@@ -177,7 +173,7 @@
   width: 20px;
   height: 3px;
   border-radius: 0 0 3px 3px;
-  background: var(--color-accent);
+  background: var(--color-brand);
 }
 
 .tab-item svg {
@@ -188,12 +184,12 @@
 
 .tab-item:hover,
 .tab-item:focus-visible {
-  color: var(--color-accent);
+  color: var(--color-brand);
   outline: none;
 }
 
 .tab-item:focus-visible {
-  box-shadow: inset 0 -2px 0 0 var(--color-accent);
+  box-shadow: inset 0 -2px 0 0 var(--color-brand);
 }
 
 /* ---- Main Content ---- */
@@ -242,7 +238,7 @@
 }
 
 .btn-primary {
-  background: var(--color-accent);
+  background: var(--color-brand);
   color: #fff;
 }
 
@@ -252,7 +248,7 @@
 
 .btn-primary:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 40%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 40%, transparent);
 }
 
 .btn-danger {
@@ -270,18 +266,18 @@
 }
 
 .btn-outline {
-  border: 2px solid var(--color-accent);
-  color: var(--color-accent);
+  border: 2px solid var(--color-brand);
+  color: var(--color-brand);
   background: transparent;
 }
 
 .btn-outline:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  background: color-mix(in srgb, var(--color-brand) 8%, transparent);
 }
 
 .btn-outline:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 30%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 30%, transparent);
 }
 
 .btn-secondary {
@@ -297,7 +293,7 @@
 
 .btn-secondary:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 30%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 30%, transparent);
 }
 
 .btn-ghost {
@@ -311,7 +307,7 @@
 
 .btn-ghost:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 30%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 30%, transparent);
 }
 
 /* ---- Badges ---- */
@@ -377,7 +373,7 @@
 }
 
 .step.active .step-dot {
-  background: var(--color-accent);
+  background: var(--color-brand);
   color: #fff;
 }
 
@@ -395,7 +391,7 @@
 
 .step.done .step-line,
 .step.active .step-line {
-  background: var(--color-accent);
+  background: var(--color-brand);
 }
 
 /* ---- Skeleton ---- */
@@ -498,7 +494,7 @@
 }
 
 .clickable-card:focus-visible {
-  outline: 2px solid var(--color-accent);
+  outline: 2px solid var(--color-brand);
   outline-offset: 2px;
 }
 
@@ -506,7 +502,7 @@
 .home-hero {
   background: linear-gradient(
     135deg,
-    var(--color-accent) 0%,
+    var(--color-brand) 0%,
     var(--color-accent-dark) 100%
   );
   color: #fff;
@@ -730,7 +726,7 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: var(--color-accent);
+  background: var(--color-brand);
   color: #fff;
   display: flex;
   align-items: center;
@@ -792,8 +788,8 @@
 
 .more-item:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-accent);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 60%, transparent);
+  box-shadow: 0 0 0 2px var(--color-brand);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brand) 60%, transparent);
 }
 
 .more-item-icon {
@@ -808,7 +804,7 @@
 }
 
 .more-icon-green {
-  background: var(--color-accent);
+  background: var(--color-brand);
 }
 .more-icon-blue {
   background: var(--color-accent-blue);
@@ -904,7 +900,7 @@
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: var(--color-accent);
+  background: var(--color-brand);
   color: #fff;
   display: flex;
   align-items: center;
@@ -968,8 +964,8 @@
 .form-select:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: var(--color-accent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 15%, transparent);
+  border-color: var(--color-brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-brand) 15%, transparent);
 }
 
 .form-input::placeholder,
@@ -1087,7 +1083,7 @@
   margin: 0 16px 20px;
   background: linear-gradient(
     135deg,
-    var(--color-accent) 0%,
+    var(--color-brand) 0%,
     var(--color-accent-dark) 100%
   );
   color: #fff;
@@ -1204,7 +1200,7 @@
 
 .settings-item:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 60%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brand) 60%, transparent);
 }
 
 .settings-item-icon {
@@ -1265,14 +1261,14 @@
 }
 
 .settings-lang-btn.active {
-  border-color: var(--color-accent);
-  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+  border-color: var(--color-brand);
+  background: color-mix(in srgb, var(--color-brand) 8%, transparent);
   color: var(--color-accent-dark);
 }
 
 .settings-lang-btn:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 60%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-brand) 60%, transparent);
 }
 
 /* ---- Skip Link ---- */
@@ -1280,7 +1276,7 @@
   position: absolute;
   left: -9999px;
   top: 0;
-  background: var(--color-accent);
+  background: var(--color-brand);
   color: #fff;
   padding: 8px 16px;
   z-index: var(--z-overlay);
@@ -1374,7 +1370,7 @@ dialog[open] {
 }
 
 .notification-badge-normal {
-  background: var(--color-accent);
+  background: var(--color-brand);
 }
 
 /* ---- PWA Install Banner ---- */
@@ -1399,7 +1395,7 @@ dialog[open] {
 }
 
 .pwa-install-btn {
-  background: var(--color-accent);
+  background: var(--color-brand);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -1447,7 +1443,17 @@ dialog[open] {
 }
 
 /* ---- Dark Mode ---- */
+.logo-dark {
+  display: none;
+}
 @media (prefers-color-scheme: dark) {
+  .logo-light {
+    display: none;
+  }
+  .logo-dark {
+    display: block;
+  }
+
   :root {
     --color-surface: #0f172a;
     --color-surface-alt: #1e293b;
@@ -1503,7 +1509,7 @@ dialog[open] {
 .action-toast-undo {
   background: transparent;
   border: none;
-  color: var(--color-accent);
+  color: var(--color-brand);
   font-weight: 700;
   padding: 6px 10px;
   min-height: 44px;
