@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#F8FAFC">
-  <link rel="icon" href="/images/green-j.png" type="image/png">
+  <link rel="icon" href="/images/logo-app-icon.png" type="image/png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <link rel="manifest" href="/manifest.json">
   @vite(['resources/css/app.css'])

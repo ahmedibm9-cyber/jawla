@@ -12,7 +12,7 @@
   "dir": "rtl",
   "categories": ["business", "productivity"],
   "icons": [
-    { "src": "/images/white-j.png", "sizes": "any", "type": "image/png" },
+    { "src": "/images/logo-app-icon.png", "sizes": "any", "type": "image/png" },
     { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
     {
