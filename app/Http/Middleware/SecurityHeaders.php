@@ -12,14 +12,43 @@ class SecurityHeaders
     {
         $response = $next($request);
 
-        $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+        // HSTS — force HTTPS for 1 year, include subdomains
+        $response->headers->set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+
+        // Prevent MIME-type sniffing
         $response->headers->set('X-Content-Type-Options', 'nosniff');
+
+        // Prevent clickjacking — never allow framing
         $response->headers->set('X-Frame-Options', 'DENY');
+
+        // Referrer — send origin only on cross-origin, full on same-origin
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
-        $response->headers->set(
-            'Content-Security-Policy',
-            "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.bunny.net; img-src 'self' data: https:; font-src 'self' data: https://fonts.bunny.net; connect-src 'self';"
-        );
+
+        // XSS Protection — legacy browsers (still blocks some attacks)
+        $response->headers->set('X-XSS-Protection', '1; mode=block');
+
+        // Permissions Policy — disable unused browser features
+        $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()');
+
+        // Cross-Origin Policies — isolate browsing context
+        $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
+        $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
+        $response->headers->set('Cross-Origin-Embedder-Policy', 'require-corp');
+
+        // CSP — Livewire needs unsafe-inline for inline styles, unsafe-eval for Alpine
+        // TODO: migrate to nonce-based CSP when Livewire supports it
+        $csp = implode('; ', [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+            "img-src 'self' data: blob:",
+            "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com",
+            "connect-src 'self' wss: ws:",
+            "frame-ancestors 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+        ]);
+        $response->headers->set('Content-Security-Policy', $csp);
 
         return $response;
     }
