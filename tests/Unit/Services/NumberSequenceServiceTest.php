@@ -26,7 +26,7 @@ class NumberSequenceServiceTest extends TestCase
 
         $number = $this->service->generate('sales_invoice', $company->id);
 
-        $this->assertMatchesRegularExpression('/^[A-Z]+-GPC-\d{4}-\d{5}$/', $number);
+        $this->assertMatchesRegularExpression('/^[A-Z]+-GPC-\d{4}-\d{5}-[0-9A-F]$/', $number);
     }
 
     public function test_returns_sequential_numbers(): void

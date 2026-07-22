@@ -38,6 +38,9 @@ class ExpenseServiceTest extends TestCase
         $company = Company::factory()->create();
         $rep = User::factory()->create(['company_id' => $company->id]);
 
+        // Create cashbox with sufficient balance
+        CashBox::create(['user_id' => $rep->id, 'company_id' => $company->id, 'balance' => 100]);
+
         app(ExpenseService::class)->log(
             companyId: $company->id,
             userId: $rep->id,
@@ -47,7 +50,24 @@ class ExpenseServiceTest extends TestCase
 
         $cashBox = CashBox::where('user_id', $rep->id)->first();
         $this->assertNotNull($cashBox);
-        $this->assertSame(-30.0, (float) $cashBox->balance);
+        $this->assertSame(70.0, (float) $cashBox->balance);
+    }
+
+    public function test_log_expense_rejects_when_balance_insufficient(): void
+    {
+        $company = Company::factory()->create();
+        $rep = User::factory()->create(['company_id' => $company->id]);
+
+        CashBox::create(['user_id' => $rep->id, 'company_id' => $company->id, 'balance' => 10]);
+
+        $this->expectException(\DomainException::class);
+
+        app(ExpenseService::class)->log(
+            companyId: $company->id,
+            userId: $rep->id,
+            category: 'fuel',
+            amount: 50.0,
+        );
     }
 
     public function test_cancel_expense_restores_cashbox(): void
@@ -79,6 +99,9 @@ class ExpenseServiceTest extends TestCase
     {
         $company = Company::factory()->create();
         $rep = User::factory()->create(['company_id' => $company->id]);
+
+        // Create cashbox with sufficient balance
+        CashBox::create(['user_id' => $rep->id, 'company_id' => $company->id, 'balance' => 100]);
 
         $expense = app(ExpenseService::class)->log(
             companyId: $company->id,

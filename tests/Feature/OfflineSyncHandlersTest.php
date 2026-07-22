@@ -43,6 +43,15 @@ class OfflineSyncHandlersTest extends TestCase
         $this->product = Product::where('sku', 'PP-H030')->firstOrFail();
         $this->actingAs($this->rep);
         app(ActiveCompanyContext::class)->setFromUser($this->rep);
+
+        // Ensure cash box has sufficient balance for expense tests
+        CashBox::updateOrCreate(
+            ['user_id' => $this->rep->id],
+            ['company_id' => $this->rep->company_id, 'balance' => 10000]
+        );
+
+        // Ensure customer has sufficient balance for return tests
+        $this->customer->update(['balance' => 50000]);
     }
 
     protected function tearDown(): void
