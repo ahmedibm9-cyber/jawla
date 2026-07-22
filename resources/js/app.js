@@ -1,6 +1,19 @@
+import * as Sentry from "@sentry/browser";
 import "./offline/sync.js";
-// Leaflet removed from main bundle — loaded dynamically on map pages only
-// SW registration handled in app.blade.php inline script (skips under navigator.webdriver)
+
+const sentryDsn = document.querySelector('meta[name="sentry-dsn"]')?.content;
+if (sentryDsn) {
+  Sentry.init({
+    dsn: sentryDsn,
+    environment:
+      document.querySelector('meta[name="sentry-environment"]')?.content ||
+      "production",
+    tracesSampleRate: 0.1,
+    replaysSessionSampleRate: 0,
+    replaysOnErrorSampleRate: 0.5,
+    integrations: [Sentry.browserTracingIntegration()],
+  });
+}
 
 const PRINTER_STORAGE_KEY = "jawla.bluetooth-printer";
 const PRINTER_SERVICE_UUIDS = [

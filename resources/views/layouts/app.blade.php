@@ -25,6 +25,10 @@
   @endphp
   <title>{{ isset($pageKeyMap[$pageKey]) ? __('app.'.$pageKeyMap[$pageKey]).' | Jawla' : 'Jawla' }}</title>
   <meta name="description" content="{{ app()->getLocale() === 'ar' ? 'تطبيق إدارة المبيعات الميدانية - Jawla' : 'Field Sales Management PWA - Jawla' }}">
+  @if(config('sentry.dsn'))
+  <meta name="sentry-dsn" content="{{ config('sentry.dsn') }}">
+  <meta name="sentry-environment" content="{{ config('sentry.environment', config('app.env', 'production')) }}">
+  @endif
   <meta name="robots" content="noindex, nofollow">
   @filamentStyles
   @vite(['resources/css/app.css', 'resources/js/app.js'])
