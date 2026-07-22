@@ -77,8 +77,14 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
     Route::get('/reconcile', CashReconcile::class)->name('reconcile');
     Route::get('/transfers', VanTransfers::class)->name('transfers');
     Route::get('/purchase-offer', SubmitPurchaseOffer::class)->name('purchase-offer');
-    Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])->name('pdf.proforma');
-    Route::get('/pdf/invoice/{invoice}', [PdfController::class, 'invoice'])->name('pdf.invoice');
-    Route::get('/pdf/receipt/{payment}', [PdfController::class, 'receipt'])->name('pdf.receipt');
+    Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])
+        ->middleware('throttle:10,1')
+        ->name('pdf.proforma');
+    Route::get('/pdf/invoice/{invoice}', [PdfController::class, 'invoice'])
+        ->middleware('throttle:10,1')
+        ->name('pdf.invoice');
+    Route::get('/pdf/receipt/{payment}', [PdfController::class, 'receipt'])
+        ->middleware('throttle:10,1')
+        ->name('pdf.receipt');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 });
