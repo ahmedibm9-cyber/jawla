@@ -71,7 +71,7 @@
   <main id="main">{!! $slot !!}</main>
   @livewireScripts
   @filamentScripts
-  <script>
+  <script defer>
     let deferredPrompt = null;
     window.addEventListener('beforeinstallprompt', e => {
       e.preventDefault();
