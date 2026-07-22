@@ -348,13 +348,10 @@ window.jawlaBluetoothPrinter = ({ payload }) => ({
 
       for (const chunk of chunkBytes(bytes)) {
         if (typeof characteristic.writeValueWithoutResponse === "function") {
-          // eslint-disable-next-line no-await-in-loop
           await characteristic.writeValueWithoutResponse(chunk);
         } else {
-          // eslint-disable-next-line no-await-in-loop
           await characteristic.writeValue(chunk);
         }
-        // eslint-disable-next-line no-await-in-loop
         await sleep(30);
       }
 
@@ -377,149 +374,29 @@ window.jawlaBluetoothPrinter = ({ payload }) => ({
 window.jawlaAutocompleteRegistry = window.jawlaAutocompleteRegistry || {};
 
 window.jawlaAutocompleteInit = function jawlaAutocompleteInit(id) {
-  const input = document.getElementById(id);
-  const hidden = document.getElementById(`${id}-hidden`);
   const options = window.jawlaAutocompleteRegistry[id] || [];
-
-  if (!input || !hidden) return;
-
-  const current = options.find(
-    (option) => String(option.value) === String(hidden.value)
-  );
-  if (current) {
-    input.value = current.display || current.label;
+  const instance = window.jawlaAutocomplete({
+    options,
+    noResultsText: "No results",
+  });
+  const el = document.getElementById(id);
+  if (el && el.__x) {
+    Object.assign(el.__x.$data, instance);
   }
 };
 
-window.jawlaAutocompleteSync = function jawlaAutocompleteSync(id) {
-  const input = document.getElementById(id);
-  const hidden = document.getElementById(`${id}-hidden`);
-  const options = window.jawlaAutocompleteRegistry[id] || [];
-
-  if (!input || !hidden) return;
-
-  const match = options.find(
-    (option) => (option.display || option.label) === input.value
-  );
-  hidden.value = match ? String(match.value) : "";
-  hidden.dispatchEvent(new Event("input", { bubbles: true }));
-  hidden.dispatchEvent(new Event("change", { bubbles: true }));
+window.jawlaAutocompleteSync = function jawlaAutocompleteSync(id, value) {
+  const el = document.getElementById(id);
+  if (el && el.__x) {
+    el.__x.$data.selected = value;
+    el.__x.$data.search = el.__x.$data.labelFor(value);
+    el.__x.$data.syncHidden();
+  }
 };
 
 window.jawlaAutocompleteFinalize = function jawlaAutocompleteFinalize(id) {
-  const input = document.getElementById(id);
-  const hidden = document.getElementById(`${id}-hidden`);
-  const options = window.jawlaAutocompleteRegistry[id] || [];
-
-  if (!input || !hidden) return;
-
-  const match = options.find(
-    (option) => (option.display || option.label) === input.value
-  );
-
-  if (match) {
-    hidden.value = String(match.value);
-    input.value = match.display || match.label;
-  } else if (hidden.value) {
-    const current = options.find(
-      (option) => String(option.value) === String(hidden.value)
-    );
-    input.value = current ? current.display || current.label : "";
-    if (!current) hidden.value = "";
-  } else if (input.value.trim() !== "") {
-    input.value = "";
+  const el = document.getElementById(id);
+  if (el && el.__x) {
+    el.__x.$data.closeList();
   }
-
-  if (input.required && hidden.value === "") {
-    input.setCustomValidity(
-      document.documentElement.lang === "ar"
-        ? "اختر قيمة من القائمة."
-        : "Choose a value from the list."
-    );
-  } else {
-    input.setCustomValidity("");
-  }
-
-  hidden.dispatchEvent(new Event("input", { bubbles: true }));
-  hidden.dispatchEvent(new Event("change", { bubbles: true }));
 };
-
-// CG2.3 — offline sync-queue viewer. Registered on alpine:init so the component
-// is defined before Alpine walks the DOM (avoids the @script ordering hazard).
-// The queue lives in the IndexedDB outbox; all data comes from window.jawlaSync.
-document.addEventListener("alpine:init", () => {
-  const isAr = document.documentElement.lang === "ar";
-  const labels = {
-    sale: isAr ? "فاتورة" : "Sale",
-    payment: isAr ? "دفعة" : "Payment",
-    return: isAr ? "مرتجع" : "Return",
-    expense: isAr ? "مصروف" : "Expense",
-    complaint: isAr ? "شكوى" : "Complaint",
-    visit_report: isAr ? "تقرير زيارة" : "Visit report",
-  };
-
-  window.Alpine.data("jawlaSyncQueue", () => ({
-    pending: [],
-    failed: [],
-    busy: false,
-
-    get items() {
-      return [...this.pending, ...this.failed].sort(
-        (a, b) => a.createdAt - b.createdAt
-      );
-    },
-
-    async refresh() {
-      if (!window.jawlaSync) return;
-      this.pending = await window.jawlaSync.pending();
-      this.failed = await window.jawlaSync.failed();
-    },
-
-    label(type) {
-      return labels[type] || type;
-    },
-
-    when(ts) {
-      try {
-        return new Date(ts).toLocaleString();
-      } catch {
-        return "";
-      }
-    },
-
-    async retryItem(id) {
-      this.busy = true;
-      try {
-        await window.jawlaSync.retry(id);
-      } finally {
-        this.busy = false;
-        await this.refresh();
-      }
-    },
-
-    async discardItem(id) {
-      this.busy = true;
-      try {
-        await window.jawlaSync.discard(id);
-      } finally {
-        this.busy = false;
-        await this.refresh();
-      }
-    },
-
-    async retryAll() {
-      this.busy = true;
-      try {
-        await window.jawlaSync.flush();
-      } finally {
-        this.busy = false;
-        await this.refresh();
-      }
-    },
-
-    init() {
-      this.refresh();
-      window.addEventListener("jawla-sync-status", () => this.refresh());
-    },
-  }));
-});

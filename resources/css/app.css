@@ -243,7 +243,7 @@
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--color-accent-dark);
+  background: var(--color-brand-dark);
 }
 
 .btn-primary:focus-visible {
@@ -503,7 +503,7 @@
   background: linear-gradient(
     135deg,
     var(--color-brand) 0%,
-    var(--color-accent-dark) 100%
+    var(--color-brand-dark) 100%
   );
   color: #fff;
   padding: 24px 20px 32px;
@@ -1084,7 +1084,7 @@
   background: linear-gradient(
     135deg,
     var(--color-brand) 0%,
-    var(--color-accent-dark) 100%
+    var(--color-brand-dark) 100%
   );
   color: #fff;
   border-radius: 16px;
@@ -1263,7 +1263,7 @@
 .settings-lang-btn.active {
   border-color: var(--color-brand);
   background: color-mix(in srgb, var(--color-brand) 8%, transparent);
-  color: var(--color-accent-dark);
+  color: var(--color-brand-dark);
 }
 
 .settings-lang-btn:focus-visible {
