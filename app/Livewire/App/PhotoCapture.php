@@ -46,7 +46,11 @@ class PhotoCapture extends Component
     public function removePhoto(int $id): void
     {
         $rep = Auth::user();
-        $photo = Photo::query()->where('user_id', $rep?->id)->find($id);
+        if ($rep === null) {
+            return;
+        }
+
+        $photo = Photo::query()->where('user_id', $rep->id)->find($id);
         if ($photo === null) {
             return;
         }

@@ -60,22 +60,27 @@
       type="button"
       x-show="selectedId"
       x-on:click="clear()"
-      class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+      class="absolute end-2 top-1/2 -translate-y-1/2"
+      style="color: var(--color-text-muted)"
       aria-label="{{ __('app.clear') }}"
     >&times;</button>
   </div>
 
   <div
     x-show="open && filtered.length > 0"
-    class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+    class="absolute z-50 w-full mt-1 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+    style="background: var(--color-surface); border: 1px solid var(--color-border)"
     role="listbox"
   >
     <template x-for="opt in filtered" :key="opt.value">
       <div
         x-on:click="select(opt.value, opt.label)"
         x-on:keydown.enter="select(opt.value, opt.label)"
-        class="px-3 py-2 cursor-pointer hover:bg-gray-100 text-sm"
-        :class="{'bg-green-50': selectedId === opt.value}"
+        class="px-3 py-2 cursor-pointer text-sm"
+        :class="{'font-semibold': selectedId === opt.value}"
+        :style="selectedId === opt.value ? 'background: var(--color-surface-hover); color: var(--color-brand)' : ''"
+        @mouseenter="$el.style.background = 'var(--color-surface-hover)'"
+        @mouseleave="$el.style.background = selectedId === opt.value ? 'var(--color-surface-hover)' : ''"
         role="option"
         tabindex="0"
       >
@@ -86,7 +91,8 @@
 
   <div
     x-show="open && filtered.length === 0 && search.length > 0"
-    class="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-3 text-gray-400 text-sm"
+    class="absolute z-50 w-full mt-1 rounded-lg shadow-lg p-3 text-sm"
+    style="background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-muted)"
   >
     {{ $emptyText ?? 'No results' }}
   </div>

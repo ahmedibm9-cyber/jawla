@@ -23,6 +23,13 @@ class LocationTracker extends Component
             return;
         }
 
+        // Rate limit: max 1 ping per 30 seconds per user
+        $lastPingKey = 'location_ping_last_'.$rep->id;
+        if (cache()->has($lastPingKey)) {
+            return;
+        }
+        cache()->put($lastPingKey, true, 30);
+
         $validator = Validator::make(
             compact('latitude', 'longitude', 'accuracy'),
             [

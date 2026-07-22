@@ -104,7 +104,8 @@ class ActionToast extends Component
 
     public function dismiss(): void
     {
-        $this->reset(['type', 'id', 'message', 'undone', 'error']);
+        $this->reset(['type', 'id', 'message', 'undone']);
+        // Preserve error until explicitly acknowledged
     }
 
     public function render()

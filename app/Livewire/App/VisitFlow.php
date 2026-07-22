@@ -122,6 +122,14 @@ class VisitFlow extends Component
             return;
         }
 
+        // Validate GPS coordinates are within plausible range
+        if ($this->userLat < -90 || $this->userLat > 90 || $this->userLng < -180 || $this->userLng > 180) {
+            $this->errorMessage = app()->getLocale() === 'ar'
+                ? 'إحداثيات GPS غير صحيحة'
+                : 'Invalid GPS coordinates';
+            return;
+        }
+
         $this->visit->update([
             'checkin_latitude' => $this->userLat,
             'checkin_longitude' => $this->userLng,

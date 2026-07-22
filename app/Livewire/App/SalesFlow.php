@@ -120,7 +120,8 @@ class SalesFlow extends Component
             unset($this->cart[$index]);
             $this->cart = array_values($this->cart);
         } else {
-            $this->cart[$index]['quantity'] = $qty;
+            // Cap at 9999 to prevent absurd quantities
+            $this->cart[$index]['quantity'] = min($qty, 9999);
         }
 
         $this->recalcCart();
@@ -132,7 +133,8 @@ class SalesFlow extends Component
             return;
         }
 
-        $this->cart[$index]['price'] = max(0, $price);
+        // Floor at 0.01 — zero-price requires explicit manager approval
+        $this->cart[$index]['price'] = max(0.01, $price);
         $this->recalcCart();
     }
 
@@ -159,6 +161,13 @@ class SalesFlow extends Component
         $subtotal = 0.0;
         $vatAmount = 0.0;
         $vatPercent = (float) (auth()->user()?->company?->vat_percent ?? 0);
+
+        if (auth()->user() === null || auth()->user()->company === null) {
+            $this->errorMessage = app()->getLocale() === 'ar'
+                ? 'حدث خطأ — يرجى إعادة تسجيل الدخول'
+                : 'Session error — please log in again';
+            return;
+        }
 
         foreach ($this->cart as &$item) {
             $lineTotal = round($item['quantity'] * $item['price'], 2);

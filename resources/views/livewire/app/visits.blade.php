@@ -31,11 +31,11 @@
                             <small class="text-text-secondary">{{ $visit->created_at->format('H:i') }}</small>
                         </div>
                         @if($visit->status?->value === 'closed')
-                            <span class="badge bg-green-100 text-green-700 shrink-0">{{ __('app.visits_done') }}</span>
+                            <span class="badge badge-success shrink-0">{{ __('app.visits_done') }}</span>
                         @elseif($visit->arrival_confirmed)
-                            <span class="badge bg-blue-100 text-blue-700 shrink-0">{{ __('app.arrived') }}</span>
+                            <span class="badge badge-info shrink-0">{{ __('app.arrived') }}</span>
                         @else
-                            <span class="badge bg-amber-100 text-amber-700 shrink-0">{{ __('app.visits_pending') }}</span>
+                            <span class="badge badge-warning shrink-0">{{ __('app.visits_pending') }}</span>
                         @endif
                     </div>
                 </a>

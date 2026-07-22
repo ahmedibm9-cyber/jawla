@@ -14,6 +14,8 @@ use Livewire\Component;
 class Home extends Component
 {
     public int $visitCount = 0;
+    public ?float $startLat = null;
+    public ?float $startLng = null;
 
     public function mount(): void
     {
@@ -74,8 +76,9 @@ class Home extends Component
             $session = WorkSession::create([
                 'user_id' => auth()->id(),
                 'started_at' => now(),
-                'start_latitude' => 0,
-                'start_longitude' => 0,
+                // GPS populated by frontend via startLat/startLng before calling this
+                'start_latitude' => $this->startLat ?? 0,
+                'start_longitude' => $this->startLng ?? 0,
             ]);
             session(['work_session_id' => $session->id]);
         }

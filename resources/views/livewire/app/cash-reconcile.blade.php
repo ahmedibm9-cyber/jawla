@@ -52,13 +52,13 @@
                                 <span class="text-text-secondary text-sm">{{ __('app.counted_amount') }}: <span dir="ltr">{{ number_format((float) $r->counted_amount, 2) }}</span></span>
                             </div>
                             <div class="text-start shrink-0" dir="ltr">
-                                <span class="badge {{ (float) $r->variance === 0.0 ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
+                                <span class="badge {{ (float) $r->variance === 0.0 ? 'badge-success' : 'badge-warning' }}">
                                     {{ (float) $r->variance > 0 ? '+' : '' }}{{ number_format((float) $r->variance, 2) }}
                                 </span>
                             </div>
                         </div>
                         <div class="mt-1">
-                            <span class="badge {{ $r->status === 'approved' ? 'bg-green-100 text-green-700' : ($r->status === 'flagged' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700') }}">
+                            <span class="badge {{ $r->status === 'approved' ? 'badge-success' : ($r->status === 'flagged' ? 'badge-danger' : 'badge-warning') }}">
                                 {{ __("app.recon_status_{$r->status}") }}
                             </span>
                         </div>

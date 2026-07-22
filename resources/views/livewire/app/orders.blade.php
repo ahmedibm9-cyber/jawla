@@ -47,10 +47,10 @@
                 @php
                     $offerRejected = in_array($offer->status, ['rejected_by_sales', 'rejected_by_purchasing'], true);
                     $offerBadge = match($offer->status) {
-                        'pending' => 'bg-amber-100 text-amber-700',
-                        'sales_approved' => 'bg-blue-100 text-blue-700',
-                        'purchasing_approved' => 'bg-green-100 text-green-700',
-                        default => 'bg-red-100 text-red-700',
+                        'pending' => 'badge-warning',
+                        'sales_approved' => 'badge badge-info',
+                        'purchasing_approved' => 'badge-success',
+                        default => 'badge-danger',
                     };
                     $offerNotes = $offer->status === 'rejected_by_sales' ? $offer->sales_review_notes : ($offer->status === 'rejected_by_purchasing' ? $offer->purchasing_review_notes : null);
                 @endphp
@@ -78,7 +78,7 @@
                     <div class="flex items-center gap-2 mt-2 pt-2 border-t border-surface-hover">
                         <span class="badge {{ $offerBadge }}">{{ __("app.status_{$offer->status}") }}</span>
                         @if($offer->isExpired())
-                            <span class="badge bg-red-100 text-red-700">{{ __('app.expired') }}</span>
+                            <span class="badge badge-danger">{{ __('app.expired') }}</span>
                         @elseif($offer->expires_at)
                             <small class="text-text-muted">{{ __('app.expires_at') }}: {{ $offer->expires_at->format('Y-m-d') }}</small>
                         @endif
@@ -118,7 +118,7 @@
                     </div>
 
                     <div class="flex items-center gap-2 mt-2 pt-2 border-t border-surface-hover">
-                        <span class="badge {{ in_array($status, ['paid', 'submitted', 'sent', 'converted_to_invoice'], true) ? 'bg-green-100 text-green-700' : (in_array($status, ['cancelled', 'amended'], true) ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700') }}">
+                        <span class="badge {{ in_array($status, ['paid', 'submitted', 'sent', 'converted_to_invoice'], true) ? 'badge-success' : (in_array($status, ['cancelled', 'amended'], true) ? 'badge-danger' : 'badge-warning') }}">
                             {{ __("app.status_{$status}") }}
                         </span>
                         <span class="flex-1"></span>

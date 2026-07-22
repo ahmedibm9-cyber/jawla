@@ -344,6 +344,11 @@
   color: var(--color-danger);
 }
 
+.badge-info {
+  background: #dbeafe;
+  color: var(--color-info);
+}
+
 /* ---- Stepper ---- */
 .stepper {
   display: flex;
