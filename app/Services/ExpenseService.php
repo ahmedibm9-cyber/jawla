@@ -11,6 +11,24 @@ class ExpenseService
     public function log(int $companyId, int $userId, string $category, float $amount, string $note = '', ?int $workSessionId = null): Expense
     {
         return DB::transaction(function () use ($companyId, $userId, $category, $amount, $note, $workSessionId): Expense {
+            // Guard: prevent negative cash box balance
+            $cashBox = CashBox::where('user_id', $userId)->lockForUpdate()->first();
+            if (! $cashBox) {
+                $cashBox = CashBox::create([
+                    'company_id' => $companyId,
+                    'user_id' => $userId,
+                    'balance' => 0,
+                ]);
+            }
+
+            if ($amount > (float) $cashBox->balance) {
+                throw new \DomainException(
+                    app()->getLocale() === 'ar'
+                        ? 'المبلغ يتجاوز رصيد صندوق النقدية المتاح'
+                        : 'Amount exceeds available cash box balance'
+                );
+            }
+
             $expense = Expense::create([
                 'company_id' => $companyId,
                 'user_id' => $userId,
@@ -22,10 +40,6 @@ class ExpenseService
                 'posting_date' => today(),
             ]);
 
-            $cashBox = CashBox::firstOrCreate(
-                ['user_id' => $userId],
-                ['company_id' => $companyId, 'balance' => 0],
-            );
             $cashBox->decrement('balance', $amount);
 
             return $expense;

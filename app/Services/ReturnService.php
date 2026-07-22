@@ -63,7 +63,17 @@ class ReturnService
 
             $return->update(['total' => $total]);
 
-            $return->customer->decrement('balance', $total);
+            // Guard: prevent negative customer balance
+            $customer = $return->customer;
+            if ($total > (float) $customer->balance) {
+                throw new \DomainException(
+                    app()->getLocale() === 'ar'
+                        ? 'قيمة المرتجع تتجاوز رصيد العميل'
+                        : 'Return value exceeds customer balance'
+                );
+            }
+
+            $customer->decrement('balance', $total);
 
             return $return->fresh(['items']);
         });

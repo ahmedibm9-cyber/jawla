@@ -40,8 +40,13 @@ class NumberSequenceService implements Contracts\DocumentNumberService
 
             $abbr = Company::where('id', $companyId)->value('abbr') ?? 'XX';
 
+            // Add random suffix to prevent sequential prediction
+            // Format: PREFIX-ABBR-YEAR-NNNNN-X (X = 1 random hex char)
+            $randomChar = strtoupper(dechex(random_int(0, 15)));
+
             return $series->prefix.'-'.$abbr.'-'.date('Y').'-'.
-                str_pad((string) $next, $series->pad_length, '0', STR_PAD_LEFT);
+                str_pad((string) $next, $series->pad_length, '0', STR_PAD_LEFT).
+                '-'.$randomChar;
         });
     }
 }

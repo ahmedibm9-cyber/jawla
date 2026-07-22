@@ -35,12 +35,15 @@ Route::get('/offline', [SystemPageController::class, 'offline']);
 
 Route::get('/health', [SystemPageController::class, 'health']);
 
-Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])->name('locale.switch');
+Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
+    ->middleware('throttle:10,1')
+    ->name('locale.switch');
 
 // Admin (Filament) is auto-registered by the panel provider.
 
 // Handle GET /admin/logout — Filament registers POST only
-Route::get('/admin/logout', [SystemPageController::class, 'adminLogout']);
+Route::get('/admin/logout', [SystemPageController::class, 'adminLogout'])
+    ->middleware('throttle:10,1');
 
 // Rep PWA guest routes (login)
 Route::middleware(['web', 'guest'])->prefix('app')->name('app.')->group(function () {

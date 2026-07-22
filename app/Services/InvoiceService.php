@@ -197,6 +197,14 @@ class InvoiceService implements InvoiceContract
 
     private function cancelWithoutTransaction(Invoice $invoice, int $userId, string $reason): void
     {
+        // Re-fetch with lock to prevent double-cancel race condition
+        $invoice = Invoice::whereKey($invoice->getKey())->lockForUpdate()->firstOrFail();
+
+        // Guard: don't cancel if already cancelled
+        if ($invoice->status === InvoiceStatus::Cancelled) {
+            return;
+        }
+
         $invoice->update([
             'status' => InvoiceStatus::Cancelled,
             'cancelled_at' => now(),

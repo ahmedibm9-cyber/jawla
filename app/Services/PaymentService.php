@@ -88,7 +88,8 @@ class PaymentService
 
     private function ensureCashBox(int $userId, int $companyId): CashBox
     {
-        $cashBox = CashBox::where('user_id', $userId)->first();
+        // Use lockForUpdate to prevent TOCTOU race on concurrent payments
+        $cashBox = CashBox::where('user_id', $userId)->lockForUpdate()->first();
         if (! $cashBox) {
             $cashBox = CashBox::create([
                 'company_id' => $companyId,
