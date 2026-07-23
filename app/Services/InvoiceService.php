@@ -42,7 +42,14 @@ class InvoiceService implements InvoiceContract
                 throw new \DomainException($this->companyMessage('seller'));
             }
 
-            $vanWarehouse = $this->vanWarehouseFor($seller->id, $company->id);
+            // Van warehouse is required for reps (van sales), optional for admin/manager
+            $vanWarehouse = $seller->hasRole('rep')
+                ? $this->vanWarehouseFor($seller->id, $company->id)
+                : Warehouse::where('user_id', $seller->id)
+                    ->where('company_id', $company->id)
+                    ->where('type', 'van')
+                    ->where('is_active', true)
+                    ->first();
 
             // Support both multi-line (items array) and single-line (legacy)
             $items = $data['items'] ?? [
@@ -124,16 +131,19 @@ class InvoiceService implements InvoiceContract
                 ]);
             }
 
-            foreach ($items as $item) {
-                $this->stock->decrement(
-                    $vanWarehouse->id,
-                    $item['product_id'],
-                    $item['batch_id'] ?? null,
-                    (float) $item['quantity'],
-                    StockReason::Sale,
-                    $invoice,
-                    $sellerId,
-                );
+            // Decrement van stock only if seller has a van warehouse (reps have vans; admin/manager may not)
+            if ($vanWarehouse) {
+                foreach ($items as $item) {
+                    $this->stock->decrement(
+                        $vanWarehouse->id,
+                        $item['product_id'],
+                        $item['batch_id'] ?? null,
+                        (float) $item['quantity'],
+                        StockReason::Sale,
+                        $invoice,
+                        $sellerId,
+                    );
+                }
             }
 
             // Customer balance update
@@ -161,18 +171,24 @@ class InvoiceService implements InvoiceContract
                 'issued_at' => now(),
             ]);
 
-            $vanWarehouse = $this->vanWarehouseFor($invoice->user_id, $invoice->company_id);
+            $vanWarehouse = Warehouse::where('user_id', $invoice->user_id)
+                ->where('company_id', $invoice->company_id)
+                ->where('type', 'van')
+                ->where('is_active', true)
+                ->first();
 
-            foreach ($invoice->items as $item) {
-                $this->stock->decrement(
-                    $vanWarehouse->id,
-                    $item->product_id,
-                    $item->batch_id,
-                    (float) $item->quantity,
-                    StockReason::Sale,
-                    $invoice,
-                    $invoice->user_id,
-                );
+            if ($vanWarehouse) {
+                foreach ($invoice->items as $item) {
+                    $this->stock->decrement(
+                        $vanWarehouse->id,
+                        $item->product_id,
+                        $item->batch_id,
+                        (float) $item->quantity,
+                        StockReason::Sale,
+                        $invoice,
+                        $invoice->user_id,
+                    );
+                }
             }
 
             return $invoice->fresh();
@@ -244,18 +260,25 @@ class InvoiceService implements InvoiceContract
             'cancelled_by' => $userId,
         ]);
 
-        // Reverse stock
-        $vanWarehouse = $this->vanWarehouseFor($invoice->user_id, $invoice->company_id);
-        foreach ($invoice->items as $item) {
-            $this->stock->increment(
-                $vanWarehouse->id,
-                $item->product_id,
-                $item->batch_id,
-                (float) $item->quantity,
-                StockReason::Adjustment,
-                $invoice,
-                $userId,
-            );
+        // Reverse stock — only if seller had a van warehouse
+        $vanWarehouse = Warehouse::where('user_id', $invoice->user_id)
+            ->where('company_id', $invoice->company_id)
+            ->where('type', 'van')
+            ->where('is_active', true)
+            ->first();
+
+        if ($vanWarehouse) {
+            foreach ($invoice->items as $item) {
+                $this->stock->increment(
+                    $vanWarehouse->id,
+                    $item->product_id,
+                    $item->batch_id,
+                    (float) $item->quantity,
+                    StockReason::Adjustment,
+                    $invoice,
+                    $userId,
+                );
+            }
         }
 
         // Reverse customer balance — only the unpaid portion
