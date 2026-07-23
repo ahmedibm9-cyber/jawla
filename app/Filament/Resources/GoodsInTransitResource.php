@@ -44,29 +44,51 @@ class GoodsInTransitResource extends Resource
         return app()->getLocale() === 'ar' ? 'الشحنات الواردة' : 'Goods in Transit';
     }
 
+    public static function canCreate(): bool
+    {
+        return ! auth()->user()->hasRole('executive');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return ! auth()->user()->hasRole('executive');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return ! auth()->user()->hasRole('executive');
+    }
+
     public static function form(Schema $schema): Schema
     {
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
             Section::make($l('الشحنة', 'Shipment'))->schema([
-                Forms\Components\TextInput::make('shipment_number')->label($l('رقم الشحنة', 'Shipment #'))->required(),
-                Forms\Components\Select::make('supplier_id')->label($l('المورد', 'Supplier'))->relationship('supplier', 'name_ar')->searchable()->required(),
+                Forms\Components\TextInput::make('shipment_number')->label($l('رقم الشحنة', 'Shipment #'))->required()
+                    ->helperText($l('المعرف الفريد للشحنة', 'Unique shipment identifier')),
+                Forms\Components\Select::make('supplier_id')->label($l('المورد', 'Supplier'))->relationship('supplier', 'name_ar')->searchable()->required()
+                    ->helperText($l('المورد الذي أرسل الشحنة', 'The supplier who sent the shipment')),
                 Forms\Components\Select::make('status')->label($l('الحالة', 'Status'))->options([
                     'in_transit' => $l('قيد النقل', 'In transit'),
                     'at_customs' => $l('في الجمارك', 'At customs'),
                     'cleared' => $l('تم التخليص', 'Cleared'),
                     'partial_received' => $l('استلام جزئي', 'Partially received'),
                     'received' => $l('مستلم', 'Received'),
-                ])->required(),
+                ])->required()
+                    ->helperText($l('الحالة الحالية للشحنة', 'Current status of the shipment')),
                 Forms\Components\DatePicker::make('estimated_arrival_date')->label($l('الوصول المتوقع', 'ETA')),
                 Forms\Components\DatePicker::make('posting_date')->label($l('تاريخ القيد', 'Posting Date'))->required()->default(now()),
             ])->columns(2),
             Section::make($l('تكاليف الوصول', 'Landed Costs'))->schema([
-                Forms\Components\TextInput::make('shipping_cost')->label($l('الشحن', 'Shipping'))->numeric()->default(0),
-                Forms\Components\TextInput::make('freight_cost')->label($l('النقل', 'Freight'))->numeric()->default(0),
-                Forms\Components\TextInput::make('customs_cost')->label($l('الجمارك', 'Customs'))->numeric()->default(0),
-                Forms\Components\TextInput::make('clearance_cost')->label($l('التخليص', 'Clearance'))->numeric()->default(0),
+                Forms\Components\TextInput::make('shipping_cost')->label($l('الشحن', 'Shipping'))->numeric()->default(0)
+                    ->helperText($l('تكلفة الشحن من المورد', 'Shipping cost from supplier')),
+                Forms\Components\TextInput::make('freight_cost')->label($l('النقل', 'Freight'))->numeric()->default(0)
+                    ->helperText($l('تكلفة النقل الداخلي', 'Internal freight cost')),
+                Forms\Components\TextInput::make('customs_cost')->label($l('الجمارك', 'Customs'))->numeric()->default(0)
+                    ->helperText($l('رسوم الجمارك والضرائب', 'Customs duties and taxes')),
+                Forms\Components\TextInput::make('clearance_cost')->label($l('التخليص', 'Clearance'))->numeric()->default(0)
+                    ->helperText($l('رسوم التخليص الجمركي', 'Customs clearance fees')),
             ])->columns(2),
         ]);
     }
@@ -119,7 +141,8 @@ class GoodsInTransitResource extends Resource
                             Notification::make()->danger()->title($e->getMessage())->send();
                         }
                     }),
-                EditAction::make(),
+                EditAction::make()
+                    ->visible(fn () => ! auth()->user()->hasRole('executive')),
             ])
             ->bulkActions([]);
     }

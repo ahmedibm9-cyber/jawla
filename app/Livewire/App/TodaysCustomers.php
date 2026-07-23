@@ -14,6 +14,13 @@ class TodaysCustomers extends Component
 
     public string $search = '';
 
+    public int $expandedCustomerId = 0;
+
+    public function toggleCustomerActions(int $customerId): void
+    {
+        $this->expandedCustomerId = $this->expandedCustomerId === $customerId ? 0 : $customerId;
+    }
+
     public function render()
     {
         $customers = Customer::query()
@@ -25,6 +32,7 @@ class TodaysCustomers extends Component
                     ->orWhere('code', 'ilike', "%{$this->search}%");
             }))
             ->where('is_active', true)
+            ->withCount(['invoices', 'visits'])
             ->orderBy('name_ar')
             ->paginate(30);
 

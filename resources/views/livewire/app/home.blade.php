@@ -104,6 +104,30 @@
                 {{ __('app.start_work') }}
             </button>
         </div>
+
+        {{-- Quick Action Buttons --}}
+        <div class="home-section">
+            <div class="grid grid-cols-3 gap-3">
+                <a href="/app/sell" class="quick-action-card">
+                    <div class="quick-action-icon">
+                        <x-heroicon-o-shopping-cart class="w-6 h-6" />
+                    </div>
+                    <span class="quick-action-label">{{ __('app.quick_sale') }}</span>
+                </a>
+                <a href="/app/visits" class="quick-action-card">
+                    <div class="quick-action-icon">
+                        <x-heroicon-o-map-pin class="w-6 h-6" />
+                    </div>
+                    <span class="quick-action-label">{{ __('app.log_visit') }}</span>
+                </a>
+                <a href="/app/stock" class="quick-action-card">
+                    <div class="quick-action-icon">
+                        <x-heroicon-o-cube class="w-6 h-6" />
+                    </div>
+                    <span class="quick-action-label">{{ __('app.check_stock') }}</span>
+                </a>
+            </div>
+        </div>
     </div>
 
     <x-tab-bar active="home" />

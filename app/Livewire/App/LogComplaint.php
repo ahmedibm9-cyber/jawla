@@ -65,6 +65,7 @@ class LogComplaint extends Component
         return view('livewire.app.log-complaint', [
             'customers' => Customer::where('company_id', auth()->user()->company_id)
                 ->where('is_active', true)
+                ->where('status', 'approved')
                 ->orderBy('name_ar')
                 ->limit(50)
                 ->get(),

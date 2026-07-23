@@ -7,7 +7,6 @@ use App\Filament\AvatarProviders\CompanyAvatarProvider;
 use App\Filament\Pages\CollectPayment;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ReportsPage;
-use App\Filament\Widgets\CollectionRateWidget;
 use App\Filament\Widgets\LowStockAlertWidget;
 use App\Filament\Widgets\OpenAlarmsWidget;
 use App\Filament\Widgets\OutstandingBalanceWidget;
@@ -40,6 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login(Login::class)
+            ->sessionCookieName('jawla-admin-session')
             ->colors([
                 'primary' => Color::hex('#6DB83B'),
             ])
@@ -66,7 +66,6 @@ class AdminPanelProvider extends PanelProvider
                 SalesTodayWidget::class,
                 OutstandingBalanceWidget::class,
                 LowStockAlertWidget::class,
-                CollectionRateWidget::class,
                 RepPerformanceWidget::class,
             ])
             ->userMenuItems([

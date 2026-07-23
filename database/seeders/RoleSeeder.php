@@ -93,5 +93,8 @@ class RoleSeeder extends Seeder
             $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
             $role->syncPermissions($perms);
         }
+
+        // Super Admin — bypasses all permission checks via Gate::before
+        Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
     }
 }

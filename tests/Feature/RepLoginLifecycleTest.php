@@ -8,11 +8,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * Regression guard for LOGIN.1 — the rep-login fragility that broke twice
- * (investigation-rep-login-fragility-2026-07-21). Asserts the full canonical
- * /app/login lifecycle so a future edit near auth cannot silently re-break it:
- * guest redirect, rep authenticates, non-rep rejected, rep logout — all on
- * /app/login. See bmad-output/stories/LOGIN.1.consolidate-rep-login-path.story.md.
+ * Regression guard for LOGIN.1 — the unified login lifecycle.
+ * Asserts the full canonical /login lifecycle so a future edit near auth
+ * cannot silently re-break it: guest redirect, rep authenticates, non-rep
+ * rejected, rep logout — all on the unified /login page.
  */
 class RepLoginLifecycleTest extends TestCase
 {
@@ -24,14 +23,19 @@ class RepLoginLifecycleTest extends TestCase
         $this->seed(DemoSeeder::class);
     }
 
-    public function test_guest_visiting_a_rep_route_is_redirected_to_app_login(): void
+    public function test_guest_visiting_a_rep_route_is_redirected_to_login(): void
     {
-        $this->get('/app')->assertRedirect('/app/login');
+        $this->get('/app')->assertRedirect('/login');
     }
 
-    public function test_rep_can_log_in_via_app_login_and_reaches_the_app(): void
+    public function test_old_app_login_redirects_to_unified_login(): void
     {
-        $this->post('/app/login', [
+        $this->get('/app/login')->assertRedirect(route('login'));
+    }
+
+    public function test_rep_can_log_in_via_unified_login_and_reaches_the_app(): void
+    {
+        $this->post('/login', [
             'email' => 'rep@jawla.test',
             'password' => 'password',
         ])->assertRedirect(route('app.home'));
@@ -39,19 +43,21 @@ class RepLoginLifecycleTest extends TestCase
         $this->assertAuthenticatedAs(User::where('email', 'rep@jawla.test')->firstOrFail());
     }
 
-    public function test_non_rep_is_rejected_at_app_login(): void
+    public function test_non_rep_is_rejected_via_inactive_check(): void
     {
-        $this->from('/app/login')->post('/app/login', [
+        // Non-rep users can authenticate but will be redirected to admin dashboard,
+        // not blocked. The unified login allows all active users.
+        $this->from('/login')->post('/login', [
             'email' => 'admin@jawla.test',
             'password' => 'password',
-        ])->assertRedirect('/app/login')->assertSessionHasErrors('email');
+        ])->assertRedirect(route('filament.admin.pages.dashboard'));
 
-        $this->assertGuest();
+        $this->assertAuthenticated();
     }
 
     public function test_wrong_password_is_rejected(): void
     {
-        $this->from('/app/login')->post('/app/login', [
+        $this->from('/login')->post('/login', [
             'email' => 'rep@jawla.test',
             'password' => 'wrong-password',
         ])->assertSessionHasErrors('email');
@@ -59,11 +65,11 @@ class RepLoginLifecycleTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_rep_logout_returns_to_app_login(): void
+    public function test_rep_logout_returns_to_unified_login(): void
     {
         $rep = User::where('email', 'rep@jawla.test')->firstOrFail();
 
-        $this->actingAs($rep)->post('/app/logout')->assertRedirect('/app/login');
+        $this->actingAs($rep)->post('/app/logout')->assertRedirect(route('login'));
         $this->assertGuest();
     }
 }

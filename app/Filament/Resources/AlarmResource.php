@@ -4,7 +4,10 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\AlarmResource\Pages;
 use App\Models\Alarm;
+use App\Models\Customer;
 use App\Models\OutOfStockRequest;
+use App\Models\User;
+use App\Notifications\CustomerApprovalOutcome;
 use App\Services\Contracts\AlarmService as AlarmServiceContract;
 use App\Services\Contracts\OutOfStockService;
 use Filament\Actions\Action;
@@ -90,11 +93,102 @@ class AlarmResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
+                // Customer approval: Accept button
+                Action::make('accept_customer')
+                    ->label($l('قبول', 'Accept'))
+                    ->icon('heroicon-o-check')
+                    ->color('success')
+                    ->tooltip($l('اعتماد العميل الجديد', 'Approve the new customer'))
+                    ->visible(fn (Alarm $a) => $a->type === 'new_customer_pending'
+                        && ! $a->is_read
+                        && static::canRespond())
+                    ->requiresConfirmation()
+                    ->modalHeading(fn (Alarm $a) => $l(
+                        "قبول العميل: {$a->title}",
+                        "Accept Customer: {$a->title}",
+                    ))
+                    ->modalDescription(fn (Alarm $a) => $l(
+                        "سيتم اعتماد العميل الجديد والموافقة عليه",
+                        "The new customer will be approved and activated",
+                    ))
+                    ->action(function (Alarm $a) use ($l): void {
+                        abort_unless(static::canRespond(), 403);
+
+                        if ($a->reference_type === Customer::class) {
+                            $customer = Customer::withoutGlobalScopes()
+                                ->where('company_id', $a->company_id)
+                                ->find($a->reference_id);
+
+                            if ($customer !== null) {
+                                $customer->update([
+                                    'status' => 'approved',
+                                    'approved_by' => auth()->id(),
+                                    'approved_at' => now(),
+                                ]);
+
+                                User::find($customer->added_by)
+                                    ?->notify(new CustomerApprovalOutcome($customer, 'approved'));
+                            }
+                        }
+
+                        app(AlarmServiceContract::class)->resolve($a, auth()->id());
+
+                        Notification::make()->title($l('تم قبول العميل', 'Customer Accepted'))->success()->send();
+                    }),
+
+                // Customer approval: Reject button
+                Action::make('reject_customer')
+                    ->label($l('رفض', 'Reject'))
+                    ->icon('heroicon-o-x-mark')
+                    ->color('danger')
+                    ->tooltip($l('رفض العميل الجديد', 'Reject the new customer'))
+                    ->visible(fn (Alarm $a) => $a->type === 'new_customer_pending'
+                        && ! $a->is_read
+                        && static::canRespond())
+                    ->requiresConfirmation()
+                    ->modalHeading(fn (Alarm $a) => $l(
+                        "رفض العميل: {$a->title}",
+                        "Reject Customer: {$a->title}",
+                    ))
+                    ->modalDescription(fn (Alarm $a) => $l(
+                        "سيتم رفض العميل الجديد وتعطيل حسابه",
+                        "The new customer will be rejected and deactivated",
+                    ))
+                    ->action(function (Alarm $a) use ($l): void {
+                        abort_unless(static::canRespond(), 403);
+
+                        if ($a->reference_type === Customer::class) {
+                            $customer = Customer::withoutGlobalScopes()
+                                ->where('company_id', $a->company_id)
+                                ->find($a->reference_id);
+
+                            if ($customer !== null) {
+                                $customer->update([
+                                    'status' => 'rejected',
+                                    'is_active' => false,
+                                    'rejected_by' => auth()->id(),
+                                    'rejected_at' => now(),
+                                ]);
+
+                                User::find($customer->added_by)
+                                    ?->notify(new CustomerApprovalOutcome($customer, 'rejected'));
+                            }
+                        }
+
+                        app(AlarmServiceContract::class)->resolve($a, auth()->id());
+
+                        Notification::make()->title($l('تم رفض العميل', 'Customer Rejected'))->success()->send();
+                    }),
+
+                // Generic: Acknowledge (for non-customer alarms)
                 Action::make('acknowledge')
                     ->label($l('استلام', 'Acknowledge'))
                     ->icon('heroicon-o-check')
                     ->color('warning')
-                    ->visible(fn (Alarm $a) => ! $a->is_read && static::canRespond())
+                    ->tooltip($l('تسجيل استلام التنبيه', 'Record acknowledgment of this alarm'))
+                    ->visible(fn (Alarm $a) => $a->type !== 'new_customer_pending'
+                        && ! $a->is_read
+                        && static::canRespond())
                     ->requiresConfirmation()
                     ->modalDescription(fn (Alarm $a) => $l(
                         "سيتم تسجيل استلامك لهذا التنبيه: {$a->title}",
@@ -107,11 +201,15 @@ class AlarmResource extends Resource
 
                         Notification::make()->title($l('تم الاستلام', 'Acknowledged'))->success()->send();
                     }),
+
+                // Generic: Resolve (for non-customer alarms)
                 Action::make('resolve')
                     ->label($l('حل', 'Resolve'))
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn () => static::canRespond())
+                    ->tooltip($l('إغلاق التنبيه نهائياً', 'Close this alarm permanently'))
+                    ->visible(fn (Alarm $a) => $a->type !== 'new_customer_pending'
+                        && static::canRespond())
                     ->requiresConfirmation()
                     ->modalDescription(fn (Alarm $a) => $l(
                         "سيتم إغلاق هذا التنبيه نهائياً: {$a->title}",

@@ -55,9 +55,8 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        // Canonical rep-login path (LOGIN.1): a rep logging out returns to the
-        // rep login, not the admin login.
-        return redirect()->route('app.login')
+        // Canonical login path: all roles use the unified /login page.
+        return redirect()->route('login')
             ->header('Clear-Site-Data', '"cache", "storage"');
     }
 }

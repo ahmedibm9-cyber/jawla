@@ -66,6 +66,22 @@ class InvoiceService implements InvoiceContract
                 throw new \DomainException($this->companyMessage('customer'));
             }
 
+            // Issue 13: Customer must be approved before creating invoices
+            if (($customer->status ?? 'approved') !== 'approved') {
+                $message = match($customer->status) {
+                    'pending' => app()->getLocale() === 'ar'
+                        ? 'العميل في انتظار موافقة الإدارة ولا يمكن إنشاء فاتورة له'
+                        : 'Customer is pending admin approval and cannot be invoiced yet',
+                    'rejected' => app()->getLocale() === 'ar'
+                        ? 'تم رفض هذا العميل من الإدارة ولا يمكن إنشاء فاتورة له'
+                        : 'This customer was rejected by admin and cannot be invoiced',
+                    default => app()->getLocale() === 'ar'
+                        ? 'حالة العميل غير صالحة'
+                        : 'Invalid customer status',
+                };
+                throw new \DomainException($message);
+            }
+
             $lineInputs = [];
             foreach ($items as $item) {
                 $prod = $products->get($item['product_id']);

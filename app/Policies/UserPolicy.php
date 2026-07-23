@@ -11,9 +11,13 @@ class UserPolicy
         return $u->hasRole('admin');
     }
 
-    public function view(User $u): bool
+    public function view(User $u, User $target): bool
     {
-        return $u->hasRole('admin');
+        if ($u->isSuperAdmin()) {
+            return true;
+        }
+
+        return $u->hasRole('admin') && !$target->isSuperAdmin();
     }
 
     public function create(User $u): bool
@@ -21,13 +25,21 @@ class UserPolicy
         return $u->hasRole('admin');
     }
 
-    public function update(User $u): bool
+    public function update(User $u, User $target): bool
     {
-        return $u->hasRole('admin');
+        if ($u->isSuperAdmin()) {
+            return true;
+        }
+
+        return $u->hasRole('admin') && !$target->isSuperAdmin();
     }
 
-    public function delete(User $u): bool
+    public function delete(User $u, User $target): bool
     {
-        return $u->hasRole('admin');
+        if ($u->isSuperAdmin()) {
+            return true;
+        }
+
+        return $u->hasRole('admin') && !$target->isSuperAdmin();
     }
 }

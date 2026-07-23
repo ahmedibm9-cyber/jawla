@@ -24,10 +24,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure.rep' => EnsureRepRole::class,
         ]);
 
-        // Canonical rep-login path (LOGIN.1): unauthenticated web-guard access
-        // (the /app/* rep routes) redirects to /app/login. The Filament admin
-        // panel handles its own guest redirect to /admin/login independently.
-        $middleware->redirectGuestsTo('/app/login');
+        // All unauthenticated users are redirected to the unified login page.
+        $middleware->redirectGuestsTo('/login');
 
         $middleware->web(append: [
             SecurityHeaders::class,

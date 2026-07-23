@@ -12,6 +12,12 @@ class ListGoodsInTransit extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [CreateAction::make()];
+        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
+
+        return [
+            CreateAction::make()
+                ->label($l('إضافة شحنة واردة', 'Add Incoming Shipment'))
+                ->visible(fn () => ! auth()->user()->hasRole('executive')),
+        ];
     }
 }

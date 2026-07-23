@@ -107,10 +107,15 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasMany(StockMovement::class);
     }
 
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('super_admin');
+    }
+
     public function canAccessPanel(Panel $panel): bool
     {
         return $this->is_active && $this->hasAnyRole([
-            'admin', 'sales_manager', 'accounts', 'purchasing', 'warehouse_keeper', 'executive',
+            'super_admin', 'admin', 'sales_manager', 'accounts', 'purchasing', 'warehouse_keeper', 'executive',
         ]);
     }
 }

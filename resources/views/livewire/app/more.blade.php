@@ -26,167 +26,113 @@
         </div>
     </div>
 
-    {{-- Account --}}
+    {{-- All Actions Grid --}}
     <div class="more-section">
         <h2 class="more-section-title">{{ __('app.account') }}</h2>
-
-        <a href="/app/profile" class="more-item">
-            <div class="more-item-icon more-icon-blue">
-                <x-heroicon-o-user />
-            </div>
-            <div class="more-item-body">
-                <span class="more-item-label">{{ __('app.profile') }}</span>
-                <span class="more-item-desc">{{ __('app.personal_info') }}</span>
-            </div>
-            <x-heroicon-o-chevron-right class="more-item-chevron" />
-        </a>
-
-        <a href="/app/settings" class="more-item">
-            <div class="more-item-icon more-icon-blue">
-                <x-heroicon-o-cog-6-tooth />
-            </div>
-            <div class="more-item-body">
-                <span class="more-item-label">{{ __('app.settings') }}</span>
-                <span class="more-item-desc">{{ __('app.language') }}</span>
-            </div>
-            <x-heroicon-o-chevron-right class="more-item-chevron" />
-        </a>
+        <div class="more-grid">
+            <a href="/app/profile" class="more-tile">
+                <div class="more-tile-icon more-icon-blue">
+                    <x-heroicon-o-user />
+                </div>
+                <span class="more-tile-label">{{ __('app.profile') }}</span>
+            </a>
+            <a href="/app/settings" class="more-tile">
+                <div class="more-tile-icon more-icon-blue">
+                    <x-heroicon-o-cog-6-tooth />
+                </div>
+                <span class="more-tile-label">{{ __('app.settings') }}</span>
+            </a>
+        </div>
     </div>
 
-    {{-- Sales Actions --}}
     <div class="more-section">
         <h2 class="more-section-title">{{ __('app.sales') }}</h2>
-
-        <a href="/app/sell" class="more-item">
-            <div class="more-item-icon more-icon-green">
-                <x-heroicon-o-clipboard-document-check />
-            </div>
-            <div class="more-item-body">
-                <span class="more-item-label">{{ __('app.create_invoice') }}</span>
-                <span class="more-item-desc">{{ __('app.create_new_invoice') }}</span>
-            </div>
-            <x-heroicon-o-chevron-right class="more-item-chevron" />
-        </a>
-
-        <a href="/app/stock" class="more-item">
-            <div class="more-item-icon more-icon-green">
-                <x-heroicon-o-cube />
-            </div>
-            <div class="more-item-body">
-                <span class="more-item-label">{{ __('app.stock') }}</span>
-                <span class="more-item-desc">{{ __('app.search_stock_report_shortages') }}</span>
-            </div>
-            <x-heroicon-o-chevron-right class="more-item-chevron" />
-        </a>
-
-        <a href="/app/transfers" class="more-item">
-            <div class="more-item-icon more-icon-blue">
-                <x-heroicon-o-arrows-right-left />
-            </div>
-            <div class="more-item-body">
-                <span class="more-item-label">{{ __('app.van_transfers') }}</span>
-                <span class="more-item-desc">{{ __('app.receive_van_stock') }}</span>
-            </div>
-            <x-heroicon-o-chevron-right class="more-item-chevron" />
-        </a>
-
-        <a href="/app/quotations" class="more-item">
-            <div class="more-item-icon more-icon-blue">
-                <x-heroicon-o-document-text />
-            </div>
-            <div class="more-item-body">
-                <span class="more-item-label">{{ __('app.quotations') }}</span>
-                <span class="more-item-desc">{{ __('app.price_quotations') }}</span>
-            </div>
-            <x-heroicon-o-chevron-right class="more-item-chevron" />
-        </a>
-
-        <a href="/app/returns" class="more-item">
-            <div class="more-item-icon more-icon-amber">
-                <x-heroicon-o-arrow-uturn-left />
-            </div>
-            <div class="more-item-body">
-                <span class="more-item-label">{{ __('app.log_return') }}</span>
-                <span class="more-item-desc">{{ __('app.log_product_return') }}</span>
-            </div>
-            <x-heroicon-o-chevron-right class="more-item-chevron" />
-        </a>
+        <div class="more-grid">
+            <a href="/app/sell" class="more-tile">
+                <div class="more-tile-icon more-icon-green">
+                    <x-heroicon-o-clipboard-document-check />
+                </div>
+                <span class="more-tile-label">{{ __('app.create_invoice') }}</span>
+            </a>
+            <a href="/app/collect-payment" class="more-tile">
+                <div class="more-tile-icon more-icon-emerald">
+                    <x-heroicon-o-banknotes />
+                </div>
+                <span class="more-tile-label">{{ __('app.collect_payment') }}</span>
+            </a>
+            <a href="/app/stock" class="more-tile">
+                <div class="more-tile-icon more-icon-green">
+                    <x-heroicon-o-cube />
+                </div>
+                <span class="more-tile-label">{{ __('app.stock') }}</span>
+            </a>
+            <a href="/app/transfers" class="more-tile">
+                <div class="more-tile-icon more-icon-blue">
+                    <x-heroicon-o-arrows-right-left />
+                </div>
+                <span class="more-tile-label">{{ __('app.van_transfers') }}</span>
+            </a>
+            <a href="/app/quotations" class="more-tile">
+                <div class="more-tile-icon more-icon-blue">
+                    <x-heroicon-o-document-text />
+                </div>
+                <span class="more-tile-label">{{ __('app.quotations') }}</span>
+            </a>
+            <a href="/app/returns" class="more-tile">
+                <div class="more-tile-icon more-icon-amber">
+                    <x-heroicon-o-arrow-uturn-left />
+                </div>
+                <span class="more-tile-label">{{ __('app.log_return') }}</span>
+            </a>
+        </div>
     </div>
 
-    {{-- Finance --}}
     <div class="more-section">
         <h2 class="more-section-title">{{ __('app.finance') }}</h2>
-
-        <a href="/app/collect-payment" class="more-item">
-            <div class="more-item-icon more-icon-emerald">
-                <x-heroicon-o-banknotes />
-            </div>
-            <div class="more-item-body">
-                <span class="more-item-label">{{ __('app.collect_payment') }}</span>
-                <span class="more-item-desc">{{ __('app.collect_payment_from_customer') }}</span>
-            </div>
-            <x-heroicon-o-chevron-right class="more-item-chevron" />
-        </a>
-
-        <a href="/app/expenses" class="more-item">
-            <div class="more-item-icon more-icon-red">
-                <x-heroicon-o-currency-dollar />
-            </div>
-            <div class="more-item-body">
-                <span class="more-item-label">{{ __('app.log_expense') }}</span>
-                <span class="more-item-desc">{{ __('app.log_an_expense') }}</span>
-            </div>
-            <x-heroicon-o-chevron-right class="more-item-chevron" />
-        </a>
-
-        <a href="/app/reconcile" class="more-item">
-            <div class="more-item-icon more-icon-emerald">
-                <x-heroicon-o-clipboard-document-list />
-            </div>
-            <div class="more-item-body">
-                <span class="more-item-label">{{ __('app.cash_reconciliation') }}</span>
-                <span class="more-item-desc">{{ __('app.reconcile_your_cashbox') }}</span>
-            </div>
-            <x-heroicon-o-chevron-right class="more-item-chevron" />
-        </a>
+        <div class="more-grid">
+            <a href="/app/collect-payment" class="more-tile">
+                <div class="more-tile-icon more-icon-emerald">
+                    <x-heroicon-o-banknotes />
+                </div>
+                <span class="more-tile-label">{{ __('app.collect_payment') }}</span>
+            </a>
+            <a href="/app/expenses" class="more-tile">
+                <div class="more-tile-icon more-icon-red">
+                    <x-heroicon-o-currency-dollar />
+                </div>
+                <span class="more-tile-label">{{ __('app.log_expense') }}</span>
+            </a>
+            <a href="/app/reconcile" class="more-tile">
+                <div class="more-tile-icon more-icon-emerald">
+                    <x-heroicon-o-clipboard-document-list />
+                </div>
+                <span class="more-tile-label">{{ __('app.cash_reconciliation') }}</span>
+            </a>
+        </div>
     </div>
 
-    {{-- Other --}}
     <div class="more-section">
         <h2 class="more-section-title">{{ __('app.other') }}</h2>
-
-        <a href="/app/customers/create" class="more-item">
-            <div class="more-item-icon more-icon-purple">
-                <x-heroicon-o-user-plus />
-            </div>
-            <div class="more-item-body">
-                <span class="more-item-label">{{ __('app.add_customer') }}</span>
-                <span class="more-item-desc">{{ __('app.register_new_customer') }}</span>
-            </div>
-            <x-heroicon-o-chevron-right class="more-item-chevron" />
-        </a>
-
-        <a href="/app/complaints" class="more-item">
-            <div class="more-item-icon more-icon-orange">
-                <x-heroicon-o-exclamation-triangle />
-            </div>
-            <div class="more-item-body">
-                <span class="more-item-label">{{ __('app.log_complaint') }}</span>
-                <span class="more-item-desc">{{ __('app.report_customer_complaint') }}</span>
-            </div>
-            <x-heroicon-o-chevron-right class="more-item-chevron" />
-        </a>
-
-        <a href="/app/purchase-offer" class="more-item">
-            <div class="more-item-icon more-icon-teal">
-                <x-heroicon-o-shopping-bag />
-            </div>
-            <div class="more-item-body">
-                <span class="more-item-label">{{ __('app.purchase_offer') }}</span>
-                <span class="more-item-desc">{{ __('app.submit_purchase_offer') }}</span>
-            </div>
-            <x-heroicon-o-chevron-right class="more-item-chevron" />
-        </a>
+        <div class="more-grid">
+            <a href="/app/customers/create" class="more-tile">
+                <div class="more-tile-icon more-icon-purple">
+                    <x-heroicon-o-user-plus />
+                </div>
+                <span class="more-tile-label">{{ __('app.add_customer') }}</span>
+            </a>
+            <a href="/app/complaints" class="more-tile">
+                <div class="more-tile-icon more-icon-orange">
+                    <x-heroicon-o-exclamation-triangle />
+                </div>
+                <span class="more-tile-label">{{ __('app.log_complaint') }}</span>
+            </a>
+            <a href="/app/purchase-offer" class="more-tile">
+                <div class="more-tile-icon more-icon-teal">
+                    <x-heroicon-o-shopping-bag />
+                </div>
+                <span class="more-tile-label">{{ __('app.purchase_offer') }}</span>
+            </a>
+        </div>
     </div>
 
     {{-- Logout --}}

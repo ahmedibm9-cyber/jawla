@@ -11,16 +11,16 @@ class RoleSeederTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_seeder_creates_all_seven_roles(): void
+    public function test_seeder_creates_all_roles(): void
     {
         $this->seed(RoleSeeder::class);
 
         $this->assertEqualsCanonicalizing(
-            ['admin', 'sales_manager', 'accounts', 'purchasing', 'warehouse_keeper', 'executive', 'rep'],
+            ['admin', 'super_admin', 'sales_manager', 'accounts', 'purchasing', 'warehouse_keeper', 'executive', 'rep'],
             Role::pluck('name')->toArray()
         );
 
-        $this->assertSame(7, Role::count());
+        $this->assertSame(8, Role::count());
     }
 
     public function test_admin_has_full_access(): void

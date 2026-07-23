@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\App\LoginController;
 use App\Http\Controllers\App\PdfController;
+use App\Http\Controllers\Auth\UnifiedLoginController;
 use App\Http\Controllers\SystemPageController;
 use App\Livewire\App\AddCustomer;
 use App\Livewire\App\CashReconcile;
@@ -28,6 +29,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [SystemPageController::class, 'root']);
 
+// Unified login — single entry point for all roles (admin, rep, etc.)
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [UnifiedLoginController::class, 'show'])->name('login');
+    Route::post('/login', [UnifiedLoginController::class, 'login'])
+        ->middleware('throttle:login')
+        ->name('login.post');
+});
+
 // Catch /admin root — Filament registers sub-pages but not the bare prefix
 Route::get('/admin', [SystemPageController::class, 'adminRoot']);
 
@@ -45,13 +54,9 @@ Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
 Route::get('/admin/logout', [SystemPageController::class, 'adminLogout'])
     ->middleware('throttle:10,1');
 
-// Rep PWA guest routes (login)
-Route::middleware(['web', 'guest'])->prefix('app')->name('app.')->group(function () {
-    Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])
-        ->middleware('throttle:login')
-        ->name('login.store');
-});
+// Old rep login routes — redirect to unified login
+Route::get('/app/login', fn () => redirect()->route('login'))
+    ->name('app.login');
 
 // Rep PWA route group (protected)
 Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->group(function () {

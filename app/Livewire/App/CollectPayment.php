@@ -122,6 +122,7 @@ class CollectPayment extends Component
         $customers = Customer::query()
             ->where('company_id', $user->company_id)
             ->where('is_active', true)
+            ->where('status', 'approved')
             ->orderBy('name_ar')
             ->limit(100)
             ->get();

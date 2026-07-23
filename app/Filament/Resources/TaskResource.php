@@ -39,6 +39,21 @@ class TaskResource extends Resource
         return app()->getLocale() === 'ar' ? 'المهام' : 'Tasks';
     }
 
+    public static function canCreate(): bool
+    {
+        return ! auth()->user()->hasRole('executive');
+    }
+
+    public static function canEdit($record): bool
+    {
+        return ! auth()->user()->hasRole('executive');
+    }
+
+    public static function canDelete($record): bool
+    {
+        return ! auth()->user()->hasRole('executive');
+    }
+
     public static function form(Schema $schema): Schema
     {
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
@@ -49,12 +64,14 @@ class TaskResource extends Resource
                     ->label($l('مسند إلى', 'Assigned To'))
                     ->relationship('assignedTo', 'name')
                     ->searchable()
-                    ->required(),
+                    ->required()
+                    ->helperText($l('اختر الشخص المسؤول عن تنفيذ المهمة', 'Select the person responsible for the task')),
                 Forms\Components\Select::make('customer_id')
                     ->label($l('العميل', 'Customer'))
                     ->relationship('customer', 'name_ar')
                     ->searchable()
-                    ->nullable(),
+                    ->nullable()
+                    ->helperText($l('العميل المعني بالمهمة (اختياري)', 'Customer related to the task (optional)')),
                 Forms\Components\TextInput::make('title')
                     ->label($l('العنوان', 'Title'))
                     ->required()
@@ -64,7 +81,8 @@ class TaskResource extends Resource
                     ->nullable(),
                 Forms\Components\DatePicker::make('due_date')
                     ->label($l('تاريخ الاستحقاق', 'Due Date'))
-                    ->nullable(),
+                    ->nullable()
+                    ->helperText($l('التاريخ المطلوب لإنجاز المهمة', 'The deadline for completing the task')),
                 Forms\Components\Select::make('status')
                     ->label($l('الحالة', 'Status'))
                     ->options(['open' => $l('مفتوحة', 'Open'), 'done' => $l('تم', 'Done')])

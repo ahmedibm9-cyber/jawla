@@ -97,6 +97,7 @@ class DemoSeeder extends Seeder
         }
 
         // ─── Users ─────────────────────────────────────────────────────
+        $superAdmin = User::factory()->create(['company_id' => $company->id, 'name' => 'Super Admin', 'email' => 'superadmin@jawla.test', 'employee_code' => 'EMP-000'])->assignRole('super_admin');
         $admin    = User::factory()->create(['company_id' => $company->id, 'name' => 'عمرو حكيم', 'email' => 'admin@jawla.test', 'employee_code' => 'EMP-001'])->assignRole('admin');
         $manager  = User::factory()->create(['company_id' => $company->id, 'name' => 'مدير المبيعات', 'email' => 'manager@jawla.test', 'employee_code' => 'EMP-002'])->assignRole('sales_manager');
         User::factory()->create(['company_id' => $company->id, 'name' => 'مالية', 'email' => 'accounts@jawla.test', 'employee_code' => 'EMP-003'])->assignRole('accounts');
@@ -412,6 +413,7 @@ class DemoSeeder extends Seeder
         echo "  Company: شركة اللدائن العالمية (GPC)\n";
         echo "  Products: " . count($products) . " across 4 categories\n";
         echo "  Customers: " . count($customers) . " across 3 routes\n";
+        echo "  Super Admin: superadmin@jawla.test / password\n";
         echo "  Admin: admin@jawla.test / password\n";
         echo "  Manager: manager@jawla.test / password\n";
         echo "  Rep 1: rep@jawla.test / password\n";

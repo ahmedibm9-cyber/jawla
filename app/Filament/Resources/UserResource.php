@@ -70,6 +70,14 @@ class UserResource extends Resource
         $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
+            ->modifyQueryUsing(function ($query) {
+                $user = auth()->user();
+                if ($user && !$user->isSuperAdmin()) {
+                    $query->whereDoesntHave('roles', function ($q) {
+                        $q->where('name', 'super_admin');
+                    });
+                }
+            })
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label($l('الاسم', 'Name'))->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('email')->label($l('البريد', 'Email'))->searchable(),
