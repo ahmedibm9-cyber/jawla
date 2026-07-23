@@ -22,6 +22,11 @@ plus a full `pg_dump` → `pg_restore` cycle with matching row counts.
 
 ## 2. Deploy
 
+`scripts/deploy.sh` fails closed when `/up` is unhealthy. A non-zero exit means
+the release must not be promoted; use the rollback procedure below after
+assessing migration compatibility. Do not treat a failed health check as a
+successful deployment.
+
 ```bash
 git pull --ff-only                      # or deploy the tagged release
 composer install --no-dev --optimize-autoloader

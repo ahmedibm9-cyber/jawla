@@ -3,13 +3,32 @@
 // record's `id` is a client-generated UUID used as the server idempotency key,
 // so a replay is applied exactly once by the sync engine.
 
-const DB_NAME = "jawla-offline";
+const DB_PREFIX = "jawla-offline-";
 const STORE = "outbox";
 const VERSION = 1;
+let identity = null;
+
+export function configureIdentity(value) {
+  if (!value || typeof value !== "string") {
+    throw new Error("An authenticated offline identity is required.");
+  }
+
+  identity = value;
+}
+
+function dbName() {
+  if (!identity) {
+    throw new Error(
+      "Offline storage has not been scoped to an authenticated user."
+    );
+  }
+
+  return `${DB_PREFIX}${identity}`;
+}
 
 function openDb() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, VERSION);
+    const req = indexedDB.open(dbName(), VERSION);
     req.onupgradeneeded = () => {
       const db = req.result;
       if (!db.objectStoreNames.contains(STORE)) {
@@ -86,4 +105,14 @@ export function markFailed(id, error) {
 
 export function markPending(id) {
   return setStatus(id, "pending", null);
+}
+
+export function markConflict(id, error) {
+  return setStatus(id, "conflict", error);
+}
+
+export function clear() {
+  if (!identity || !window.indexedDB) return Promise.resolve();
+
+  return run(STORE, "readwrite", (store) => store.clear());
 }

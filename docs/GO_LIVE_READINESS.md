@@ -5,6 +5,14 @@
 done and verified green; each remaining gate is reduced to the _exact_ input
 needed and the (small) work that follows once it's provided.
 
+> **Current release authority — 2026-07-22.** This document's earlier
+> “launchable now” language is superseded by
+> `bmad-output/pwa-production-readiness-audit-2026-07-22.md` and its remediation
+> re-audit. The application is **NO-GO for real company data and production
+> operation** until all mandatory section-19 gates in the supplied production
+> checklist have evidence or a formally approved, time-bounded risk acceptance.
+> A passing repository test suite is necessary but not sufficient.
+
 ---
 
 ## A. Verified green (build-side complete)
@@ -21,8 +29,9 @@ Evidence, not assertion — all re-run on `master` (== `origin/master`) 2026-07-
 | Prod runtime                     | ✅                  | php-fpm + nginx (not `artisan serve`); `route:cache` on                         |
 | Prod health                      | ✅                  | Online, 2/2 replicas, `/up` 200                                                 |
 
-**Shippability of the code itself: ready.** The blockers below are inputs and
-external passes, not defects.
+**Repository verification:** the current PostgreSQL-backed suite passed **332
+tests / 1,038 assertions**, including **12 browser E2E tests**. This evidence
+does not satisfy staging, infrastructure, legal, or business acceptance gates.
 
 ---
 
@@ -87,16 +96,13 @@ Ordered by what actually blocks launch.
 
 ## C. Recommended launch decision
 
-With B2 (photos) done and B3 (backups) decided, **only B1 and B4 remain**:
-
-- **Egypt (ETA-regulated):** **do not launch** until B1 (ETA e-invoicing) is
-  closed — it's a legal gate, pending client credentials (status: "coming").
-- **Non-ETA / pilot:** **launchable now** — the code is green, photos are durable,
-  the backup posture is decided. Run B4 against staging before a wide rollout, and
-  have an operator execute the backup restore drill once.
-
-**The one remaining hard blocker is B1** (ETA credentials). Everything else is
-either done or an operator/staging task.
+**Do not launch any real-data pilot or production workload yet.** ETA
+credentials/certification, a measured independent backup-and-restore drill,
+deployment rollback evidence, staging security/performance/accessibility and
+device/offline checks, named incident/support ownership, privacy/legal approval,
+and signed business UAT are all mandatory release gates. See
+`docs/PRIVACY_AND_OPERATIONS_GATES.md` for the accountable-owner evidence
+required to change this decision.
 
 ---
 

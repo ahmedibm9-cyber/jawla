@@ -191,7 +191,7 @@
 
     {{-- Logout --}}
     <div class="more-section">
-        <form action="/app/logout" method="POST" aria-label="{{ __('app.logout') }}">
+        <form action="/app/logout" method="POST" aria-label="{{ __('app.logout') }}" data-jawla-logout>
             @csrf
             <button type="submit" class="more-logout-btn">
                 <x-heroicon-o-arrow-right-on-rectangle />

@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/browser";
 import "./offline/sync.js";
+import "./pwa-register.js";
 
 const sentryDsn = document.querySelector('meta[name="sentry-dsn"]')?.content;
 if (sentryDsn) {
@@ -57,12 +58,14 @@ window.jawlaAutocomplete = ({ options, noResultsText }) => ({
   get filtered() {
     if (!this.search) return this.options;
     const q = this.search.toLowerCase();
-    return this.options.filter((o) => o.label.toLowerCase().includes(q));
+    return this.options.filter((o) =>
+      (o.display || o.label).toLowerCase().includes(q)
+    );
   },
 
   labelFor(val) {
     const option = this.options.find((o) => String(o.value) === String(val));
-    return option ? option.label : "";
+    return option ? option.display || option.label : "";
   },
 
   syncHidden() {
@@ -74,7 +77,7 @@ window.jawlaAutocomplete = ({ options, noResultsText }) => ({
 
   choose(option) {
     this.selected = String(option.value);
-    this.search = option.label;
+    this.search = option.display || option.label;
     this.syncHidden();
     this.open = false;
     this.highlighted = -1;
@@ -384,32 +387,12 @@ window.jawlaBluetoothPrinter = ({ payload }) => ({
   },
 });
 
-window.jawlaAutocompleteRegistry = window.jawlaAutocompleteRegistry || {};
+document.addEventListener("submit", async (event) => {
+  const form = event.target.closest?.("form[data-jawla-logout]");
+  if (!form || form.dataset.purgingOffline === "true") return;
 
-window.jawlaAutocompleteInit = function jawlaAutocompleteInit(id) {
-  const options = window.jawlaAutocompleteRegistry[id] || [];
-  const instance = window.jawlaAutocomplete({
-    options,
-    noResultsText: "No results",
-  });
-  const el = document.getElementById(id);
-  if (el && el.__x) {
-    Object.assign(el.__x.$data, instance);
-  }
-};
-
-window.jawlaAutocompleteSync = function jawlaAutocompleteSync(id, value) {
-  const el = document.getElementById(id);
-  if (el && el.__x) {
-    el.__x.$data.selected = value;
-    el.__x.$data.search = el.__x.$data.labelFor(value);
-    el.__x.$data.syncHidden();
-  }
-};
-
-window.jawlaAutocompleteFinalize = function jawlaAutocompleteFinalize(id) {
-  const el = document.getElementById(id);
-  if (el && el.__x) {
-    el.__x.$data.closeList();
-  }
-};
+  event.preventDefault();
+  form.dataset.purgingOffline = "true";
+  await window.jawlaOffline?.clear?.();
+  form.requestSubmit();
+});

@@ -11,6 +11,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Product;
 use App\Models\ProformaInvoice;
+use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\Contracts\DocumentNumberService;
 use App\Services\Contracts\InvoiceCalculationService;
@@ -31,13 +32,39 @@ class InvoiceService implements InvoiceContract
     {
         return DB::transaction(function () use ($data): Invoice {
             $company = Company::findOrFail($data['company_id']);
+            $sellerId = $data['user_id'] ?? auth()->id();
+            $seller = User::withoutGlobalScopes()
+                ->whereKey($sellerId)
+                ->where('company_id', $company->id)
+                ->lockForUpdate()
+                ->first();
+            if (! $seller) {
+                throw new \DomainException($this->companyMessage('seller'));
+            }
+
+            $vanWarehouse = $this->vanWarehouseFor($seller->id, $company->id);
 
             // Support both multi-line (items array) and single-line (legacy)
             $items = $data['items'] ?? [
                 ['product_id' => $data['product_id'], 'quantity' => $data['quantity'], 'unit_price' => $data['unit_price'], 'batch_id' => $data['batch_id'] ?? null],
             ];
 
-            $products = Product::whereIn('id', array_column($items, 'product_id'))->get()->keyBy('id');
+            $productIds = array_values(array_unique(array_column($items, 'product_id')));
+            $products = Product::where('company_id', $company->id)
+                ->whereIn('id', $productIds)
+                ->get()
+                ->keyBy('id');
+            if ($products->count() !== count($productIds)) {
+                throw new \DomainException($this->companyMessage('product'));
+            }
+
+            $customer = Customer::whereKey($data['customer_id'])
+                ->where('company_id', $company->id)
+                ->lockForUpdate()
+                ->first();
+            if (! $customer) {
+                throw new \DomainException($this->companyMessage('customer'));
+            }
 
             $lineInputs = [];
             foreach ($items as $item) {
@@ -56,7 +83,7 @@ class InvoiceService implements InvoiceContract
             $invoice = Invoice::create([
                 'company_id' => $company->id,
                 'customer_id' => $data['customer_id'],
-                'user_id' => auth()->id(),
+                'user_id' => $sellerId,
                 'visit_id' => $data['visit_id'] ?? null,
                 'proforma_invoice_id' => $data['proforma_invoice_id'] ?? null,
                 'invoice_number' => $invNumber,
@@ -81,26 +108,19 @@ class InvoiceService implements InvoiceContract
                 ]);
             }
 
-            // Van stock: look up rep's van warehouse
-            $vanWarehouse = Warehouse::where('user_id', auth()->id())
-                ->where('type', 'van')->first();
-
-            if ($vanWarehouse) {
-                foreach ($items as $item) {
-                    $this->stock->decrement(
-                        $vanWarehouse->id,
-                        $item['product_id'],
-                        $item['batch_id'] ?? null,
-                        (float) $item['quantity'],
-                        StockReason::Sale,
-                        $invoice,
-                        auth()->id(),
-                    );
-                }
+            foreach ($items as $item) {
+                $this->stock->decrement(
+                    $vanWarehouse->id,
+                    $item['product_id'],
+                    $item['batch_id'] ?? null,
+                    (float) $item['quantity'],
+                    StockReason::Sale,
+                    $invoice,
+                    $sellerId,
+                );
             }
 
             // Customer balance update
-            $customer = Customer::findOrFail($data['customer_id']);
             $customer->increment('balance', (float) $calculation->total);
 
             // If from proforma, mark it converted
@@ -125,21 +145,18 @@ class InvoiceService implements InvoiceContract
                 'issued_at' => now(),
             ]);
 
-            $vanWarehouse = Warehouse::where('user_id', $invoice->user_id)
-                ->where('type', 'van')->first();
+            $vanWarehouse = $this->vanWarehouseFor($invoice->user_id, $invoice->company_id);
 
-            if ($vanWarehouse) {
-                foreach ($invoice->items as $item) {
-                    $this->stock->decrement(
-                        $vanWarehouse->id,
-                        $item->product_id,
-                        $item->batch_id,
-                        (float) $item->quantity,
-                        StockReason::Sale,
-                        $invoice,
-                        $invoice->user_id,
-                    );
-                }
+            foreach ($invoice->items as $item) {
+                $this->stock->decrement(
+                    $vanWarehouse->id,
+                    $item->product_id,
+                    $item->batch_id,
+                    (float) $item->quantity,
+                    StockReason::Sale,
+                    $invoice,
+                    $invoice->user_id,
+                );
             }
 
             return $invoice->fresh();
@@ -212,30 +229,67 @@ class InvoiceService implements InvoiceContract
         ]);
 
         // Reverse stock
-        $vanWarehouse = Warehouse::where('user_id', $invoice->user_id)
-            ->where('type', 'van')->first();
-
-        if ($vanWarehouse) {
-            foreach ($invoice->items as $item) {
-                $this->stock->increment(
-                    $vanWarehouse->id,
-                    $item->product_id,
-                    $item->batch_id,
-                    (float) $item->quantity,
-                    StockReason::Adjustment,
-                    $invoice,
-                    $userId,
-                );
-            }
+        $vanWarehouse = $this->vanWarehouseFor($invoice->user_id, $invoice->company_id);
+        foreach ($invoice->items as $item) {
+            $this->stock->increment(
+                $vanWarehouse->id,
+                $item->product_id,
+                $item->batch_id,
+                (float) $item->quantity,
+                StockReason::Adjustment,
+                $invoice,
+                $userId,
+            );
         }
 
         // Reverse customer balance — only the unpaid portion
         $unpaidAmount = (float) $invoice->total - (float) $invoice->paid_amount;
         if ($unpaidAmount > 0) {
-            $invoice->customer->decrement('balance', $unpaidAmount);
+            Customer::whereKey($invoice->customer_id)
+                ->where('company_id', $invoice->company_id)
+                ->lockForUpdate()
+                ->firstOrFail()
+                ->decrement('balance', $unpaidAmount);
         }
 
         // Log the reversal activity
         Activity::log('invoice_reversed', $invoice, 'Invoice '.$invoice->invoice_number.' reversed: '.$reason);
+    }
+
+    private function vanWarehouseFor(?int $userId, int $companyId): Warehouse
+    {
+        if ($userId === null) {
+            throw new \DomainException('A seller is required to create or submit an invoice.');
+        }
+
+        $warehouse = Warehouse::where('user_id', $userId)
+            ->where('company_id', $companyId)
+            ->where('type', 'van')
+            ->where('is_active', true)
+            ->lockForUpdate()
+            ->first();
+
+        if (! $warehouse) {
+            throw new \DomainException(
+                app()->getLocale() === 'ar'
+                    ? 'لا يمكن إتمام البيع بدون مخزن سيارة نشط للمندوب'
+                    : 'A sale requires an active van warehouse for the seller.'
+            );
+        }
+
+        return $warehouse;
+    }
+
+    private function companyMessage(string $resource): string
+    {
+        $english = ucfirst($resource).' does not belong to this company.';
+        $arabic = match ($resource) {
+            'seller' => 'المندوب لا يتبع هذه الشركة.',
+            'customer' => 'العميل لا يتبع هذه الشركة.',
+            'product' => 'المنتج لا يتبع هذه الشركة.',
+            default => 'السجل لا يتبع هذه الشركة.',
+        };
+
+        return app()->getLocale() === 'ar' ? $arabic : $english;
     }
 }

@@ -124,7 +124,7 @@
                         <span class="flex-1"></span>
                         <a href="{{ $pdfUrl }}" target="_blank" class="btn btn-outline text-sm no-underline">{{ __('app.view_pdf') }}</a>
                         <a href="https://wa.me/?text={{ urlencode($shareText) }}" target="_blank" rel="noopener"
-                           class="btn text-sm no-underline text-white" style="background:#25D366"
+                           class="btn text-sm no-underline text-white" style="background:var(--color-whatsapp)"
                            aria-label="{{ __('app.share_whatsapp') }}">WhatsApp</a>
                     </div>
                 </div>

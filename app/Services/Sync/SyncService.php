@@ -54,49 +54,74 @@ class SyncService
             return ['key' => $key, 'status' => 'invalid', 'error' => 'Missing idempotency key or type.'];
         }
 
-        $existing = $this->findReceipt($rep, $key);
-        if ($existing !== null) {
-            return ['key' => $key, 'status' => 'duplicate', 'result' => $existing->response ?? []];
-        }
-
         if (! $this->registry->has($type)) {
             return ['key' => $key, 'status' => 'unsupported'];
         }
 
-        // Reserve the key. A racing request with the same key hits the unique
-        // constraint and is reported as a duplicate instead of double-applying.
         try {
-            $receipt = SyncReceipt::create([
-                'company_id' => $rep->company_id,
-                'user_id' => $rep->id,
-                'idempotency_key' => $key,
-                'operation_type' => $type,
-                'response' => null,
-            ]);
+            return DB::transaction(function () use ($rep, $key, $type, $payload): array {
+                // Both the receipt and domain write must commit or roll back
+                // together. A receipt with no response is a legacy ambiguous
+                // state and is deliberately quarantined rather than replayed.
+                $existing = $this->findReceipt($rep, $key, true);
+                if ($existing !== null) {
+                    if ($existing->response === null) {
+                        return [
+                            'key' => $key,
+                            'status' => 'conflict',
+                            'error' => 'This operation needs support review before it can be retried.',
+                        ];
+                    }
+
+                    return ['key' => $key, 'status' => 'duplicate', 'result' => $existing->response];
+                }
+
+                $receipt = SyncReceipt::create([
+                    'company_id' => $rep->company_id,
+                    'user_id' => $rep->id,
+                    'idempotency_key' => $key,
+                    'operation_type' => $type,
+                    'response' => null,
+                ]);
+
+                $result = $this->registry->get($type)->handle($rep, $payload);
+                $receipt->update(['response' => $result]);
+
+                return ['key' => $key, 'status' => 'applied', 'result' => $result];
+            }, attempts: 3);
         } catch (QueryException $e) {
+            // A concurrent request can pass the initial lookup, then lose the
+            // database's unique (company_id, idempotency_key) race. Re-read the
+            // durable receipt so the client receives its original outcome.
             $existing = $this->findReceipt($rep, $key);
+            if ($existing?->response !== null) {
+                return ['key' => $key, 'status' => 'duplicate', 'result' => $existing->response];
+            }
 
-            return ['key' => $key, 'status' => 'duplicate', 'result' => $existing?->response ?? []];
-        }
+            if ($existing !== null) {
+                return [
+                    'key' => $key,
+                    'status' => 'conflict',
+                    'error' => 'This operation needs support review before it can be retried.',
+                ];
+            }
 
-        try {
-            $result = DB::transaction(fn () => $this->registry->get($type)->handle($rep, $payload));
-            $receipt->update(['response' => $result]);
-
-            return ['key' => $key, 'status' => 'applied', 'result' => $result];
+            return ['key' => $key, 'status' => 'failed', 'error' => $e->getMessage()];
         } catch (\Throwable $e) {
-            // Handler rolled back; release the reservation so a retry can re-apply.
-            $receipt->delete();
-
             return ['key' => $key, 'status' => 'failed', 'error' => $e->getMessage()];
         }
     }
 
-    private function findReceipt(User $rep, string $key): ?SyncReceipt
+    private function findReceipt(User $rep, string $key, bool $lock = false): ?SyncReceipt
     {
-        return SyncReceipt::query()
+        $query = SyncReceipt::withoutGlobalScopes()
             ->where('company_id', $rep->company_id)
-            ->where('idempotency_key', $key)
-            ->first();
+            ->where('idempotency_key', $key);
+
+        if ($lock) {
+            $query->lockForUpdate();
+        }
+
+        return $query->first();
     }
 }

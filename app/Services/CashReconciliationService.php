@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Activity;
 use App\Models\CashBox;
 use App\Models\CashReconciliation;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -18,7 +19,19 @@ class CashReconciliationService
     public function submit(int $companyId, int $userId, float $countedAmount, string $notes = '', ?int $workSessionId = null): CashReconciliation
     {
         return DB::transaction(function () use ($companyId, $userId, $countedAmount, $notes, $workSessionId): CashReconciliation {
-            $cashBox = CashBox::where('user_id', $userId)->lockForUpdate()->first();
+            $user = User::withoutGlobalScopes()
+                ->whereKey($userId)
+                ->where('company_id', $companyId)
+                ->lockForUpdate()
+                ->first();
+            if (! $user) {
+                throw new \DomainException($this->companyMessage('representative'));
+            }
+
+            $cashBox = CashBox::withoutGlobalScopes()->where('user_id', $userId)->lockForUpdate()->first();
+            if ($cashBox !== null && $cashBox->company_id !== null && $cashBox->company_id !== $companyId) {
+                throw new \DomainException($this->companyMessage('cash box'));
+            }
             $expected = $cashBox ? (float) $cashBox->balance : 0.0;
             $variance = round($countedAmount - $expected, 2);
 
@@ -54,6 +67,14 @@ class CashReconciliationService
     {
         return DB::transaction(function () use ($reconciliation, $reviewerId, $status, $reviewNotes): CashReconciliation {
             $fresh = CashReconciliation::whereKey($reconciliation->getKey())->lockForUpdate()->firstOrFail();
+            $reviewer = User::withoutGlobalScopes()
+                ->whereKey($reviewerId)
+                ->where('company_id', $fresh->company_id)
+                ->lockForUpdate()
+                ->first();
+            if (! $reviewer) {
+                throw new \DomainException($this->companyMessage('reviewer'));
+            }
 
             throw_if($fresh->status !== 'pending', new \RuntimeException(
                 "This reconciliation has already been reviewed (status: {$fresh->status})."));
@@ -70,5 +91,18 @@ class CashReconciliationService
 
             return $fresh;
         });
+    }
+
+    private function companyMessage(string $resource): string
+    {
+        $english = ucfirst($resource).' does not belong to this company.';
+        $arabic = match ($resource) {
+            'representative' => 'المندوب لا يتبع هذه الشركة.',
+            'reviewer' => 'المراجع لا يتبع هذه الشركة.',
+            'cash box' => 'صندوق النقدية لا يتبع هذه الشركة.',
+            default => 'السجل لا يتبع هذه الشركة.',
+        };
+
+        return app()->getLocale() === 'ar' ? $arabic : $english;
     }
 }

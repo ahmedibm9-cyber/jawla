@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\CashBox;
 use App\Models\Expense;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class ExpenseService
@@ -12,14 +13,7 @@ class ExpenseService
     {
         return DB::transaction(function () use ($companyId, $userId, $category, $amount, $note, $workSessionId): Expense {
             // Guard: prevent negative cash box balance
-            $cashBox = CashBox::where('user_id', $userId)->lockForUpdate()->first();
-            if (! $cashBox) {
-                $cashBox = CashBox::create([
-                    'company_id' => $companyId,
-                    'user_id' => $userId,
-                    'balance' => 0,
-                ]);
-            }
+            $cashBox = $this->ensureCashBox($userId, $companyId);
 
             if ($amount > (float) $cashBox->balance) {
                 throw new \DomainException(
@@ -49,10 +43,12 @@ class ExpenseService
     public function cancel(Expense $expense, int $userId): Expense
     {
         return DB::transaction(function () use ($expense, $userId): Expense {
-            $cashBox = CashBox::firstOrCreate(
-                ['user_id' => $expense->user_id],
-                ['company_id' => $expense->company_id, 'balance' => 0],
-            );
+            $expense = Expense::whereKey($expense->id)->lockForUpdate()->firstOrFail();
+            if ($expense->cancelled_at !== null) {
+                return $expense;
+            }
+
+            $cashBox = $this->ensureCashBox($expense->user_id, $expense->company_id);
             $cashBox->increment('balance', (float) $expense->amount);
 
             $expense->update([
@@ -62,5 +58,26 @@ class ExpenseService
 
             return $expense;
         });
+    }
+
+    private function ensureCashBox(int $userId, int $companyId): CashBox
+    {
+        $user = User::withoutGlobalScopes()->whereKey($userId)->lockForUpdate()->firstOrFail();
+        if ($user->company_id !== $companyId) {
+            throw new \DomainException('Cash box user does not belong to this company.');
+        }
+
+        $cashBox = CashBox::withoutGlobalScopes()->where('user_id', $userId)->lockForUpdate()->first();
+        if (! $cashBox) {
+            $cashBox = CashBox::create([
+                'company_id' => $companyId,
+                'user_id' => $userId,
+                'balance' => 0,
+            ]);
+        } elseif ($cashBox->company_id === null) {
+            $cashBox->update(['company_id' => $companyId]);
+        }
+
+        return $cashBox->refresh();
     }
 }

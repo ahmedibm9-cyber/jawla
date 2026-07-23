@@ -111,6 +111,19 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($key);
         });
 
+        // Financial mutations — stricter than global POST (30/min per user)
+        RateLimiter::for('financial', function (Request $request) {
+            $user = $request->user();
+            $key = $user ? 'user:'.$user->id : 'ip:'.$request->ip();
+
+            return Limit::perMinute(30)->by($key);
+        });
+
+        // Sync batch — tighter due to 100 ops per call (20/min per user)
+        RateLimiter::for('sync', function (Request $request) {
+            return Limit::perMinute(20)->by('user:'.$request->user()->id);
+        });
+
         Route::middleware('api')
             ->prefix('api')
             ->group(base_path('routes/api.php'));

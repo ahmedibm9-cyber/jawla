@@ -4,8 +4,10 @@ namespace App\Services;
 
 use App\Enums\InvoiceStatus;
 use App\Models\CashBox;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
 class PaymentService
@@ -13,6 +15,32 @@ class PaymentService
     public function collect(int $companyId, int $userId, int $customerId, float $amount, string $method, ?int $invoiceId = null, ?int $visitId = null, ?string $notes = null): Payment
     {
         return DB::transaction(function () use ($companyId, $userId, $customerId, $amount, $method, $invoiceId, $visitId, $notes): Payment {
+            if ($amount <= 0) {
+                throw new \DomainException('Payment amount must be greater than zero.');
+            }
+
+            $customer = Customer::whereKey($customerId)
+                ->where('company_id', $companyId)
+                ->lockForUpdate()
+                ->first();
+            if (! $customer) {
+                throw new \DomainException($this->companyMessage('customer'));
+            }
+
+            $invoice = null;
+            if ($invoiceId) {
+                $invoice = Invoice::whereKey($invoiceId)
+                    ->where('company_id', $companyId)
+                    ->lockForUpdate()
+                    ->first();
+                if (! $invoice || $invoice->customer_id !== $customerId) {
+                    throw new \DomainException($this->companyMessage('invoice'));
+                }
+                if (bccomp(number_format($amount, 2, '.', ''), (string) $invoice->remaining_amount, 2) > 0) {
+                    throw new \DomainException('Payment exceeds the invoice balance.');
+                }
+            }
+
             $payment = Payment::create([
                 'company_id' => $companyId,
                 'customer_id' => $customerId,
@@ -32,9 +60,7 @@ class PaymentService
                 $cashBox->increment('balance', $amount);
             }
 
-            if ($invoiceId) {
-                $invoice = Invoice::findOrFail($invoiceId);
-                abort_if($invoice->customer_id !== $customerId, 422, 'Invoice does not belong to this customer');
+            if ($invoice) {
                 $invoice->increment('paid_amount', $amount);
                 $invoice->decrement('remaining_amount', $amount);
 
@@ -48,7 +74,6 @@ class PaymentService
                 }
             }
 
-            $customer = $payment->customer;
             $customer->decrement('balance', $amount);
 
             return $payment;
@@ -58,6 +83,11 @@ class PaymentService
     public function cancel(Payment $payment, int $userId, string $reason): Payment
     {
         return DB::transaction(function () use ($payment, $userId, $reason): Payment {
+            $payment = Payment::whereKey($payment->id)->lockForUpdate()->firstOrFail();
+            if ($payment->cancelled_at !== null) {
+                return $payment;
+            }
+
             $cashBox = $this->ensureCashBox($payment->user_id, $payment->company_id);
 
             if ($payment->method === 'cash') {
@@ -65,7 +95,7 @@ class PaymentService
             }
 
             if ($payment->invoice_id) {
-                $invoice = Invoice::findOrFail($payment->invoice_id);
+                $invoice = Invoice::whereKey($payment->invoice_id)->lockForUpdate()->firstOrFail();
                 $invoice->decrement('paid_amount', (float) $payment->amount);
                 $invoice->increment('remaining_amount', (float) $payment->amount);
 
@@ -74,7 +104,11 @@ class PaymentService
                 }
             }
 
-            $payment->customer->increment('balance', (float) $payment->amount);
+            Customer::whereKey($payment->customer_id)
+                ->where('company_id', $payment->company_id)
+                ->lockForUpdate()
+                ->firstOrFail()
+                ->increment('balance', (float) $payment->amount);
 
             $payment->update([
                 'cancelled_at' => now(),
@@ -88,8 +122,16 @@ class PaymentService
 
     private function ensureCashBox(int $userId, int $companyId): CashBox
     {
-        // Use lockForUpdate to prevent TOCTOU race on concurrent payments
-        $cashBox = CashBox::where('user_id', $userId)->lockForUpdate()->first();
+        // A cash box is unique per user. Lock the user row before looking it up
+        // so concurrent first collections cannot create competing cash boxes.
+        $user = User::withoutGlobalScopes()->whereKey($userId)->lockForUpdate()->firstOrFail();
+        if ($user->company_id !== $companyId) {
+            throw new \DomainException('Cash box user does not belong to this company.');
+        }
+
+        // Legacy cash boxes predate company_id, so this lookup must include the
+        // nullable rows that the company global scope would otherwise hide.
+        $cashBox = CashBox::withoutGlobalScopes()->where('user_id', $userId)->lockForUpdate()->first();
         if (! $cashBox) {
             $cashBox = CashBox::create([
                 'company_id' => $companyId,
@@ -98,10 +140,22 @@ class PaymentService
             ]);
         }
 
-        if (! $cashBox->company_id) {
+        if ($cashBox->company_id === null) {
             $cashBox->update(['company_id' => $companyId]);
         }
 
         return $cashBox->refresh();
+    }
+
+    private function companyMessage(string $resource): string
+    {
+        $english = ucfirst($resource).' does not belong to this company.';
+        $arabic = match ($resource) {
+            'customer' => 'العميل لا يتبع هذه الشركة.',
+            'invoice' => 'الفاتورة لا تتبع هذا العميل أو هذه الشركة.',
+            default => 'السجل لا يتبع هذه الشركة.',
+        };
+
+        return app()->getLocale() === 'ar' ? $arabic : $english;
     }
 }

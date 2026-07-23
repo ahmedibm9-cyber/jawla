@@ -1,39 +1,27 @@
-#!/bin/bash
-# Railway cron job: daily PostgreSQL backup
-# Set up as a Railway cron service with this command.
-# Backups are stored in /tmp/backups with 7-day retention.
-
+#!/usr/bin/env bash
+# Encrypted, off-host PostgreSQL backup. Configure the required environment in
+# the scheduled backup worker; this script intentionally fails instead of
+# writing an unencrypted or local-only archive.
 set -euo pipefail
 
-BACKUP_DIR="/tmp/backups"
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-RETENTION_DAYS=7
+: "${DATABASE_URL:?DATABASE_URL is required}"
+: "${BACKUP_STORAGE_URI:?BACKUP_STORAGE_URI is required (for example remote:jawla-backups)}"
+: "${BACKUP_AGE_RECIPIENT:?BACKUP_AGE_RECIPIENT is required}"
 
-mkdir -p "$BACKUP_DIR"
+command -v pg_dump >/dev/null
+command -v age >/dev/null
+command -v rclone >/dev/null
 
-# Use Railway's internal DB connection vars
-export PGHOST="${DB_HOST:-127.0.0.1}"
-export PGPORT="${DB_PORT:-5432}"
-export PGDATABASE="${DB_DATABASE:-jawla}"
-export PGUSER="${DB_USERNAME:-postgres}"
-export PGPASSWORD="${DB_PASSWORD:-}"
+timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
+archive="jawla_${timestamp}.dump.age"
+workdir="$(mktemp -d)"
+trap 'rm -rf "$workdir"' EXIT
 
-OUTPUT_FILE="$BACKUP_DIR/jawla_${TIMESTAMP}.sql.gz"
+pg_dump "$DATABASE_URL" --format=custom --no-owner --no-privileges \
+  | age -r "$BACKUP_AGE_RECIPIENT" -o "$workdir/$archive"
 
-echo "[$(date)] Starting backup to $OUTPUT_FILE"
+test -s "$workdir/$archive"
+rclone copyto "$workdir/$archive" "$BACKUP_STORAGE_URI/$archive"
+rclone lsf "$BACKUP_STORAGE_URI" | grep -Fqx "$archive"
 
-pg_dump --format=custom --compress=9 --file="$OUTPUT_FILE" 2>&1
-
-if [ $? -eq 0 ]; then
-    SIZE=$(du -h "$OUTPUT_FILE" | cut -f1)
-    echo "[$(date)] Backup completed: $OUTPUT_FILE ($SIZE)"
-else
-    echo "[$(date)] BACKUP FAILED" >&2
-    exit 1
-fi
-
-# Clean up old backups
-find "$BACKUP_DIR" -name "jawla_*.sql.gz" -mtime +$RETENTION_DAYS -delete
-echo "[$(date)] Cleaned backups older than $RETENTION_DAYS days"
-
-echo "[$(date)] Backup job complete"
+echo "[$(date -u --iso-8601=seconds)] uploaded encrypted backup ${archive}"

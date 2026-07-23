@@ -11,7 +11,7 @@ body{font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;margin:0;display:fl
 .card img{height:56px;width:auto;margin-bottom:16px}
 h1{font-size:1.25rem;margin:0 0 8px;color:#0F172A}
 p{color:#475569;margin:0 0 16px;font-size:.875rem;line-height:1.5}
-.btn{display:inline-block;padding:10px 24px;background:#6DB83B;color:#fff;border-radius:8px;text-decoration:none;font-size:.875rem}
+.btn{display:inline-block;padding:10px 24px;background:#3D7A18;color:#fff;border-radius:8px;text-decoration:none;font-size:.875rem}
 </style>
 </head>
 <body>

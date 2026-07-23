@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Request;
 
 class Activity extends Model
 {
+    use BelongsToCompany;
+
     protected $fillable = [
         'company_id', 'user_id', 'type',
         'subject_type', 'subject_id',

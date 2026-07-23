@@ -57,6 +57,7 @@ class LoginController extends Controller
 
         // Canonical rep-login path (LOGIN.1): a rep logging out returns to the
         // rep login, not the admin login.
-        return redirect()->route('app.login');
+        return redirect()->route('app.login')
+            ->header('Clear-Site-Data', '"cache", "storage"');
     }
 }

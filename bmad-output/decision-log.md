@@ -111,3 +111,45 @@
 - B3 (backups): DECISION = Railway managed Postgres backups sufficient for V1; spatie/laravel-backup NOT installed. Remaining: operator runs the pg_dump→restore drill once and records it.
 - B1 (ETA e-invoicing): status = credentials coming; held + correctly gated off. The one remaining hard go-live blocker.
 - B4 (live k6 + Burp): staging/manual passes remain.
+
+## Investigation: race-conditions-and-rep-reliability — 2026-07-20
+
+- Symptom: full-app sweep — REP actions "fail or hang", suspected race conditions in money/stock flows, screen-fit unverified
+- Primary hypothesis: sale double-submit (cart never reset) + a repo-wide check-then-act-without-lock pattern in every cancel/undo path; online writes lack the idempotency the offline path already has
+- Primary suspected component: SalesFlow + the money-mutation service cancel family (Invoice/Return/Payment/Expense/VanTransfer)
+- Case file: bmad-output/investigation-race-conditions-and-rep-reliability-2026-07-20.md
+- Recommended response: Option A — stories 08.1 (concurrency hardening), 08.2 (rep action reliability), 08.3 (live UI audit), 08.4 (price bounds)
+- Owner decisions captured: sales always stock-backed; min/max price bounds set by manager; overpayment = customer credit; expense-floor check deferred
+
+## Audit: full-stack-audit — 2026-07-20
+
+- Scope: security (OWASP-aligned), frontend, backend, CI/CD, auth, UI/UX — static review + dependency audits
+- Headline: SW-1 service worker cache-first navigations (stale app after deploy + pages readable after logout) — likely true root cause of "looks broken / hangs"; 1 High, 8 Medium, 7 Low/Info new findings
+- Report: bmad-output/full-stack-audit-2026-07-20.md
+- Response: fix SW-1 first, then epic 08 stories; Railway env/backup verification and staging pen-test flagged as owner actions
+
+## Investigation: pwa-production-readiness — 2026-07-22
+
+- Scope: all 137 numbered domains in the supplied PWA production-readiness checklist, plus release gates and go/no-go questions.
+- Method: static forensic review only; no tests, builds, browsers, scanners, database, network, Railway, or deployment actions were run.
+- Result: 60 Fail, 76 Partial, 1 N/A, 0 Pass.
+- Headline: **NO-GO for normal production, any real-data pilot, and real Egyptian invoicing.** P0 blockers include cross-tenant Activity Log exposure, authenticated PWA cache/client-state leakage, financial/offline state races, false sync state, unsafe SW updates, unproved restore/rollback, fail-open CI, privacy/legal gaps, unsigned ETA, and contrast failure.
+- Case file: `bmad-output/investigation-pwa-production-readiness-2026-07-22.md`
+- Full audit: `bmad-output/pwa-production-readiness-audit-2026-07-22.md`
+- Recommended response: Option C — freeze real-data launch, reconcile the authoritative baseline/owners, execute the systemic workstreams, then repeat independent runtime verification against one clean immutable release artifact.
+
+## Remediation verification — 2026-07-22
+
+- The PostgreSQL-backed suite passed: 332 tests, 1,038 assertions, including 12 browser E2E tests.
+- Corrected post-remediation defects: legacy cash boxes are adopted under a user-row lock; sync unique-key races return the durable result; deferred service-worker updates re-prompt after the queue drains.
+- Corrected stale test assumptions: return photo attachment now supplies the mandated active van and customer balance; purchase-order assertions validate the required random suffix as well as sequence.
+- Removed `bmad-output/issues/01-repair-test-suite.md` only after its verification outcome was demonstrated. The production readiness audit remains NO-GO because operational, legal, tax, staging, and recovery evidence is still absent.
+
+## Investigation: Null Property Access in Dashboard Widgets — 2026-07-23
+
+- Symptom: 500 error "Attempt to read property company_id on null" on admin dashboard when session expires during Livewire update
+- Primary hypothesis: Session expiry causes Auth::user() to return null, all 8 dashboard widgets crash
+- Primary suspected component: All 8 dashboard widgets (null-unsafe Auth::user() pattern)
+- Case file: bmad-output/investigation-null-company-id-widget-crash-2026-07-23.md
+- Recommended response: Option A — create fix story for null guard across all widgets
+- Fix story: bmad-output/stories/HOTFIX.null-guard-dashboard-widgets.story.md

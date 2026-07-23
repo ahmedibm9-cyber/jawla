@@ -8,20 +8,20 @@
 >   managed Postgres backups** on the `jawla-db` volume, supplemented by the manual
 >   `pg_dump` procedure below. Do not cite the spatie pipeline as live.
 
-## Automated daily backup (Railway cron + scripts/backup.sh)
+## Automated encrypted off-host backup
 
-A shell script at `scripts/backup.sh` performs a compressed `pg_dump` and
-retains 7 days of backups. To activate on Railway:
+`scripts/backup.sh` now fails closed unless it can create an encrypted archive
+and verify its upload to an off-host rclone remote. To activate a dedicated
+backup worker, provide `DATABASE_URL`, `BACKUP_STORAGE_URI`,
+`BACKUP_AGE_RECIPIENT`, `age`, and `rclone`; configure object-storage lifecycle
+retention for at least 30 days. Do not mount `/tmp` as backup storage.
 
 1. Railway dashboard → New → Cron Service
 2. Schedule: `0 2 * * *` (daily 02:00 UTC)
 3. Start command: `bash scripts/backup.sh`
-4. Copy all `DB_*` env vars from the web service
-5. (Optional) Mount a persistent volume at `/tmp/backups`
-
-The script uses `pg_dump --format=custom --compress=9` and auto-prunes files
-older than 7 days. Railway's managed Postgres volume snapshots remain the
-primary recovery mechanism; this cron provides an off-volume logical backup.
+4. Provide only the backup worker's DB read credentials plus the encrypted
+   backup remote configuration; do not expose those credentials to the web app.
+5. Alert if the job exits non-zero or a backup is older than 24 hours.
 
 ## Current mechanism (interim, no extra packages)
 
@@ -40,10 +40,12 @@ primary recovery mechanism; this cron provides an off-volume logical backup.
 This must be executed against a **scratch** database — never production.
 
 1. Provision a throwaway Postgres (local container or a scratch Railway DB).
-2. Restore the latest dump:
+2. Restore the latest encrypted dump with the fail-closed helper:
    ```bash
-   createdb jawla_restore_test
-   pg_restore --no-owner --no-privileges -d jawla_restore_test jawla_YYYYMMDD.dump
+   BACKUP_FILE=jawla_YYYYMMDD.dump.age \
+   TARGET_DATABASE_URL=postgres://.../jawla_restore_test \
+   BACKUP_AGE_IDENTITY_FILE=/secure/path/restore-key.txt \
+   ALLOW_SCRATCH_RESTORE=1 bash scripts/restore-backup.sh
    ```
 3. Point a local app copy at `jawla_restore_test` (`.env` `DB_*`), then:
    ```bash
@@ -54,13 +56,12 @@ This must be executed against a **scratch** database — never production.
 5. Record the date + outcome in the log below. **Do not** mark the drill done
    until steps 1–4 actually pass.
 
-## Decision (2026-07-21): Railway managed backups accepted for V1
+## Release requirement
 
-The V1 backup posture is **Railway's managed Postgres backups** on the `jawla-db`
-volume (owner decision). `spatie/laravel-backup` is intentionally **not** installed
-for V1 — revisit post-launch if off-Railway/encrypted archives become a
-requirement. **Still required before go-live:** an operator runs the restore drill
-above once against a scratch DB and records the result in the log below.
+Railway volume backups alone are not sufficient release evidence. Before any
+real-data release, record an independent encrypted off-host backup and a
+successful scratch restore below, including measured RPO/RTO and the financial
+and stock reconciliation results.
 
 ## Restore log
 

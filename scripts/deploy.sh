@@ -14,6 +14,10 @@ git pull origin master
 echo "  Installing Composer deps..."
 composer install --no-dev --optimize-autoloader --no-interaction
 
+echo "  Building production assets..."
+npm ci
+npm run build
+
 echo "  Migrating database..."
 $ARTISAN migrate --force
 
@@ -33,6 +37,12 @@ echo "  Restarting queue worker..."
 $ARTISAN queue:restart
 
 echo "  Health check..."
-curl -sf http://localhost/up > /dev/null && echo "  OK" || echo "  WARN: health check failed"
+if ! curl --fail --silent --show-error --retry 5 --retry-connrefused \
+  http://localhost/up > /dev/null; then
+  echo "  ERROR: health check failed; deployment must not be promoted."
+  exit 1
+fi
+
+echo "  OK"
 
 echo "=== Deploy complete ==="

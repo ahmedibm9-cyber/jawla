@@ -35,12 +35,19 @@ class ActivityLog extends Page
 
     public ?string $typeFilter = null;
 
+    public static function canAccess(): bool
+    {
+        $user = auth()->user();
+
+        return $user?->hasAnyRole(['admin', 'sales_manager']) ?? false;
+    }
+
     public function reverse(int $activityId): void
     {
         $activity = Activity::findOrFail($activityId);
         $user = auth()->user();
 
-        if (! $user->hasRole(['system_viewer', 'sales_manager'])) {
+        if (! $user || ! $user->hasAnyRole(['admin', 'sales_manager'])) {
             Notification::make()->danger()->title(__('Unauthorized'))->send();
 
             return;

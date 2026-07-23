@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Enums\StockReason;
+use App\Models\Customer;
+use App\Models\Product;
 use App\Models\ReturnItem;
 use App\Models\ReturnRecord;
 use App\Models\Warehouse;
@@ -19,6 +21,32 @@ class ReturnService
     public function create(int $companyId, int $userId, int $customerId, array $items, ?int $againstInvoiceId = null, ?int $visitId = null, string $reason = ''): ReturnRecord
     {
         return DB::transaction(function () use ($companyId, $userId, $customerId, $items, $againstInvoiceId, $visitId, $reason): ReturnRecord {
+            $vanWarehouse = Warehouse::where('user_id', $userId)
+                ->where('company_id', $companyId)
+                ->where('type', 'van')
+                ->where('is_active', true)
+                ->lockForUpdate()
+                ->first();
+            if (! $vanWarehouse) {
+                throw new \DomainException(
+                    app()->getLocale() === 'ar'
+                        ? 'لا يمكن تسجيل مرتجع بدون مخزن سيارة نشط للمندوب'
+                        : 'A return requires an active van warehouse for the seller.'
+                );
+            }
+            $customer = Customer::whereKey($customerId)
+                ->where('company_id', $companyId)
+                ->lockForUpdate()
+                ->first();
+            if (! $customer) {
+                throw new \DomainException($this->companyMessage('customer'));
+            }
+
+            $productIds = array_values(array_unique(array_column($items, 'product_id')));
+            if (Product::where('company_id', $companyId)->whereIn('id', $productIds)->count() !== count($productIds)) {
+                throw new \DomainException($this->companyMessage('product'));
+            }
+
             $return = ReturnRecord::create([
                 'company_id' => $companyId,
                 'customer_id' => $customerId,
@@ -33,8 +61,6 @@ class ReturnService
                 'posting_date' => today(),
             ]);
 
-            $vanWarehouse = Warehouse::where('user_id', $userId)
-                ->where('type', 'van')->first();
             $total = 0;
             foreach ($items as $item) {
                 $lineTotal = $item['unit_price'] * $item['quantity'];
@@ -48,23 +74,20 @@ class ReturnService
                 ]);
                 $total += $lineTotal;
 
-                if ($vanWarehouse) {
-                    $this->stock->increment(
-                        $vanWarehouse->id,
-                        $item['product_id'],
-                        $item['batch_id'] ?? null,
-                        (float) $item['quantity'],
-                        StockReason::Return,
-                        $return,
-                        $userId,
-                    );
-                }
+                $this->stock->increment(
+                    $vanWarehouse->id,
+                    $item['product_id'],
+                    $item['batch_id'] ?? null,
+                    (float) $item['quantity'],
+                    StockReason::Return,
+                    $return,
+                    $userId,
+                );
             }
 
             $return->update(['total' => $total]);
 
             // Guard: prevent negative customer balance
-            $customer = $return->customer;
             if ($total > (float) $customer->balance) {
                 throw new \DomainException(
                     app()->getLocale() === 'ar'
@@ -82,6 +105,10 @@ class ReturnService
     public function cancel(ReturnRecord $return, int $userId, string $reason): ReturnRecord
     {
         return DB::transaction(function () use ($return, $userId): ReturnRecord {
+            $return = ReturnRecord::whereKey($return->id)->lockForUpdate()->firstOrFail();
+            if ($return->cancelled_at !== null) {
+                return $return;
+            }
             $return->update([
                 'status' => 'cancelled',
                 'cancelled_at' => now(),
@@ -89,24 +116,39 @@ class ReturnService
             ]);
 
             $vanWarehouse = Warehouse::where('user_id', $return->user_id)
-                ->where('type', 'van')->first();
+                ->where('company_id', $return->company_id)
+                ->where('type', 'van')->where('is_active', true)->lockForUpdate()->firstOrFail();
             foreach ($return->items as $item) {
-                if ($vanWarehouse) {
-                    $this->stock->decrement(
-                        $vanWarehouse->id,
-                        $item->product_id,
-                        $item->batch_id,
-                        (float) $item->quantity,
-                        StockReason::Adjustment,
-                        $return,
-                        $userId,
-                    );
-                }
+                $this->stock->decrement(
+                    $vanWarehouse->id,
+                    $item->product_id,
+                    $item->batch_id,
+                    (float) $item->quantity,
+                    StockReason::Adjustment,
+                    $return,
+                    $userId,
+                );
             }
 
-            $return->customer->increment('balance', (float) $return->total);
+            Customer::whereKey($return->customer_id)
+                ->where('company_id', $return->company_id)
+                ->lockForUpdate()
+                ->firstOrFail()
+                ->increment('balance', (float) $return->total);
 
             return $return;
         });
+    }
+
+    private function companyMessage(string $resource): string
+    {
+        $english = ucfirst($resource).' does not belong to this company.';
+        $arabic = match ($resource) {
+            'customer' => 'العميل لا يتبع هذه الشركة.',
+            'product' => 'المنتج لا يتبع هذه الشركة.',
+            default => 'السجل لا يتبع هذه الشركة.',
+        };
+
+        return app()->getLocale() === 'ar' ? $arabic : $english;
     }
 }

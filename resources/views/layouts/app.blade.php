@@ -30,6 +30,9 @@
   <meta name="sentry-environment" content="{{ config('sentry.environment', config('app.env', 'production')) }}">
   @endif
   <meta name="robots" content="noindex, nofollow">
+  @auth
+  <meta name="jawla-offline-identity" content="{{ hash_hmac('sha256', (string) auth()->id(), (string) config('app.key')) }}">
+  @endauth
   @filamentStyles
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <style>:root{-webkit-tap-highlight-color:transparent}[x-cloak]{display:none!important}</style>
@@ -51,15 +54,15 @@
       {{-- CG2 offline sync-status badge: pending/failed count from the outbox --}}
       <a href="/app/sync-queue" aria-label="{{ app()->getLocale() === 'ar' ? 'قائمة المزامنة' : 'Sync queue' }}"
          class="notification-fab"
-         x-data="{ pending: 0, failed: 0 }"
-         x-init="window.addEventListener('jawla-sync-status', e => { pending = e.detail.pending; failed = e.detail.failed; })"
-         x-show="pending > 0 || failed > 0"
+         x-data="{ pending: 0, failed: 0, conflicts: 0 }"
+         x-init="window.addEventListener('jawla-sync-status', e => { pending = e.detail.pending; failed = e.detail.failed; conflicts = e.detail.conflicts; })"
+         x-show="pending > 0 || failed > 0 || conflicts > 0"
          style="display:none">
         <svg aria-hidden="true" width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12a9 9 0 019-9 9.75 9.75 0 016.74 2.74L21 8m0 0V3m0 5h-5M21 12a9 9 0 01-9 9 9.75 9.75 0 01-6.74-2.74L3 16m0 0v5m0-5h5"/></svg>
         <span aria-live="polite"
               class="notification-badge {{ 'notification-badge-normal' }}"
-              :class="failed > 0 ? 'notification-badge-critical' : 'notification-badge-normal'"
-              x-text="(pending + failed) > 99 ? '99+' : (pending + failed)"></span>
+              :class="failed > 0 || conflicts > 0 ? 'notification-badge-critical' : 'notification-badge-normal'"
+              x-text="(pending + failed + conflicts) > 99 ? '99+' : (pending + failed + conflicts)"></span>
       </a>
       <a href="/app/notifications" aria-label="{{ __('app.notifications') }}"
          class="notification-fab">
@@ -94,16 +97,6 @@
       }, 30000);
     });
     window.addEventListener('appinstalled', () => { document.getElementById('pwa-install-banner')?.remove(); });
-  </script>
-  <script>
-    // Skip the service worker under automated browsers (navigator.webdriver):
-    // its shell caching keeps the page from reaching network-idle, which hangs
-    // E2E tests. Real users are unaffected.
-    if ('serviceWorker' in navigator && !navigator.webdriver) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
-      });
-    }
   </script>
   @auth
     {{-- Global undo toast for reversible rep writes (Phase 6 / B1). --}}

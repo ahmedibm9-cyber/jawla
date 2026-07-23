@@ -2,7 +2,7 @@ name: ci
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
 
 jobs:
@@ -14,7 +14,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: jawla_test
-        ports: [ '5432:5432' ]
+        ports: ["5432:5432"]
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -25,7 +25,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
+          php-version: "8.3"
           extensions: mbstring, pdo, pdo_pgsql, intl, gd, zip, bcmath
           coverage: none
       - name: Cache Composer
@@ -34,18 +34,22 @@ jobs:
           path: ~/.composer/cache
           key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
       - name: Install PHP deps
-        run: composer install --no-interaction --prefer-dist --no-progress || echo "composer.json not yet populated — scaffold-only run"
+        run: composer install --no-interaction --prefer-dist --no-progress --no-progress
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
       - name: Install JS deps
-        run: npm ci || echo "package.json not yet populated — scaffold-only run"
+        run: npm ci
       - name: Copy env
         run: cp .env.example .env && php artisan key:generate
       - name: Pint (style)
         run: vendor/bin/pint --test
+      - name: Build production assets
+        run: npm run build
+      - name: Enforce PWA asset budgets
+        run: npm run audit:pwa-assets
       - name: Pest
         run: vendor/bin/pest
         env:
@@ -54,6 +58,9 @@ jobs:
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
       - name: Composer audit
-        run: composer audit || true
+        run: composer audit
       - name: npm audit
-        run: npm audit --audit-level=high || true
+        run: npm audit --audit-level=high
+      - name: Block obvious committed secrets
+        run: |
+          ! git grep -nEi '(aws_secret_access_key|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|eta_(client_)?secret\s*[:=]\s*[^$])' -- ':!*.lock' ':!docs/**'

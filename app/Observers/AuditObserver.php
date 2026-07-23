@@ -8,14 +8,18 @@ use App\Models\User;
 
 class AuditObserver
 {
+    /** @var array<int, string> */
+    private const USER_AUDITABLE_ATTRIBUTES = ['name', 'email', 'is_active', 'company_id'];
+
     public function updated($model): void
     {
         if (! $model instanceof User) {
             return;
         }
 
-        $dirty = $model->getChanges();
-        unset($dirty['updated_at']);
+        $dirty = collect($model->getChanges())
+            ->only(self::USER_AUDITABLE_ATTRIBUTES)
+            ->all();
 
         if (empty($dirty)) {
             return;

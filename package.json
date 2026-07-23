@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "audit:pwa-assets": "node scripts/verify-pwa-assets.mjs",
     "build": "vite build",
     "dev": "vite",
     "prepare": "husky"

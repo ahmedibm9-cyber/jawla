@@ -1,18 +1,58 @@
 name: security
 
 on:
+  pull_request:
+  push:
+    branches: [master]
   schedule:
-    - cron: '0 3 * * 1'
+    - cron: "0 3 * * 1"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
+  codeql:
+    name: Static analysis (CodeQL)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: php
+          build-mode: none
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: npm ci
+      - run: composer audit
+      - run: npm audit --audit-level=high
   zap-baseline:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Require an explicitly configured staging target
+        env:
+          STAGING_URL: ${{ vars.JAWLA_STAGING_URL }}
+        run: test -n "$STAGING_URL"
       - name: ZAP baseline scan (staging)
         uses: zaproxy/action-baseline@v0.12.0
         with:
-          target: 'https://staging.jawla.app'
+          target: ${{ vars.JAWLA_STAGING_URL }}
           fail_action: true
           allow_issue_writing: false

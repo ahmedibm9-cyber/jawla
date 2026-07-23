@@ -1,80 +1,96 @@
-const CACHE = "jawla-shell-v5";
-const SHELL = ["/", "/app", "/manifest.json", "/offline"];
+const CACHE = "jawla-public-v6";
+const PUBLIC_SHELL = ["/offline", "/manifest.json"];
 
-// Install: cache shell assets
-self.addEventListener("install", (e) => {
-  e.waitUntil(
-    caches
-      .open(CACHE)
-      .then((c) => c.addAll(SHELL))
-      .then(() => self.skipWaiting())
+function isCacheablePublicAsset(request) {
+  const url = new URL(request.url);
+
+  return (
+    url.origin === self.location.origin &&
+    request.method === "GET" &&
+    (url.pathname.startsWith("/build/") ||
+      url.pathname.startsWith("/images/") ||
+      url.pathname.startsWith("/icons/") ||
+      ["/manifest.json", "/favicon.ico"].includes(url.pathname))
+  );
+}
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE).then((cache) => cache.addAll(PUBLIC_SHELL))
   );
 });
 
-// Activate: clean old caches + claim clients
-self.addEventListener("activate", (e) => {
-  e.waitUntil(
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
     caches
       .keys()
       .then((keys) =>
         Promise.all(
-          keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))
+          keys
+            .filter((key) => key.startsWith("jawla-") && key !== CACHE)
+            .map((key) => caches.delete(key))
         )
       )
-      .then(() => self.clients.claim())
   );
 });
 
-// Fetch: strategy per request type
-self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET") return;
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "PURGE_USER_DATA") {
+    event.waitUntil(
+      caches
+        .keys()
+        .then((keys) =>
+          Promise.all(
+            keys
+              .filter((key) => key.startsWith("jawla-"))
+              .map((key) => caches.delete(key))
+          )
+        )
+    );
+  }
 
-  // Navigation: cache-first for cached pages, network-first for others
-  if (e.request.mode === "navigate") {
-    e.respondWith(
-      caches.match(e.request).then((cached) => {
-        if (cached) return cached;
-        return fetch(e.request)
-          .then((response) => {
-            const clone = response.clone();
-            caches.open(CACHE).then((c) => c.put(e.request, clone));
-            return response;
-          })
-          .catch(() => caches.match("/offline"));
+  // A waiting worker is activated only after an explicit client decision.
+  if (event.data?.type === "ACTIVATE_UPDATE") {
+    self.skipWaiting();
+  }
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+
+  // Authenticated HTML, API, PDFs, and all other dynamic responses always use
+  // the network. They are never placed in Cache Storage or served after logout.
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request).catch(async () => {
+        const cachedOffline = await caches.match("/offline");
+        if (cachedOffline) {
+          return cachedOffline;
+        }
+        // If even the offline page is not cached, return a basic offline response.
+        return new Response(
+          "<h1>Offline</h1><p>You are offline and the offline page is not available.</p>",
+          { headers: { "Content-Type": "text/html" } }
+        );
       })
     );
     return;
   }
 
-  // Static assets: cache-first
-  if (
-    e.request.destination === "style" ||
-    e.request.destination === "script" ||
-    e.request.destination === "font" ||
-    e.request.destination === "image"
-  ) {
-    e.respondWith(
-      caches.match(e.request).then(
-        (r) =>
-          r ||
-          fetch(e.request).then((response) => {
-            const clone = response.clone();
-            caches.open(CACHE).then((c) => c.put(e.request, clone));
-            return response;
-          })
-      )
-    );
-    return;
-  }
+  if (!isCacheablePublicAsset(event.request)) return;
 
-  // API / other: network-first
-  e.respondWith(
-    fetch(e.request)
-      .then((r) => {
-        const clone = r.clone();
-        caches.open(CACHE).then((c) => c.put(e.request, clone));
-        return r;
-      })
-      .catch(() => caches.match(e.request))
+  event.respondWith(
+    caches.match(event.request).then(
+      (cached) =>
+        cached ||
+        fetch(event.request).then((response) => {
+          if (!response.ok || response.type !== "basic") return response;
+          const copy = response.clone();
+          event.waitUntil(
+            caches.open(CACHE).then((cache) => cache.put(event.request, copy))
+          );
+          return response;
+        })
+    )
   );
 });

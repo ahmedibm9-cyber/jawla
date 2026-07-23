@@ -92,6 +92,7 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 \App\Http\Middleware\SecurityHeaders::class,
+                \App\Http\Middleware\ThrottlePost::class,
             ])
             ->authMiddleware([
                 FilamentAuthenticate::class,

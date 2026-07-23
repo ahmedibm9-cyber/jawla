@@ -47,44 +47,48 @@
     })->values();
 @endphp
 
-<div id="{{ $acId }}-root" class="relative">
-    <input type="hidden" id="{{ $acId }}-hidden" {{ $wireModelAttributes }}>
+<div id="{{ $acId }}-root" class="relative"
+    x-data="jawlaAutocomplete({ options: @js($normalized), noResultsText: @js(__('app.no_results')) })"
+    x-init="init()"
+    x-on:click.outside="closeList()">
+    <input type="hidden" id="{{ $acId }}-hidden" x-ref="hidden" {{ $wireModelAttributes }}>
     <input
         type="text"
         id="{{ $acId }}"
         role="combobox"
         aria-autocomplete="list"
-        aria-expanded="false"
+        x-bind:aria-expanded="open.toString()"
         aria-controls="{{ $acId }}-listbox"
+        x-bind:aria-activedescendant="highlighted >= 0 ? '{{ $acId }}-option-' + highlighted : null"
         autocomplete="off"
         @if($required) aria-required="true" @endif
         placeholder="{{ $placeholder ?? __('app.search') }}"
         {{ $passthroughAttributes->merge(['class' => 'form-input w-full']) }}
-        list="{{ $acId }}-listbox"
-        oninput="window.jawlaAutocompleteSync && window.jawlaAutocompleteSync('{{ $acId }}')"
-        onchange="window.jawlaAutocompleteSync && window.jawlaAutocompleteSync('{{ $acId }}')"
-        onblur="window.jawlaAutocompleteFinalize && window.jawlaAutocompleteFinalize('{{ $acId }}')"
+        x-model="search"
+        x-on:focus="open = true"
+        x-on:input="open = true; highlighted = -1; if (!search) clear()"
+        x-on:keydown.arrow-down.prevent="move(1)"
+        x-on:keydown.arrow-up.prevent="move(-1)"
+        x-on:keydown.enter.prevent="enter()"
+        x-on:keydown.escape.prevent="closeList()"
     >
 
-    <datalist id="{{ $acId }}-listbox">
-        @foreach($normalized as $option)
-            <option value="{{ $option['display'] }}"></option>
-        @endforeach
-    </datalist>
+    <ul id="{{ $acId }}-listbox" role="listbox" x-cloak
+        x-show="open && filtered.length > 0"
+        class="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-lg shadow-lg"
+        style="background: var(--color-surface); border: 1px solid var(--color-border)">
+        <template x-for="(option, index) in filtered" :key="option.value">
+            <li role="option"
+                x-bind:id="'{{ $acId }}-option-' + index"
+                x-bind:aria-selected="String(selected) === String(option.value)"
+                x-bind:class="{ 'font-semibold': String(selected) === String(option.value), 'bg-surface-hover': highlighted === index }"
+                class="cursor-pointer px-3 py-2 text-sm"
+                x-on:mousedown.prevent="choose(option)"
+                x-on:mouseenter="highlighted = index">
+                <span x-text="option.display || option.label"></span>
+            </li>
+        </template>
+    </ul>
 
-    <script>
-        window.jawlaAutocompleteRegistry = window.jawlaAutocompleteRegistry || {};
-        window.jawlaAutocompleteRegistry[@js($acId)] = @json($normalized);
-        const jawlaInit{{ str_replace('-', '_', $acId) }} = () => {
-            if (window.jawlaAutocompleteInit) {
-                window.jawlaAutocompleteInit(@js($acId));
-            }
-        };
-
-        if (window.jawlaAutocompleteInit) {
-            jawlaInit{{ str_replace('-', '_', $acId) }}();
-        } else {
-            window.addEventListener('load', jawlaInit{{ str_replace('-', '_', $acId) }}, { once: true });
-        }
-    </script>
+    <p class="sr-only" aria-live="polite" x-text="open && search && filtered.length === 0 ? noResultsText : ''"></p>
 </div>

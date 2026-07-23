@@ -5,7 +5,6 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\InvoiceResource\Pages;
 use App\Models\Invoice;
 use Filament\Actions\Action;
-use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
@@ -46,8 +45,7 @@ class InvoiceResource extends Resource
                 Forms\Components\Select::make('visit_id')->label($l('الزيارة', 'Visit'))
                     ->relationship('visit', 'id')->nullable(),
                 Forms\Components\TextInput::make('invoice_number')->label($l('رقم الفاتورة', 'Number'))->disabled(),
-                Forms\Components\Select::make('status')->label($l('الحالة', 'Status'))
-                    ->options(['draft' => $l('مسودة', 'Draft'), 'submitted' => $l('مرسلة', 'Submitted'), 'partially_paid' => $l('مدفوعة جزئياً', 'Partially paid'), 'paid' => $l('مدفوعة', 'Paid'), 'cancelled' => $l('ملغاة', 'Cancelled')]),
+                Forms\Components\TextInput::make('status')->label($l('الحالة', 'Status'))->disabled(),
                 Forms\Components\TextInput::make('subtotal')->label($l('المجموع الفرعي', 'Subtotal'))->disabled(),
                 Forms\Components\TextInput::make('vat_amount')->label($l('الضريبة', 'VAT'))->disabled(),
                 Forms\Components\TextInput::make('total')->label($l('الإجمالي', 'Total'))->disabled(),
@@ -87,7 +85,6 @@ class InvoiceResource extends Resource
                     ->icon('heroicon-o-share')
                     ->url(fn (Invoice $r) => 'https://wa.me/?text='.urlencode(__('app.proforma_msg')." #{$r->invoice_number} - ".number_format((float) $r->total, 2).' EGP'))
                     ->openUrlInNewTab(),
-                EditAction::make(),
             ])
             ->bulkActions([]);
     }
@@ -96,7 +93,6 @@ class InvoiceResource extends Resource
     {
         return [
             'index' => Pages\ListInvoices::route('/'),
-            'edit' => Pages\EditInvoice::route('/{record}/edit'),
         ];
     }
 }
