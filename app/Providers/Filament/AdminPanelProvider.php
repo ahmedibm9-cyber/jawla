@@ -39,7 +39,6 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login(Login::class)
-            ->sessionCookieName('jawla-admin-session')
             ->colors([
                 'primary' => Color::hex('#6DB83B'),
             ])
