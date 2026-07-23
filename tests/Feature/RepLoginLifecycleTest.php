@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
 
 /**
@@ -21,6 +22,10 @@ class RepLoginLifecycleTest extends TestCase
     {
         parent::setUp();
         $this->seed(DemoSeeder::class);
+
+        // Clear rate limiter to avoid 405/429 when running in parallel
+        // (multiple processes share the same IP-based key).
+        RateLimiter::clear('post|ip:127.0.0.1');
     }
 
     public function test_guest_visiting_a_rep_route_is_redirected_to_login(): void
