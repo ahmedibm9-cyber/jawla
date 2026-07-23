@@ -12,6 +12,11 @@ class VisitsTodayWidget extends StatsOverviewWidget
     protected function getStats(): array
     {
         $user = Auth::user();
+
+        if (! $user) {
+            return [];
+        }
+
         $companyId = $user->company_id;
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 

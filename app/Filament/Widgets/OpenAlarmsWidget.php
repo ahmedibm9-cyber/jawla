@@ -12,6 +12,11 @@ class OpenAlarmsWidget extends StatsOverviewWidget
     protected function getStats(): array
     {
         $user = Auth::user();
+
+        if (! $user) {
+            return [];
+        }
+
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
         $critical = Alarm::where('company_id', $user->company_id)

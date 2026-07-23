@@ -12,6 +12,11 @@ class PendingQuotationsWidget extends StatsOverviewWidget
     protected function getStats(): array
     {
         $user = Auth::user();
+
+        if (! $user) {
+            return [];
+        }
+
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
         $pending = PriceQuotationRequest::where('company_id', $user->company_id)

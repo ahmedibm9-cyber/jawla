@@ -15,6 +15,11 @@ class LowStockAlertWidget extends StatsOverviewWidget
     protected function getStats(): array
     {
         $user = Auth::user();
+
+        if (! $user) {
+            return [];
+        }
+
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
         // Get main warehouse(s) for the company

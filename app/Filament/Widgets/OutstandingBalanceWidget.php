@@ -14,6 +14,11 @@ class OutstandingBalanceWidget extends StatsOverviewWidget
     protected function getStats(): array
     {
         $user = Auth::user();
+
+        if (! $user) {
+            return [];
+        }
+
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
         $outstanding = Invoice::where('company_id', $user->company_id)

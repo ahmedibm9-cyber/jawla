@@ -15,6 +15,11 @@ class CollectionRateWidget extends StatsOverviewWidget
     protected function getStats(): array
     {
         $user = Auth::user();
+
+        if (! $user) {
+            return [];
+        }
+
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
         $thisMonthStart = now()->startOfMonth();
