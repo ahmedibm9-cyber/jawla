@@ -60,7 +60,7 @@ class AlarmBroadcastTest extends TestCase
     {
         $rep = User::where('email', 'rep@jawla.test')->first();
         $customer = Customer::where('status', 'approved')->first();
-        $product = Product::where('sku', 'CHEM-952')->first();
+        $product = Product::where('sku', 'CHM-TIO2')->first();
 
         $oosr = OutOfStockRequest::create([
             'company_id' => $rep->company_id,

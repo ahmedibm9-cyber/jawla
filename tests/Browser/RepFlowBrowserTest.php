@@ -35,12 +35,23 @@ it('loads the rep home page without JavaScript errors', function () {
 
 it('renders the customer autocomplete on collect payment', function () {
     $rep = makeRep();
+    $customer = Customer::factory()->create([
+        'company_id' => $rep->company_id,
+        'name_ar' => 'عميل يمكن اختياره',
+    ]);
 
     $page = $this->actingAs($rep)->visit('/app/collect-payment');
 
     $page->assertNoJavascriptErrors()
         ->assertPresent('#customer_id[role="combobox"]')
-        ->assertPresent('#customer_id-hidden');
+        ->assertPresent('#customer_id-listbox[role="listbox"]')
+        ->assertPresent('#customer_id-hidden')
+        ->type('#customer_id', 'عميل يمكن')
+        ->assertAttribute('#customer_id', 'aria-expanded', 'true')
+        ->keys('#customer_id', ['ArrowDown', 'Enter'])
+        ->assertValue('#customer_id-hidden', $customer->id)
+        ->assertValue('#customer_id', 'عميل يمكن اختياره')
+        ->assertAttribute('#customer_id', 'aria-expanded', 'false');
 });
 
 it('renders product and supplier autocompletes on the purchase offer page', function () {
@@ -52,8 +63,10 @@ it('renders product and supplier autocompletes on the purchase offer page', func
 
     $page->assertNoJavascriptErrors()
         ->assertPresent('#product_id[role="combobox"]')
+        ->assertPresent('#product_id-listbox[role="listbox"]')
         ->assertPresent('#product_id-hidden')
         ->assertPresent('#supplier_id[role="combobox"]')
+        ->assertPresent('#supplier_id-listbox[role="listbox"]')
         ->assertPresent('#supplier_id-hidden');
 });
 

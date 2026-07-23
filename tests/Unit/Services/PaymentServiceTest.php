@@ -58,6 +58,51 @@ class PaymentServiceTest extends TestCase
         $this->assertSame(250.0, (float) $cashBox->balance);
     }
 
+    public function test_collect_payment_rejects_a_customer_from_another_company_before_any_write(): void
+    {
+        $company = Company::factory()->create();
+        $rep = User::factory()->create(['company_id' => $company->id]);
+        $foreignCustomer = Customer::factory()->create(['company_id' => Company::factory()->create()->id]);
+
+        $this->expectException(\DomainException::class);
+        try {
+            app(PaymentService::class)->collect(
+                companyId: $company->id,
+                userId: $rep->id,
+                customerId: $foreignCustomer->id,
+                amount: 100,
+                method: 'cash',
+            );
+        } finally {
+            $this->assertDatabaseCount('payments', 0);
+            $this->assertDatabaseCount('cash_boxes', 0);
+        }
+    }
+
+    public function test_collect_payment_adopts_a_legacy_cashbox_instead_of_creating_a_second_one(): void
+    {
+        $company = Company::factory()->create();
+        $rep = User::factory()->create(['company_id' => $company->id]);
+        $customer = Customer::factory()->create(['company_id' => $company->id]);
+        $legacyCashBox = CashBox::withoutGlobalScopes()->create([
+            'company_id' => null,
+            'user_id' => $rep->id,
+            'balance' => 0,
+        ]);
+
+        app(PaymentService::class)->collect(
+            companyId: $company->id,
+            userId: $rep->id,
+            customerId: $customer->id,
+            amount: 250.0,
+            method: 'cash',
+        );
+
+        $this->assertDatabaseCount('cash_boxes', 1);
+        $this->assertSame($company->id, $legacyCashBox->fresh()->company_id);
+        $this->assertSame(250.0, (float) $legacyCashBox->fresh()->balance);
+    }
+
     public function test_collect_payment_updates_invoice_status_to_paid(): void
     {
         $company = Company::factory()->create();
@@ -150,6 +195,31 @@ class PaymentServiceTest extends TestCase
         $this->assertSame($total, (float) $invoice->remaining_amount);
 
         $this->assertNotNull($payment->fresh()->cancelled_at);
+    }
+
+    public function test_collect_payment_rejects_an_overpayment_without_creating_a_payment(): void
+    {
+        $company = Company::factory()->create();
+        $rep = User::factory()->create(['company_id' => $company->id]);
+        $van = Warehouse::factory()->create(['company_id' => $company->id, 'type' => 'van', 'user_id' => $rep->id]);
+        $customer = Customer::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+        $this->actingAs($rep);
+        app(StockService::class)->increment($van->id, $product->id, null, 10, StockReason::Initial, $product);
+        $invoice = app(InvoiceService::class)->create([
+            'company_id' => $company->id, 'customer_id' => $customer->id,
+            'product_id' => $product->id, 'quantity' => 1, 'unit_price' => 100,
+        ]);
+
+        try {
+            app(PaymentService::class)->collect(
+                $company->id, $rep->id, $customer->id, (float) $invoice->total + 1, 'cash', $invoice->id,
+            );
+            $this->fail('Expected an overpayment to be rejected.');
+        } catch (\DomainException) {
+        }
+
+        $this->assertDatabaseCount('payments', 0);
     }
 
     public function test_non_cash_method_does_not_credit_cashbox(): void

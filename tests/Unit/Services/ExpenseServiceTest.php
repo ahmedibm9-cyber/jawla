@@ -116,4 +116,17 @@ class ExpenseServiceTest extends TestCase
         $this->assertNotNull($fresh->cancelled_at);
         $this->assertSame($rep->id, $fresh->cancelled_by);
     }
+
+    public function test_cancelling_an_expense_twice_does_not_credit_cash_twice(): void
+    {
+        $company = Company::factory()->create();
+        $rep = User::factory()->create(['company_id' => $company->id]);
+        CashBox::create(['user_id' => $rep->id, 'company_id' => $company->id, 'balance' => 200]);
+        $expense = app(ExpenseService::class)->log($company->id, $rep->id, 'fuel', 50);
+
+        app(ExpenseService::class)->cancel($expense, $rep->id);
+        app(ExpenseService::class)->cancel($expense, $rep->id);
+
+        $this->assertSame(200.0, (float) CashBox::where('user_id', $rep->id)->firstOrFail()->balance);
+    }
 }

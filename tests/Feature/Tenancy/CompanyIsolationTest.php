@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Tenancy;
 
+use App\Models\Activity;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Support\ActiveCompanyContext;
@@ -58,5 +59,21 @@ class CompanyIsolationTest extends TestCase
         $visibleIds = Customer::pluck('id');
         $this->assertTrue($visibleIds->contains($custA->id));
         $this->assertTrue($visibleIds->contains($custB->id));
+    }
+
+    public function test_company_a_cannot_read_company_b_activity_records(): void
+    {
+        $companyA = Company::factory()->create();
+        $companyB = Company::factory()->create();
+
+        $activityB = Activity::create([
+            'company_id' => $companyB->id,
+            'type' => 'invoice_created',
+            'description' => 'Company B only',
+        ]);
+
+        app(ActiveCompanyContext::class)->setCompanyId($companyA->id);
+
+        $this->assertFalse(Activity::whereKey($activityB->id)->exists());
     }
 }

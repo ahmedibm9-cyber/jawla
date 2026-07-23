@@ -19,8 +19,8 @@ use Tests\TestCase;
 
 /**
  * Server-render smoke tests for the four rep pages using
- * native <datalist> autocomplete. These catch Blade-compile errors and
- * wire:model extraction bugs; interactive filtering is covered by the browser suite.
+ * accessible Alpine autocomplete. These catch Blade-compile errors and
+ * Livewire model extraction bugs; interactive filtering is covered by the browser suite.
  */
 class AutocompleteComponentTest extends TestCase
 {
@@ -58,6 +58,7 @@ class AutocompleteComponentTest extends TestCase
             ->test(CollectPayment::class)
             ->assertOk()
             ->assertSeeHtml('role="combobox"')
+            ->assertSeeHtml('role="listbox"')
             ->assertSeeHtml('id="customer_id-hidden"');
     }
 

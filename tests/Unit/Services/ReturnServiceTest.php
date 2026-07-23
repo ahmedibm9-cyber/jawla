@@ -87,22 +87,48 @@ class ReturnServiceTest extends TestCase
         $this->assertNotNull($return->fresh()->cancelled_at);
     }
 
-    public function test_create_return_works_without_van_warehouse(): void
+    public function test_create_return_requires_a_van_warehouse_before_creating_any_financial_record(): void
     {
         $company = Company::factory()->create();
         $rep = User::factory()->create(['company_id' => $company->id]);
         $customer = Customer::factory()->create(['company_id' => $company->id, 'balance' => 200]);
         $product = Product::factory()->create(['company_id' => $company->id]);
 
-        $return = app(ReturnService::class)->create(
-            companyId: $company->id,
-            userId: $rep->id,
-            customerId: $customer->id,
-            items: [['product_id' => $product->id, 'quantity' => 2.0, 'unit_price' => 50.0]],
-        );
+        try {
+            app(ReturnService::class)->create(
+                companyId: $company->id,
+                userId: $rep->id,
+                customerId: $customer->id,
+                items: [['product_id' => $product->id, 'quantity' => 2.0, 'unit_price' => 50.0]],
+            );
+            $this->fail('Expected a return without a van warehouse to be rejected.');
+        } catch (\DomainException) {
+        }
 
-        $this->assertSame('submitted', $return->status);
-        $this->assertSame(200.0 - 100.0, (float) $customer->fresh()->balance);
-        $this->assertCount(1, $return->items);
+        $this->assertDatabaseCount('returns', 0);
+        $this->assertSame(200.0, (float) $customer->fresh()->balance);
+    }
+
+    public function test_create_return_rejects_foreign_customer_and_product_before_any_write(): void
+    {
+        $company = Company::factory()->create();
+        $rep = User::factory()->create(['company_id' => $company->id]);
+        Warehouse::factory()->create(['company_id' => $company->id, 'type' => 'van', 'user_id' => $rep->id]);
+        $foreignCompany = Company::factory()->create();
+        $foreignCustomer = Customer::factory()->create(['company_id' => $foreignCompany->id, 'balance' => 500]);
+        $foreignProduct = Product::factory()->create(['company_id' => $foreignCompany->id]);
+
+        $this->expectException(\DomainException::class);
+        try {
+            app(ReturnService::class)->create(
+                companyId: $company->id,
+                userId: $rep->id,
+                customerId: $foreignCustomer->id,
+                items: [['product_id' => $foreignProduct->id, 'quantity' => 1.0, 'unit_price' => 50.0]],
+            );
+        } finally {
+            $this->assertDatabaseCount('returns', 0);
+            $this->assertDatabaseCount('return_items', 0);
+        }
     }
 }

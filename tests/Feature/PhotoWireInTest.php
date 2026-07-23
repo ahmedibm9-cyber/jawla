@@ -10,6 +10,7 @@ use App\Models\Photo;
 use App\Models\Product;
 use App\Models\ReturnRecord;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Support\ActiveCompanyContext;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -39,7 +40,14 @@ class PhotoWireInTest extends TestCase
         $this->seed(DemoSeeder::class);
         $this->rep = User::where('email', 'rep@jawla.test')->firstOrFail();
         $this->customer = Customer::where('status', 'approved')->firstOrFail();
-        $this->product = Product::where('sku', 'PP-H030')->firstOrFail();
+        $this->customer->update(['balance' => 100]);
+        $this->product = Product::where('sku', 'VIR-PP-H030')->firstOrFail();
+        Warehouse::factory()->create([
+            'company_id' => $this->rep->company_id,
+            'user_id' => $this->rep->id,
+            'type' => 'van',
+            'is_active' => true,
+        ]);
         $this->actingAs($this->rep);
         app(ActiveCompanyContext::class)->setFromUser($this->rep);
     }

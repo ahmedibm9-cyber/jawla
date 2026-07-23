@@ -68,6 +68,18 @@ class CashReconciliationTest extends TestCase
         $this->assertSame(0.0, (float) $recon->variance);
     }
 
+    public function test_submit_rejects_a_rep_from_another_company_before_creating_a_record(): void
+    {
+        $foreignRep = User::factory()->create(['company_id' => Company::factory()->create()->id]);
+
+        $this->expectException(\DomainException::class);
+        try {
+            $this->service()->submit($this->company->id, $foreignRep->id, 100.0);
+        } finally {
+            $this->assertDatabaseCount('cash_reconciliations', 0);
+        }
+    }
+
     public function test_manager_approves_reconciliation(): void
     {
         CashBox::create(['company_id' => $this->company->id, 'user_id' => $this->rep->id, 'balance' => 500]);

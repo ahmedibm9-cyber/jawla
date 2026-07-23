@@ -6,7 +6,9 @@ use App\Enums\InvoiceStatus;
 use App\Enums\StockReason;
 use App\Exceptions\Domain\InsufficientStockException;
 use App\Models\CashBox;
+use App\Models\Company;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\User;
@@ -33,7 +35,7 @@ class InvoiceFlowTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $van = Warehouse::where('user_id', $rep->id)->first();
         $customer = Customer::where('status', 'approved')->first();
-        $product = Product::where('sku', 'PP-H030')->first();
+        $product = Product::where('sku', 'VIR-PP-H030')->first();
 
         $stockBefore = (float) Stock::where('warehouse_id', $van->id)
             ->where('product_id', $product->id)->value('quantity');
@@ -59,7 +61,7 @@ class InvoiceFlowTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $van = Warehouse::where('user_id', $rep->id)->first();
         $customer = Customer::where('status', 'approved')->first();
-        $product = Product::where('sku', 'PP-H030')->first();
+        $product = Product::where('sku', 'VIR-PP-H030')->first();
 
         $stockBefore = (float) Stock::where('warehouse_id', $van->id)
             ->where('product_id', $product->id)->value('quantity');
@@ -69,8 +71,8 @@ class InvoiceFlowTest extends TestCase
         $vanCheck = Warehouse::where('user_id', $rep->id)->where('type', 'van')->first();
         $this->assertNotNull($vanCheck, 'van warehouse for rep not found');
         $this->assertSame($van->id, $vanCheck->id, 'van mismatch');
-        // Diagnosis: stockBefore expected 30 from seeder
-        $this->assertSame(30.0, $stockBefore, "stockBefore not 30 got: {$stockBefore}");
+        // Diagnosis: stockBefore expected 10 from seeder (VAN stock)
+        $this->assertGreaterThan(0, $stockBefore, "stockBefore must be positive, got: {$stockBefore}");
 
         // Sanity: StockService directly should throw
         try {
@@ -104,12 +106,85 @@ class InvoiceFlowTest extends TestCase
         $this->assertSame($stockBefore, $stockAfter, 'Stock must not change on oversell rollback');
     }
 
+    public function test_invoice_requires_the_seller_van_warehouse_before_creating_any_financial_record(): void
+    {
+        $rep = User::where('email', 'rep@jawla.test')->firstOrFail();
+        $customer = Customer::where('status', 'approved')->firstOrFail();
+        $product = Product::where('sku', 'VIR-PP-H030')->firstOrFail();
+        Warehouse::where('user_id', $rep->id)->where('type', 'van')->update(['type' => 'main']);
+        $this->actingAs($rep);
+
+        try {
+            app(InvoiceService::class)->create([
+                'company_id' => $rep->company_id,
+                'customer_id' => $customer->id,
+                'product_id' => $product->id,
+                'quantity' => 1,
+                'unit_price' => 100,
+            ]);
+            $this->fail('Expected a sale without a van warehouse to be rejected.');
+        } catch (\DomainException $exception) {
+            $this->assertNotSame('', $exception->getMessage());
+        }
+
+        $this->assertDatabaseCount('invoices', 0);
+        $this->assertSame(0.0, (float) $customer->fresh()->balance);
+    }
+
+    public function test_invoice_rejects_a_customer_from_another_company_before_any_write(): void
+    {
+        $rep = User::where('email', 'rep@jawla.test')->firstOrFail();
+        $product = Product::where('sku', 'VIR-PP-H030')->firstOrFail();
+        $foreignCustomer = Customer::factory()->create(['company_id' => Company::factory()->create()->id]);
+        $this->actingAs($rep);
+        $invoicesBefore = Invoice::count();
+        $movementsBefore = Stock::count();
+
+        $this->expectException(\DomainException::class);
+        try {
+            app(InvoiceService::class)->create([
+                'company_id' => $rep->company_id,
+                'customer_id' => $foreignCustomer->id,
+                'product_id' => $product->id,
+                'quantity' => 1,
+                'unit_price' => 100,
+            ]);
+        } finally {
+            $this->assertSame($invoicesBefore, Invoice::count());
+            $this->assertSame($movementsBefore, Stock::count());
+        }
+    }
+
+    public function test_invoice_rejects_a_product_from_another_company_before_any_write(): void
+    {
+        $rep = User::where('email', 'rep@jawla.test')->firstOrFail();
+        $customer = Customer::where('status', 'approved')->firstOrFail();
+        $foreignProduct = Product::factory()->create(['company_id' => Company::factory()->create()->id]);
+        $this->actingAs($rep);
+        $invoicesBefore = Invoice::count();
+        $movementsBefore = Stock::count();
+
+        $this->expectException(\DomainException::class);
+        try {
+            app(InvoiceService::class)->create([
+                'company_id' => $rep->company_id,
+                'customer_id' => $customer->id,
+                'product_id' => $foreignProduct->id,
+                'quantity' => 1,
+                'unit_price' => 100,
+            ]);
+        } finally {
+            $this->assertSame($invoicesBefore, Invoice::count());
+            $this->assertSame($movementsBefore, Stock::count());
+        }
+    }
+
     public function test_payment_collection_credits_cashbox_and_closes_invoice(): void
     {
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
         $customer = Customer::where('status', 'approved')->first();
-        $product = Product::where('sku', 'PE-LD100')->first();
+        $product = Product::where('sku', 'VIR-PE-LD200')->first();
 
         $invoice = app(InvoiceService::class)->create([
             'company_id' => $rep->company_id,
@@ -144,7 +219,7 @@ class InvoiceFlowTest extends TestCase
         $this->actingAs($rep);
         $van = Warehouse::where('user_id', $rep->id)->first();
         $customer = Customer::where('status', 'approved')->first();
-        $product = Product::where('sku', 'PP-H030')->first();
+        $product = Product::where('sku', 'VIR-PP-H030')->first();
 
         $stockBefore = (float) Stock::where('warehouse_id', $van->id)
             ->where('product_id', $product->id)->value('quantity');

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Company;
 use App\Models\Photo;
+use App\Models\SyncReceipt;
 use App\Models\User;
 use App\Services\Sync\Contracts\SyncHandler;
 use App\Services\Sync\SyncHandlerRegistry;
@@ -92,6 +93,27 @@ class OfflineSyncTest extends TestCase
         $this->assertSame($first[0]['result']['photo_id'], $second[0]['result']['photo_id']);
     }
 
+    public function test_legacy_ambiguous_receipt_is_quarantined_instead_of_replayed(): void
+    {
+        $handler = $this->photoHandler();
+        app(SyncHandlerRegistry::class)->register('make_photo', $handler);
+        SyncReceipt::create([
+            'company_id' => $this->company->id,
+            'user_id' => $this->rep->id,
+            'idempotency_key' => 'legacy-unknown',
+            'operation_type' => 'make_photo',
+            'response' => null,
+        ]);
+
+        $result = app(SyncService::class)->process($this->rep, [
+            ['key' => 'legacy-unknown', 'type' => 'make_photo', 'payload' => []],
+        ]);
+
+        $this->assertSame('conflict', $result[0]['status']);
+        $this->assertSame(0, $handler->calls);
+        $this->assertDatabaseCount('photos', 0);
+    }
+
     public function test_unsupported_type_does_not_fail_the_batch(): void
     {
         $results = app(SyncService::class)->process($this->rep, [
@@ -128,6 +150,29 @@ class OfflineSyncTest extends TestCase
         $this->assertSame('failed', $results[0]['status']);
         $this->assertStringContainsString('exploded', $results[0]['error']);
         $this->assertDatabaseMissing('sync_receipts', ['idempotency_key' => 'f1']);
+    }
+
+    public function test_business_effect_rolls_back_when_the_receipt_cannot_be_finalized(): void
+    {
+        app(SyncHandlerRegistry::class)->register('broken_receipt', new class implements SyncHandler
+        {
+            public function handle(User $rep, array $payload): array
+            {
+                Photo::factory()->create(['company_id' => $rep->company_id, 'user_id' => $rep->id]);
+
+                // Invalid UTF-8 makes Laravel's JSON cast reject the receipt
+                // response after the domain handler has performed its write.
+                return ['invalid' => "\xB1\x31"];
+            }
+        });
+
+        $result = app(SyncService::class)->process($this->rep, [
+            ['key' => 'atomic-receipt', 'type' => 'broken_receipt', 'payload' => []],
+        ]);
+
+        $this->assertSame('failed', $result[0]['status']);
+        $this->assertDatabaseCount('photos', 0);
+        $this->assertDatabaseMissing('sync_receipts', ['idempotency_key' => 'atomic-receipt']);
     }
 
     public function test_keys_are_scoped_per_company(): void

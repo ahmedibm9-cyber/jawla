@@ -40,7 +40,7 @@ class OfflineSyncHandlersTest extends TestCase
         $this->seed(DemoSeeder::class);
         $this->rep = User::where('email', 'rep@jawla.test')->firstOrFail();
         $this->customer = Customer::where('status', 'approved')->firstOrFail();
-        $this->product = Product::where('sku', 'PP-H030')->firstOrFail();
+        $this->product = Product::where('sku', 'VIR-PP-H030')->firstOrFail();
         $this->actingAs($this->rep);
         app(ActiveCompanyContext::class)->setFromUser($this->rep);
 
