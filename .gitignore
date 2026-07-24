@@ -33,3 +33,6 @@ Thumbs.db
 *.png
 !public/images/*.png
 !public/icons/*.png
+
+# Archived issue/bug documents
+/.archive/
