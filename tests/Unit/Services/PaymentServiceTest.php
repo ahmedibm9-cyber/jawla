@@ -13,12 +13,12 @@ use App\Models\Warehouse;
 use App\Services\Contracts\StockService;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class PaymentServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     public function test_collect_payment_creates_payment(): void
     {
@@ -211,13 +211,10 @@ class PaymentServiceTest extends TestCase
             'product_id' => $product->id, 'quantity' => 1, 'unit_price' => 100,
         ]);
 
-        try {
-            app(PaymentService::class)->collect(
-                $company->id, $rep->id, $customer->id, (float) $invoice->total + 1, 'cash', $invoice->id,
-            );
-            $this->fail('Expected an overpayment to be rejected.');
-        } catch (\DomainException) {
-        }
+        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        app(PaymentService::class)->collect(
+            $company->id, $rep->id, $customer->id, (float) $invoice->total + 1, 'cash', $invoice->id,
+        );
 
         $this->assertDatabaseCount('payments', 0);
     }

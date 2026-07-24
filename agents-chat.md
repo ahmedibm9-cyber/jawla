@@ -41,22 +41,42 @@ startup and appends what it's doing so others don't conflict or duplicate.
 
 - **Task:** bmad-investigate sweep — review all Filament resources, pages, widgets; fix issues; commit
 - **Files:** `app/Filament/`, `resources/views/filament/`, `config/filament.php`
-- **Status:** in_progress
-- **Notes:** Claimed Domain 2. Auditing Filament admin panel for correctness, access control, and CRUD completeness.
+- **Status:** done
+- **Notes:** Audited all 93 Filament PHP files + 9 Blade views. Fixed 3 bugs: (1) CashReconciliationResource badge colors inverted (status→color_name mapped wrong), (2) ExpenseResource cancel action missing visible guard (showed on already-cancelled), (3) GoodsInTransitResource same inverted badge colors. All syntax clean. Committed as `21b01b1` + pushed to GitHub. Railway deploy needs re-auth.
 
 ## infra-agent — 2026-07-25 00:15
 
 - **Task:** Investigate pre-existing 9 unit test failures, fix them, then verify full test suite passes
-- **Files:** `tests/`, `phpunit.xml`, `.github/workflows/`, `railway.toml`, `docs/`
-- **Status:** in_progress
-- **Notes:** Using bmad-investigate workflow. Working tree is clean, last deploy successful. Unit tests show 9 failures in PaymentService, ReturnService, ReversalService, StockImportService, ExpenseService tests when run together (pass in isolation).
+- **Files:** `tests/Unit/Services/PaymentServiceTest.php`, `tests/Unit/Services/ReturnServiceTest.php`, `tests/Unit/Services/ReversalServiceTest.php`, `tests/Unit/Services/ExpenseServiceTest.php`, `tests/Unit/Services/EgyptQrStrategyTest.php`, `tests/Feature/RepLoginLifecycleTest.php`, `.archive/investigation-test-deadlock-pgsql-2026-07-25.md`
+- **Status:** done
+- **Notes:** Fixed 3 root causes: (1) PostgreSQL deadlock from RefreshDatabase DDL vs lockForUpdate — switched 5 test classes to DatabaseTransactions; (2) Wrong DomainException class caught (PHP built-in vs App custom) — fixed 2 tests; (3) EgyptQrStrategyTest used RefreshDatabase but doesn't touch DB — removed it. 98/98 unit tests + 6/6 RepLoginLifecycle tests pass. Investigation case filed at `.archive/investigation-test-deadlock-pgsql-2026-07-25.md`.
 
-## backend-agent — 2026-07-24T21:55:00Z
+## backend-agent — 2026-07-24T21:55:00Z → 2026-07-25 (DONE)
 
 - **Task:** Full codebase investigation sweep — review code, run tests, fix issues, commit, deploy
-- **Files:** All `app/Services/`, `app/Models/`, `app/Exceptions/`, `tests/`, `database/`
-- **Status:** in_progress
-- **Notes:** Following /bmad-investigate workflow. Reviewing every file in backend domain for correctness, test coverage, and test reliability. Started from a completed architecture review (7 findings implemented). Now running full sweep.
+- **Files:** `app/Services/` (Invoice, Payment, CashReconciliation, PdfEngine, Sync, Contracts),
+  `app/Livewire/App/SalesFlow.php`,
+  `tests/Feature/InvoiceFlowTest.php`, `tests/Feature/OfflineSyncTest.php`,
+  `lang/en/errors.php`, `lang/ar/errors.php`,
+  `app/Exceptions/`, `app/Providers/`
+- **Status:** done
+- **Shipped:** 
+  - **F1**: Extracted companyMessage() → DomainException + lang keys (3 services)
+  - **F2**: Removed duplicate customer-status check from SalesFlow (single authority: InvoiceService)
+  - **F3**: SalesFlow::recalcCart() now uses InvoiceCalculationService (single math seam)
+  - **F4**: Extracted PdfEngine (mPDF + cache) from PdfService god class
+  - **F5**: Added PaymentService contract (+ container binding)
+  - **F6**: Added type():string to SyncHandler interface + auto-discovery via container tags; all 6 handlers + 3 test anonymous classes updated
+  - **F7**: SalesFlow resolved via app() (Livewire-compatible injection)
+  - **F8 (bugfix)**: Fixed `\DomainException` resolution in InvoiceService::vanWarehouseFor()
+  - **F9 (bugfix)**: Fixed InvoiceFlowTest: van warehouse assertion + stock seeding (DB::table bypasses nested-transaction issues)
+  - **F10 (bugfix)**: Fixed OfflineSyncTest anonymous classes missing type() method
+  - **F11**: Created worklog.md with full git audit + architecture summary
+  - **F12**: Architecture review HTML report at %TEMP%/architecture-review-2026-07-24.html
+- **Remaining for infra-agent:** 9 pre-existing test failures (PaymentService, ReturnService etc.) — DomainException class resolution issue needs fixing in those services too. InvoiceFlowTest has 2 pre-existing `RefreshDatabase` + stock issues (infra-agent already investigating).
+- **Conflicts with admin-agent:** None — admin-agent's Filament resource fixes were in different files.
+- **Conflicts with rep-pwa-agent:** None — layout CSS changes don't touch service layer.
+- **Notable:** `ParallelTestingServiceProvider` file was created then deleted (caused autodiscovery + DB corruption). `bootstrap/testing.php` untracked file can be deleted.
 
 ## rep-pwa-agent — 2026-07-25 10:00
 
@@ -71,3 +91,8 @@ startup and appends what it's doing so others don't conflict or duplicate.
 - **Status:** done
 - **Shipped:** Sidebar nav ≥1024px, multi-column list/dashboard grids on tablet/desktop, mobile layout unchanged. Reviewed, rep-view render tests pass (2 apparent failures were Postgres deadlocks from 4 agents sharing `jawla_test` — infra's known "pass in isolation" issue, not app code). Committed + pushed (HEAD==origin) + **deployed & verified live** on production (`--side-nav` in live CSS, sidebar + 3-col grid rendering at 1440px).
 - **Open item for login/auth owner:** user wants the custom `/login` (unstyled `resources/views/app/login.blade.php`) deleted and unified on the styled Filament `/admin/login` (`LoginResponse` already routes rep→`/app`). Out of my domain — leaving to the owner. `RepLoginLifecycleTest` guards the custom `POST /login` and must move with it.
+
+## rep-pwa-agent — 2026-07-25 10:40 (review sweep complete)
+- **Task:** Full bmad-investigate review sweep of Rep PWA domain (24 Livewire components, 24 views, shared components, sw.js, manifest, resources/js).
+- **Status:** done — clean, nothing to fix.
+- **Reviewed:** shell-exec/eval (none), mass assignment (none), unbounded queries (all lists paginated or `->limit()`), direct stock/money mutation in Livewire (none — routes through services), leftover debug (none), blade `{!!` (only trusted SVG icon slot), service worker (network-first for auth HTML → never caches authed pages; PURGE_USER_DATA on logout; correct install/activate/fetch), manifest.json (valid), multi-tenant scoping (model `BelongsToCompany` global scope + component user_id scoping — no cross-tenant leak). All round-1 UI fixes + responsive layout intact & deployed. No commits needed this pass.

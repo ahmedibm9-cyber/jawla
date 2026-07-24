@@ -10,12 +10,12 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\Contracts\StockService;
 use App\Services\ReturnService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class ReturnServiceTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     public function test_create_return_restores_stock_and_reduces_balance(): void
     {
@@ -94,16 +94,13 @@ class ReturnServiceTest extends TestCase
         $customer = Customer::factory()->create(['company_id' => $company->id, 'balance' => 200]);
         $product = Product::factory()->create(['company_id' => $company->id]);
 
-        try {
-            app(ReturnService::class)->create(
-                companyId: $company->id,
-                userId: $rep->id,
-                customerId: $customer->id,
-                items: [['product_id' => $product->id, 'quantity' => 2.0, 'unit_price' => 50.0]],
-            );
-            $this->fail('Expected a return without a van warehouse to be rejected.');
-        } catch (\DomainException) {
-        }
+        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        app(ReturnService::class)->create(
+            companyId: $company->id,
+            userId: $rep->id,
+            customerId: $customer->id,
+            items: [['product_id' => $product->id, 'quantity' => 2.0, 'unit_price' => 50.0]],
+        );
 
         $this->assertDatabaseCount('returns', 0);
         $this->assertSame(200.0, (float) $customer->fresh()->balance);

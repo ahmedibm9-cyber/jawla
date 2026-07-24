@@ -17,12 +17,12 @@ use App\Services\Contracts\StockService;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
 use Database\Seeders\DemoSeeder;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class InvoiceFlowTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected function setUp(): void
     {
@@ -36,6 +36,13 @@ class InvoiceFlowTest extends TestCase
         $van = Warehouse::where('user_id', $rep->id)->first();
         $customer = Customer::where('status', 'approved')->first();
         $product = Product::where('sku', 'VIR-PP-H030')->first();
+
+        // Reset stock for this product to a known value (DemoSeeder's
+        // 40-invoice loop is non-deterministic and may leave it depleted).
+        \Illuminate\Support\Facades\DB::table('stocks')->updateOrInsert(
+            ['warehouse_id' => $van->id, 'product_id' => $product->id, 'batch_id' => null],
+            ['quantity' => 10],
+        );
 
         $stockBefore = (float) Stock::where('warehouse_id', $van->id)
             ->where('product_id', $product->id)->value('quantity');
@@ -185,8 +192,15 @@ class InvoiceFlowTest extends TestCase
     {
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
+        $van = Warehouse::where('user_id', $rep->id)->first();
         $customer = Customer::where('status', 'approved')->first();
+        // Use a product guaranteed to have stock: seed directly via
+        // DB table to avoid nested-transaction issues with StockService.
         $product = Product::where('sku', 'VIR-PE-LD200')->first();
+        \Illuminate\Support\Facades\DB::table('stocks')->updateOrInsert(
+            ['warehouse_id' => $van->id, 'product_id' => $product->id, 'batch_id' => null],
+            ['quantity' => 10],
+        );
 
         $invoice = app(InvoiceService::class)->create([
             'company_id' => $rep->company_id,
@@ -222,6 +236,13 @@ class InvoiceFlowTest extends TestCase
         $van = Warehouse::where('user_id', $rep->id)->first();
         $customer = Customer::where('status', 'approved')->first();
         $product = Product::where('sku', 'VIR-PP-H030')->first();
+
+        // Seed sufficient stock directly (avoids DemoSeeder's non-deterministic
+        // 40-invoice loop which may leave stock below the 3 units we need).
+        \Illuminate\Support\Facades\DB::table('stocks')->updateOrInsert(
+            ['warehouse_id' => $van->id, 'product_id' => $product->id, 'batch_id' => null],
+            ['quantity' => 10],
+        );
 
         $stockBefore = (float) Stock::where('warehouse_id', $van->id)
             ->where('product_id', $product->id)->value('quantity');

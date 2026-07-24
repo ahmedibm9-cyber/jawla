@@ -51,6 +51,11 @@ class OfflineSyncTest extends TestCase
         {
             public int $calls = 0;
 
+            public function type(): string
+            {
+                return 'test_photo';
+            }
+
             public function handle(User $rep, array $payload): array
             {
                 $this->calls++;
@@ -137,6 +142,11 @@ class OfflineSyncTest extends TestCase
     {
         app(SyncHandlerRegistry::class)->register('boom', new class implements SyncHandler
         {
+            public function type(): string
+            {
+                return 'boom';
+            }
+
             public function handle(User $rep, array $payload): array
             {
                 throw new \RuntimeException('handler exploded');
@@ -156,6 +166,11 @@ class OfflineSyncTest extends TestCase
     {
         app(SyncHandlerRegistry::class)->register('broken_receipt', new class implements SyncHandler
         {
+            public function type(): string
+            {
+                return 'broken_receipt';
+            }
+
             public function handle(User $rep, array $payload): array
             {
                 Photo::factory()->create(['company_id' => $rep->company_id, 'user_id' => $rep->id]);
