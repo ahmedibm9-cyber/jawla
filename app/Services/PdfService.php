@@ -70,7 +70,7 @@ class PdfService
             ?? $invoice->user?->name;
         $signatureSvg = is_string($signaturePath) && Storage::disk('private')->exists($signaturePath)
             ? '<img src="data:image/png;base64,'.base64_encode(Storage::disk('private')->get($signaturePath)).'" style="max-width:160px;max-height:60px">'
-            : '<span style="font-style:italic">'.$invoice->user?->name.'</span>';
+            : '<span style="font-style:italic">'.e($invoice->user?->name ?? '').'</span>';
 
         $qrData = $this->qrService->generateForInvoice($invoice);
         $qr = $this->qrSvg($qrData);
@@ -183,8 +183,8 @@ HTML;
         }
 
         $bank = $doc instanceof ProformaInvoice && $doc->company_bank_account_id
-            ? ($doc->bankAccount?->bank_name.' · '.($doc->bankAccount?->iban ?? $doc->bankAccount?->account_number))
-            : ($company?->bank_name.' · '.$company?->bank_iban);
+            ? e($doc->bankAccount?->bank_name ?? '').' · '.e($doc->bankAccount?->iban ?? $doc->bankAccount?->account_number ?? '')
+            : e($company?->bank_name ?? '').' · '.e($company?->bank_iban ?? '');
 
         $number = $type === 'proforma' ? $doc->proforma_number : $doc->invoice_number;
         $date = $doc->posting_date?->format('Y-m-d') ?? '';
