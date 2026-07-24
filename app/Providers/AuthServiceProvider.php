@@ -14,6 +14,11 @@ class AuthServiceProvider extends ServiceProvider
             if ($user->isSuperAdmin()) {
                 return true;
             }
+
+            // Admin role with 'full_access' permission bypasses all fine-grained checks.
+            if ($user->hasRole('admin')) {
+                return true;
+            }
         });
 
         Gate::define('products.manage_prices', fn (User $user) => $user->hasAnyRole(['admin', 'accounts', 'sales_manager', 'executive']));
