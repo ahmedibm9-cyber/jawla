@@ -42,7 +42,7 @@ class SecurityHeaders
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
             "img-src 'self' data: blob: https://*.tile.openstreetmap.org",
             "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com https://fonts.bunny.net",
-            "connect-src 'self' wss: ws:",
+            "connect-src 'self' wss: ws: https://o4511398253625344.ingest.us.sentry.io",
             "frame-ancestors 'none'",
             "base-uri 'self'",
             "form-action 'self'",
