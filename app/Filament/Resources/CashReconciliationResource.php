@@ -75,9 +75,9 @@ class CashReconciliationResource extends Resource
                     ->weight('bold'),
                 Tables\Columns\BadgeColumn::make('status')->label(l('الحالة', 'Status'))
                     ->colors([
-                        'warning' => 'pending',
-                        'success' => 'approved',
-                        'danger' => 'flagged',
+                        'pending' => 'warning',
+                        'approved' => 'success',
+                        'flagged' => 'danger',
                     ]),
                 Tables\Columns\TextColumn::make('created_at')->label(l('التاريخ', 'Date'))->dateTime()->sortable(),
             ])

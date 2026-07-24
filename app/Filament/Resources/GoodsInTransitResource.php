@@ -107,9 +107,11 @@ class GoodsInTransitResource extends Resource
                     ->state(fn (GoodsInTransit $r) => number_format(app(GoodsInTransitService::class)->totalLandedCost($r), 2)),
                 Tables\Columns\BadgeColumn::make('status')->label(l('الحالة', 'Status'))
                     ->colors([
-                        'warning' => 'in_transit',
-                        'info' => ['at_customs', 'cleared', 'partial_received'],
-                        'success' => 'received',
+                        'in_transit' => 'warning',
+                        'at_customs' => 'info',
+                        'cleared' => 'info',
+                        'partial_received' => 'info',
+                        'received' => 'success',
                     ]),
                 Tables\Columns\TextColumn::make('estimated_arrival_date')->label(l('الوصول', 'ETA'))->date()->placeholder('—'),
             ])

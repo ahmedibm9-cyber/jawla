@@ -53,6 +53,7 @@ class ExpenseResource extends Resource
                     ->label(l('إلغاء', 'Cancel'))
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
+                    ->visible(fn (Expense $r) => $r->cancelled_at === null)
                     ->requiresConfirmation()
                     ->action(fn (Expense $r) => app(ExpenseService::class)->cancel($r, auth()->id())),
             ])
