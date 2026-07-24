@@ -39,11 +39,11 @@ class ExpenseResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')->label('#')->sortable(),
-                TextColumn::make('user.name')->label(l('المستخدم', 'User')),
+                TextColumn::make('user.name')->label(l('المستخدم', 'User'))->searchable(),
                 BadgeColumn::make('category')->label(l('النوع', 'Category'))
                     ->colors(['fuel' => 'warning', 'maintenance' => 'info', 'food' => 'success', 'other' => 'gray']),
                 TextColumn::make('amount')->label(l('المبلغ', 'Amount'))->money('egp')->sortable(),
-                TextColumn::make('note')->label(l('ملاحظات', 'Note'))->limit(40),
+                TextColumn::make('note')->label(l('ملاحظات', 'Note'))->limit(40)->searchable(),
                 TextColumn::make('spent_at')->label(l('التاريخ', 'Date'))->dateTime()->sortable(),
             ])
             ->filters([])
