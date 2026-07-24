@@ -10,8 +10,16 @@ use Illuminate\View\View;
 
 class UnifiedLoginController extends Controller
 {
-    public function show(): View
+    public function show(): View|RedirectResponse
     {
+        if (Auth::check()) {
+            $user = Auth::user();
+            if ($user->hasRole('rep')) {
+                return redirect()->route('app.home');
+            }
+            return redirect()->route('filament.admin.pages.dashboard');
+        }
+
         return view('auth.login');
     }
 
