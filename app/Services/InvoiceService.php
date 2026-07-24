@@ -87,7 +87,7 @@ class InvoiceService implements InvoiceContract
                         ? 'حالة العميل غير صالحة'
                         : 'Invalid customer status',
                 };
-                throw new \DomainException($message);
+                throw new DomainException($message);
             }
 
             $lineInputs = [];

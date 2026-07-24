@@ -18,7 +18,7 @@ class PaymentService implements PaymentServiceContract
     {
         return DB::transaction(function () use ($companyId, $userId, $customerId, $amount, $method, $invoiceId, $visitId, $notes): Payment {
             if ($amount <= 0) {
-                throw new \DomainException('Payment amount must be greater than zero.');
+                throw new DomainException('Payment amount must be greater than zero.');
             }
 
             $customer = Customer::whereKey($customerId)
@@ -128,7 +128,7 @@ class PaymentService implements PaymentServiceContract
         // so concurrent first collections cannot create competing cash boxes.
         $user = User::withoutGlobalScopes()->whereKey($userId)->lockForUpdate()->firstOrFail();
         if ($user->company_id !== $companyId) {
-            throw new \DomainException('Cash box user does not belong to this company.');
+            throw new DomainException('Cash box user does not belong to this company.');
         }
 
         // Legacy cash boxes predate company_id, so this lookup must include the

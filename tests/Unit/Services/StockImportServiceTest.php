@@ -10,7 +10,7 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WarehouseImportLog;
 use App\Services\StockImportService;
-use DomainException;
+use App\Exceptions\Domain\DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

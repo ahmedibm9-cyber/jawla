@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\Domain\DomainException;
 use App\Models\Product;
 use App\Models\Stock;
 use App\Models\Warehouse;
@@ -131,7 +132,7 @@ class StockImportService
     public function apply(array $preview, Warehouse $warehouse, string $fileName, int $userId): WarehouseImportLog
     {
         if (WarehouseImportLog::where('checksum', $preview['checksum'])->exists()) {
-            throw new \DomainException(app()->getLocale() === 'ar'
+            throw new DomainException(app()->getLocale() === 'ar'
                 ? 'تم استيراد هذا الملف من قبل'
                 : 'This exact file was already imported');
         }

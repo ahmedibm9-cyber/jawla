@@ -29,7 +29,7 @@ class ReturnService
                 ->lockForUpdate()
                 ->first();
             if (! $vanWarehouse) {
-                throw new \DomainException(
+                throw new DomainException(
                     app()->getLocale() === 'ar'
                         ? 'لا يمكن تسجيل مرتجع بدون مخزن سيارة نشط للمندوب'
                         : 'A return requires an active van warehouse for the seller.'
@@ -40,12 +40,12 @@ class ReturnService
                 ->lockForUpdate()
                 ->first();
             if (! $customer) {
-                throw new \DomainException($this->companyMessage('customer'));
+                throw new DomainException($this->companyMessage('customer'));
             }
 
             $productIds = array_values(array_unique(array_column($items, 'product_id')));
             if (Product::where('company_id', $companyId)->whereIn('id', $productIds)->count() !== count($productIds)) {
-                throw new \DomainException($this->companyMessage('product'));
+                throw new DomainException($this->companyMessage('product'));
             }
 
             $return = ReturnRecord::create([
@@ -90,7 +90,7 @@ class ReturnService
 
             // Guard: prevent negative customer balance
             if ($total > (float) $customer->balance) {
-                throw new \DomainException(
+                throw new DomainException(
                     app()->getLocale() === 'ar'
                         ? 'قيمة المرتجع تتجاوز رصيد العميل'
                         : 'Return value exceeds customer balance'

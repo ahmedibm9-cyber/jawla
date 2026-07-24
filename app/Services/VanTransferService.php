@@ -28,17 +28,17 @@ class VanTransferService implements VanTransferServiceContract
                 ->lockForUpdate()
                 ->get();
             if ($participants->count() !== count(array_unique([$fromUserId, $toUserId]))) {
-                throw new \DomainException('Transfer participants must belong to the same company.');
+                throw new DomainException('Transfer participants must belong to the same company.');
             }
 
             $productIds = array_values(array_unique(array_column($items, 'product_id')));
             if (Product::where('company_id', $companyId)->whereIn('id', $productIds)->count() !== count($productIds)) {
-                throw new \DomainException('Transfer products must belong to the same company.');
+                throw new DomainException('Transfer products must belong to the same company.');
             }
 
             if ($inTransitWarehouseId !== null && ! Warehouse::whereKey($inTransitWarehouseId)
                 ->where('company_id', $companyId)->lockForUpdate()->exists()) {
-                throw new \DomainException('In-transit warehouse does not belong to this company.');
+                throw new DomainException('In-transit warehouse does not belong to this company.');
             }
 
             $transfer = VanTransfer::create([
@@ -68,7 +68,7 @@ class VanTransferService implements VanTransferServiceContract
             $transfer = VanTransfer::with('items')->whereKey($transferId)->lockForUpdate()->firstOrFail();
 
             throw_if($transfer->status !== VanTransferStatus::Pending, new \RuntimeException('Only pending transfers can be shipped.'));
-            throw_if($transfer->from_user_id !== $userId, new \DomainException('Only the source representative can ship this transfer.'));
+            throw_if($transfer->from_user_id !== $userId, new DomainException('Only the source representative can ship this transfer.'));
 
             Warehouse::whereKey($fromWarehouseId)
                 ->where('company_id', $transfer->company_id)
@@ -105,7 +105,7 @@ class VanTransferService implements VanTransferServiceContract
             $transfer = VanTransfer::with('items')->whereKey($transferId)->lockForUpdate()->firstOrFail();
 
             throw_if($transfer->status !== VanTransferStatus::Shipped, new \RuntimeException('Only shipped transfers can be received.'));
-            throw_if($transfer->to_user_id !== $userId, new \DomainException('Only the destination representative can receive this transfer.'));
+            throw_if($transfer->to_user_id !== $userId, new DomainException('Only the destination representative can receive this transfer.'));
 
             $inTransitId = $transfer->in_transit_warehouse_id;
             throw_if(! $inTransitId, new \RuntimeException('In-transit warehouse is required.'));
@@ -159,7 +159,7 @@ class VanTransferService implements VanTransferServiceContract
             $transfer = VanTransfer::whereKey($transferId)->lockForUpdate()->firstOrFail();
 
             throw_if($transfer->status !== VanTransferStatus::Pending, new \RuntimeException('Only pending transfers can be cancelled.'));
-            throw_if($transfer->from_user_id !== $userId, new \DomainException('Only the source representative can cancel this transfer.'));
+            throw_if($transfer->from_user_id !== $userId, new DomainException('Only the source representative can cancel this transfer.'));
 
             $transfer->update(['status' => VanTransferStatus::Cancelled]);
 

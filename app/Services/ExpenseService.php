@@ -13,7 +13,7 @@ class ExpenseService
     public function log(int $companyId, int $userId, string $category, float $amount, string $note = '', ?int $workSessionId = null): Expense
     {
         if ($amount <= 0) {
-            throw new \DomainException(
+            throw new DomainException(
                 app()->getLocale() === 'ar'
                     ? 'المبلغ يجب أن يكون أكبر من صفر'
                     : 'Amount must be greater than zero'
@@ -25,7 +25,7 @@ class ExpenseService
             $cashBox = $this->ensureCashBox($userId, $companyId);
 
             if ($amount > (float) $cashBox->balance) {
-                throw new \DomainException(
+                throw new DomainException(
                     app()->getLocale() === 'ar'
                         ? 'المبلغ يتجاوز رصيد صندوق النقدية المتاح'
                         : 'Amount exceeds available cash box balance'
@@ -73,7 +73,7 @@ class ExpenseService
     {
         $user = User::withoutGlobalScopes()->whereKey($userId)->lockForUpdate()->firstOrFail();
         if ($user->company_id !== $companyId) {
-            throw new \DomainException('Cash box user does not belong to this company.');
+            throw new DomainException('Cash box user does not belong to this company.');
         }
 
         $cashBox = CashBox::withoutGlobalScopes()->where('user_id', $userId)->lockForUpdate()->first();

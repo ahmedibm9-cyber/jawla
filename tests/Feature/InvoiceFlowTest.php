@@ -17,12 +17,12 @@ use App\Services\Contracts\StockService;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
 use Database\Seeders\DemoSeeder;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
 class InvoiceFlowTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTransactions;
 
     protected function setUp(): void
     {
@@ -114,6 +114,8 @@ class InvoiceFlowTest extends TestCase
         Warehouse::where('user_id', $rep->id)->where('type', 'van')->update(['type' => 'main']);
         $this->actingAs($rep);
 
+        $invoicesBefore = Invoice::count();
+
         try {
             app(InvoiceService::class)->create([
                 'company_id' => $rep->company_id,
@@ -127,7 +129,7 @@ class InvoiceFlowTest extends TestCase
             $this->assertNotSame('', $exception->getMessage());
         }
 
-        $this->assertDatabaseCount('invoices', 0);
+        $this->assertSame($invoicesBefore, Invoice::count(), 'No new invoices should be created on a failed sale');
         $this->assertSame(0.0, (float) $customer->fresh()->balance);
     }
 
