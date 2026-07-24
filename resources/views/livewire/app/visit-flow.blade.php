@@ -74,7 +74,7 @@
     </div>
 
     {{-- Stepper --}}
-    <div class="stepper">
+    <div class="stepper" role="list" aria-label="{{ app()->getLocale() === 'ar' ? 'خطوات' : 'Steps' }}">
         <div class="step done">
             <div class="step-dot">&#10003;</div>
             <small>{{ __('app.scheduled') }}</small>
@@ -161,8 +161,8 @@
         </div>
 
         <div class="card">
-            <label class="flex items-center gap-2">
-                <input type="checkbox" wire:model="followUpNeeded">
+            <label for="followUpNeeded" class="flex items-center gap-2">
+                <input type="checkbox" wire:model="followUpNeeded" id="followUpNeeded">
                 <span class="font-semibold">{{ __('app.follow_up_needed') }}</span>
             </label>
             @if($followUpNeeded)

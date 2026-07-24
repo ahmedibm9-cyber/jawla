@@ -13,8 +13,14 @@ class AlarmService implements Contracts\AlarmService
     public function raise(string $type, Model $ref, string $title, string $description, string $severity): Alarm
     {
         return DB::transaction(function () use ($type, $ref, $title, $description, $severity): Alarm {
+            $companyId = $ref->company_id;
+
+            if ($companyId === null) {
+                throw new \InvalidArgumentException('Alarm reference must have a company_id');
+            }
+
             $alarm = Alarm::create([
-                'company_id' => $ref->company_id ?? 1,
+                'company_id' => $companyId,
                 'type' => $type,
                 'reference_type' => get_class($ref),
                 'reference_id' => $ref->id,

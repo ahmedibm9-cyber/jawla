@@ -4,8 +4,8 @@
         <x-filament::section>
             <div class="flex flex-wrap gap-3 items-end">
                 <div class="w-full sm:w-auto">
-                    <label class="filament-component-label mb-1 block">{{ app()->getLocale() === 'ar' ? 'نوع النشاط' : 'Activity Type' }}</label>
-                    <select wire:model.live="typeFilter" class="filament-input w-full">
+                    <label for="activityType" class="filament-component-label mb-1 block">{{ app()->getLocale() === 'ar' ? 'نوع النشاط' : 'Activity Type' }}</label>
+                    <select id="activityType" wire:model.live="typeFilter" class="filament-input w-full">
                         <option value="">{{ app()->getLocale() === 'ar' ? 'جميع الأنشطة' : 'All Activities' }}</option>
                         <option value="invoice_created">{{ app()->getLocale() === 'ar' ? 'فاتورة جديدة' : 'Invoice Created' }}</option>
                         <option value="invoice_submitted">{{ app()->getLocale() === 'ar' ? 'فاتورة مرسلة' : 'Invoice Submitted' }}</option>

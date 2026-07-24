@@ -103,6 +103,7 @@
 
                 {{-- Bilingual revoke confirmation modal --}}
                 <div x-cloak x-show="confirming" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                    role="dialog" aria-modal="true" aria-label="{{ $ar ? 'إلغاء المفتاح' : 'Revoke token' }}"
                     x-on:keydown.escape.window="confirming = false">
                     <div class="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-900" x-on:click.outside="confirming = false">
                         <h3 class="text-lg font-semibold">{{ $ar ? 'إلغاء المفتاح؟' : 'Revoke token?' }}</h3>

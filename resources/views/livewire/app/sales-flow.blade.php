@@ -6,7 +6,7 @@
 
     <div class="page-body" x-effect="step = $wire.step; window.scrollTo(0,0)">
         {{-- Stepper --}}
-        <div class="stepper">
+        <div class="stepper" role="list" aria-label="{{ app()->getLocale() === 'ar' ? 'خطوات' : 'Steps' }}">
             <div class="step {{ $step === 'cart' ? 'active' : 'done' }}">
                 <div class="step-dot">{{ $step === 'cart' ? '1' : '&#10003;' }}</div>
                 <small>{{ __('app.cart') }}</small>
@@ -96,7 +96,7 @@
                     <div class="flex gap-2">
                         <button type="button" wire:loading.attr="disabled" x-on:click="start()"
                             class="btn btn-secondary flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2v16H3V4zm4 0h1v16H7V4zm3 0h2v16h-2V4zm4 0h1v16h-1V4zm3 0h2v16h-2V4z"/></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h2v16H3V4zm4 0h1v16H7V4zm3 0h2v16h-2V4zm4 0h1v16h-1V4zm3 0h2v16h-2V4z"/></svg>
                             {{ $arScan ? 'مسح باركود' : 'Scan barcode' }}
                         </button>
                         <button type="button" x-on:click="manual()" class="btn btn-ghost">
@@ -105,6 +105,7 @@
                     </div>
 
                     <div x-show="open" x-cloak class="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-4"
+                        role="dialog" aria-modal="true" aria-label="{{ $arScan ? 'مسح الباركود' : 'Scan barcode' }}"
                         x-on:keydown.escape.window="stop()">
                         <video x-ref="video" playsinline muted class="w-full max-h-[70vh] rounded-lg object-cover"></video>
                         <p class="text-white text-sm mt-3">{{ $arScan ? 'وجّه الكاميرا نحو الباركود' : 'Point the camera at the barcode' }}</p>

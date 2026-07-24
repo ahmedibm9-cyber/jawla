@@ -19,6 +19,11 @@ class CollectPayment extends Page
 
     protected static string|\UnitEnum|null $navigationGroup = null;
 
+    public static function canAccess(): bool
+    {
+        return Auth::user()?->can('payments.collect') ?? false;
+    }
+
     public static function getNavigationLabel(): string
     {
         return app()->getLocale() === 'ar' ? 'تحصيل دفعة' : 'Collect Payment';

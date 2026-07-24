@@ -25,6 +25,11 @@ class ReportsPage extends Page
 
     protected static string|\UnitEnum|null $navigationGroup = null;
 
+    public static function canAccess(): bool
+    {
+        return Auth::user()?->can('reports.view') ?? false;
+    }
+
     public string $tab = 'visit_reports';
 
     public ?string $fromDate = null;
