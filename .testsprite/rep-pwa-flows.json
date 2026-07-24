@@ -1,0 +1,181 @@
+{
+  "projectId": "8d1ac104-8d4c-4e71-8526-936a13722bda",
+  "type": "frontend",
+  "name": "Rep PWA — Full Screen Sweep",
+  "description": "Login as rep@jawla.test and navigate every PWA screen to verify they load without errors",
+  "priority": "p0",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/login"
+    },
+    {
+      "type": "action",
+      "description": "On the login page, type 'rep@jawla.test' into the email field and 'password' into the password field, then click the login/submit button"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert that after login the page redirects to the /app home dashboard and not back to the login page"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app (Home dashboard)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Home dashboard loads without error and shows dashboard content (not a blank page or 500 error)"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/customers (Today's Customers)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Customers page loads and shows a customer list or empty state, not a 500 error"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/customers/create (Add Customer)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Add Customer form loads with input fields for customer name, phone, and address"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/visits (Visits list)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Visits page loads and shows visit history or an empty state"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/orders (Orders)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Orders page loads and shows invoice/order history or empty state"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/stock (Stock Search)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Stock Search page loads with a search input field"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/sell (Sales Flow)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Sales Flow page loads and shows a customer selection or product search interface"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/collect-payment (Collect Payment)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Collect Payment page loads with a form for selecting customer and entering payment amount"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/returns (Log Return)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Returns page loads with a form for selecting customer and adding return items"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/expenses (Log Expense)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Expenses page loads with a form for expense category, amount, and notes"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/reconcile (Cash Reconcile)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Cash Reconcile page loads and shows expected balance or a reconciliation form"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/transfers (Van Transfers)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Van Transfers page loads and shows transfer history or an empty state"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/complaints (Log Complaint)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Complaints page loads with a form for customer, complaint type, and description"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/quotations (Quotation Flow)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Quotations page loads and shows quotation requests or an empty state"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/purchase-offer (Submit Purchase Offer)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Purchase Offer page loads with a form for product, supplier, quantity, and price"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/notifications (Notifications)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Notifications page loads and shows a notification list or empty state"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/sync-queue (Sync Queue)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Sync Queue page loads and shows queued operations or an empty state"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/more (More page)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the More page loads and shows additional navigation options"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/profile (Profile)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Profile page loads and shows user name, email, and editable fields"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app/settings (Settings)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Settings page loads and shows user name, company name, and locale info"
+    }
+  ]
+}

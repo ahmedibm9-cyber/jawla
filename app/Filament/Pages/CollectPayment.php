@@ -41,11 +41,10 @@ class CollectPayment extends Page
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
             Forms\Components\Select::make('customer_id')
-                ->label($l('العميل', 'Customer'))
+                ->label(l('العميل', 'Customer'))
                 ->options(fn () => Customer::where('company_id', Auth::user()->company_id)
                     ->where('is_active', true)
                     ->orderBy('name_ar')
@@ -53,12 +52,12 @@ class CollectPayment extends Page
                 ->reactive()
                 ->required(),
             Forms\Components\Select::make('invoice_id')
-                ->label($l('فاتورة', 'Invoice'))
+                ->label(l('فاتورة', 'Invoice'))
                 ->options(fn (callable $get) => Invoice::where('customer_id', $get('customer_id'))
                     ->whereIn('status', ['submitted', 'partially_paid'])
                     ->whereRaw('remaining_amount > 0')
                     ->pluck('invoice_number', 'id'))
-                ->helperText($l('اختياري', 'Optional'))
+                ->helperText(l('اختياري', 'Optional'))
                 ->reactive()
                 ->afterStateUpdated(function (callable $set, $state) {
                     $inv = Invoice::find($state);
@@ -67,16 +66,16 @@ class CollectPayment extends Page
                     }
                 }),
             Forms\Components\TextInput::make('amount')
-                ->label($l('المبلغ', 'Amount'))
+                ->label(l('المبلغ', 'Amount'))
                 ->numeric()
                 ->required(),
             Forms\Components\Select::make('method')
-                ->label($l('طريقة الدفع', 'Method'))
-                ->options(['cash' => $l('نقدي', 'Cash'), 'cheque' => $l('شيك', 'Cheque'), 'transfer' => $l('تحويل', 'Transfer'), 'other' => $l('أخرى', 'Other')])
+                ->label(l('طريقة الدفع', 'Method'))
+                ->options(['cash' => l('نقدي', 'Cash'), 'cheque' => l('شيك', 'Cheque'), 'transfer' => l('تحويل', 'Transfer'), 'other' => l('أخرى', 'Other')])
                 ->default('cash')
                 ->required(),
             Forms\Components\Textarea::make('notes')
-                ->label($l('ملاحظات', 'Notes')),
+                ->label(l('ملاحظات', 'Notes')),
         ]);
     }
 

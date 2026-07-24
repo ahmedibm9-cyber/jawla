@@ -46,24 +46,23 @@ class StockImport extends Page
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
             Forms\Components\Select::make('warehouse_id')
-                ->label($l('المستودع', 'Warehouse'))
+                ->label(l('المستودع', 'Warehouse'))
                 ->options(fn () => Warehouse::where('company_id', Auth::user()->company_id)
                     ->where('is_active', true)
                     ->orderBy('name_ar')
                     ->pluck('name_ar', 'id'))
                 ->required(),
             Forms\Components\FileUpload::make('file')
-                ->label($l('ملف CSV', 'CSV File'))
+                ->label(l('ملف CSV', 'CSV File'))
                 ->disk('private')
                 ->directory('stock-imports')
                 ->acceptedFileTypes(['text/csv', 'text/plain', 'application/vnd.ms-excel'])
                 ->maxSize(2048)
                 ->required()
-                ->helperText($l(
+                ->helperText(l(
                     'الأعمدة: sku, quantity (اختياري: transit_quantity). الكمية = العد الفعلي الكامل.',
                     'Columns: sku, quantity (optional: transit_quantity). Quantity = absolute counted stock.',
                 )),
@@ -72,7 +71,6 @@ class StockImport extends Page
 
     public function runPreview(): void
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
         $data = $this->form->getState();
 
         $warehouse = Warehouse::where('company_id', Auth::user()->company_id)
@@ -88,7 +86,7 @@ class StockImport extends Page
 
         if ($this->preview['valid'] === [] && $this->preview['errors'] !== []) {
             Notification::make()
-                ->title($l('لا توجد صفوف صالحة', 'No valid rows'))
+                ->title(l('لا توجد صفوف صالحة', 'No valid rows'))
                 ->danger()
                 ->send();
         }
@@ -96,7 +94,6 @@ class StockImport extends Page
 
     public function confirmImport(): void
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         if ($this->preview === null || $this->preview['valid'] === []) {
             return;
@@ -119,7 +116,7 @@ class StockImport extends Page
         }
 
         Notification::make()
-            ->title($l("تم استيراد {$log->rows_imported} صف", "{$log->rows_imported} rows imported"))
+            ->title(l("تم استيراد {$log->rows_imported} صف", "{$log->rows_imported} rows imported"))
             ->success()
             ->send();
 

@@ -43,44 +43,43 @@ class StockResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
                 TextColumn::make('warehouse.name_ar')
-                    ->label($l('المستودع', 'Warehouse'))
+                    ->label(l('المستودع', 'Warehouse'))
                     ->searchable(),
                 TextColumn::make('product.name_ar')
-                    ->label($l('المنتج', 'Product'))
+                    ->label(l('المنتج', 'Product'))
                     ->searchable(),
                 TextColumn::make('product.sku')
                     ->label('SKU')
                     ->searchable(),
                 TextColumn::make('batch.batch_number')
-                    ->label($l('التشغيلة', 'Batch'))
+                    ->label(l('التشغيلة', 'Batch'))
                     ->placeholder('—'),
                 TextColumn::make('quantity')
-                    ->label($l('الكمية', 'Quantity'))
+                    ->label(l('الكمية', 'Quantity'))
                     ->numeric(3)
                     ->sortable()
                     ->color(fn ($state) => $state <= 5 ? 'danger' : ($state <= 20 ? 'warning' : 'success')),
                 TextColumn::make('updated_at')
-                    ->label($l('آخر تحديث', 'Updated'))
+                    ->label(l('آخر تحديث', 'Updated'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('warehouse_id')
-                    ->label($l('المستودع', 'Warehouse'))
+                    ->label(l('المستودع', 'Warehouse'))
                     ->relationship('warehouse', 'name_ar'),
                 SelectFilter::make('product_id')
-                    ->label($l('المنتج', 'Product'))
+                    ->label(l('المنتج', 'Product'))
                     ->relationship('product', 'name_ar'),
             ])
             ->actions([
                 TableAction::make('adjust')
-                    ->label($l('تسوية', 'Adjust'))
+                    ->label(l('تسوية', 'Adjust'))
                     ->icon('heroicon-o-adjustments-horizontal')
                     ->color('warning')
                     ->visible(fn () => auth()->user()->hasAnyRole(['admin', 'warehouse_keeper']))
@@ -90,12 +89,12 @@ class StockResource extends Resource
                         : 'This will create a matching stock movement. Cannot be undone.')
                     ->form([
                         TextInput::make('counted_quantity')
-                            ->label($l('الكمية الفعلية', 'Counted Quantity'))
+                            ->label(l('الكمية الفعلية', 'Counted Quantity'))
                             ->numeric()
                             ->step(0.001)
                             ->required(),
                         Textarea::make('reason')
-                            ->label($l('السبب', 'Reason'))
+                            ->label(l('السبب', 'Reason'))
                             ->required()
                             ->maxLength(500),
                     ])
@@ -110,7 +109,7 @@ class StockResource extends Resource
                         );
 
                         Notification::make()
-                            ->title($l('تمت التسوية', 'Stock adjusted'))
+                            ->title(l('تمت التسوية', 'Stock adjusted'))
                             ->success()
                             ->send();
                     }),

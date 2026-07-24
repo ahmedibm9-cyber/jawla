@@ -15,7 +15,7 @@
                     <h3 class="m-0 mb-4 text-base font-semibold">{{ __('app.personal_info') }}</h3>
 
                     <div class="form-group">
-                        <label for="name" class="form-label">{{ __('app.name') }} *</label>
+                        <label for="name" class="form-label">{{ __('app.full_name') }} *</label>
                         <input wire:model="name" id="name" type="text" autocomplete="name" class="form-input" required @error('name') aria-invalid="true" aria-describedby="name-error" @enderror>
                         @error('name') <small id="name-error" class="form-error">{{ $message }}</small> @enderror
                     </div>
@@ -78,7 +78,7 @@
             {{-- View Mode --}}
             <div class="card">
                 <div class="profile-field">
-                    <span class="profile-field-label">{{ __('app.name') }}</span>
+                    <span class="profile-field-label">{{ __('app.full_name') }}</span>
                     <span class="profile-field-value">{{ $user->name }}</span>
                 </div>
                 <div class="profile-field">

@@ -52,48 +52,46 @@ class BatchResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
         $companyId = Auth::user()?->company_id;
 
         return $schema->schema([
-            Section::make($l('بيانات الدفعة', 'Batch Details'))->schema([
-                Forms\Components\Select::make('product_id')->label($l('المنتج', 'Product'))
+            Section::make(l('بيانات الدفعة', 'Batch Details'))->schema([
+                Forms\Components\Select::make('product_id')->label(l('المنتج', 'Product'))
                     ->options(fn () => Product::where('company_id', $companyId)->pluck('name_ar', 'id'))
                     ->searchable()->required(),
-                Forms\Components\TextInput::make('batch_number')->label($l('رقم الدفعة', 'Batch Number'))->required()->maxLength(100),
-                Forms\Components\DatePicker::make('manufacture_date')->label($l('تاريخ الإنتاج', 'Manufacture Date')),
-                Forms\Components\DatePicker::make('expiry_date')->label($l('تاريخ الانتهاء', 'Expiry Date')),
-                Forms\Components\DatePicker::make('received_date')->label($l('تاريخ الاستلام', 'Received Date'))->required()->default(now()),
-                Forms\Components\Select::make('supplier_id')->label($l('المورد', 'Supplier'))
+                Forms\Components\TextInput::make('batch_number')->label(l('رقم الدفعة', 'Batch Number'))->required()->maxLength(100),
+                Forms\Components\DatePicker::make('manufacture_date')->label(l('تاريخ الإنتاج', 'Manufacture Date')),
+                Forms\Components\DatePicker::make('expiry_date')->label(l('تاريخ الانتهاء', 'Expiry Date')),
+                Forms\Components\DatePicker::make('received_date')->label(l('تاريخ الاستلام', 'Received Date'))->required()->default(now()),
+                Forms\Components\Select::make('supplier_id')->label(l('المورد', 'Supplier'))
                     ->relationship('supplier', 'name_ar')->searchable(),
-                Forms\Components\FileUpload::make('coa_file_path')->label($l('شهادة التحليل (COA)', 'Certificate of Analysis'))
+                Forms\Components\FileUpload::make('coa_file_path')->label(l('شهادة التحليل (COA)', 'Certificate of Analysis'))
                     ->directory('coa')->acceptedFileTypes(['application/pdf', 'image/*']),
-                Forms\Components\Toggle::make('is_active')->label($l('نشط', 'Active'))->default(true),
+                Forms\Components\Toggle::make('is_active')->label(l('نشط', 'Active'))->default(true),
             ])->columns(2),
         ]);
     }
 
     public static function table(Table $table): Table
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('product.name_ar')->label($l('المنتج', 'Product'))->searchable(),
-                Tables\Columns\TextColumn::make('batch_number')->label($l('رقم الدفعة', 'Batch #'))->searchable(),
-                Tables\Columns\TextColumn::make('expiry_date')->label($l('الانتهاء', 'Expiry'))->date()
+                Tables\Columns\TextColumn::make('product.name_ar')->label(l('المنتج', 'Product'))->searchable(),
+                Tables\Columns\TextColumn::make('batch_number')->label(l('رقم الدفعة', 'Batch #'))->searchable(),
+                Tables\Columns\TextColumn::make('expiry_date')->label(l('الانتهاء', 'Expiry'))->date()
                     ->color(fn (Batch $r) => $r->isExpired() ? 'danger' : ($r->expiresWithinDays(30) ? 'warning' : 'success'))
-                    ->description(fn (Batch $r) => $r->isExpired() ? $l('منتهي', 'Expired') : ($r->expiresWithinDays(30) ? $l('قريب الانتهاء', 'Expiring soon') : null)),
-                Tables\Columns\TextColumn::make('supplier.name_ar')->label($l('المورد', 'Supplier'))->placeholder('—'),
-                Tables\Columns\IconColumn::make('coa_file_path')->label($l('COA', 'COA'))->boolean(),
-                Tables\Columns\IconColumn::make('is_active')->label($l('نشط', 'Active'))->boolean(),
+                    ->description(fn (Batch $r) => $r->isExpired() ? l('منتهي', 'Expired') : ($r->expiresWithinDays(30) ? l('قريب الانتهاء', 'Expiring soon') : null)),
+                Tables\Columns\TextColumn::make('supplier.name_ar')->label(l('المورد', 'Supplier'))->placeholder('—'),
+                Tables\Columns\IconColumn::make('coa_file_path')->label(l('COA', 'COA'))->boolean(),
+                Tables\Columns\IconColumn::make('is_active')->label(l('نشط', 'Active'))->boolean(),
             ])
             ->filters([
-                Tables\Filters\Filter::make('expired')->label($l('منتهية', 'Expired'))
+                Tables\Filters\Filter::make('expired')->label(l('منتهية', 'Expired'))
                     ->query(fn (Builder $q) => $q->whereNotNull('expiry_date')->whereDate('expiry_date', '<', today())),
-                Tables\Filters\Filter::make('expiring_soon')->label($l('قريبة الانتهاء', 'Expiring soon'))
+                Tables\Filters\Filter::make('expiring_soon')->label(l('قريبة الانتهاء', 'Expiring soon'))
                     ->query(fn (Builder $q) => $q->expiringWithin(30)),
-                Tables\Filters\TernaryFilter::make('is_active')->label($l('نشطة', 'Active')),
+                Tables\Filters\TernaryFilter::make('is_active')->label(l('نشطة', 'Active')),
             ])
             ->defaultSort('expiry_date', 'asc')
             ->actions([EditAction::make(), DeleteAction::make()]);

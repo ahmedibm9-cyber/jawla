@@ -11,6 +11,14 @@ class ExpenseService
 {
     public function log(int $companyId, int $userId, string $category, float $amount, string $note = '', ?int $workSessionId = null): Expense
     {
+        if ($amount <= 0) {
+            throw new \DomainException(
+                app()->getLocale() === 'ar'
+                    ? 'المبلغ يجب أن يكون أكبر من صفر'
+                    : 'Amount must be greater than zero'
+            );
+        }
+
         return DB::transaction(function () use ($companyId, $userId, $category, $amount, $note, $workSessionId): Expense {
             // Guard: prevent negative cash box balance
             $cashBox = $this->ensureCashBox($userId, $companyId);

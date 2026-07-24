@@ -41,27 +41,25 @@ class RouteResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Forms\Components\TextInput::make('name_ar')->label($l('الاسم (عربي)', 'Name (Arabic)'))->required(),
-            Forms\Components\TextInput::make('name_en')->label($l('الاسم (إنجليزي)', 'Name (English)'))->required(),
-            Forms\Components\TextInput::make('region')->label($l('المنطقة', 'Region')),
-            Forms\Components\Select::make('users')->label($l('المندوبين', 'Reps'))->relationship('users', 'name')->multiple()->preload(),
-            Forms\Components\Toggle::make('is_active')->label($l('نشط', 'Active'))->default(true),
+            Forms\Components\TextInput::make('name_ar')->label(l('الاسم (عربي)', 'Name (Arabic)'))->required(),
+            Forms\Components\TextInput::make('name_en')->label(l('الاسم (إنجليزي)', 'Name (English)'))->required(),
+            Forms\Components\TextInput::make('region')->label(l('المنطقة', 'Region')),
+            Forms\Components\Select::make('users')->label(l('المندوبين', 'Reps'))->relationship('users', 'name')->multiple()->preload(),
+            Forms\Components\Toggle::make('is_active')->label(l('نشط', 'Active'))->default(true),
         ]);
     }
 
     public static function table(Table $table): Table
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name_ar')->label($l('الاسم', 'Name'))->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('region')->label($l('المنطقة', 'Region')),
-                Tables\Columns\TextColumn::make('users.name')->label($l('المندوبين', 'Reps'))->formatStateUsing(fn ($s) => collect($s)->join(', ')),
-                Tables\Columns\IconColumn::make('is_active')->label($l('نشط', 'Active'))->boolean(),
+                Tables\Columns\TextColumn::make('name_ar')->label(l('الاسم', 'Name'))->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('region')->label(l('المنطقة', 'Region')),
+                Tables\Columns\TextColumn::make('users.name')->label(l('المندوبين', 'Reps'))->formatStateUsing(fn ($s) => collect($s)->join(', ')),
+                Tables\Columns\IconColumn::make('is_active')->label(l('نشط', 'Active'))->boolean(),
             ])
             ->filters([Tables\Filters\TernaryFilter::make('is_active')])
             ->actions([EditAction::make()])

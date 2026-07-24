@@ -36,49 +36,47 @@ class InvoiceResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Section::make($l('بيانات الفاتورة', 'Invoice Info'))->schema([
-                Forms\Components\Select::make('customer_id')->label($l('العميل', 'Customer'))
+            Section::make(l('بيانات الفاتورة', 'Invoice Info'))->schema([
+                Forms\Components\Select::make('customer_id')->label(l('العميل', 'Customer'))
                     ->relationship('customer', 'name_ar')->required(),
-                Forms\Components\Select::make('visit_id')->label($l('الزيارة', 'Visit'))
+                Forms\Components\Select::make('visit_id')->label(l('الزيارة', 'Visit'))
                     ->relationship('visit', 'id')->nullable(),
-                Forms\Components\TextInput::make('invoice_number')->label($l('رقم الفاتورة', 'Number'))->disabled(),
-                Forms\Components\TextInput::make('status')->label($l('الحالة', 'Status'))->disabled(),
-                Forms\Components\TextInput::make('subtotal')->label($l('المجموع الفرعي', 'Subtotal'))->disabled(),
-                Forms\Components\TextInput::make('vat_amount')->label($l('الضريبة', 'VAT'))->disabled(),
-                Forms\Components\TextInput::make('total')->label($l('الإجمالي', 'Total'))->disabled(),
-                Forms\Components\TextInput::make('paid_amount')->label($l('المدفوع', 'Paid'))->disabled(),
-                Forms\Components\TextInput::make('remaining_amount')->label($l('المتبقي', 'Remaining'))->disabled(),
+                Forms\Components\TextInput::make('invoice_number')->label(l('رقم الفاتورة', 'Number'))->disabled(),
+                Forms\Components\TextInput::make('status')->label(l('الحالة', 'Status'))->disabled(),
+                Forms\Components\TextInput::make('subtotal')->label(l('المجموع الفرعي', 'Subtotal'))->disabled(),
+                Forms\Components\TextInput::make('vat_amount')->label(l('الضريبة', 'VAT'))->disabled(),
+                Forms\Components\TextInput::make('total')->label(l('الإجمالي', 'Total'))->disabled(),
+                Forms\Components\TextInput::make('paid_amount')->label(l('المدفوع', 'Paid'))->disabled(),
+                Forms\Components\TextInput::make('remaining_amount')->label(l('المتبقي', 'Remaining'))->disabled(),
             ])->columns(2),
         ]);
     }
 
     public static function table(Table $table): Table
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('invoice_number')->label($l('رقم', 'Number'))->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('customer.name_ar')->label($l('العميل', 'Customer'))->searchable(),
-                Tables\Columns\TextColumn::make('total')->label($l('الإجمالي', 'Total'))->money('egp'),
-                Tables\Columns\TextColumn::make('remaining_amount')->label($l('المتبقي', 'Remaining')),
-                Tables\Columns\BadgeColumn::make('status')->label($l('الحالة', 'Status'))
+                Tables\Columns\TextColumn::make('invoice_number')->label(l('رقم', 'Number'))->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('customer.name_ar')->label(l('العميل', 'Customer'))->searchable(),
+                Tables\Columns\TextColumn::make('total')->label(l('الإجمالي', 'Total'))->money('egp'),
+                Tables\Columns\TextColumn::make('remaining_amount')->label(l('المتبقي', 'Remaining')),
+                Tables\Columns\BadgeColumn::make('status')->label(l('الحالة', 'Status'))
                     ->colors(['draft' => 'gray', 'submitted' => 'info', 'partially_paid' => 'warning', 'paid' => 'success', 'cancelled' => 'danger']),
-                Tables\Columns\TextColumn::make('issued_at')->label($l('التاريخ', 'Date'))->dateTime()->sortable(),
+                Tables\Columns\TextColumn::make('issued_at')->label(l('التاريخ', 'Date'))->dateTime()->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')->label($l('الحالة', 'Status'))
+                Tables\Filters\SelectFilter::make('status')->label(l('الحالة', 'Status'))
                     ->options(['draft' => 'Draft', 'submitted' => 'Submitted', 'partially_paid' => 'Partially Paid', 'paid' => 'Paid', 'cancelled' => 'Cancelled']),
             ])
             ->defaultSort('issued_at', 'desc')
             ->actions([
                 Action::make('view_pdf')
-                    ->label($l('عرض PDF', 'View PDF'))
+                    ->label(l('عرض PDF', 'View PDF'))
                     ->icon('heroicon-o-document-arrow-down')
-                    ->url(fn (Invoice $r) => route('pdf.invoice', $r))
+                    ->url(fn (Invoice $r) => url("/app/pdf/invoice/{$r->id}"))
                     ->openUrlInNewTab(),
                 Action::make('whatsapp')
                     ->label('WhatsApp')

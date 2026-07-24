@@ -35,23 +35,22 @@ class ExpenseResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
                 TextColumn::make('id')->label('#')->sortable(),
-                TextColumn::make('user.name')->label($l('المستخدم', 'User')),
-                BadgeColumn::make('category')->label($l('النوع', 'Category'))
+                TextColumn::make('user.name')->label(l('المستخدم', 'User')),
+                BadgeColumn::make('category')->label(l('النوع', 'Category'))
                     ->colors(['fuel' => 'warning', 'maintenance' => 'info', 'food' => 'success', 'other' => 'gray']),
-                TextColumn::make('amount')->label($l('المبلغ', 'Amount'))->money('egp')->sortable(),
-                TextColumn::make('note')->label($l('ملاحظات', 'Note'))->limit(40),
-                TextColumn::make('spent_at')->label($l('التاريخ', 'Date'))->dateTime()->sortable(),
+                TextColumn::make('amount')->label(l('المبلغ', 'Amount'))->money('egp')->sortable(),
+                TextColumn::make('note')->label(l('ملاحظات', 'Note'))->limit(40),
+                TextColumn::make('spent_at')->label(l('التاريخ', 'Date'))->dateTime()->sortable(),
             ])
             ->filters([])
             ->defaultSort('spent_at', 'desc')
             ->actions([
                 Action::make('cancel')
-                    ->label($l('إلغاء', 'Cancel'))
+                    ->label(l('إلغاء', 'Cancel'))
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->requiresConfirmation()

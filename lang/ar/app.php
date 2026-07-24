@@ -266,6 +266,8 @@ return [
     'account' => 'الحساب',
     'employee_code' => 'كود الموظف',
     'company' => 'الشركة',
+    'full_name' => 'الاسم',
+    'email' => 'البريد الإلكتروني',
     'edit_profile' => 'تعديل الملف',
     'save_changes' => 'حفظ التغييرات',
     'profile_updated' => 'تم تحديث الملف الشخصي بنجاح',

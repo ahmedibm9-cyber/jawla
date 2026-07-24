@@ -59,36 +59,35 @@ class TaskResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Section::make($l('تفاصيل المهمة', 'Task Details'))->schema([
+            Section::make(l('تفاصيل المهمة', 'Task Details'))->schema([
                 Forms\Components\Select::make('assigned_to')
-                    ->label($l('مسند إلى', 'Assigned To'))
+                    ->label(l('مسند إلى', 'Assigned To'))
                     ->relationship('assignedTo', 'name')
                     ->searchable()
                     ->required()
-                    ->helperText($l('اختر الشخص المسؤول عن تنفيذ المهمة', 'Select the person responsible for the task')),
+                    ->helperText(l('اختر الشخص المسؤول عن تنفيذ المهمة', 'Select the person responsible for the task')),
                 Forms\Components\Select::make('customer_id')
-                    ->label($l('العميل', 'Customer'))
+                    ->label(l('العميل', 'Customer'))
                     ->relationship('customer', 'name_ar')
                     ->searchable()
                     ->nullable()
-                    ->helperText($l('العميل المعني بالمهمة (اختياري)', 'Customer related to the task (optional)')),
+                    ->helperText(l('العميل المعني بالمهمة (اختياري)', 'Customer related to the task (optional)')),
                 Forms\Components\TextInput::make('title')
-                    ->label($l('العنوان', 'Title'))
+                    ->label(l('العنوان', 'Title'))
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Textarea::make('note')
-                    ->label($l('ملاحظات', 'Note'))
+                    ->label(l('ملاحظات', 'Note'))
                     ->nullable(),
                 Forms\Components\DatePicker::make('due_date')
-                    ->label($l('تاريخ الاستحقاق', 'Due Date'))
+                    ->label(l('تاريخ الاستحقاق', 'Due Date'))
                     ->nullable()
-                    ->helperText($l('التاريخ المطلوب لإنجاز المهمة', 'The deadline for completing the task')),
+                    ->helperText(l('التاريخ المطلوب لإنجاز المهمة', 'The deadline for completing the task')),
                 Forms\Components\Select::make('status')
-                    ->label($l('الحالة', 'Status'))
-                    ->options(['open' => $l('مفتوحة', 'Open'), 'done' => $l('تم', 'Done')])
+                    ->label(l('الحالة', 'Status'))
+                    ->options(['open' => l('مفتوحة', 'Open'), 'done' => l('تم', 'Done')])
                     ->default('open')
                     ->required(),
             ]),
@@ -97,24 +96,23 @@ class TaskResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
-                TextColumn::make('title')->label($l('العنوان', 'Title'))->searchable(),
-                TextColumn::make('assignedTo.name')->label($l('مسند إلى', 'Assigned To')),
+                TextColumn::make('title')->label(l('العنوان', 'Title'))->searchable(),
+                TextColumn::make('assignedTo.name')->label(l('مسند إلى', 'Assigned To')),
                 TextColumn::make('status')
-                    ->label($l('الحالة', 'Status'))
+                    ->label(l('الحالة', 'Status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'done' => 'success', default => 'warning'
                     }),
-                TextColumn::make('due_date')->label($l('تاريخ الاستحقاق', 'Due Date'))->date(),
-                TextColumn::make('created_at')->label($l('تاريخ الإنشاء', 'Created'))->dateTime(),
+                TextColumn::make('due_date')->label(l('تاريخ الاستحقاق', 'Due Date'))->date(),
+                TextColumn::make('created_at')->label(l('تاريخ الإنشاء', 'Created'))->dateTime(),
             ])
             ->filters([
                 SelectFilter::make('status')
-                    ->options(['open' => $l('مفتوحة', 'Open'), 'done' => $l('تم', 'Done')]),
+                    ->options(['open' => l('مفتوحة', 'Open'), 'done' => l('تم', 'Done')]),
             ]);
     }
 

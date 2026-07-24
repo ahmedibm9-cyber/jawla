@@ -45,23 +45,22 @@ class VanTransferResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Section::make($l('بيانات التحويل', 'Transfer Info'))->schema([
+            Section::make(l('بيانات التحويل', 'Transfer Info'))->schema([
                 Forms\Components\Select::make('from_user_id')
-                    ->label($l('من مستخدم', 'From User'))
+                    ->label(l('من مستخدم', 'From User'))
                     ->relationship('fromUser', 'name')
                     ->required(),
                 Forms\Components\Select::make('to_user_id')
-                    ->label($l('إلى مستخدم', 'To User'))
+                    ->label(l('إلى مستخدم', 'To User'))
                     ->relationship('toUser', 'name')
                     ->required(),
                 Forms\Components\Select::make('in_transit_warehouse_id')
-                    ->label($l('مستودع العبور', 'In-Transit Warehouse'))
+                    ->label(l('مستودع العبور', 'In-Transit Warehouse'))
                     ->relationship('transitWarehouse', 'name_ar'),
                 Forms\Components\TextInput::make('items_count')
-                    ->label($l('عدد الأصناف', 'Items'))
+                    ->label(l('عدد الأصناف', 'Items'))
                     ->disabled(),
             ])->columns(2),
         ]);
@@ -69,7 +68,6 @@ class VanTransferResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
@@ -77,16 +75,16 @@ class VanTransferResource extends Resource
                     ->label('#')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('fromUser.name')
-                    ->label($l('من', 'From'))
+                    ->label(l('من', 'From'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('toUser.name')
-                    ->label($l('إلى', 'To'))
+                    ->label(l('إلى', 'To'))
                     ->searchable(),
                 Tables\Columns\TextColumn::make('items_count')
-                    ->label($l('الأصناف', 'Items'))
+                    ->label(l('الأصناف', 'Items'))
                     ->counts('items'),
                 Tables\Columns\BadgeColumn::make('status')
-                    ->label($l('الحالة', 'Status'))
+                    ->label(l('الحالة', 'Status'))
                     ->colors([
                         'pending' => 'warning',
                         'accepted' => 'info',
@@ -96,27 +94,27 @@ class VanTransferResource extends Resource
                         'cancelled' => 'gray',
                     ]),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->label($l('التاريخ', 'Date'))
+                    ->label(l('التاريخ', 'Date'))
                     ->dateTime()
                     ->sortable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('status')
-                    ->label($l('الحالة', 'Status'))
+                    ->label(l('الحالة', 'Status'))
                     ->options(collect(VanTransferStatus::cases())->mapWithKeys(fn ($c) => [$c->value => $c->value])),
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
                 Action::make('ship')
-                    ->label($l('شحن', 'Ship'))
+                    ->label(l('شحن', 'Ship'))
                     ->icon('heroicon-o-rocket-launch')
                     ->color('primary')
                     ->visible(fn (VanTransfer $r) => $r->status === VanTransferStatus::Pending)
                     ->requiresConfirmation()
-                    ->modalDescription(fn () => $l('سيتم خصم المخزون من المستودع الرئيسي.', 'Stock will be deducted from the main warehouse.'))
+                    ->modalDescription(fn () => l('سيتم خصم المخزون من المستودع الرئيسي.', 'Stock will be deducted from the main warehouse.'))
                     ->form([
                         Forms\Components\Select::make('from_warehouse_id')
-                            ->label(fn () => $l('المستودع المصدر', 'Source Warehouse'))
+                            ->label(fn () => l('المستودع المصدر', 'Source Warehouse'))
                             ->options(fn () => Warehouse::where('type', 'main')->pluck('name_ar', 'id'))
                             ->required(),
                     ])
@@ -127,25 +125,25 @@ class VanTransferResource extends Resource
                             auth()->id(),
                         );
 
-                        Notification::make()->title($l('تم الشحن', 'Shipped'))->success()->send();
+                        Notification::make()->title(l('تم الشحن', 'Shipped'))->success()->send();
                     }),
                 Action::make('receive')
-                    ->label($l('استلام', 'Receive'))
+                    ->label(l('استلام', 'Receive'))
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(fn (VanTransfer $r) => $r->status === VanTransferStatus::Shipped)
                     ->requiresConfirmation()
-                    ->modalDescription(fn () => $l('سيتم إضافة المخزون إلى مخزن المستخدم المستلم.', 'Stock will be added to the receiving user\'s van warehouse.'))
+                    ->modalDescription(fn () => l('سيتم إضافة المخزون إلى مخزن المستخدم المستلم.', 'Stock will be added to the receiving user\'s van warehouse.'))
                     ->action(function (VanTransfer $record) {
                         app(VanTransferService::class)->receive(
                             $record->id,
                             auth()->id(),
                         );
 
-                        Notification::make()->title($l('تم الاستلام', 'Received'))->success()->send();
+                        Notification::make()->title(l('تم الاستلام', 'Received'))->success()->send();
                     }),
                 Action::make('reject')
-                    ->label($l('رفض', 'Reject'))
+                    ->label(l('رفض', 'Reject'))
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->visible(fn (VanTransfer $r) => in_array($r->status, [VanTransferStatus::Pending, VanTransferStatus::Accepted]))
@@ -156,10 +154,10 @@ class VanTransferResource extends Resource
                             auth()->id(),
                         );
 
-                        Notification::make()->title($l('تم الرفض', 'Rejected'))->success()->send();
+                        Notification::make()->title(l('تم الرفض', 'Rejected'))->success()->send();
                     }),
                 Action::make('cancel')
-                    ->label($l('إلغاء', 'Cancel'))
+                    ->label(l('إلغاء', 'Cancel'))
                     ->icon('heroicon-o-ban')
                     ->color('gray')
                     ->visible(fn (VanTransfer $r) => $r->status === VanTransferStatus::Pending)
@@ -170,7 +168,7 @@ class VanTransferResource extends Resource
                             auth()->id(),
                         );
 
-                        Notification::make()->title($l('تم الإلغاء', 'Cancelled'))->success()->send();
+                        Notification::make()->title(l('تم الإلغاء', 'Cancelled'))->success()->send();
                     }),
             ])
             ->paginated([10, 25, 50]);

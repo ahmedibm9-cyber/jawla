@@ -1,5 +1,5 @@
 [deploy]
-preDeployCommand = "php artisan migrate --force && php artisan app:seed-super-admin && php artisan db:seed --class=DemoSeeder --force && php artisan config:cache && php artisan route:cache && php artisan view:cache"
+preDeployCommand = "php artisan migrate --force && php artisan app:seed-super-admin && php artisan app:seed-transactions && php artisan config:cache && php artisan route:cache && php artisan view:cache"
 startCommand = "/app/docker/start-container.sh"
 healthcheckPath = "/up"
 numReplicas = 2

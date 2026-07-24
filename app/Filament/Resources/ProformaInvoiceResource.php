@@ -37,41 +37,39 @@ class ProformaInvoiceResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Section::make($l('بيانات', 'Info'))->schema([
-                Forms\Components\TextInput::make('proforma_number')->label($l('رقم', 'Number'))->disabled(),
-                Forms\Components\Select::make('customer_id')->label($l('العميل', 'Customer'))
+            Section::make(l('بيانات', 'Info'))->schema([
+                Forms\Components\TextInput::make('proforma_number')->label(l('رقم', 'Number'))->disabled(),
+                Forms\Components\Select::make('customer_id')->label(l('العميل', 'Customer'))
                     ->relationship('customer', 'name_ar'),
-                Forms\Components\TextInput::make('total')->label($l('الإجمالي', 'Total'))->disabled(),
-                Forms\Components\Select::make('status')->label($l('الحالة', 'Status'))
-                    ->options(['sent' => $l('مرسلة', 'Sent'), 'converted_to_invoice' => $l('محول لفاتورة', 'Converted'), 'expired' => $l('منتهي', 'Expired'), 'cancelled' => $l('ملغي', 'Cancelled')]),
+                Forms\Components\TextInput::make('total')->label(l('الإجمالي', 'Total'))->disabled(),
+                Forms\Components\Select::make('status')->label(l('الحالة', 'Status'))
+                    ->options(['sent' => l('مرسلة', 'Sent'), 'converted_to_invoice' => l('محول لفاتورة', 'Converted'), 'expired' => l('منتهي', 'Expired'), 'cancelled' => l('ملغي', 'Cancelled')]),
             ])->columns(2),
         ]);
     }
 
     public static function table(Table $table): Table
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('proforma_number')->label($l('رقم', 'Number'))->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('customer.name_ar')->label($l('العميل', 'Customer'))->searchable(),
-                Tables\Columns\TextColumn::make('total')->label($l('الإجمالي', 'Total')),
-                Tables\Columns\BadgeColumn::make('status')->label($l('الحالة', 'Status'))
+                Tables\Columns\TextColumn::make('proforma_number')->label(l('رقم', 'Number'))->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('customer.name_ar')->label(l('العميل', 'Customer'))->searchable(),
+                Tables\Columns\TextColumn::make('total')->label(l('الإجمالي', 'Total')),
+                Tables\Columns\BadgeColumn::make('status')->label(l('الحالة', 'Status'))
                     ->colors(['sent' => 'info', 'converted_to_invoice' => 'success', 'expired' => 'warning', 'cancelled' => 'danger']),
-                Tables\Columns\TextColumn::make('posting_date')->label($l('التاريخ', 'Date'))->date()->sortable(),
+                Tables\Columns\TextColumn::make('posting_date')->label(l('التاريخ', 'Date'))->date()->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')->label($l('الحالة', 'Status'))
+                Tables\Filters\SelectFilter::make('status')->label(l('الحالة', 'Status'))
                     ->options(['sent' => 'Sent', 'converted_to_invoice' => 'Converted', 'expired' => 'Expired', 'cancelled' => 'Cancelled']),
             ])
             ->defaultSort('posting_date', 'desc')
             ->actions([
                 Action::make('view_pdf')
-                    ->label($l('عرض PDF', 'View PDF'))
+                    ->label(l('عرض PDF', 'View PDF'))
                     ->icon('heroicon-o-document-arrow-down')
                     ->url(fn (ProformaInvoice $r) => route('pdf.proforma', $r))
                     ->openUrlInNewTab(),

@@ -35,23 +35,22 @@ class ReturnRecordResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
-                TextColumn::make('return_number')->label($l('رقم', 'Number'))->searchable()->sortable(),
-                TextColumn::make('customer.name_ar')->label($l('العميل', 'Customer'))->searchable(),
-                TextColumn::make('user.name')->label($l('المستخدم', 'User')),
-                TextColumn::make('total')->label($l('الإجمالي', 'Total'))->money('egp')->sortable(),
-                BadgeColumn::make('status')->label($l('الحالة', 'Status'))
+                TextColumn::make('return_number')->label(l('رقم', 'Number'))->searchable()->sortable(),
+                TextColumn::make('customer.name_ar')->label(l('العميل', 'Customer'))->searchable(),
+                TextColumn::make('user.name')->label(l('المستخدم', 'User')),
+                TextColumn::make('total')->label(l('الإجمالي', 'Total'))->money('egp')->sortable(),
+                BadgeColumn::make('status')->label(l('الحالة', 'Status'))
                     ->colors(['draft' => 'gray', 'submitted' => 'success', 'cancelled' => 'danger']),
-                TextColumn::make('returned_at')->label($l('التاريخ', 'Date'))->dateTime()->sortable(),
+                TextColumn::make('returned_at')->label(l('التاريخ', 'Date'))->dateTime()->sortable(),
             ])
             ->filters([])
             ->defaultSort('returned_at', 'desc')
             ->actions([
                 Action::make('cancel')
-                    ->label($l('إلغاء', 'Cancel'))
+                    ->label(l('إلغاء', 'Cancel'))
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->visible(fn (ReturnRecord $r) => $r->status === 'submitted')

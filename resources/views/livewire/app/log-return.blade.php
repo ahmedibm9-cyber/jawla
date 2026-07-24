@@ -65,7 +65,6 @@
 
                 {{-- Photos (online only — capture uploads immediately) --}}
                 <div class="card mt-3">
-                    <label class="font-semibold block mb-1">{{ app()->getLocale() === 'ar' ? 'صور' : 'Photos' }}</label>
                     <livewire:app.photo-capture />
                 </div>
 

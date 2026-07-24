@@ -1,0 +1,73 @@
+{
+  "projectId": "8d1ac104-8d4c-4e71-8526-936a13722bda",
+  "type": "frontend",
+  "name": "Jawla Core Flows",
+  "description": "Tests login, health, routing, and auth protection for the Jawla field sales PWA",
+  "priority": "p1",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/health and verify the page loads"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the health endpoint responds with OK or a healthy status (not a 500 error)"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/ and verify the root page loads"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the root page loads without a 500 error and is not blank"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/login and verify the login page renders"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the login page has a username/email input field, a password input field, and a submit button"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/login and verify the Filament admin login page loads"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the admin login page shows a login form with email and password fields"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/app without being logged in"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert that the unauthenticated user is redirected to the login page, not shown the app home"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin without being logged in"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert that the admin panel redirects to the admin login page when not authenticated"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/offline and verify it loads"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the offline page loads without error and shows an offline/unavailable message"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/locale/ar to switch to Arabic"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the locale switch loads without error and the page is served in Arabic or redirects properly"
+    }
+  ]
+}

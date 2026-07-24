@@ -39,10 +39,7 @@
             </div>
 
             {{-- Photos (online only — capture uploads immediately) --}}
-            <div class="form-group">
-                <label class="form-label">{{ app()->getLocale() === 'ar' ? 'صور' : 'Photos' }}</label>
-                <livewire:app.photo-capture />
-            </div>
+            <livewire:app.photo-capture />
 
             <x-ds.modal :title="__('app.confirm_complaint_title') ?? 'Log complaint?'" :message="__('app.confirm_complaint_msg') ?? 'This complaint will be recorded and sent to the sales manager for resolution.'">
                 <x-slot:trigger>

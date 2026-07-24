@@ -45,21 +45,20 @@ class SalesTargetResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
         $companyId = Auth::user()?->company_id;
 
         return $schema->schema([
-            Section::make($l('الهدف', 'Target'))->schema([
-                Forms\Components\Select::make('user_id')->label($l('المندوب', 'Rep'))
+            Section::make(l('الهدف', 'Target'))->schema([
+                Forms\Components\Select::make('user_id')->label(l('المندوب', 'Rep'))
                     ->options(fn () => User::where('company_id', $companyId)
                         ->whereHas('roles', fn ($q) => $q->where('name', 'rep'))
                         ->pluck('name', 'id'))
                     ->searchable()->required(),
-                Forms\Components\DatePicker::make('period_start')->label($l('بداية الفترة', 'Period Start'))
+                Forms\Components\DatePicker::make('period_start')->label(l('بداية الفترة', 'Period Start'))
                     ->required()->default(now()->startOfMonth()),
-                Forms\Components\DatePicker::make('period_end')->label($l('نهاية الفترة', 'Period End'))
+                Forms\Components\DatePicker::make('period_end')->label(l('نهاية الفترة', 'Period End'))
                     ->required()->default(now()->endOfMonth())->afterOrEqual('period_start'),
-                Forms\Components\TextInput::make('target_amount')->label($l('قيمة الهدف', 'Target Amount'))
+                Forms\Components\TextInput::make('target_amount')->label(l('قيمة الهدف', 'Target Amount'))
                     ->numeric()->required()->minValue(0),
             ])->columns(2),
         ]);
@@ -67,17 +66,16 @@ class SalesTargetResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')->label($l('المندوب', 'Rep'))->searchable(),
-                Tables\Columns\TextColumn::make('period_start')->label($l('من', 'From'))->date(),
-                Tables\Columns\TextColumn::make('period_end')->label($l('إلى', 'To'))->date(),
-                Tables\Columns\TextColumn::make('target_amount')->label($l('الهدف', 'Target'))->numeric(2),
-                Tables\Columns\TextColumn::make('actual')->label($l('المحقق', 'Actual'))
+                Tables\Columns\TextColumn::make('user.name')->label(l('المندوب', 'Rep'))->searchable(),
+                Tables\Columns\TextColumn::make('period_start')->label(l('من', 'From'))->date(),
+                Tables\Columns\TextColumn::make('period_end')->label(l('إلى', 'To'))->date(),
+                Tables\Columns\TextColumn::make('target_amount')->label(l('الهدف', 'Target'))->numeric(2),
+                Tables\Columns\TextColumn::make('actual')->label(l('المحقق', 'Actual'))
                     ->state(fn (SalesTarget $r) => number_format(app(AttainmentService::class)->attainment($r)['actual'], 2)),
-                Tables\Columns\TextColumn::make('percent')->label($l('نسبة التحقيق', 'Attainment'))
+                Tables\Columns\TextColumn::make('percent')->label(l('نسبة التحقيق', 'Attainment'))
                     ->state(fn (SalesTarget $r) => app(AttainmentService::class)->attainment($r)['percent'].'%')
                     ->badge()
                     ->color(function (SalesTarget $r) {

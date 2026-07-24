@@ -5,8 +5,8 @@
         <div class="home-hero">
             <div class="home-hero-content">
                 <div class="home-hero-brand">
-                    <img src="/images/green-j.png" alt="Jawla" class="home-hero-logo logo-light" width="100" height="33">
-                    <img src="/images/white-j.png" alt="Jawla" class="home-hero-logo logo-dark" width="100" height="33">
+                    <img src="/images/green-j.webp" alt="Jawla" class="home-hero-logo logo-light" width="100" height="33">
+                    <img src="/images/white-j.webp" alt="Jawla" class="home-hero-logo logo-dark" width="100" height="33">
                 </div>
                 <div class="home-hero-top">
                     <div>

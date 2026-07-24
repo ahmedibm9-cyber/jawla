@@ -22,8 +22,19 @@ class User extends Authenticatable implements FilamentUser
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, HasRoles, Notifiable;
 
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function (User $user) {
+            if (blank($user->uuid)) {
+                $user->uuid = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
+
     protected $fillable = [
-        'company_id', 'name', 'email', 'phone', 'password',
+        'uuid', 'company_id', 'name', 'email', 'phone', 'password',
         'employee_code', 'is_active',
     ];
 

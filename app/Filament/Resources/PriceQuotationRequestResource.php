@@ -44,19 +44,18 @@ class PriceQuotationRequestResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Section::make($l('طلب عرض سعر', 'Quotation Request'))->schema([
-                Forms\Components\Select::make('customer_id')->label($l('العميل', 'Customer'))
+            Section::make(l('طلب عرض سعر', 'Quotation Request'))->schema([
+                Forms\Components\Select::make('customer_id')->label(l('العميل', 'Customer'))
                     ->relationship('customer', 'name_ar')->preload()->required(),
-                Forms\Components\Select::make('product_id')->label($l('المنتج', 'Product'))
+                Forms\Components\Select::make('product_id')->label(l('المنتج', 'Product'))
                     ->relationship('product', 'name_ar')->preload()->required(),
-                Forms\Components\Select::make('user_id')->label($l('المندوب', 'Rep'))
+                Forms\Components\Select::make('user_id')->label(l('المندوب', 'Rep'))
                     ->relationship('user', 'name')->preload()->required(),
-                Forms\Components\TextInput::make('quantity_requested')->label($l('الكمية المطلوبة', 'Qty'))
+                Forms\Components\TextInput::make('quantity_requested')->label(l('الكمية المطلوبة', 'Qty'))
                     ->numeric()->required()->minValue(0),
-                Forms\Components\Select::make('status')->label($l('الحالة', 'Status'))
+                Forms\Components\Select::make('status')->label(l('الحالة', 'Status'))
                     ->options(['requested' => 'Requested', 'priced' => 'Priced', 'confirmed' => 'Confirmed', 'cancelled' => 'Cancelled'])
                     ->default('requested'),
             ])->columns(2),

@@ -1,0 +1,217 @@
+{
+  "projectId": "8d1ac104-8d4c-4e71-8526-936a13722bda",
+  "type": "frontend",
+  "name": "Admin Panel — Full Resource Sweep",
+  "description": "Login as admin@jawla.test and navigate every Filament admin resource to verify they load without errors",
+  "priority": "p0",
+  "planSteps": [
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/login"
+    },
+    {
+      "type": "action",
+      "description": "On the login page, type 'admin@jawla.test' into the email field and 'password' into the password field, then click the login/submit button"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert that after login the page redirects to the /admin dashboard and not back to the login page"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin (Admin Dashboard)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Admin Dashboard loads and shows widget content like Sales Today, Visits Today, or Outstanding Balance"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/users (User Management)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Users page loads and shows a list of users or a data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/customers (Customer Management)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Customers page loads and shows a customer list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/products (Product Management)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Products page loads and shows a product list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/invoices (Invoice Register)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Invoices page loads and shows an invoice list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/proforma-invoices (Proforma Invoices)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Proforma Invoices page loads and shows a list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/payments (Payment Register)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Payments page loads and shows a payment list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/return-records (Returns)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Return Records page loads and shows a list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/stock (Stock Balances)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Stock page loads and shows stock levels or a data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/van-transfers (Van Transfers)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Van Transfers page loads and shows transfer records or a data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/routes (Route Management)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Routes page loads and shows route list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/daily-visit-assignments (Visit Assignments)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Daily Visit Assignments page loads and shows assignments or a data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/alarms (Alarm Register)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Alarms page loads and shows alarm list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/complaints (Complaints)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Complaints page loads and shows complaint list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/expenses (Expense Register)"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/cash-reconciliations (Cash Reconciliations)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Cash Reconciliations page loads and shows reconciliation records or a data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/purchase-requests (Purchase Requests)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Purchase Requests page loads and shows request list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/purchase-orders (Purchase Orders)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Purchase Orders page loads and shows order list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/goods-in-transits (Goods in Transit)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Goods in Transit page loads and shows shipment records or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/price-quotation-requests (Quotation Requests)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Price Quotation Requests page loads and shows request list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/sales-targets (Sales Targets)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Sales Targets page loads and shows target list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/tasks (Task Management)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Tasks page loads and shows task list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/batches (Batch Management)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Batches page loads and shows batch list or data table"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/reports (Reports Page)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Reports page loads and shows report tabs for Visit Reports, Quotation Requests, Proforma Invoices, and Invoices"
+    },
+    {
+      "type": "action",
+      "description": "Navigate to https://jawla-production.up.railway.app/admin/company-settings (Company Settings)"
+    },
+    {
+      "type": "assertion",
+      "description": "Assert the Company Settings page loads and shows company configuration fields"
+    }
+  ]
+}

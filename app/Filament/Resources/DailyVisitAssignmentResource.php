@@ -42,33 +42,32 @@ class DailyVisitAssignmentResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Section::make($l('بيانات', 'Info'))->schema([
+            Section::make(l('بيانات', 'Info'))->schema([
                 Forms\Components\Select::make('user_id')
-                    ->label($l('المندوب', 'Rep'))
+                    ->label(l('المندوب', 'Rep'))
                     ->relationship('user', 'name')
                     ->preload()
                     ->required(),
                 Forms\Components\Select::make('customer_id')
-                    ->label($l('العميل', 'Customer'))
+                    ->label(l('العميل', 'Customer'))
                     ->relationship('customer', 'name_ar')
                     ->preload()
                     ->required(),
                 Forms\Components\DatePicker::make('visit_date')
-                    ->label($l('تاريخ الزيارة', 'Visit Date'))
+                    ->label(l('تاريخ الزيارة', 'Visit Date'))
                     ->required(),
                 Forms\Components\TextInput::make('sort_order')
-                    ->label($l('الترتيب', 'Sort Order'))
+                    ->label(l('الترتيب', 'Sort Order'))
                     ->numeric()
                     ->default(0),
                 Forms\Components\Select::make('status')
-                    ->label($l('الحالة', 'Status'))
+                    ->label(l('الحالة', 'Status'))
                     ->options([
-                        'pending' => $l('معلق', 'Pending'),
-                        'completed' => $l('مكتمل', 'Completed'),
-                        'missed' => $l('فاتت', 'Missed'),
+                        'pending' => l('معلق', 'Pending'),
+                        'completed' => l('مكتمل', 'Completed'),
+                        'missed' => l('فاتت', 'Missed'),
                     ])
                     ->default('pending'),
             ])->columns(2),
@@ -77,21 +76,20 @@ class DailyVisitAssignmentResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')->label($l('المندوب', 'Rep'))->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('customer.name_ar')->label($l('العميل', 'Customer'))->searchable(),
-                Tables\Columns\TextColumn::make('visit_date')->label($l('التاريخ', 'Date'))->date()->sortable(),
-                Tables\Columns\BadgeColumn::make('status')->label($l('الحالة', 'Status'))
+                Tables\Columns\TextColumn::make('user.name')->label(l('المندوب', 'Rep'))->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('customer.name_ar')->label(l('العميل', 'Customer'))->searchable(),
+                Tables\Columns\TextColumn::make('visit_date')->label(l('التاريخ', 'Date'))->date()->sortable(),
+                Tables\Columns\BadgeColumn::make('status')->label(l('الحالة', 'Status'))
                     ->colors(['pending' => 'warning', 'completed' => 'success', 'missed' => 'danger']),
-                Tables\Columns\TextColumn::make('sort_order')->label($l('الترتيب', 'Order'))->sortable(),
+                Tables\Columns\TextColumn::make('sort_order')->label(l('الترتيب', 'Order'))->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('user_id')->label($l('المندوب', 'Rep'))->relationship('user', 'name'),
-                Tables\Filters\SelectFilter::make('status')->label($l('الحالة', 'Status'))
-                    ->options(['pending' => $l('معلق', 'Pending'), 'completed' => $l('مكتمل', 'Completed'), 'missed' => $l('فاتت', 'Missed')]),
+                Tables\Filters\SelectFilter::make('user_id')->label(l('المندوب', 'Rep'))->relationship('user', 'name'),
+                Tables\Filters\SelectFilter::make('status')->label(l('الحالة', 'Status'))
+                    ->options(['pending' => l('معلق', 'Pending'), 'completed' => l('مكتمل', 'Completed'), 'missed' => l('فاتت', 'Missed')]),
             ])
             ->defaultSort('visit_date', 'desc')
             ->actions([EditAction::make()])

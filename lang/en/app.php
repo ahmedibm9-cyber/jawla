@@ -266,6 +266,8 @@ return [
     'account' => 'Account',
     'employee_code' => 'Employee Code',
     'company' => 'Company',
+    'full_name' => 'Name',
+    'email' => 'Email',
     'edit_profile' => 'Edit Profile',
     'save_changes' => 'Save Changes',
     'profile_updated' => 'Profile updated successfully',

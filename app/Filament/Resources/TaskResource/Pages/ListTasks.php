@@ -12,11 +12,10 @@ class ListTasks extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return [
             Actions\CreateAction::make()
-                ->label($l('إضافة مهمة', 'Add Task'))
+                ->label(l('إضافة مهمة', 'Add Task'))
                 ->visible(fn () => ! auth()->user()->hasRole('executive')),
         ];
     }
