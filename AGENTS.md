@@ -1,18 +1,21 @@
 # Rules for Codex working in this repository
 
 ## Sources of truth
+
 1. `Jawla_Production_Build_Guide.md` and `Jawla_Build_Guide_v1_Reference.md`
    are the primary spec. If they conflict with anything here, they win.
 2. `docs/` files are the working reference for architecture, security, roles,
    design system, business rules, ZATCA, testing, deployment, and backups.
 
 ## Workflow
+
 1. Build phase by phase per §12 of the production guide. Do not skip phases.
 2. After every phase: run tests, print a summary, then commit with a clear
    message (`feat: phase N — <title>`).
 3. Every phase must meet its Definition of Done before starting the next.
 
 ## Non-negotiable engineering rules (apply to every line of code)
+
 - Secrets only in `.env`. Nothing secret ever reaches the frontend, JS
   bundles, Blade output, or logs. No API keys, tokens, or PATs in code.
 - No shell execution: never use `exec`, `shell_exec`, `system`, `passthru`,
@@ -36,27 +39,42 @@
 - RTL Arabic + LTR English work everywhere from the first commit.
 
 ## Non-negotiable business rules
+
 - No negative van stock. Reject the sale at the service layer with a
   bilingual error message; never rely on UI alone.
 - A sale creates: invoice + invoice_items + stock decrement + stock_movements
-  + customer balance update, all inside one transaction. Any failure → full
-  rollback, no partial state.
+  - customer balance update, all inside one transaction. Any failure → full
+    rollback, no partial state.
 - Invoice/return numbers are sequential per company, generated server-side,
   never editable, never guessable.
 - Reversal is a compensating transaction (never `delete()`) and is itself
   a logged activity linking to the original.
 
 ## Tests
+
 - Write Pest tests alongside each phase (not in a "phase 13 test push").
 - Feature tests must include the failure path for every money/stock flow.
 - E2E: at minimum, rep day flow + admin master-data flow + RTL smoke.
 
 ## Browser Automation (playwright-cli)
+
 - Session name: `playwright` — use `-s=playwright` with all commands.
 - Profile: Chrome profile named "playwright" (created by user). Use `open --persistent` or `attach --cdp=chrome` in guest mode for visible browser testing.
 - Dev server: `php artisan serve --port=8000` for local testing.
 
+## Agents Chat (multi-agent coordination)
+
+- Before starting any task, **read `agents-chat.md`** to see what other
+  agents are working on. Don't touch files another active agent owns.
+- **Append** your entry before starting work: agent name, task, files, status.
+- **Update** your entry when done (mark `done` + one-line summary of what
+  shipped). Never delete another agent's entry.
+- If two agents need the same file, the one who read it first wins. The other
+  picks a different approach or waits.
+- If idle >5 min with no progress, mark yourself `done` or `blocked`.
+
 ## When in doubt
+
 - Prefer the simplest solution that meets the guide.
 - Do not introduce new packages beyond §2 of the main guide without asking.
 - Do not modify `docs/BUSINESS_RULES.md` or `docs/SECURITY.md` — they are spec.
