@@ -43,7 +43,8 @@ class DemoSeeder extends Seeder
     {
         $this->call(RoleSeeder::class);
 
-        $alreadySeeded = Company::where('name_en', 'Global Plastic Company (GPC)')->exists();
+        $company = Company::where('name_en', 'Global Plastic Company (GPC)')->first();
+        $alreadySeeded = $company !== null;
 
         if (! $alreadySeeded) {
         // ─── Company ───────────────────────────────────────────────────
