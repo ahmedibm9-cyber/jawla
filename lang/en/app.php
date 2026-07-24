@@ -290,4 +290,5 @@ return [
     'current_password_required' => 'Current password is required to change password',
     'current_password_incorrect' => 'The current password is incorrect',
     'items' => 'items',
+    'products' => 'Products',
 ];

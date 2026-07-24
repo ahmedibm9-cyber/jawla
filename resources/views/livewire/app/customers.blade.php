@@ -6,8 +6,8 @@
     </x-page-header>
 
     <div class="page-body">
-        <div class="form-group">
-            <input type="text" wire:model.live="search" aria-label="{{ __('app.search') }}" autocomplete="off" class="form-input"
+        <div class="form-group" x-data x-init="$refs.searchInput.value = ''">
+            <input type="text" x-ref="searchInput" wire:model.live="search" aria-label="{{ __('app.search') }}" autocomplete="off" autocorrect="off" autocapitalize="off" class="form-input"
                 placeholder="{{ __('app.search_customers') }}">
         </div>
 

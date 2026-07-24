@@ -290,4 +290,5 @@ return [
     'current_password_required' => 'كلمة المرور الحالية مطلوبة لتغيير كلمة المرور',
     'current_password_incorrect' => 'كلمة المرور الحالية غير صحيحة',
     'items' => 'صنف',
+    'products' => 'المنتجات',
 ];

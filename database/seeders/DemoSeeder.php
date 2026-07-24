@@ -531,7 +531,7 @@ class DemoSeeder extends Seeder
             // ─── Purchase Requests ────────────────────────────────
             $reqStatuses = ['pending', 'pending', 'pending', 'sales_approved', 'sales_approved', 'purchasing_approved', 'rejected_by_sales', 'purchasing_approved', 'pending', 'pending'];
             for ($i = 0; $i < 10; $i++) {
-                $prod = $products[array_rand($products)];
+                $prod = $products->random();
                 PurchaseRequest::create([
                     'company_id' => $company->id,
                     'user_id' => $i % 2 === 0 ? $rep1->id : $rep2->id,
@@ -553,12 +553,12 @@ class DemoSeeder extends Seeder
                 $daysAgo = rand(0, 85);
                 if ($daysAgo < 3) $daysAgo = rand(0, 3); // bias toward recent
                 $issueDate = today()->subDays($daysAgo);
-                $cust = $customers[array_rand($customers)];
+                $cust = $customers->random();
 
                 $itemCount = rand(1, 3);
                 $items = []; $subtotal = 0;
                 for ($j = 0; $j < $itemCount; $j++) {
-                    $prod = $products[array_rand($products)];
+                    $prod = $products->random();
                     $qty = rand(1, 8);
                     $price = $prod->price;
                     $lineTotal = $qty * $price;
@@ -723,8 +723,8 @@ class DemoSeeder extends Seeder
             // ─── Price Quotation Requests ─────────────────────────
             $quoteStatuses = ['requested', 'requested', 'priced', 'priced', 'confirmed', 'requested', 'requested'];
             foreach ($quoteStatuses as $i => $status) {
-                $prod = $products[array_rand($products)];
-                $cust = $customers[array_rand($customers)];
+                $prod = $products->random();
+                $cust = $customers->random();
                 PriceQuotationRequest::create([
                     'company_id' => $company->id,
                     'customer_id' => $cust->id,
