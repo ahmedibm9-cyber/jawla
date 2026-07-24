@@ -34,6 +34,8 @@ class SalesFlow extends Component
 
     public ?string $printNotice = null;
 
+    public ?Customer $selectedCustomer = null;
+
     public function mount(?int $customer = null, ?int $visitId = null): void
     {
         if ($customer) {
@@ -47,6 +49,7 @@ class SalesFlow extends Component
     public function selectCustomer(int $id): void
     {
         $this->customerId = $id;
+        $this->selectedCustomer = Customer::find($id);
         $this->customerSearch = '';
         $this->errorMessage = '';
     }
@@ -341,7 +344,7 @@ class SalesFlow extends Component
         return view('livewire.app.sales-flow', [
             'customers' => $customers,
             'products' => $products,
-            'selectedCustomer' => $this->customerId > 0 ? Customer::find($this->customerId) : null,
+            'selectedCustomer' => $this->selectedCustomer,
         ]);
     }
 }
