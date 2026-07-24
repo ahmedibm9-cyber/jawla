@@ -45,38 +45,36 @@ class PurchaseRequestResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $schema->schema([
-            Section::make($l('بيانات', 'Info'))->schema([
-                Forms\Components\Select::make('user_id')->label($l('المندوب', 'Rep'))
+            Section::make(l('بيانات', 'Info'))->schema([
+                Forms\Components\Select::make('user_id')->label(l('المندوب', 'Rep'))
                     ->relationship('user', 'name')->preload(),
-                Forms\Components\Select::make('supplier_id')->label($l('المورد', 'Supplier'))
+                Forms\Components\Select::make('supplier_id')->label(l('المورد', 'Supplier'))
                     ->relationship('supplier', 'name_ar')->preload(),
-                Forms\Components\Select::make('product_id')->label($l('المنتج', 'Product'))
+                Forms\Components\Select::make('product_id')->label(l('المنتج', 'Product'))
                     ->relationship('product', 'name_ar')->preload(),
-                Forms\Components\TextInput::make('quantity')->label($l('الكمية', 'Quantity'))->numeric(),
-                Forms\Components\TextInput::make('offered_price')->label($l('السعر المعروض', 'Offered Price'))->numeric(),
-                Forms\Components\TextInput::make('currency')->label($l('العملة', 'Currency'))->default('EGP'),
-                Forms\Components\DatePicker::make('expires_at')->label($l('تاريخ انتهاء العرض', 'Offer Expires At')),
-                Forms\Components\Textarea::make('payment_terms')->label($l('شروط الدفع', 'Payment Terms')),
+                Forms\Components\TextInput::make('quantity')->label(l('الكمية', 'Quantity'))->numeric(),
+                Forms\Components\TextInput::make('offered_price')->label(l('السعر المعروض', 'Offered Price'))->numeric(),
+                Forms\Components\TextInput::make('currency')->label(l('العملة', 'Currency'))->default('EGP'),
+                Forms\Components\DatePicker::make('expires_at')->label(l('تاريخ انتهاء العرض', 'Offer Expires At')),
+                Forms\Components\Textarea::make('payment_terms')->label(l('شروط الدفع', 'Payment Terms')),
             ])->columns(2),
         ]);
     }
 
     public static function table(Table $table): Table
     {
-        $l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en;
 
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('user.name')->label($l('المندوب', 'Rep')),
-                Tables\Columns\TextColumn::make('supplier.name_ar')->label($l('المورد', 'Supplier'))
-                    ->formatStateUsing(fn ($s, $r) => $r->supplier?->name_ar ?? $r->supplier?->name_en ?? $l('غير محدد', 'N/A')),
-                Tables\Columns\TextColumn::make('product.name_ar')->label($l('المنتج', 'Product'))->searchable(),
-                Tables\Columns\TextColumn::make('quantity')->label($l('الكمية', 'Qty')),
-                Tables\Columns\TextColumn::make('offered_price')->label($l('السعر', 'Price')),
-                Tables\Columns\BadgeColumn::make('status')->label($l('الحالة', 'Status'))
+                Tables\Columns\TextColumn::make('user.name')->label(l('المندوب', 'Rep')),
+                Tables\Columns\TextColumn::make('supplier.name_ar')->label(l('المورد', 'Supplier'))
+                    ->formatStateUsing(fn ($s, $r) => $r->supplier?->name_ar ?? $r->supplier?->name_en ?? l('غير محدد', 'N/A')),
+                Tables\Columns\TextColumn::make('product.name_ar')->label(l('المنتج', 'Product'))->searchable(),
+                Tables\Columns\TextColumn::make('quantity')->label(l('الكمية', 'Qty')),
+                Tables\Columns\TextColumn::make('offered_price')->label(l('السعر', 'Price')),
+                Tables\Columns\BadgeColumn::make('status')->label(l('الحالة', 'Status'))
                     ->colors([
                         'pending' => 'warning',
                         'sales_approved' => 'info',
@@ -84,96 +82,96 @@ class PurchaseRequestResource extends Resource
                         'rejected_by_sales' => 'danger',
                         'rejected_by_purchasing' => 'danger',
                     ]),
-                Tables\Columns\TextColumn::make('expires_at')->label($l('ينتهي في', 'Expires'))
+                Tables\Columns\TextColumn::make('expires_at')->label(l('ينتهي في', 'Expires'))
                     ->date()
                     ->placeholder('—')
                     ->color(fn (PurchaseRequest $r) => $r->isExpired() ? 'danger' : null),
-                Tables\Columns\TextColumn::make('purchaseOrder.order_number')->label($l('أمر الشراء', 'PO #'))
+                Tables\Columns\TextColumn::make('purchaseOrder.order_number')->label(l('أمر الشراء', 'PO #'))
                     ->placeholder('—'),
-                Tables\Columns\TextColumn::make('created_at')->label($l('التاريخ', 'Date'))->dateTime()->sortable(),
+                Tables\Columns\TextColumn::make('created_at')->label(l('التاريخ', 'Date'))->dateTime()->sortable(),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('status')->label($l('الحالة', 'Status'))
+                Tables\Filters\SelectFilter::make('status')->label(l('الحالة', 'Status'))
                     ->options([
-                        'pending' => $l('معلق', 'Pending'),
-                        'sales_approved' => $l('Sales وافق', 'Sales approved'),
-                        'purchasing_approved' => $l('Purchasing وافق', 'Purchasing approved'),
-                        'rejected_by_sales' => $l('Sales رفض', 'Rejected by Sales'),
-                        'rejected_by_purchasing' => $l('Purchasing رفض', 'Rejected by Purchasing'),
+                        'pending' => l('معلق', 'Pending'),
+                        'sales_approved' => l('Sales وافق', 'Sales approved'),
+                        'purchasing_approved' => l('Purchasing وافق', 'Purchasing approved'),
+                        'rejected_by_sales' => l('Sales رفض', 'Rejected by Sales'),
+                        'rejected_by_purchasing' => l('Purchasing رفض', 'Rejected by Purchasing'),
                     ]),
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
                 Action::make('sales_approve')
-                    ->label($l('موافقة Sales', 'Sales Approve'))
+                    ->label(l('موافقة Sales', 'Sales Approve'))
                     ->icon('heroicon-o-check')
                     ->color('info')
                     ->visible(fn (PurchaseRequest $r) => $r->status === 'pending' && ! $r->isExpired() && auth()->user()->hasAnyRole(['admin', 'sales_manager']))
                     ->form([
-                        Forms\Components\Textarea::make('notes')->label($l('ملاحظات (اختياري)', 'Notes (optional)'))->rows(2)->maxLength(500),
+                        Forms\Components\Textarea::make('notes')->label(l('ملاحظات (اختياري)', 'Notes (optional)'))->rows(2)->maxLength(500),
                     ])
                     ->requiresConfirmation()
-                    ->modalDescription($l('سينتقل العرض إلى مراجعة المشتريات وسيتم إخطار المندوب.', 'The offer will move to Purchasing review and the rep will be notified.'))
-                    ->action(function (PurchaseRequest $r, array $data) use ($l) {
+                    ->modalDescription(l('سينتقل العرض إلى مراجعة المشتريات وسيتم إخطار المندوب.', 'The offer will move to Purchasing review and the rep will be notified.'))
+                    ->action(function (PurchaseRequest $r, array $data) {
                         try {
                             app(PurchaseRequestService::class)->salesApprove($r, Auth::id(), $data['notes'] ?: null);
-                            Notification::make()->success()->title($l('تمت موافقة المبيعات', 'Sales approval recorded'))->send();
+                            Notification::make()->success()->title(l('تمت موافقة المبيعات', 'Sales approval recorded'))->send();
                         } catch (\RuntimeException $e) {
                             Notification::make()->danger()->title($e->getMessage())->send();
                         }
                     }),
                 Action::make('sales_reject')
-                    ->label($l('رفض Sales', 'Sales Reject'))
+                    ->label(l('رفض Sales', 'Sales Reject'))
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
                     ->visible(fn (PurchaseRequest $r) => $r->status === 'pending' && auth()->user()->hasAnyRole(['admin', 'sales_manager']))
                     ->form([
-                        Forms\Components\Textarea::make('notes')->label($l('سبب الرفض (اختياري)', 'Rejection reason (optional)'))->rows(2)->maxLength(500),
+                        Forms\Components\Textarea::make('notes')->label(l('سبب الرفض (اختياري)', 'Rejection reason (optional)'))->rows(2)->maxLength(500),
                     ])
                     ->requiresConfirmation()
-                    ->modalDescription($l('سيبقى العرض قابلاً للتعديل وإعادة التقديم من المندوب، وسيتم إخطاره بالسبب.', 'The offer stays open for the rep to edit and resubmit; the rep will be notified with the reason.'))
-                    ->action(function (PurchaseRequest $r, array $data) use ($l) {
+                    ->modalDescription(l('سيبقى العرض قابلاً للتعديل وإعادة التقديم من المندوب، وسيتم إخطاره بالسبب.', 'The offer stays open for the rep to edit and resubmit; the rep will be notified with the reason.'))
+                    ->action(function (PurchaseRequest $r, array $data) {
                         try {
                             app(PurchaseRequestService::class)->salesReject($r, Auth::id(), $data['notes'] ?: null);
-                            Notification::make()->success()->title($l('تم تسجيل الرفض', 'Rejection recorded'))->send();
+                            Notification::make()->success()->title(l('تم تسجيل الرفض', 'Rejection recorded'))->send();
                         } catch (\RuntimeException $e) {
                             Notification::make()->danger()->title($e->getMessage())->send();
                         }
                     }),
                 Action::make('purchasing_approve')
-                    ->label($l('موافقة Purchasing', 'Purchasing Approve'))
+                    ->label(l('موافقة Purchasing', 'Purchasing Approve'))
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
                     ->visible(fn (PurchaseRequest $r) => $r->status === 'sales_approved' && ! $r->isExpired() && auth()->user()->hasAnyRole(['admin', 'purchasing']))
                     ->form([
-                        Forms\Components\Textarea::make('notes')->label($l('ملاحظات (اختياري)', 'Notes (optional)'))->rows(2)->maxLength(500),
+                        Forms\Components\Textarea::make('notes')->label(l('ملاحظات (اختياري)', 'Notes (optional)'))->rows(2)->maxLength(500),
                     ])
                     ->requiresConfirmation()
-                    ->modalDescription($l('سيتم إنشاء أمر شراء لهذا العرض وإخطار المندوب.', 'A purchase order will be generated for this offer and the rep will be notified.'))
-                    ->action(function (PurchaseRequest $r, array $data) use ($l) {
+                    ->modalDescription(l('سيتم إنشاء أمر شراء لهذا العرض وإخطار المندوب.', 'A purchase order will be generated for this offer and the rep will be notified.'))
+                    ->action(function (PurchaseRequest $r, array $data) {
                         try {
                             $order = app(PurchaseRequestService::class)->purchasingApprove($r, Auth::id(), $data['notes'] ?: null);
                             Notification::make()->success()
-                                ->title($l('تم إنشاء أمر الشراء ', 'Purchase order created ').$order->order_number)
+                                ->title(l('تم إنشاء أمر الشراء ', 'Purchase order created ').$order->order_number)
                                 ->send();
                         } catch (\RuntimeException $e) {
                             Notification::make()->danger()->title($e->getMessage())->send();
                         }
                     }),
                 Action::make('purchasing_reject')
-                    ->label($l('رفض Purchasing', 'Purchasing Reject'))
+                    ->label(l('رفض Purchasing', 'Purchasing Reject'))
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
                     ->visible(fn (PurchaseRequest $r) => $r->status === 'sales_approved' && auth()->user()->hasAnyRole(['admin', 'purchasing']))
                     ->form([
-                        Forms\Components\Textarea::make('notes')->label($l('سبب الرفض (اختياري)', 'Rejection reason (optional)'))->rows(2)->maxLength(500),
+                        Forms\Components\Textarea::make('notes')->label(l('سبب الرفض (اختياري)', 'Rejection reason (optional)'))->rows(2)->maxLength(500),
                     ])
                     ->requiresConfirmation()
-                    ->modalDescription($l('سيبقى العرض قابلاً للتعديل وإعادة التقديم من المندوب، وسيتم إخطاره بالسبب.', 'The offer stays open for the rep to edit and resubmit; the rep will be notified with the reason.'))
-                    ->action(function (PurchaseRequest $r, array $data) use ($l) {
+                    ->modalDescription(l('سيبقى العرض قابلاً للتعديل وإعادة التقديم من المندوب، وسيتم إخطاره بالسبب.', 'The offer stays open for the rep to edit and resubmit; the rep will be notified with the reason.'))
+                    ->action(function (PurchaseRequest $r, array $data) {
                         try {
                             app(PurchaseRequestService::class)->purchasingReject($r, Auth::id(), $data['notes'] ?: null);
-                            Notification::make()->success()->title($l('تم تسجيل الرفض', 'Rejection recorded'))->send();
+                            Notification::make()->success()->title(l('تم تسجيل الرفض', 'Rejection recorded'))->send();
                         } catch (\RuntimeException $e) {
                             Notification::make()->danger()->title($e->getMessage())->send();
                         }
