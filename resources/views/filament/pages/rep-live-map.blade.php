@@ -27,7 +27,7 @@
 </x-filament-panels::page>
 
 @push('scripts')
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7azlZ7s3I8/US2q3BkQ1cL0GqO3B7i0WCGv+M2T6U54E4c5T5Vq46s5" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
 <script>
     window.repLiveMap = function (points) {
         return {
