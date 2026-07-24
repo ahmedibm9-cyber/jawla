@@ -109,6 +109,30 @@ class ReturnServiceTest extends TestCase
         $this->assertSame(200.0, (float) $customer->fresh()->balance);
     }
 
+    public function test_create_return_rejects_when_total_exceeds_customer_balance(): void
+    {
+        $company = Company::factory()->create();
+        $rep = User::factory()->create(['company_id' => $company->id]);
+        $van = Warehouse::factory()->create([
+            'company_id' => $company->id, 'type' => 'van', 'user_id' => $rep->id,
+        ]);
+        $customer = Customer::factory()->create(['company_id' => $company->id, 'balance' => 100]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+
+        app(StockService::class)->increment(
+            $van->id, $product->id, null, 50.0,
+            StockReason::Initial, $product,
+        );
+
+        $this->expectException(\DomainException::class);
+        app(ReturnService::class)->create(
+            companyId: $company->id,
+            userId: $rep->id,
+            customerId: $customer->id,
+            items: [['product_id' => $product->id, 'quantity' => 5.0, 'unit_price' => 50.0]],
+        );
+    }
+
     public function test_create_return_rejects_foreign_customer_and_product_before_any_write(): void
     {
         $company = Company::factory()->create();
