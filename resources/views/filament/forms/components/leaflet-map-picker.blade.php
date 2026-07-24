@@ -61,7 +61,7 @@
             initMap() {
                 const tryInit = () => {
                     if (!window.L) { setTimeout(tryInit, 50); return; }
-                    L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+                    L.Icon.Default.imagePath = '/images/';
 
                     // Get initial values from hidden inputs
                     const latInput = document.getElementById(this.latitudeField + '_' + this.$id);
@@ -106,6 +106,7 @@
 
                 // Locate user on init
                 this.locateUser();
+                }, 100);
                 };
                 tryInit();
             },

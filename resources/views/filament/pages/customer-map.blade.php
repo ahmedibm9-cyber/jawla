@@ -32,7 +32,7 @@
             initMap() {
                 const tryInit = () => {
                     if (!window.L) { setTimeout(tryInit, 50); return; }
-                    L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+                    L.Icon.Default.imagePath = '/images/';
                     this.map = L.map('customer-map', { zoomControl: true });
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
