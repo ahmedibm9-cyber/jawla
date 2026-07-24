@@ -64,7 +64,7 @@ class PaymentServiceTest extends TestCase
         $rep = User::factory()->create(['company_id' => $company->id]);
         $foreignCustomer = Customer::factory()->create(['company_id' => Company::factory()->create()->id]);
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(\App\Exceptions\Domain\DomainException::class);
         try {
             app(PaymentService::class)->collect(
                 companyId: $company->id,

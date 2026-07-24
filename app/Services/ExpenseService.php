@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\Domain\DomainException;
 use App\Models\CashBox;
 use App\Models\Expense;
 use App\Models\User;

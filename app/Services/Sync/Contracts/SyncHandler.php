@@ -15,5 +15,12 @@ use App\Models\User;
  */
 interface SyncHandler
 {
+    /** Unique operation type key for routing offline-queued payloads. */
+    public function type(): string;
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>
+     */
     public function handle(User $rep, array $payload): array;
 }

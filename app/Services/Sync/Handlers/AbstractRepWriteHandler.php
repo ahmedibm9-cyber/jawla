@@ -15,6 +15,9 @@ use Illuminate\Support\Facades\Validator;
  */
 abstract class AbstractRepWriteHandler implements SyncHandler
 {
+    /** Each subclass overrides this with its operation type key. */
+    abstract public function type(): string;
+
     /**
      * @param  array<string, mixed>  $payload
      * @param  array<string, mixed>  $rules

@@ -77,7 +77,7 @@
       </a>
     </header>
   @endauth
-  <main id="main">{!! $slot !!}</main>
+  <main id="main" data-page="{{ $pageKey }}">{!! $slot !!}</main>
   @livewireScripts
   @filamentScripts
   <script defer>

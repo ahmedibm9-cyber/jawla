@@ -3,14 +3,16 @@
 namespace App\Services;
 
 use App\Enums\InvoiceStatus;
+use App\Exceptions\Domain\DomainException;
 use App\Models\CashBox;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\Contracts\PaymentService as PaymentServiceContract;
 use Illuminate\Support\Facades\DB;
 
-class PaymentService
+class PaymentService implements PaymentServiceContract
 {
     public function collect(int $companyId, int $userId, int $customerId, float $amount, string $method, ?int $invoiceId = null, ?int $visitId = null, ?string $notes = null): Payment
     {
@@ -24,7 +26,7 @@ class PaymentService
                 ->lockForUpdate()
                 ->first();
             if (! $customer) {
-                throw new \DomainException($this->companyMessage('customer'));
+                throw new DomainException('errors.resource.customer');
             }
 
             $invoice = null;
@@ -34,10 +36,10 @@ class PaymentService
                     ->lockForUpdate()
                     ->first();
                 if (! $invoice || $invoice->customer_id !== $customerId) {
-                    throw new \DomainException($this->companyMessage('invoice'));
+                    throw new DomainException('errors.resource.invoice');
                 }
                 if (bccomp(number_format($amount, 2, '.', ''), (string) $invoice->remaining_amount, 2) > 0) {
-                    throw new \DomainException('Payment exceeds the invoice balance.');
+                    throw new DomainException('Payment exceeds the invoice balance.');
                 }
             }
 
@@ -145,17 +147,5 @@ class PaymentService
         }
 
         return $cashBox->refresh();
-    }
-
-    private function companyMessage(string $resource): string
-    {
-        $english = ucfirst($resource).' does not belong to this company.';
-        $arabic = match ($resource) {
-            'customer' => 'العميل لا يتبع هذه الشركة.',
-            'invoice' => 'الفاتورة لا تتبع هذا العميل أو هذه الشركة.',
-            default => 'السجل لا يتبع هذه الشركة.',
-        };
-
-        return app()->getLocale() === 'ar' ? $arabic : $english;
     }
 }

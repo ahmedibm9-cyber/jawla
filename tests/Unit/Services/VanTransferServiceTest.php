@@ -302,7 +302,7 @@ class VanTransferServiceTest extends TestCase
             inTransitWarehouseId: $inTransitWarehouse->id,
         );
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(\App\Exceptions\Domain\DomainException::class);
         $service->ship($transfer->id, $mainWarehouse->id, $toUser->id);
     }
 
@@ -356,7 +356,7 @@ class VanTransferServiceTest extends TestCase
 
         $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(\App\Exceptions\Domain\DomainException::class);
         $service->receive($transfer->id, $fromUser->id);
     }
 
@@ -410,7 +410,7 @@ class VanTransferServiceTest extends TestCase
             items: [['product_id' => $product->id, 'quantity' => 10.0]],
         );
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(\App\Exceptions\Domain\DomainException::class);
         $service->cancel($transfer->id, $toUser->id);
     }
 }

@@ -140,7 +140,7 @@ class InvoiceFlowTest extends TestCase
         $invoicesBefore = Invoice::count();
         $movementsBefore = Stock::count();
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(\App\Exceptions\Domain\DomainException::class);
         try {
             app(InvoiceService::class)->create([
                 'company_id' => $rep->company_id,
@@ -164,7 +164,7 @@ class InvoiceFlowTest extends TestCase
         $invoicesBefore = Invoice::count();
         $movementsBefore = Stock::count();
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(\App\Exceptions\Domain\DomainException::class);
         try {
             app(InvoiceService::class)->create([
                 'company_id' => $rep->company_id,

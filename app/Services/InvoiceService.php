@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\StockReason;
+use App\Exceptions\Domain\DomainException;
 use App\Models\Activity;
 use App\Models\Company;
 use App\Models\Customer;
@@ -39,7 +40,7 @@ class InvoiceService implements InvoiceContract
                 ->lockForUpdate()
                 ->first();
             if (! $seller) {
-                throw new \DomainException($this->companyMessage('seller'));
+                throw new DomainException('errors.resource.seller');
             }
 
             // Van warehouse is required for reps (van sales), optional for admin/manager
@@ -62,7 +63,7 @@ class InvoiceService implements InvoiceContract
                 ->get()
                 ->keyBy('id');
             if ($products->count() !== count($productIds)) {
-                throw new \DomainException($this->companyMessage('product'));
+                throw new DomainException('errors.resource.product');
             }
 
             $customer = Customer::whereKey($data['customer_id'])
@@ -70,7 +71,7 @@ class InvoiceService implements InvoiceContract
                 ->lockForUpdate()
                 ->first();
             if (! $customer) {
-                throw new \DomainException($this->companyMessage('customer'));
+                throw new DomainException('errors.resource.customer');
             }
 
             // Issue 13: Customer must be approved before creating invoices
@@ -317,18 +318,5 @@ class InvoiceService implements InvoiceContract
         }
 
         return $warehouse;
-    }
-
-    private function companyMessage(string $resource): string
-    {
-        $english = ucfirst($resource).' does not belong to this company.';
-        $arabic = match ($resource) {
-            'seller' => 'المندوب لا يتبع هذه الشركة.',
-            'customer' => 'العميل لا يتبع هذه الشركة.',
-            'product' => 'المنتج لا يتبع هذه الشركة.',
-            default => 'السجل لا يتبع هذه الشركة.',
-        };
-
-        return app()->getLocale() === 'ar' ? $arabic : $english;
     }
 }

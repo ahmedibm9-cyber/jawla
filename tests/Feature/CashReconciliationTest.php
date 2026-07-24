@@ -72,7 +72,7 @@ class CashReconciliationTest extends TestCase
     {
         $foreignRep = User::factory()->create(['company_id' => Company::factory()->create()->id]);
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(\App\Exceptions\Domain\DomainException::class);
         try {
             $this->service()->submit($this->company->id, $foreignRep->id, 100.0);
         } finally {

@@ -12,21 +12,22 @@ use App\Services\Sync\SyncHandlerRegistry;
 use Illuminate\Support\ServiceProvider;
 
 /**
- * Registers the offline-sync operation handlers (CG2). Each type maps to a rep
- * write and reuses the existing service. Adding a new offline operation = add a
- * handler + one line here.
+ * Registers the offline-sync operation handlers (CG2) via container tagging.
+ * The SyncHandlerRegistry auto-discovers tagged handlers at first use.
+ * Adding a new offline operation = create the handler class + add it to the tag
+ * list below — no manual registry calls, no boot-order dependencies.
  */
 class SyncServiceProvider extends ServiceProvider
 {
-    public function boot(): void
+    public function register(): void
     {
-        $registry = $this->app->make(SyncHandlerRegistry::class);
-
-        $registry->register('sale', $this->app->make(SaleSyncHandler::class));
-        $registry->register('payment', $this->app->make(PaymentSyncHandler::class));
-        $registry->register('return', $this->app->make(ReturnSyncHandler::class));
-        $registry->register('expense', $this->app->make(ExpenseSyncHandler::class));
-        $registry->register('complaint', $this->app->make(ComplaintSyncHandler::class));
-        $registry->register('visit_report', $this->app->make(VisitReportSyncHandler::class));
+        $this->app->tag([
+            SaleSyncHandler::class,
+            PaymentSyncHandler::class,
+            ReturnSyncHandler::class,
+            ExpenseSyncHandler::class,
+            ComplaintSyncHandler::class,
+            VisitReportSyncHandler::class,
+        ], 'sync.handler');
     }
 }

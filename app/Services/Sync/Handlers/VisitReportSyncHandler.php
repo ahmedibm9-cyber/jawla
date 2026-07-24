@@ -15,6 +15,11 @@ class VisitReportSyncHandler extends AbstractRepWriteHandler
 {
     public function __construct(private readonly VisitReportService $reports) {}
 
+    public function type(): string
+    {
+        return 'visit_report';
+    }
+
     public function handle(User $rep, array $payload): array
     {
         $data = $this->validated($payload, [

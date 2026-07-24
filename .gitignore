@@ -36,3 +36,6 @@ Thumbs.db
 
 # Archived issue/bug documents
 /.archive/
+
+# Old git state dumps
+/recovery/

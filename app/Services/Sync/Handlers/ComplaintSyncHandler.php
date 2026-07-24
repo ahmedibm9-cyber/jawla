@@ -13,6 +13,11 @@ class ComplaintSyncHandler extends AbstractRepWriteHandler
 {
     public function __construct(private readonly ComplaintService $complaints) {}
 
+    public function type(): string
+    {
+        return 'complaint';
+    }
+
     public function handle(User $rep, array $payload): array
     {
         $data = $this->validated($payload, [

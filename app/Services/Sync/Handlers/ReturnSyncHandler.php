@@ -13,6 +13,11 @@ class ReturnSyncHandler extends AbstractRepWriteHandler
 {
     public function __construct(private readonly ReturnService $returns) {}
 
+    public function type(): string
+    {
+        return 'return';
+    }
+
     public function handle(User $rep, array $payload): array
     {
         $data = $this->validated($payload, [

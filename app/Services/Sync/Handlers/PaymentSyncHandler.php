@@ -13,6 +13,11 @@ class PaymentSyncHandler extends AbstractRepWriteHandler
 {
     public function __construct(private readonly PaymentService $payments) {}
 
+    public function type(): string
+    {
+        return 'payment';
+    }
+
     public function handle(User $rep, array $payload): array
     {
         $data = $this->validated($payload, [

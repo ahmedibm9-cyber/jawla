@@ -4,7 +4,7 @@ namespace App\Exceptions\Domain;
 
 use RuntimeException;
 
-abstract class DomainException extends RuntimeException
+class DomainException extends RuntimeException
 {
     public function __construct(
         public readonly string $messageKey,

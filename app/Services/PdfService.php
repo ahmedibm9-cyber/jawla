@@ -6,13 +6,18 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\ProformaInvoice;
 use Illuminate\Support\Facades\Storage;
-use Mpdf\Mpdf;
 use SimpleSoftwareIO\QrCode\Generator;
 
+/**
+ * Generates PDF documents for invoices, proformas, and receipts. Each document
+ * method handles its own data loading and template rendering, then delegates
+ * to PdfEngine for the mPDF binary generation and disk cache.
+ */
 class PdfService
 {
     public function __construct(
-        private readonly InvoiceQrService $qrService
+        private readonly InvoiceQrService $qrService,
+        private readonly PdfEngine $engine,
     ) {}
 
     public function generateProforma(ProformaInvoice $proforma): string
@@ -21,19 +26,17 @@ class PdfService
         $qrData = $this->qrService->generateForProforma($proforma);
         $qr = $this->qrSvg($qrData);
 
-        // Save QR data to proforma for later reference
         $proforma->update(['zatca_qr' => $qrData]);
 
         $html = $this->render('proforma', $proforma, $qr);
 
-        return $this->toPdf($html, "proforma_{$proforma->proforma_number}.pdf");
+        return $this->engine->renderAndSave($html, "proforma_{$proforma->proforma_number}.pdf");
     }
 
     public function generateReceipt(Payment $payment): string
     {
-        // Payments are immutable, so a receipt PDF never changes — serve the
-        // cached render instead of rebuilding mPDF on every download.
-        if ($cached = $this->cached("receipt_{$payment->id}.pdf")) {
+        $filename = "receipt_{$payment->id}.pdf";
+        if ($cached = $this->engine->cached($filename)) {
             return $cached;
         }
 
@@ -42,26 +45,13 @@ class PdfService
 
         $html = $this->renderReceipt($payment, $qr);
 
-        return $this->toPdf($html, "receipt_{$payment->id}.pdf");
-    }
-
-    /**
-     * Return the stored path for an already-generated PDF, or null. Used to
-     * short-circuit re-rendering immutable documents (invoices, receipts) on
-     * repeat downloads — the expensive mPDF pass runs once per document.
-     */
-    private function cached(string $filename): ?string
-    {
-        $path = "pdfs/{$filename}";
-
-        return Storage::disk('private')->exists($path) ? $path : null;
+        return $this->engine->renderAndSave($html, $filename);
     }
 
     public function generateInvoice(Invoice $invoice): string
     {
-        // Invoices are immutable financial records (reversal is a compensating
-        // transaction, never an edit), so the PDF is stable once rendered.
-        if ($cached = $this->cached("invoice_{$invoice->invoice_number}.pdf")) {
+        $filename = "invoice_{$invoice->invoice_number}.pdf";
+        if ($cached = $this->engine->cached($filename)) {
             return $cached;
         }
 
@@ -75,12 +65,11 @@ class PdfService
         $qrData = $this->qrService->generateForInvoice($invoice);
         $qr = $this->qrSvg($qrData);
 
-        // Save QR data to invoice for later reference
         $invoice->update(['zatca_qr' => $qrData]);
 
         $html = $this->render('invoice', $invoice, $qr, $signatureSvg);
 
-        return $this->toPdf($html, "invoice_{$invoice->invoice_number}.pdf");
+        return $this->engine->renderAndSave($html, $filename);
     }
 
     private function renderReceipt(Payment $payment, string $qr): string
@@ -153,7 +142,7 @@ HTML;
     {
         $company = $doc->company;
         $customer = $doc->customer;
-        $items = $type === 'proforma' ? $doc->items : $doc->items;
+        $items = $doc->items;
         $lang = app()->getLocale();
 
         $title = $type === 'proforma'
@@ -237,20 +226,5 @@ HTML;
         $qr = (new Generator)->size(100)->generate($data);
 
         return '<div class="qr">'.$qr.'</div>';
-    }
-
-    private function toPdf(string $html, string $filename): string
-    {
-        $mpdf = new Mpdf([
-            'mode' => 'utf-8',
-            'format' => 'A4',
-            'tempDir' => storage_path('app/temp'),
-        ]);
-        $mpdf->WriteHTML($html);
-        $path = "pdfs/{$filename}";
-        Storage::disk('private')->makeDirectory('pdfs');
-        Storage::disk('private')->put($path, $mpdf->Output($filename, 'S'));
-
-        return $path;
     }
 }

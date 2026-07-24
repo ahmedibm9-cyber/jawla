@@ -2110,93 +2110,188 @@ dialog[open] {
 }
 
 /* =====================================================================
-   Large-screen App Shell (tablet + laptop + desktop)
-   The rep app is a mobile-first PWA. On wide screens a bare centered
-   column looked broken: a full-width tab bar under a narrow column,
-   an orphaned bell, and a stark white void. Here we present the app as
-   a clean column on a branded canvas, with the header/nav constrained
-   to the column so everything reads as one intentional surface.
+   Responsive layout — the rep PWA fills and adapts to larger screens.
+   Phones keep the mobile bottom-tab layout untouched. From 768px the
+   content uses the full width and grids go multi-column. From 1024px
+   the bottom tab bar becomes a persistent side navigation and content
+   fills the rest. Logical properties keep RTL (Arabic) mirrored.
    ===================================================================== */
+
+/* Sidebar brand header — hidden on mobile, shown when the nav is a rail */
+.tab-bar-brand {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 14px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--color-border-light);
+  text-decoration: none;
+}
+.tab-bar-brand img {
+  height: 30px;
+  width: auto;
+}
+
+/* ---- Tablet and up: content fills the width; grids go multi-column ---- */
 @media (min-width: 768px) {
-  :root {
-    --app-col: 30rem; /* 480px — comfortable phone-app width */
+  .main-content {
+    max-width: none;
+    padding-inline: clamp(20px, 3.2vw, 40px);
+  }
+  /* main-content now owns the side gutter — sections drop their own */
+  .page-header,
+  .page-body,
+  .home-section,
+  .home-stats,
+  .more-section {
+    padding-inline: 0;
+  }
+  .home-hero {
+    border-radius: 20px;
   }
 
-  /* Branded full-bleed canvas so the brand fills the screen */
-  body {
-    background:
-      radial-gradient(
-        ellipse at 50% -10%,
-        rgba(255, 255, 255, 0.08) 0%,
-        transparent 55%
-      ),
-      linear-gradient(
-        160deg,
-        var(--color-brand-dark) 0%,
-        var(--color-brand) 45%,
-        #244f0f 100%
-      );
-    background-attachment: fixed;
+  /* Tile / stat / action grids expand to use the width */
+  .more-grid {
+    grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
   }
 
-  /* The app column: header + main + tab bar share one centered width */
-  .notification-header,
-  #main,
-  .tab-bar {
-    max-width: var(--app-col);
+  /* Forms & simple pages stay readable, centred (never stretched edge-to-edge) */
+  .page-body {
+    max-width: 880px;
     margin-inline: auto;
   }
 
-  /* Main is the card body: app background, lifted off the canvas */
-  #main {
-    background: var(--color-surface-alt);
-    min-height: calc(100dvh - 56px);
-    box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.55);
+  /* List pages fill the width as a responsive card grid */
+  [data-page="customers"] .page-body,
+  [data-page="orders"] .page-body,
+  [data-page="stock"] .page-body,
+  [data-page="visits"] .page-body,
+  [data-page="quotations"] .page-body,
+  [data-page="notifications"] .page-body {
+    max-width: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+    align-content: start;
   }
-
-  /* Header becomes the top of the card (solid, rounded top) */
-  .notification-header {
-    background: var(--color-surface-alt);
-    border-radius: 20px 20px 0 0;
-    box-shadow: 0 -1px 0 0 rgba(0, 0, 0, 0.02);
+  /* Non-card rows (search, buttons, pagination, empty state) span all columns */
+  [data-page] .page-body > .form-group,
+  [data-page] .page-body > .btn,
+  [data-page] .page-body > .mb-3,
+  [data-page] .page-body > .mt-3,
+  [data-page] .page-body > .mt-4,
+  [data-page] .page-body > .space-y-2,
+  [data-page] .page-body > .ds-empty,
+  [data-page] .page-body > .empty-state {
+    grid-column: 1 / -1;
   }
-
-  /* Tab bar sits at the bottom of the card, aligned to the column */
-  .tab-bar {
-    left: 0;
-    right: 0;
-    border-radius: 18px 18px 0 0;
-    border-top: 1px solid var(--color-border-light);
-    box-shadow: 0 -6px 24px -8px rgba(0, 0, 0, 0.25);
-  }
-
-  /* Install banner + undo toast must not stretch across the canvas */
-  .pwa-install-banner,
-  .action-toast {
-    max-width: var(--app-col);
-    margin-inline: auto;
-    left: 0;
-    right: 0;
+  [data-page] .page-body > .card {
+    margin-bottom: 0;
   }
 }
 
-/* On very wide screens, keep the column comfortable, not stretched */
+/* ---- Desktop: bottom tab bar becomes a side navigation rail ---- */
 @media (min-width: 1024px) {
   :root {
-    --app-col: 30rem;
+    --side-nav: 15.5rem;
+  }
+
+  .tab-bar {
+    inset-block: 0;
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+    width: var(--side-nav);
+    height: 100dvh;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+    gap: 2px;
+    padding: 16px 12px;
+    border-top: none;
+    border-inline-end: 1px solid var(--color-border-light);
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.05);
+    overflow-y: auto;
+  }
+  .tab-bar-brand {
+    display: flex;
+  }
+
+  .tab-item {
+    flex: 0 0 auto;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 14px;
+    min-height: 46px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+  .tab-item svg {
+    width: 23px;
+    height: 23px;
+    margin-bottom: 0;
+  }
+  .tab-item:active svg {
+    transform: none;
+  }
+  .tab-item.active {
+    background: color-mix(in srgb, var(--color-brand) 12%, transparent);
+  }
+  .tab-item.active::after {
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    inset-inline-start: 2px;
+    inset-inline-end: auto;
+    inset-block-start: 22%;
+    width: 3px;
+    height: 56%;
+    transform: none;
+    border-radius: 4px;
+  }
+
+  /* Shift header + content past the rail, then fill the rest */
+  #main,
+  .notification-header {
+    margin-inline-start: var(--side-nav);
+  }
+  .main-content {
+    max-width: 1360px;
+    margin-inline: auto;
+    padding-inline: clamp(28px, 3vw, 56px);
+    padding-bottom: 40px;
+  }
+  .notification-header {
+    max-width: none;
+    padding-inline: clamp(28px, 3vw, 56px);
+  }
+
+  .pwa-install-banner,
+  .action-toast {
+    inset-inline-start: var(--side-nav);
   }
 }
 
-/* App-shell canvas: deepen the green in dark mode so it isn't jarring */
-@media (min-width: 768px) and (prefers-color-scheme: dark) {
-  body {
-    background:
-      radial-gradient(
-        ellipse at 50% -10%,
-        rgba(255, 255, 255, 0.04) 0%,
-        transparent 55%
-      ),
-      linear-gradient(160deg, #0a1f0a 0%, #12300c 55%, #08170a 100%);
-    background-attachment: fixed;
+/* ---- Desktop polish: home "today's plan" fills as a grid; larger more-tiles ---- */
+@media (min-width: 1024px) {
+  [data-page="home"] .home-section:has(> .visit-card) {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 12px;
+    align-items: start;
+  }
+  [data-page="home"] .home-section:has(> .visit-card) > .home-section-title,
+  [data-page="home"] .home-section:has(> .visit-card) > .space-y-2,
+  [data-page="home"] .home-section:has(> .visit-card) > .ds-empty {
+    grid-column: 1 / -1;
+  }
+  [data-page="home"] .home-section:has(> .visit-card) > .visit-card {
+    margin-bottom: 0;
+  }
+  .more-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\Domain\DomainException;
 use App\Models\Activity;
 use App\Models\CashBox;
 use App\Models\CashReconciliation;
@@ -25,12 +26,12 @@ class CashReconciliationService
                 ->lockForUpdate()
                 ->first();
             if (! $user) {
-                throw new \DomainException($this->companyMessage('representative'));
+                throw new DomainException('errors.resource.seller');
             }
 
             $cashBox = CashBox::withoutGlobalScopes()->where('user_id', $userId)->lockForUpdate()->first();
             if ($cashBox !== null && $cashBox->company_id !== null && $cashBox->company_id !== $companyId) {
-                throw new \DomainException($this->companyMessage('cash box'));
+                throw new DomainException('errors.resource.cash_box');
             }
             $expected = $cashBox ? (float) $cashBox->balance : 0.0;
             $variance = round($countedAmount - $expected, 2);
@@ -73,7 +74,7 @@ class CashReconciliationService
                 ->lockForUpdate()
                 ->first();
             if (! $reviewer) {
-                throw new \DomainException($this->companyMessage('reviewer'));
+                throw new DomainException('errors.resource.reviewer');
             }
 
             throw_if($fresh->status !== 'pending', new \RuntimeException(
@@ -91,18 +92,5 @@ class CashReconciliationService
 
             return $fresh;
         });
-    }
-
-    private function companyMessage(string $resource): string
-    {
-        $english = ucfirst($resource).' does not belong to this company.';
-        $arabic = match ($resource) {
-            'representative' => 'المندوب لا يتبع هذه الشركة.',
-            'reviewer' => 'المراجع لا يتبع هذه الشركة.',
-            'cash box' => 'صندوق النقدية لا يتبع هذه الشركة.',
-            default => 'السجل لا يتبع هذه الشركة.',
-        };
-
-        return app()->getLocale() === 'ar' ? $arabic : $english;
     }
 }

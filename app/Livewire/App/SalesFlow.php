@@ -4,7 +4,9 @@ namespace App\Livewire\App;
 
 use App\Models\Customer;
 use App\Models\Product;
+use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\InvoiceService;
+use App\Services\Contracts\LineItemInput;
 use App\Support\ThermalPrintFormatter;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -161,8 +163,6 @@ class SalesFlow extends Component
 
     public function recalcCart(): void
     {
-        $subtotal = 0.0;
-        $vatAmount = 0.0;
         $vatPercent = (float) (auth()->user()?->company?->vat_percent ?? 0);
 
         if (auth()->user() === null || auth()->user()->company === null) {
@@ -173,26 +173,29 @@ class SalesFlow extends Component
             return;
         }
 
-        foreach ($this->cart as &$item) {
-            $lineTotal = round($item['quantity'] * $item['price'], 2);
-            $item['line_total'] = $lineTotal;
-            $subtotal += $lineTotal;
+        $inputs = [];
+        foreach ($this->cart as $item) {
+            $inputs[] = new LineItemInput(
+                qty: (float) ($item['quantity'] ?? 0),
+                unitPrice: (float) ($item['price'] ?? 0),
+                vatApplicable: (bool) ($item['vat_applicable'] ?? false),
+            );
+        }
 
-            if ($item['vat_applicable'] && $vatPercent > 0) {
-                $item['vat_amount'] = round($lineTotal * ($vatPercent / 100), 2);
-                $vatAmount += $item['vat_amount'];
-            } else {
-                $item['vat_amount'] = 0.0;
-            }
+        $calculation = app(InvoiceCalculationService::class)->calculate($inputs, $vatPercent);
+
+        foreach ($this->cart as $i => &$item) {
+            $item['line_total'] = $calculation->lines[$i]->lineTotal;
+            $item['vat_amount'] = $calculation->lines[$i]->vatAmount;
         }
         unset($item);
 
-        $this->cartSubtotal = round($subtotal, 2);
-        $this->cartVatAmount = round($vatAmount, 2);
-        $this->cartTotal = round($subtotal + $vatAmount, 2);
+        $this->cartSubtotal = $calculation->subtotal;
+        $this->cartVatAmount = $calculation->vatAmount;
+        $this->cartTotal = $calculation->total;
     }
 
-    public function submit(InvoiceService $invoices, ThermalPrintFormatter $printer): void
+    public function submit(): void
     {
         // Validate customer
         $this->validate([
@@ -237,24 +240,6 @@ class SalesFlow extends Component
             return;
         }
 
-        // Issue 13: Customer must be approved before creating invoices
-        if (($customer->status ?? 'approved') !== 'approved') {
-            $statusMessage = match($customer->status) {
-                'pending' => app()->getLocale() === 'ar'
-                    ? 'العميل في انتظار موافقة الإدارة ولا يمكن إنشاء فاتورة له'
-                    : 'Customer is pending admin approval and cannot be invoiced yet',
-                'rejected' => app()->getLocale() === 'ar'
-                    ? 'تم رفض هذا العميل من الإدارة ولا يمكن إنشاء فاتورة له'
-                    : 'This customer was rejected by admin and cannot be invoiced',
-                default => app()->getLocale() === 'ar'
-                    ? 'حالة العميل غير صالحة'
-                    : 'Invalid customer status',
-            };
-            $this->errorMessage = $statusMessage;
-
-            return;
-        }
-
         $items = [];
         foreach ($this->cart as $item) {
             $items[] = [
@@ -265,7 +250,7 @@ class SalesFlow extends Component
         }
 
         try {
-            $invoice = $invoices->create([
+            $invoice = app(InvoiceService::class)->create([
                 'company_id' => auth()->user()->company_id,
                 'customer_id' => $this->customerId,
                 'visit_id' => $this->visitId,
@@ -286,6 +271,8 @@ class SalesFlow extends Component
             message: __('app.invoice_created').' #'.$invoice->invoice_number);
 
         try {
+            /** @var ThermalPrintFormatter $printer */
+            $printer = app(ThermalPrintFormatter::class);
             $this->invoicePrintPayload = $printer->invoicePayload($invoice);
         } catch (\Throwable) {
             $this->invoicePrintPayload = [];

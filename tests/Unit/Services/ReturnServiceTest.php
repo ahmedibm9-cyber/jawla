@@ -124,7 +124,7 @@ class ReturnServiceTest extends TestCase
             StockReason::Initial, $product,
         );
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(\App\Exceptions\Domain\DomainException::class);
         app(ReturnService::class)->create(
             companyId: $company->id,
             userId: $rep->id,
@@ -142,7 +142,7 @@ class ReturnServiceTest extends TestCase
         $foreignCustomer = Customer::factory()->create(['company_id' => $foreignCompany->id, 'balance' => 500]);
         $foreignProduct = Product::factory()->create(['company_id' => $foreignCompany->id]);
 
-        $this->expectException(\DomainException::class);
+        $this->expectException(\App\Exceptions\Domain\DomainException::class);
         try {
             app(ReturnService::class)->create(
                 companyId: $company->id,

@@ -15,6 +15,11 @@ class SaleSyncHandler extends AbstractRepWriteHandler
 {
     public function __construct(private readonly InvoiceService $invoices) {}
 
+    public function type(): string
+    {
+        return 'sale';
+    }
+
     public function handle(User $rep, array $payload): array
     {
         $data = $this->validated($payload, [

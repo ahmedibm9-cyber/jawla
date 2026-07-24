@@ -1,0 +1,37 @@
+<?php
+
+namespace App\Services;
+
+use Illuminate\Support\Facades\Storage;
+use Mpdf\Mpdf;
+
+/**
+ * Thin wrapper around mPDF and disk I/O. Exists as a seam so callers (and
+ * their tests) can swap the engine for an in-memory fake without touching
+ * the document-rendering code. PdfService delegates to this for every PDF
+ * write; the cache lookup is here because it's part of the same disk concern.
+ */
+class PdfEngine
+{
+    public function cached(string $filename): ?string
+    {
+        $path = "pdfs/{$filename}";
+
+        return Storage::disk('private')->exists($path) ? $path : null;
+    }
+
+    public function renderAndSave(string $html, string $filename): string
+    {
+        $mpdf = new Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'tempDir' => storage_path('app/temp'),
+        ]);
+        $mpdf->WriteHTML($html);
+        $path = "pdfs/{$filename}";
+        Storage::disk('private')->makeDirectory('pdfs');
+        Storage::disk('private')->put($path, $mpdf->Output($filename, 'S'));
+
+        return $path;
+    }
+}

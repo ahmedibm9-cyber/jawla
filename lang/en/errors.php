@@ -48,6 +48,16 @@ return [
         'exceeded' => 'Credit limit exceeded for customer :name. Limit: :limit, balance: :balance.',
     ],
 
+    'resource' => [
+        'seller' => 'The representative does not belong to this company.',
+        'customer' => 'The customer does not belong to this company.',
+        'product' => 'The product does not belong to this company.',
+        'invoice' => 'The invoice does not belong to this customer or company.',
+        'reviewer' => 'The reviewer does not belong to this company.',
+        'cash_box' => 'The cash box does not belong to this company.',
+        'default' => 'The record does not belong to this company.',
+    ],
+
     '403_description' => 'You do not have permission to access this page.',
     '404_description' => 'The page you are looking for could not be found.',
     '419_description' => 'Your session has expired. Please refresh and try again.',

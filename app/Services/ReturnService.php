@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\Domain\DomainException;
 use App\Enums\StockReason;
 use App\Models\Customer;
 use App\Models\Product;

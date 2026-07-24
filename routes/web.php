@@ -28,11 +28,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [SystemPageController::class, 'root']);
 
-// Unified login — handles both rep and admin auth, then redirects by role
-Route::get('/login', [LoginController::class, 'create'])->name('login');
-Route::post('/login', [LoginController::class, 'store'])
-    ->middleware('throttle:login')
-    ->name('app.login.store');
+// Unified login is the Filament admin login page (styled + role-aware via
+// LoginResponse: reps land on /app, everyone else on the dashboard). /login is
+// kept only as a short alias that redirects to it.
+Route::get('/login', fn () => redirect()->route('filament.admin.auth.login'))->name('login');
 
 // Catch /admin root — Filament registers sub-pages but not the bare prefix
 Route::get('/admin', [SystemPageController::class, 'adminRoot']);

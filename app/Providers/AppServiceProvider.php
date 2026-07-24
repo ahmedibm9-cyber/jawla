@@ -11,6 +11,7 @@ use App\Services\Contracts\AlarmService;
 use App\Services\Contracts\DocumentNumberService;
 use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\InvoiceService;
+use App\Services\Contracts\PaymentService as PaymentServiceContract;
 use App\Services\Contracts\PricingService;
 use App\Services\Contracts\StockService;
 use App\Services\Contracts\VanTransferService as VanTransferServiceContract;
@@ -58,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(\App\Services\Contracts\OutOfStockService::class, fn () => app(OutOfStockService::class));
         $this->app->singleton(ComplaintService::class);
         $this->app->bind(VanTransferServiceContract::class, fn () => app(VanTransferService::class));
+        $this->app->bind(PaymentServiceContract::class, fn () => app(\App\Services\PaymentService::class));
 
         // ETA e-invoicing. The HTTP transport (OAuth + submission + response
         // mapping) is built; it activates only when ETA is enabled AND base URLs
