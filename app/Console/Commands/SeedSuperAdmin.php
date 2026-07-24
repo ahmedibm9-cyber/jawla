@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class SeedSuperAdmin extends Command
 {
@@ -15,6 +16,10 @@ class SeedSuperAdmin extends Command
 
     public function handle(): int
     {
+        // Ensure the super_admin role exists
+        Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
+        $this->info('super_admin role ensured.');
+
         $email = 'superadmin@jawla.test';
 
         if (User::where('email', $email)->exists()) {
