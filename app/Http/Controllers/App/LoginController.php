@@ -33,7 +33,7 @@ class LoginController extends Controller
 
         $user = Auth::user();
 
-        if (! $user->is_active || ! $user->hasRole('rep')) {
+        if (! $user->is_active) {
             Auth::logout();
 
             return back()
@@ -43,9 +43,13 @@ class LoginController extends Controller
 
         $request->session()->regenerate();
 
-        Activity::log('login', $user, "Rep login: {$user->email}");
+        if ($user->hasRole('rep')) {
+            Activity::log('login', $user, "Rep login: {$user->email}");
 
-        return redirect()->intended(route('app.home'));
+            return redirect()->intended(route('app.home'));
+        }
+
+        return redirect()->intended(route('filament.admin.pages.dashboard'));
     }
 
     public function destroy(Request $request): RedirectResponse
@@ -55,7 +59,7 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('filament.admin.auth.login')
+        return redirect()->route('login')
             ->header('Clear-Site-Data', '"cache", "storage"');
     }
 }

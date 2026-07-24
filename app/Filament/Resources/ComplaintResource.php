@@ -27,7 +27,7 @@ class ComplaintResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return app()->getLocale() === 'ar' ? 'التنبيهات' : 'Alarms';
+        return app()->getLocale() === 'ar' ? 'الشكاوى' : 'Complaints';
     }
 
     public static function getLabel(): string

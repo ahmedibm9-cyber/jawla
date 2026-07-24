@@ -28,11 +28,11 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [SystemPageController::class, 'root']);
 
-// Login — redirect to Filament's professional login page at /admin/login
-Route::get('/login', fn () => redirect()->route('filament.admin.auth.login'))->name('login');
-Route::post('/login', fn () => redirect()->route('filament.admin.auth.login'))
+// Unified login — handles both rep and admin auth, then redirects by role
+Route::get('/login', [LoginController::class, 'create'])->name('login');
+Route::post('/login', [LoginController::class, 'store'])
     ->middleware('throttle:login')
-    ->name('login.post');
+    ->name('app.login.store');
 
 // Catch /admin root — Filament registers sub-pages but not the bare prefix
 Route::get('/admin', [SystemPageController::class, 'adminRoot']);
@@ -51,9 +51,11 @@ Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
 Route::get('/admin/logout', [SystemPageController::class, 'adminLogout'])
     ->middleware('throttle:10,1');
 
-// Old rep login routes — redirect to unified login
-Route::get('/app/login', fn () => redirect()->route('filament.admin.auth.login'))
-    ->name('app.login');
+// Old rep login route — redirect to unified login
+Route::get('/app/login', fn () => redirect()->route('login'))->name('app.login');
+
+// Old /app/sales-flow URL — redirect to /app/sell
+Route::get('/app/sales-flow', fn () => redirect()->route('app.sell'));
 
 // Rep PWA route group (protected)
 Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->group(function () {
