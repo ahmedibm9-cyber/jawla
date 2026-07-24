@@ -41,6 +41,7 @@ class DemoSeeder extends Seeder
 {
     public function run(): void
     {
+        echo "\n=== DEMO SEEDER RUNNING ===\n";
         $this->call(RoleSeeder::class);
 
         $company = Company::where('name_en', 'Global Plastic Company (GPC)')->first();
