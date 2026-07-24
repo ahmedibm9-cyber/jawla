@@ -33,16 +33,15 @@ class SecurityHeaders
         // Cross-Origin Policies — isolate browsing context
         $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
         $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
-        $response->headers->set('Cross-Origin-Embedder-Policy', 'require-corp');
 
         // CSP — Livewire needs unsafe-inline for inline styles, unsafe-eval for Alpine
         // TODO: migrate to nonce-based CSP when Livewire supports it
         $csp = implode('; ', [
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-            "img-src 'self' data: blob:",
-            "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
+            "img-src 'self' data: blob: https://*.tile.openstreetmap.org",
+            "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com https://fonts.bunny.net",
             "connect-src 'self' wss: ws:",
             "frame-ancestors 'none'",
             "base-uri 'self'",

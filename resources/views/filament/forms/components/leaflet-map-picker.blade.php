@@ -45,6 +45,7 @@
 </div>
 
 @push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7azlZ7s3I8/US2q3BkQ1cL0GqO3B7i0WCGv+M2T6U54E4c5T5Vq46s5" crossorigin="anonymous"></script>
 <script>
     window.leafletMapPicker = function(latitudeField, longitudeField, defaultLat, defaultLng, defaultZoom) {
         return {
@@ -58,8 +59,7 @@
             online: navigator.onLine,
             
             initMap() {
-                import('leaflet').then(mod => {
-                    window.L = mod.default;
+                setTimeout(() => {
 
                     // Get initial values from hidden inputs
                     const latInput = document.getElementById(this.latitudeField + '_' + this.$id);
@@ -104,7 +104,7 @@
 
                 // Locate user on init
                 this.locateUser();
-                }).catch(err => console.error('Leaflet load failed:', err));
+                }, 100);
             },
 
             locateUser() {

@@ -27,6 +27,7 @@
 </x-filament-panels::page>
 
 @push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7azlZ7s3I8/US2q3BkQ1cL0GqO3B7i0WCGv+M2T6U54E4c5T5Vq46s5" crossorigin="anonymous"></script>
 <script>
     window.repLiveMap = function (points) {
         return {
@@ -34,8 +35,7 @@
             map: null,
             layer: null,
             init() {
-                import('leaflet').then(mod => {
-                    window.L = mod.default;
+                setTimeout(() => {
                     this.map = L.map('rep-live-map', { zoomControl: true });
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -46,7 +46,7 @@
                     // Default view (Riyadh) until we have fixes.
                     this.map.setView([24.7136, 46.6753], 6);
                     this.draw(this.points, true);
-                }).catch(err => console.error('Leaflet load failed:', err));
+                }, 100);
             },
             refresh(points) {
                 this.points = points ?? [];

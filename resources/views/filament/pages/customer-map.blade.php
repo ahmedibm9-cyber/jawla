@@ -23,14 +23,14 @@
 </x-filament-panels::page>
 
 @push('scripts')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7azlZ7s3I8/US2q3BkQ1cL0GqO3B7i0WCGv+M2T6U54E4c5T5Vq46s5" crossorigin="anonymous"></script>
 <script>
     window.customerMap = function (points) {
         return {
             points,
             map: null,
             initMap() {
-                import('leaflet').then(mod => {
-                    window.L = mod.default;
+                setTimeout(() => {
                     this.map = L.map('customer-map', { zoomControl: true });
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -53,7 +53,7 @@
                 } else if (bounds.length > 1) {
                     this.map.fitBounds(bounds, { padding: [40, 40] });
                 }
-                }).catch(err => console.error('Leaflet load failed:', err));
+                }, 100);
             },
         };
     };

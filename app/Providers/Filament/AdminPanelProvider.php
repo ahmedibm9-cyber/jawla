@@ -22,6 +22,7 @@ use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -44,8 +45,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->font('IBM Plex Sans Arabic')
             ->brandName('Jawla')
-            ->brandLogo(asset('images/black-j.webp'))
-            ->darkModeBrandLogo(asset('images/white-j.webp'))
+            ->brandLogo(secure_asset('images/black-j.webp'))
+            ->darkModeBrandLogo(secure_asset('images/white-j.webp'))
             ->brandLogoHeight('4rem')
             ->defaultAvatarProvider(CompanyAvatarProvider::class)
             ->spa()
@@ -94,6 +95,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 FilamentAuthenticate::class,
-            ]);
+            ])
+            ->renderHook('panels::head.start', fn (): string => '<link rel="preload" href="'.secure_asset('images/black-j.webp').'" as="image" fetchpriority="high">')
+            ->renderHook('panels::body.end', fn (): string => '<script>window.areRecordsPartiallySelected??=()=>!1;window.getRecordsOnPage??=()=>[];window.areRecordsSelected??=()=>!1;window.areRecordsToggleable??=()=>!0;</script>');
     }
 }
