@@ -129,4 +129,36 @@ class ExpenseServiceTest extends TestCase
 
         $this->assertSame(200.0, (float) CashBox::where('user_id', $rep->id)->firstOrFail()->balance);
     }
+
+    public function test_log_expense_rejects_zero_amount(): void
+    {
+        $company = Company::factory()->create();
+        $rep = User::factory()->create(['company_id' => $company->id]);
+        CashBox::create(['user_id' => $rep->id, 'company_id' => $company->id, 'balance' => 100]);
+
+        $this->expectException(\DomainException::class);
+
+        app(ExpenseService::class)->log(
+            companyId: $company->id,
+            userId: $rep->id,
+            category: 'fuel',
+            amount: 0,
+        );
+    }
+
+    public function test_log_expense_rejects_negative_amount(): void
+    {
+        $company = Company::factory()->create();
+        $rep = User::factory()->create(['company_id' => $company->id]);
+        CashBox::create(['user_id' => $rep->id, 'company_id' => $company->id, 'balance' => 100]);
+
+        $this->expectException(\DomainException::class);
+
+        app(ExpenseService::class)->log(
+            companyId: $company->id,
+            userId: $rep->id,
+            category: 'fuel',
+            amount: -50,
+        );
+    }
 }
