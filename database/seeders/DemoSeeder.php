@@ -43,6 +43,9 @@ class DemoSeeder extends Seeder
     {
         $this->call(RoleSeeder::class);
 
+        $alreadySeeded = Company::where('name_en', 'Global Plastic Company (GPC)')->exists();
+
+        if (! $alreadySeeded) {
         // ─── Company ───────────────────────────────────────────────────
         // GPC (Global Plastic Company) — شركة اللدائن العالمية
         // Founded 2019 · 6th of October City, Giza · Raw-materials trading & distribution
@@ -432,6 +435,8 @@ class DemoSeeder extends Seeder
             'start_longitude' => 31.2089,
         ]);
 
+        } // end if (! $alreadySeeded)
+
         // ═══════════════════════════════════════════════════════════
         //  TRANSACTIONAL DEMO DATA — invoices, payments, POs, etc.
         // ═══════════════════════════════════════════════════════════
@@ -441,6 +446,12 @@ class DemoSeeder extends Seeder
             $mainWarehouse, $van1, $van2, $ws1, $ws2,
             $routeCairo, $routeGiza, $routeAlex,
         ) {
+            // Skip if transactional data already exists
+            if (Invoice::where('company_id', $company->id)->exists()) {
+                echo "Transactional data already seeded — skipping.\n";
+                return;
+            }
+
             // ─── Suppliers ────────────────────────────────────────
             $suppliers = [];
             $suppliers[] = Supplier::create(['company_id' => $company->id, 'code' => 'SUP-001', 'name_ar' => 'سابك', 'name_en' => 'SABIC', 'type' => 'international', 'contact_person' => 'Ahmed Al-Rashid', 'phone' => '+966500000001', 'email' => 'sales@sabic.com', 'payment_terms' => 'LC 90 days']);
