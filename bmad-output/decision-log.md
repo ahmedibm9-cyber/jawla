@@ -153,3 +153,16 @@
 - Case file: bmad-output/investigation-null-company-id-widget-crash-2026-07-23.md
 - Recommended response: Option A — create fix story for null guard across all widgets
 - Fix story: bmad-output/stories/HOTFIX.null-guard-dashboard-widgets.story.md
+
+## Investigation: Test Coverage Gaps — 2026-07-23
+
+- Symptom: 18 user stories have zero test coverage, 12 have partial coverage (72 total across 24 epics)
+- Primary hypothesis: Filament admin pages and Livewire rep components lack tests due to auto-generation patterns and Playwright/Alpine.js incompatibility
+- Primary suspected component: Filament Resources (PaymentResource, ExpenseResource, StockResource, PurchaseOrderResource, TaskResource) + Livewire App components (ProfilePage, SettingsPage, TodaysCustomers) + Dashboard Widgets (7 total)
+- Case file: bmad-output/investigation-test-coverage-gaps-2026-07-23.md
+- Recommended response: Option A — Create 13 test files across P0/P1/P2/P3 priority
+- P0 (financial/reversal): InvoiceAmendServiceTest, ReversalServiceTest, PaymentResourceTest
+- P1 (admin visibility): DashboardWidgetTest, InvoiceResourceTest, StockResourceTest, ExpenseResourceTest
+- P2 (UX/security): ProfilePageTest, SettingsPageTest, TodaysCustomersTest, PurchaseOrderResourceTest
+- P3 (backlog): TaskManagementTest, StockAdjustTest
+- Note: US-7.2 Cancel Return was flagged as "missing" but is actually covered at service level (ReturnServiceTest.php:81)

@@ -226,7 +226,7 @@ class InvoiceService implements InvoiceContract
                 'remaining_amount' => $invoice->total,
                 'amended_from' => $invoice->id,
                 'posting_date' => today(),
-                'issued_at' => null,
+                'issued_at' => now(),
             ]);
 
             foreach ($invoice->items as $item) {
