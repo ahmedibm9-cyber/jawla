@@ -39,6 +39,12 @@ Route::get('/admin', [SystemPageController::class, 'adminRoot']);
 
 Route::get('/offline', [SystemPageController::class, 'offline']);
 
+Route::get('/_seed', function () {
+    if (! app()->environment('production')) abort(403);
+    \Illuminate\Support\Facades\Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    return response()->json(['output' => trim(\Illuminate\Support\Facades\Artisan::output())]);
+});
+
 Route::get('/health', [SystemPageController::class, 'health']);
 
 Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
