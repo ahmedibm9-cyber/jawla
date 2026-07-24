@@ -89,4 +89,9 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
         ->middleware('throttle:10,1')
         ->name('pdf.receipt');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
+    Route::get('/_seed-demo', function () {
+        \Illuminate\Support\Facades\Artisan::call('app:seed-transactions');
+        return response()->json(['output' => trim(\Illuminate\Support\Facades\Artisan::output())]);
+    });
+
 });
