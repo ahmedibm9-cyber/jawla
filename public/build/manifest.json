@@ -1,7 +1,7 @@
 {
-  "_fonts-CG2XgnCB.css": {
-    "file": "assets/fonts-CG2XgnCB.css",
-    "src": "_fonts-CG2XgnCB.css"
+  "_fonts-C2a-Aj-d.css": {
+    "file": "assets/fonts-C2a-Aj-d.css",
+    "src": "_fonts-C2a-Aj-d.css"
   },
   "_ibm-plex-sans-arabic-400-normal-Bjm8chgm.woff": {
     "file": "assets/ibm-plex-sans-arabic-400-normal-Bjm8chgm.woff",
@@ -34,38 +34,6 @@
   "_ibm-plex-sans-arabic-400-normal-sbZiljcy.woff": {
     "file": "assets/ibm-plex-sans-arabic-400-normal-sbZiljcy.woff",
     "src": "_ibm-plex-sans-arabic-400-normal-sbZiljcy.woff"
-  },
-  "_ibm-plex-sans-arabic-500-normal-BKKTaxl1.woff": {
-    "file": "assets/ibm-plex-sans-arabic-500-normal-BKKTaxl1.woff",
-    "src": "_ibm-plex-sans-arabic-500-normal-BKKTaxl1.woff"
-  },
-  "_ibm-plex-sans-arabic-500-normal-BrC3D1t3.woff": {
-    "file": "assets/ibm-plex-sans-arabic-500-normal-BrC3D1t3.woff",
-    "src": "_ibm-plex-sans-arabic-500-normal-BrC3D1t3.woff"
-  },
-  "_ibm-plex-sans-arabic-500-normal-C4MQITzh.woff2": {
-    "file": "assets/ibm-plex-sans-arabic-500-normal-C4MQITzh.woff2",
-    "src": "_ibm-plex-sans-arabic-500-normal-C4MQITzh.woff2"
-  },
-  "_ibm-plex-sans-arabic-500-normal-Cd6jVIg7.woff2": {
-    "file": "assets/ibm-plex-sans-arabic-500-normal-Cd6jVIg7.woff2",
-    "src": "_ibm-plex-sans-arabic-500-normal-Cd6jVIg7.woff2"
-  },
-  "_ibm-plex-sans-arabic-500-normal-Ck_W4G78.woff2": {
-    "file": "assets/ibm-plex-sans-arabic-500-normal-Ck_W4G78.woff2",
-    "src": "_ibm-plex-sans-arabic-500-normal-Ck_W4G78.woff2"
-  },
-  "_ibm-plex-sans-arabic-500-normal-DvhI1aHE.woff": {
-    "file": "assets/ibm-plex-sans-arabic-500-normal-DvhI1aHE.woff",
-    "src": "_ibm-plex-sans-arabic-500-normal-DvhI1aHE.woff"
-  },
-  "_ibm-plex-sans-arabic-500-normal-OtpNIXEE.woff2": {
-    "file": "assets/ibm-plex-sans-arabic-500-normal-OtpNIXEE.woff2",
-    "src": "_ibm-plex-sans-arabic-500-normal-OtpNIXEE.woff2"
-  },
-  "_ibm-plex-sans-arabic-500-normal-XmtXq_5I.woff": {
-    "file": "assets/ibm-plex-sans-arabic-500-normal-XmtXq_5I.woff",
-    "src": "_ibm-plex-sans-arabic-500-normal-XmtXq_5I.woff"
   },
   "_ibm-plex-sans-arabic-600-normal-0pRdybE_.woff2": {
     "file": "assets/ibm-plex-sans-arabic-600-normal-0pRdybE_.woff2",
@@ -144,7 +112,7 @@
     "src": "node_modules/leaflet/dist/images/marker-icon.png"
   },
   "resources/css/app.css": {
-    "file": "assets/app-D59jaJTp.css",
+    "file": "assets/app-B7p7pBYW.css",
     "name": "app",
     "names": ["app.css"],
     "src": "resources/css/app.css",
@@ -156,7 +124,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-B3V1bX6J.js",
+    "file": "assets/app-BvdEq6ac.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true

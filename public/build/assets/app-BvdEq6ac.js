@@ -8548,7 +8548,14 @@ function Rp() {
             window.addEventListener(`jawla-sync-status`, () => r()));
         })
         .catch(() => {});
-    }));
+    }),
+  document.addEventListener(`alpine:init`, () => {
+    window.getRecordsOnPage ||
+      ((window.getRecordsOnPage = () => []),
+      (window.areRecordsSelected = () => !1),
+      (window.areRecordsPartiallySelected = () => !1),
+      (window.areRecordsToggleable = () => !0));
+  }));
 var zp = document.querySelector(`meta[name="sentry-dsn"]`)?.content;
 zp &&
   Sf({

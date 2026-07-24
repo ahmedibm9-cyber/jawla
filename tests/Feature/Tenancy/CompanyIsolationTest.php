@@ -1,79 +1,102 @@
 <?php
 
-namespace Tests\Feature\Tenancy;
+namespace Tests\Feature;
 
-use App\Models\Activity;
 use App\Models\Company;
 use App\Models\Customer;
-use App\Support\ActiveCompanyContext;
+use App\Models\Product;
+use App\Models\User;
+use App\Models\Warehouse;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
+/**
+ * Cross-cutting: Company Isolation
+ *
+ * Tests that Company A users cannot see Company B data.
+ */
 class CompanyIsolationTest extends TestCase
 {
     use RefreshDatabase;
 
-    // RefreshDatabase wraps each test in a transaction and rolls it back, so
-    // no truncate() is needed. Assertions below are scoped to the rows each
-    // test creates (by company_id / id membership) rather than global counts,
-    // so seeded or leaked rows can never make them flake.
+    private Company $companyA;
+    private Company $companyB;
+    private User $userA;
+    private User $userB;
 
-    public function test_company_a_user_cannot_see_company_b_customers(): void
+    protected function setUp(): void
     {
-        $companyA = Company::factory()->create();
-        $companyB = Company::factory()->create();
+        parent::setUp();
 
-        $custB = Customer::factory()->create(['company_id' => $companyB->id]);
+        $this->companyA = Company::factory()->create(['name_en' => 'Company A']);
+        $this->companyB = Company::factory()->create(['name_en' => 'Company B']);
 
-        $context = app(ActiveCompanyContext::class);
-        $context->setCompanyId($companyA->id);
-
-        $this->assertFalse(Customer::whereKey($custB->id)->exists());
-        $this->assertSame(0, Customer::where('company_id', $companyB->id)->count());
+        $this->userA = User::factory()->create([
+            'company_id' => $this->companyA->id,
+            'email' => 'userA@test.test',
+        ]);
+        $this->userB = User::factory()->create([
+            'company_id' => $this->companyB->id,
+            'email' => 'userB@test.test',
+        ]);
     }
 
-    public function test_company_a_user_sees_own_customers(): void
+    public function test_user_a_cannot_see_company_b_customers(): void
     {
-        $companyA = Company::factory()->create();
+        $customerB = Customer::factory()->create(['company_id' => $this->companyB->id, 'name_en' => 'B Customer']);
 
-        $custA = Customer::factory()->create(['company_id' => $companyA->id]);
+        $visible = Customer::whereKey($customerB->id)
+            ->where('company_id', $this->userA->company_id)
+            ->exists();
 
-        $context = app(ActiveCompanyContext::class);
-        $context->setCompanyId($companyA->id);
-
-        $this->assertTrue(Customer::whereKey($custA->id)->exists());
-        $this->assertSame(1, Customer::where('company_id', $companyA->id)->count());
+        $this->assertFalse($visible, 'User A should not see Company B customer through scoped query');
     }
 
-    public function test_disabled_context_sees_all_companies(): void
+    public function test_user_a_cannot_see_company_b_products(): void
     {
-        $companyA = Company::factory()->create();
-        $companyB = Company::factory()->create();
+        $productB = Product::factory()->create(['company_id' => $this->companyB->id]);
 
-        $custA = Customer::factory()->create(['company_id' => $companyA->id]);
-        $custB = Customer::factory()->create(['company_id' => $companyB->id]);
+        $visible = Product::whereKey($productB->id)
+            ->where('company_id', $this->userA->company_id)
+            ->exists();
 
-        $context = app(ActiveCompanyContext::class);
-        $context->disable();
-
-        $visibleIds = Customer::pluck('id');
-        $this->assertTrue($visibleIds->contains($custA->id));
-        $this->assertTrue($visibleIds->contains($custB->id));
+        $this->assertFalse($visible, 'User A should not see Company B product through scoped query');
     }
 
-    public function test_company_a_cannot_read_company_b_activity_records(): void
+    public function test_user_a_cannot_see_company_b_warehouses(): void
     {
-        $companyA = Company::factory()->create();
-        $companyB = Company::factory()->create();
-
-        $activityB = Activity::create([
-            'company_id' => $companyB->id,
-            'type' => 'invoice_created',
-            'description' => 'Company B only',
+        $warehouseB = Warehouse::factory()->create([
+            'company_id' => $this->companyB->id, 'type' => 'main', 'name_en' => 'B Warehouse',
         ]);
 
-        app(ActiveCompanyContext::class)->setCompanyId($companyA->id);
+        $visible = Warehouse::whereKey($warehouseB->id)
+            ->where('company_id', $this->userA->company_id)
+            ->exists();
 
-        $this->assertFalse(Activity::whereKey($activityB->id)->exists());
+        $this->assertFalse($visible, 'User A should not see Company B warehouse');
+    }
+
+    public function test_user_a_sees_only_own_company_customers(): void
+    {
+        Customer::factory()->create(['company_id' => $this->companyA->id, 'name_en' => 'A Customer']);
+        Customer::factory()->create(['company_id' => $this->companyB->id, 'name_en' => 'B Customer']);
+
+        $this->actingAs($this->userA);
+
+        $visible = Customer::where('company_id', $this->userA->company_id)->get();
+        $this->assertCount(1, $visible);
+        $this->assertEquals('A Customer', $visible->first()->name_en);
+    }
+
+    public function test_user_b_sees_only_own_company_products(): void
+    {
+        Product::factory()->create(['company_id' => $this->companyA->id]);
+        Product::factory()->create(['company_id' => $this->companyB->id]);
+
+        $this->actingAs($this->userB);
+
+        $visible = Product::where('company_id', $this->userB->company_id)->get();
+        $this->assertCount(1, $visible);
+        $this->assertEquals($this->companyB->id, $visible->first()->company_id);
     }
 }

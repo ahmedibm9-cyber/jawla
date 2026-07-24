@@ -3,24 +3,39 @@
 namespace Database\Seeders;
 
 use App\Enums\StockReason;
+use App\Models\Alarm;
 use App\Models\Company;
 use App\Models\CompanyBankAccount;
 use App\Models\Customer;
 use App\Models\CustomerGroup;
 use App\Models\DailyVisitAssignment;
+use App\Models\Expense;
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use App\Models\ModeOfPayment;
 use App\Models\NamingSeries;
+use App\Models\Payment;
 use App\Models\PriceList;
+use App\Models\PriceQuotationRequest;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Models\PurchaseOrder;
+use App\Models\PurchaseOrderItem;
+use App\Models\PurchaseRequest;
+use App\Models\ReturnItem;
+use App\Models\ReturnRecord;
 use App\Models\Route;
+use App\Models\Supplier;
 use App\Models\TaxTemplate;
 use App\Models\TaxTemplateLine;
 use App\Models\User;
+use App\Models\Visit;
 use App\Models\Warehouse;
 use App\Models\WorkSession;
 use App\Services\Contracts\StockService as StockServiceContract;
+use App\Services\NumberSequenceService;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DemoSeeder extends Seeder
 {
@@ -401,13 +416,303 @@ class DemoSeeder extends Seeder
         }
 
         // ─── Work sessions ─────────────────────────────────────────────
-        WorkSession::create([
+        $ws1 = WorkSession::create([
             'user_id' => $rep1->id,
             'route_id' => $routeCairo->id,
             'started_at' => now()->subHours(2),
             'start_latitude' => 30.0444,
             'start_longitude' => 31.2357,
         ]);
+
+        $ws2 = WorkSession::create([
+            'user_id' => $rep2->id,
+            'route_id' => $routeGiza->id,
+            'started_at' => now()->subHours(3),
+            'start_latitude' => 30.0131,
+            'start_longitude' => 31.2089,
+        ]);
+
+        // ═══════════════════════════════════════════════════════════
+        //  TRANSACTIONAL DEMO DATA — invoices, payments, POs, etc.
+        // ═══════════════════════════════════════════════════════════
+        DB::transaction(function () use (
+            $company, $products, $customers, $stockService, $stockQties,
+            $rep1, $rep2, $admin, $manager, $superAdmin, $warehouseKeeper,
+            $mainWarehouse, $van1, $van2, $ws1, $ws2,
+            $routeCairo, $routeGiza, $routeAlex,
+        ) {
+            // ─── Suppliers ────────────────────────────────────────
+            $suppliers = [];
+            $suppliers[] = Supplier::create(['company_id' => $company->id, 'code' => 'SUP-001', 'name_ar' => 'سابك', 'name_en' => 'SABIC', 'type' => 'international', 'contact_person' => 'Ahmed Al-Rashid', 'phone' => '+966500000001', 'email' => 'sales@sabic.com', 'payment_terms' => 'LC 90 days']);
+            $suppliers[] = Supplier::create(['company_id' => $company->id, 'code' => 'SUP-002', 'name_ar' => 'بروج', 'name_en' => 'Borouge', 'type' => 'international', 'contact_person' => 'Fatima Al-Mansoori', 'phone' => '+971500000002', 'email' => 'orders@borouge.com', 'payment_terms' => 'LC 60 days']);
+            $suppliers[] = Supplier::create(['company_id' => $company->id, 'code' => 'SUP-003', 'name_ar' => 'إكسون موبيل', 'name_en' => 'ExxonMobil Chemical', 'type' => 'international', 'contact_person' => 'John Mitchell', 'phone' => '+12810000003', 'email' => 'polyolefins@exxonmobil.com', 'payment_terms' => 'TT 30 days']);
+            $suppliers[] = Supplier::create(['company_id' => $company->id, 'code' => 'SUP-004', 'name_ar' => 'جولدن باور للكيماويات', 'name_en' => 'Golden Power Chemicals', 'type' => 'local', 'contact_person' => 'Hassan Ibrahim', 'phone' => '01011223344', 'email' => 'hassan@gpc-eg.com', 'payment_terms' => 'Net 30']);
+            $supplierMap = []; foreach ($suppliers as $s) { $supplierMap[$s->code] = $s; }
+
+            $names = app(NumberSequenceService::class);
+
+            // ─── Purchase Orders ──────────────────────────────────
+            $pos = [];
+            $poDefs = [
+                ['supplier' => 'SUP-001', 'status' => 'confirmed', 'days' => 55, 'items' => [['sku' => 'VIR-PP-H030', 'qty' => 50, 'price' => 38000], ['sku' => 'VIR-PP-H530', 'qty' => 30, 'price' => 38500]]],
+                ['supplier' => 'SUP-001', 'status' => 'received', 'days' => 45, 'items' => [['sku' => 'VIR-PE-HD56S', 'qty' => 40, 'price' => 41000]]],
+                ['supplier' => 'SUP-002', 'status' => 'partial', 'days' => 30, 'items' => [['sku' => 'VIR-PE-HD6760', 'qty' => 25, 'price' => 42000], ['sku' => 'VIR-PET-REG', 'qty' => 15, 'price' => 36500]]],
+                ['supplier' => 'SUP-003', 'status' => 'draft', 'days' => 15, 'items' => [['sku' => 'VIR-PE-LD200', 'qty' => 35, 'price' => 39500], ['sku' => 'VIR-PS-GPPS', 'qty' => 20, 'price' => 35500]]],
+                ['supplier' => 'SUP-003', 'status' => 'confirmed', 'days' => 10, 'items' => [['sku' => 'VIR-PP-H030', 'qty' => 60, 'price' => 37800]]],
+                ['supplier' => 'SUP-004', 'status' => 'received', 'days' => 20, 'items' => [['sku' => 'CHM-CACO3', 'qty' => 100, 'price' => 6200], ['sku' => 'CHM-STEARATE', 'qty' => 200, 'price' => 95]]],
+            ];
+            foreach ($poDefs as $poDef) {
+                $orderDate = today()->subDays($poDef['days']);
+                $items = []; $subtotal = 0;
+                foreach ($poDef['items'] as $it) {
+                    $prod = collect($products)->firstWhere('sku', $it['sku']);
+                    if (! $prod) continue;
+                    $lineTotal = $it['qty'] * $it['price'];
+                    $subtotal += $lineTotal;
+                    $items[] = ['product' => $prod, 'qty' => $it['qty'], 'price' => $it['price'], 'line' => $lineTotal];
+                }
+                if (empty($items)) continue;
+                $po = PurchaseOrder::create([
+                    'company_id' => $company->id,
+                    'supplier_id' => $supplierMap[$poDef['supplier']]->id,
+                    'order_number' => $names->generate('purchase_order', $company->id),
+                    'status' => $poDef['status'],
+                    'order_date' => $orderDate,
+                    'expected_delivery_date' => $orderDate->copy()->addDays(30),
+                    'currency' => 'EGP',
+                    'subtotal' => $subtotal,
+                    'shipping_cost' => $subtotal * 0.05,
+                    'total' => $subtotal * 1.05,
+                ]);
+                foreach ($items as $it) {
+                    PurchaseOrderItem::create([
+                        'purchase_order_id' => $po->id,
+                        'product_id' => $it['product']->id,
+                        'quantity' => $it['qty'],
+                        'unit_price' => $it['price'],
+                        'line_total' => $it['line'],
+                    ]);
+                }
+                $pos[] = $po;
+            }
+
+            // ─── Purchase Requests ────────────────────────────────
+            $reqStatuses = ['pending', 'pending', 'pending', 'sales_approved', 'sales_approved', 'purchasing_approved', 'rejected_by_sales', 'purchasing_approved', 'pending', 'pending'];
+            for ($i = 0; $i < 10; $i++) {
+                $prod = $products[array_rand($products)];
+                PurchaseRequest::create([
+                    'company_id' => $company->id,
+                    'user_id' => $i % 2 === 0 ? $rep1->id : $rep2->id,
+                    'product_id' => $prod->id,
+                    'quantity' => rand(5, 40),
+                    'offered_price' => $prod->cost * (rand(90, 110) / 100),
+                    'currency' => 'EGP',
+                    'status' => $reqStatuses[$i],
+                ]);
+            }
+
+            // ─── Invoices ─────────────────────────────────────────
+            $invoices = [];
+            $invoiceCount = 40;
+            $skus = array_keys($stockQties);
+            for ($i = 0; $i < $invoiceCount; $i++) {
+                $rep = $i % 3 === 0 ? $rep2 : $rep1;
+                $van = $rep->id === $rep1->id ? $van1 : $van2;
+                $daysAgo = rand(0, 85);
+                if ($daysAgo < 3) $daysAgo = rand(0, 3); // bias toward recent
+                $issueDate = today()->subDays($daysAgo);
+                $cust = $customers[array_rand($customers)];
+
+                $itemCount = rand(1, 3);
+                $items = []; $subtotal = 0;
+                for ($j = 0; $j < $itemCount; $j++) {
+                    $prod = $products[array_rand($products)];
+                    $qty = rand(1, 8);
+                    $price = $prod->price;
+                    $lineTotal = $qty * $price;
+                    $subtotal += $lineTotal;
+                    $items[] = ['product' => $prod, 'qty' => $qty, 'price' => $price, 'line' => $lineTotal];
+                }
+                $vat = round($subtotal * 0.14, 2);
+                $total = $subtotal + $vat;
+
+                $invStatus = 'submitted';
+                $rand = rand(1, 10);
+                if ($rand <= 2) $invStatus = 'cancelled';
+                elseif ($rand <= 6) $invStatus = 'paid';
+
+                $inv = Invoice::create([
+                    'company_id' => $company->id,
+                    'customer_id' => $cust->id,
+                    'user_id' => $rep->id,
+                    'invoice_number' => $names->generate('sales_invoice', $company->id),
+                    'status' => $invStatus,
+                    'subtotal' => $subtotal,
+                    'vat_amount' => $vat,
+                    'total' => $total,
+                    'paid_amount' => $invStatus === 'paid' ? $total : 0,
+                    'remaining_amount' => $invStatus === 'paid' ? 0 : $total,
+                    'posting_date' => $issueDate,
+                    'issued_at' => $issueDate->setTime(9 + rand(0, 8), rand(0, 59)),
+                    'cancelled_at' => $invStatus === 'cancelled' ? $issueDate->copy()->addDays(1) : null,
+                ]);
+                foreach ($items as $it) {
+                    InvoiceItem::create([
+                        'invoice_id' => $inv->id,
+                        'product_id' => $it['product']->id,
+                        'quantity' => $it['qty'],
+                        'unit_price' => $it['price'],
+                        'line_total' => $it['line'],
+                    ]);
+                }
+                // Deduct stock for non-cancelled invoices
+                if ($invStatus !== 'cancelled') {
+                    foreach ($items as $it) {
+                        try { $stockService->decrement($van->id, $it['product']->id, null, $it['qty'], StockReason::Sale, $inv); } catch (\Throwable) {}
+                    }
+                }
+                $invoices[] = $inv;
+            }
+
+            // ─── Payments ─────────────────────────────────────────
+            $paymentMethods = ['cash', 'cheque', 'transfer'];
+            foreach ($invoices as $inv) {
+                if ($inv->status === 'cancelled') continue;
+                $shouldPay = rand(1, 10) <= 8;
+                if (! $shouldPay) continue;
+                $amount = rand(1, 10) <= 6 ? $inv->total : round($inv->total * (rand(3, 8) / 10), 2);
+                $method = $paymentMethods[array_rand($paymentMethods)];
+                $payment = Payment::create([
+                    'company_id' => $company->id,
+                    'customer_id' => $inv->customer_id,
+                    'user_id' => $inv->user_id,
+                    'invoice_id' => $inv->id,
+                    'amount' => $amount,
+                    'method' => $method,
+                    'collected_at' => $inv->issued_at->copy()->addDays(rand(0, 15)),
+                    'posting_date' => $inv->issued_at,
+                ]);
+                $inv->update([
+                    'paid_amount' => $inv->paid_amount + $amount,
+                    'remaining_amount' => $inv->remaining_amount - $amount,
+                ]);
+                if ($inv->remaining_amount <= 0) $inv->update(['status' => 'paid']);
+                elseif ($inv->paid_amount > 0 && $inv->status !== 'paid') $inv->update(['status' => 'partially_paid']);
+            }
+
+            // ─── Returns ──────────────────────────────────────────
+            $returnCount = 0;
+            foreach (collect($invoices)->where('status', 'paid')->random(min(4, count($invoices))) as $inv) {
+                $returnCount++;
+                $item = $inv->items->first();
+                if (! $item) continue;
+                $ret = ReturnRecord::create([
+                    'company_id' => $company->id,
+                    'customer_id' => $inv->customer_id,
+                    'user_id' => $inv->user_id,
+                    'against_invoice_id' => $inv->id,
+                    'return_number' => 'RET-' . now()->format('Ymd') . '-' . str_pad($returnCount, 3, '0', STR_PAD_LEFT),
+                    'total' => $item->line_total,
+                    'reason' => 'منتج تالف / Damaged product',
+                    'status' => 'submitted',
+                    'returned_at' => $inv->issued_at->copy()->addDays(rand(2, 10)),
+                    'posting_date' => $inv->issued_at->copy()->addDays(rand(2, 10)),
+                ]);
+                ReturnItem::create([
+                    'return_id' => $ret->id,
+                    'product_id' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->unit_price,
+                    'line_total' => $item->line_total,
+                ]);
+                $van = Warehouse::where('user_id', $inv->user_id)->where('type', 'van')->first();
+                if ($van) $stockService->increment($van->id, $item->product_id, null, $item->quantity, StockReason::Return, $ret);
+            }
+
+            // ─── Visits ───────────────────────────────────────────
+            foreach ($customers as $i => $cust) {
+                if ($i >= 15) break;
+                $rep = $cust->route_id === $routeCairo->id ? $rep1 : ($cust->route_id === $routeGiza->id ? $rep2 : $rep1);
+                $ws = $rep->id === $rep1->id ? $ws1 : $ws2;
+                $daysAgo = rand(0, 7);
+                $checkin = today()->subDays($daysAgo)->setTime(9 + rand(0, 5), rand(0, 59));
+                Visit::create([
+                    'user_id' => $rep->id,
+                    'customer_id' => $cust->id,
+                    'route_id' => $cust->route_id,
+                    'work_session_id' => $ws->id,
+                    'purpose' => 'sale',
+                    'status' => 'closed',
+                    'checkin_latitude' => $cust->latitude,
+                    'checkin_longitude' => $cust->longitude,
+                    'checkin_at' => $checkin,
+                    'checkout_at' => $checkin->copy()->addMinutes(rand(20, 90)),
+                ]);
+            }
+
+            // ─── Expenses ─────────────────────────────────────────
+            $expenseCategories = ['fuel', 'food', 'maintenance', 'food', 'fuel', 'food', 'maintenance', 'fuel', 'other', 'fuel', 'food', 'food', 'fuel'];
+            foreach ($expenseCategories as $cat) {
+                $rep = rand(0, 1) ? $rep1 : $rep2;
+                $amounts = ['fuel' => [200, 500], 'food' => [50, 150], 'maintenance' => [300, 1500], 'other' => [50, 300]];
+                Expense::create([
+                    'company_id' => $company->id,
+                    'user_id' => $rep->id,
+                    'category' => $cat,
+                    'amount' => rand($amounts[$cat][0], $amounts[$cat][1]),
+                    'note' => $cat === 'fuel' ? 'وقود' : ($cat === 'food' ? 'غداء' : 'صيانة'),
+                    'spent_at' => today()->subDays(rand(0, 25)),
+                    'posting_date' => today()->subDays(rand(0, 25)),
+                ]);
+            }
+
+            // ─── Alarms ───────────────────────────────────────────
+            $alarmDefs = [
+                ['type' => 'out_of_stock_request', 'title' => 'طلب مخزون - بولي كربونات', 'severity' => 'warning'],
+                ['type' => 'out_of_stock_request', 'title' => 'طلب مخزون - ثاني أكسيد التيتانيوم', 'severity' => 'warning'],
+                ['type' => 'customer_complaint', 'title' => 'شكوى عميل - تأخر تسليم', 'severity' => 'critical'],
+                ['type' => 'customer_complaint', 'title' => 'شكوى - جودة منتج REC-rPVC', 'severity' => 'warning'],
+                ['type' => 'batch_expiring', 'title' => 'دفعة أوشكت على الانتهاء - r-PET', 'severity' => 'info'],
+                ['type' => 'purchase_request', 'title' => 'طلب شراء جديد - PP H030', 'severity' => 'info'],
+                ['type' => 'purchase_request', 'title' => 'طلب شراء جديد - PE-LD200', 'severity' => 'info'],
+                ['type' => 'goods_in_transit_delayed', 'title' => 'تأخير شحنة - SABIC PP', 'severity' => 'warning'],
+            ];
+            foreach ($alarmDefs as $ad) {
+                Alarm::create([
+                    'company_id' => $company->id,
+                    'type' => $ad['type'],
+                    'title' => $ad['title'],
+                    'description' => $ad['title'],
+                    'severity' => $ad['severity'],
+                    'is_read' => rand(0, 1),
+                ]);
+            }
+
+            // ─── Price Quotation Requests ─────────────────────────
+            $quoteStatuses = ['requested', 'requested', 'priced', 'priced', 'confirmed', 'requested', 'requested'];
+            foreach ($quoteStatuses as $i => $status) {
+                $prod = $products[array_rand($products)];
+                $cust = $customers[array_rand($customers)];
+                PriceQuotationRequest::create([
+                    'company_id' => $company->id,
+                    'customer_id' => $cust->id,
+                    'user_id' => $i % 2 === 0 ? $rep1->id : $rep2->id,
+                    'product_id' => $prod->id,
+                    'quantity_requested' => rand(5, 50),
+                    'status' => $status,
+                    'requested_at' => now()->subDays(rand(0, 14)),
+                ]);
+            }
+
+            echo "  Invoices: " . count($invoices) . " (mix submitted/paid/cancelled)\n";
+            echo "  Payments: " . Payment::count() . "\n";
+            echo "  Purchase Orders: " . count($pos) . "\n";
+            echo "  Suppliers: " . count($suppliers) . "\n";
+            echo "  Alarms: " . Alarm::count() . "\n";
+            echo "  Returns: " . $returnCount . "\n";
+            echo "  Expenses: " . count($expenseCategories) . "\n";
+            echo "  Visits: " . Visit::count() . "\n";
+        });
 
         echo "GPC demo seeded:\n";
         echo "  Company: شركة اللدائن العالمية (GPC)\n";

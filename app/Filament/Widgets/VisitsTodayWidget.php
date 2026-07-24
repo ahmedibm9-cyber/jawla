@@ -20,30 +20,39 @@ class VisitsTodayWidget extends StatsOverviewWidget
         $companyId = $user->company_id;
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
-        $assigned = DailyVisitAssignment::where('company_id', $companyId)
-            ->whereDate('visit_date', today())
-            ->count();
+        try {
+            $assigned = DailyVisitAssignment::where('company_id', $companyId)
+                ->whereDate('visit_date', today())
+                ->count();
 
-        $completed = DailyVisitAssignment::where('company_id', $companyId)
-            ->whereDate('visit_date', today())
-            ->where('status', 'completed')
-            ->count();
+            $completed = DailyVisitAssignment::where('company_id', $companyId)
+                ->whereDate('visit_date', today())
+                ->where('status', 'completed')
+                ->count();
 
-        $pending = DailyVisitAssignment::where('company_id', $companyId)
-            ->whereDate('visit_date', today())
-            ->where('status', 'pending')
-            ->count();
+            $pending = DailyVisitAssignment::where('company_id', $companyId)
+                ->whereDate('visit_date', today())
+                ->where('status', 'pending')
+                ->count();
 
-        $labels = [
-            'ar' => ['الزيارات اليوم', 'مكتملة', 'معلقة'],
-            'en' => ["Today's Visits", 'Completed', 'Pending'],
-        ];
+            $labels = [
+                'ar' => ['الزيارات اليوم', 'مكتملة', 'معلقة'],
+                'en' => ["Today's Visits", 'Completed', 'Pending'],
+            ];
 
-        return [
-            Stat::make($labels[$lang][0], $assigned)
-                ->description($labels[$lang][1].': '.$completed.' · '.$labels[$lang][2].': '.$pending)
-                ->icon('heroicon-o-calendar-days')
-                ->color('primary'),
-        ];
+            return [
+                Stat::make($labels[$lang][0], $assigned)
+                    ->description($labels[$lang][1].': '.$completed.' · '.$labels[$lang][2].': '.$pending)
+                    ->icon('heroicon-o-calendar-days')
+                    ->color('primary'),
+            ];
+        } catch (\Throwable $e) {
+            return [
+                Stat::make($labels[$lang][0], '—')
+                    ->description(__('widgets.loading_error'))
+                    ->icon('heroicon-o-calendar-days')
+                    ->color('gray'),
+            ];
+        }
     }
 }

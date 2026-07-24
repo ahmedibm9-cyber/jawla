@@ -21,25 +21,39 @@ class OutstandingBalanceWidget extends StatsOverviewWidget
 
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
-        $outstanding = Invoice::where('company_id', $user->company_id)
-            ->whereIn('status', ['submitted', 'partially_paid'])
-            ->sum('remaining_amount');
+        try {
+            $outstanding = Invoice::where('company_id', $user->company_id)
+                ->whereIn('status', ['submitted', 'partially_paid'])
+                ->sum('remaining_amount');
 
-        $overdueCount = Invoice::where('company_id', $user->company_id)
-            ->whereIn('status', ['submitted', 'partially_paid'])
-            ->whereDate('issued_at', '<', now()->subDays(30))
-            ->count();
+            $overdueCount = Invoice::where('company_id', $user->company_id)
+                ->whereIn('status', ['submitted', 'partially_paid'])
+                ->whereDate('issued_at', '<', now()->subDays(30))
+                ->count();
 
-        $labels = [
-            'ar' => ['الرصيد المستحق', 'متأخر > 30 يوم'],
-            'en' => ['Outstanding Balance', 'Overdue > 30 days'],
-        ];
+            $labels = [
+                'ar' => ['الرصيد المستحق', 'متأخر > 30 يوم'],
+                'en' => ['Outstanding Balance', 'Overdue > 30 days'],
+            ];
 
-        return [
-            Stat::make($labels[$lang][0], number_format((float) $outstanding, 2).' EGP')
-                ->description($labels[$lang][1].': '.$overdueCount)
-                ->icon('heroicon-o-currency-dollar')
-                ->color($outstanding > 0 ? 'warning' : 'success'),
-        ];
+            return [
+                Stat::make($labels[$lang][0], number_format((float) $outstanding, 2).' EGP')
+                    ->description($labels[$lang][1].': '.$overdueCount)
+                    ->icon('heroicon-o-currency-dollar')
+                    ->color($outstanding > 0 ? 'warning' : 'success'),
+            ];
+        } catch (\Throwable $e) {
+            $labels = [
+                'ar' => ['الرصيد المستحق', 'خطأ'],
+                'en' => ['Outstanding Balance', 'Error'],
+            ];
+
+            return [
+                Stat::make($labels[$lang][0], '—')
+                    ->description($labels[$lang][1])
+                    ->icon('heroicon-o-currency-dollar')
+                    ->color('gray'),
+            ];
+        }
     }
 }
