@@ -23,9 +23,9 @@
         </div>
 
         @if(strlen($search) < 2)
-            <x-ds.empty icon="heroicon-o-magnifying-glass" :message="app()->getLocale() === 'ar' ? 'ابحث عن منتج' : 'Search for a product'" />
+            <x-ds.empty icon="heroicon-o-magnifying-glass" :message="__('app.search_stock_placeholder')" />
         @elseif($results->isEmpty())
-            <x-ds.empty icon="heroicon-o-cube-transparent" :message="app()->getLocale() === 'ar' ? 'لا نتائج' : 'No results'" />
+            <x-ds.empty icon="heroicon-o-cube-transparent" :message="__('app.no_results')" />
         @else
             @foreach($results as $product)
                 <div class="card">

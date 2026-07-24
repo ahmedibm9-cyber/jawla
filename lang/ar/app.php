@@ -291,4 +291,8 @@ return [
     'current_password_incorrect' => 'كلمة المرور الحالية غير صحيحة',
     'items' => 'صنف',
     'products' => 'المنتجات',
+    'status' => 'الحالة',
+    'number' => 'رقم',
+    'date' => 'التاريخ',
+    'search_stock_placeholder' => 'ابحث عن منتج',
 ];

@@ -66,7 +66,7 @@
                                     <td class="filament-table-cell text-gray-500">{{ Str::limit($vr->summary, 50) }}</td>
                                 </tr>
                             @empty
-                                <tr><td colspan="4" class="filament-table-cell text-center py-8">{{ __('No results') }}</td></tr>
+                                <tr><td colspan="4" class="filament-table-cell text-center py-8">{{ __('app.no_results') }}</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -82,11 +82,11 @@
                     <table class="filament-table w-full text-sm">
                         <thead>
                             <tr>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'العميل' : 'Customer' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'المنتج' : 'Product' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'الكمية' : 'Qty' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'السعر' : 'Price' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'الحالة' : 'Status' }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.customer') }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.product') }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.quantity') }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.price') }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.status') }}</th>
                             </tr>
                         </thead>
                         <tbody class="filament-table-body divide-y">
@@ -99,7 +99,7 @@
                                     <td class="filament-table-cell"><x-filament::badge :color="$r->status === 'approved' ? 'success' : ($r->status === 'rejected' ? 'danger' : 'gray')" size="sm">{{ $r->status }}</x-filament::badge></td>
                                 </tr>
                             @empty
-                                <tr><td colspan="5" class="filament-table-cell text-center py-8">{{ __('No results') }}</td></tr>
+                                <tr><td colspan="5" class="filament-table-cell text-center py-8">{{ __('app.no_results') }}</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -113,10 +113,10 @@
                     <table class="filament-table w-full text-sm">
                         <thead>
                             <tr>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'رقم' : 'Number' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'العميل' : 'Customer' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'الإجمالي' : 'Total' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'التاريخ' : 'Date' }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.number') }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.customer') }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.total') }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.date') }}</th>
                             </tr>
                         </thead>
                         <tbody class="filament-table-body divide-y">
@@ -128,7 +128,7 @@
                                     <td class="filament-table-cell text-gray-500">{{ $p->posting_date?->format('Y-m-d') }}</td>
                                 </tr>
                             @empty
-                                <tr><td colspan="4" class="filament-table-cell text-center py-8">{{ __('No results') }}</td></tr>
+                                <tr><td colspan="4" class="filament-table-cell text-center py-8">{{ __('app.no_results') }}</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -142,11 +142,11 @@
                     <table class="filament-table w-full text-sm">
                         <thead>
                             <tr>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'رقم' : 'Number' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'العميل' : 'Customer' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'الإجمالي' : 'Total' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'المتبقي' : 'Remaining' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'الحالة' : 'Status' }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.number') }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.customer') }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.total') }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.remaining') }}</th>
+                                <th class="filament-table-header-cell">{{ __('app.status') }}</th>
                             </tr>
                         </thead>
                         <tbody class="filament-table-body divide-y">
@@ -159,7 +159,7 @@
                                     <td class="filament-table-cell"><x-filament::badge :color="$inv->status === 'submitted' ? 'success' : ($inv->status === 'cancelled' ? 'danger' : 'gray')" size="sm">{{ $inv->status }}</x-filament::badge></td>
                                 </tr>
                             @empty
-                                <tr><td colspan="5" class="filament-table-cell text-center py-8">{{ __('No results') }}</td></tr>
+                                <tr><td colspan="5" class="filament-table-cell text-center py-8">{{ __('app.no_results') }}</td></tr>
                             @endforelse
                         </tbody>
                     </table>

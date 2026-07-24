@@ -291,4 +291,8 @@ return [
     'current_password_incorrect' => 'The current password is incorrect',
     'items' => 'items',
     'products' => 'Products',
+    'status' => 'Status',
+    'number' => 'Number',
+    'date' => 'Date',
+    'search_stock_placeholder' => 'Search for a product',
 ];

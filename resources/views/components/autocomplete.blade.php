@@ -94,7 +94,7 @@
     class="absolute z-50 w-full mt-1 rounded-lg shadow-lg p-3 text-sm"
     style="background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-muted)"
   >
-    {{ $emptyText ?? 'No results' }}
+    {{ $emptyText ?? __('app.no_results') }}
   </div>
 
   <input type="hidden" x-ref="input" id="{{ $id ?? '' }}-hidden" name="{{ $name ?? $id ?? '' }}" value="{{ $value ?? '' }}">
