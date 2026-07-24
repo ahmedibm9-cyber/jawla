@@ -39,11 +39,6 @@ Route::get('/admin', [SystemPageController::class, 'adminRoot']);
 
 Route::get('/offline', [SystemPageController::class, 'offline']);
 
-Route::get('/_seed-demo', function () {
-    \Illuminate\Support\Facades\Artisan::call('app:seed-transactions');
-    return response()->json(['output' => trim(\Illuminate\Support\Facades\Artisan::output())]);
-});
-
 Route::get('/health', [SystemPageController::class, 'health']);
 
 Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
