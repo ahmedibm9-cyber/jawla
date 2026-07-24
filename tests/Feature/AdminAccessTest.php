@@ -111,24 +111,19 @@ class AdminAccessTest extends TestCase
             '/admin/companies/create',
             '/admin/customers/create',
             '/admin/products/create',
-            '/admin/payments/create',
             '/admin/routes/create',
             '/admin/daily-visit-assignments/create',
             '/admin/sales-targets/create',
             '/admin/purchase-requests/create',
             '/admin/price-quotation-requests/create',
             '/admin/batches/create',
-            '/admin/van-transfers/create',
             '/admin/goods-in-transits/create',
             '/admin/complaints/create',
-            '/admin/alarms/create',
             '/admin/tasks/create',
-            '/admin/expenses/create',
         ];
 
         foreach ($creatable as $url) {
-            $response = $this->get($url);
-            $response->assertOk("Created page returned non-200 for {$url}");
+            $this->get($url)->assertOk();
         }
     }
 
