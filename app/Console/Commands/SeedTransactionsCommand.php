@@ -34,17 +34,24 @@ class SeedTransactionsCommand extends Command
 
     public function handle(): int
     {
+        fwrite(STDERR, "[seed-transactions] Starting...\n");
+        fwrite(STDERR, "[seed-transactions] Company check...\n");
+
         $company = Company::where('name_en', 'Global Plastic Company (GPC)')->first();
         if (! $company) {
+            fwrite(STDERR, "[seed-transactions] ERROR: Company not found!\n");
             $this->error('Company not found. Run DemoSeeder first.');
             return 1;
         }
 
         // Skip if already seeded
         if (Invoice::where('company_id', $company->id)->exists()) {
+            fwrite(STDERR, "[seed-transactions] Already seeded — skipping.\n");
             $this->info('Transactional data already seeded — skipping.');
             return 0;
         }
+
+        fwrite(STDERR, "[seed-transactions] Seeding began...\n");
 
         $stockService = app(StockService::class);
         $names = app(NumberSequenceService::class);
@@ -215,6 +222,7 @@ class SeedTransactionsCommand extends Command
             $this->info('Expenses: ' . Expense::count());
         });
 
+        fwrite(STDERR, "[seed-transactions] Complete.\n");
         $this->info('Transactional demo data seeded successfully.');
         return 0;
     }
