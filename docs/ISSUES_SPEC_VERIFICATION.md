@@ -1,5 +1,8 @@
 # ISSUES_SPEC — Verification Sweep
 
+> **⚠️ ARCHIVED: 2026-07-24 — Verification complete, all items closed.**
+> See `ISSUES_ARCHIVE.md` (root) for the definitive status.
+
 > Date: 2026-07-21
 > Verifies `docs/ISSUES_SPEC.md` (a bug list generated from an earlier
 > diagnosis report) against the **current** codebase. Each item below was

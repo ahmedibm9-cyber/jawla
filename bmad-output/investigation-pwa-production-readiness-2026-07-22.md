@@ -1,5 +1,8 @@
 # Investigation Case File: pwa-production-readiness
 
+> **⚠️ ARCHIVED: 2026-07-24 — Code-level risks remediated per PWA re-audit.**
+> See `ISSUES_ARCHIVE.md` (root) for the definitive status.
+
 **Date:** 2026-07-22  
 **Project:** Jawla — Laravel/Livewire/Filament field-sales PWA  
 **Reported By:** Product owner  

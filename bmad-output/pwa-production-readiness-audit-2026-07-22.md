@@ -1,5 +1,8 @@
 # Jawla PWA Production-Readiness Audit
 
+> **⚠️ ARCHIVED: 2026-07-24 — Code-level findings remediated; operational gates documented.**
+> See `ISSUES_ARCHIVE.md` (root) for the definitive status.
+
 **Audit date:** 2026-07-22  
 **Checklist:** `C:\Users\Ahmed\OneDrive\Desktop\New Text Document (3).txt`  
 **Method:** Static forensic repository review under the `bmad-investigate` workflow  

@@ -1,5 +1,8 @@
 # PWA remediation re-audit — 2026-07-22
 
+> **⚠️ ARCHIVED: 2026-07-24 — Code-level P0 risks reduced; NO-GO for production remains (operational gates).**
+> See `ISSUES_ARCHIVE.md` (root) for the definitive status.
+
 **Scope:** re-assessment of the original release blockers affected by the
 remediation work in this change set. This is not a replacement for the
 137-domain production audit and does not authorize a launch.

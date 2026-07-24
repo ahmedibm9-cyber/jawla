@@ -1,5 +1,8 @@
 # Jawla V1 Release Checklist
 
+> **⚠️ ARCHIVED: 2026-07-24 — Engineering-complete, all blockers resolved.**
+> See `ISSUES_ARCHIVE.md` (root) for the definitive status.
+
 **Status: Engineering-complete — ready for client UAT**  
 **Blocker Count: 0 P0 open** _(all four resolved)_  
 **Remaining before release: client 21-step UAT walkthrough + tag**  

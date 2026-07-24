@@ -1,6 +1,9 @@
 # Jawla — Full-Stack Audit Report
 
-**Date:** 2026-07-20 · **Commit audited:** `ef4bab9` (master) · **Method:** static code review + dependency audits (no live pen-test, no rendered-browser pass — see Limitations)
+> **⚠️ ARCHIVED: 2026-07-24 — All 17 findings addressed.**
+> See `ISSUES_ARCHIVE.md` (root) for the definitive status.
+
+**Date:** 2026-07-20 · **Commit audited:** `ef4bab9` (master)
 **Companion documents:** `investigation-race-conditions-and-rep-reliability-2026-07-20.md` (concurrency findings, not repeated here), stories `08.1`–`08.4`
 
 **Direct answer to the owner's question:** No — the earlier investigation was scoped to race conditions and rep reliability. This wider pass found **1 additional High, 8 Medium, and 7 Low/Info** findings, plus one discovery (SW-1) that likely explains the original "looks broken / actions hang" reports better than anything found before. It also confirmed a long list of things that are genuinely done right. What static review cannot prove is listed honestly at the end.

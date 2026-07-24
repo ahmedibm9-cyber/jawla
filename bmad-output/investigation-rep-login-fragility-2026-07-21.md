@@ -1,5 +1,8 @@
 # Investigation Case File: rep-login-fragility
 
+> **⚠️ ARCHIVED: 2026-07-24 — Rep login consolidated per LOGIN.1 story.**
+> See `ISSUES_ARCHIVE.md` (root) for the definitive status.
+
 **Date:** 2026-07-21
 **Project:** Jawla (جولة) Field Sales CRM/ERP
 **Reported By:** Assistant (reflog forensics during Phase 6 work) — surfaced two "restore login" commits

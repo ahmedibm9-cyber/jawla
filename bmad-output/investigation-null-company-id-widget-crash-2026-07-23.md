@@ -1,5 +1,8 @@
 # Investigation: Null Property Access in PendingQuotationsWidget
 
+> **⚠️ ARCHIVED: 2026-07-24 — All dashboard widgets already null-safe (`if (!$user) return []`).**
+> See `ISSUES_ARCHIVE.md` (root) for the definitive status.
+
 **Version:** 1.0  
 **Date:** 2026-07-23  
 **Status:** ready-for-dev  

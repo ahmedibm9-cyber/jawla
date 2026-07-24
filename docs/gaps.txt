@@ -1,3 +1,5 @@
+⚠️ ARCHIVED: 2026-07-24 — Competitive gaps logged for roadmap reference. Not bugs. See ISSUES_ARCHIVE.md.
+
 Jawla — Competitive Gaps (vs market)
 
 - No AI-powered features (PeppyBooks: AI order recs, HAL: AI reporting)

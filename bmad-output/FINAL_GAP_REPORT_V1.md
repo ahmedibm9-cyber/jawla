@@ -1,5 +1,8 @@
 # Jawla V1 — Ultimate Final GAP Report
 
+> **⚠️ ARCHIVED: 2026-07-24 — All 4 P0 blockers RESOLVED.**
+> See `ISSUES_ARCHIVE.md` (root) for the definitive status.
+
 **Date:** 2026-07-20  
 **Scope:** Complete gap analysis vs. Beta v1.1 Definition of Done + Production Build Guide  
 **Target:** Perfect, working V1 release ready for UAT → Production

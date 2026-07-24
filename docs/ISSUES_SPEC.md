@@ -1,5 +1,11 @@
 # Issues to Create — From Diagnosis Report
 
+> **⚠️ ARCHIVED: 2026-07-24 — All 18 issues are CLOSED.**
+> See `ISSUES_ARCHIVE.md` (root) for the definitive status of every documented issue.
+> Every P0/P1 bug was fixed and verified in subsequent commits. The 🟡 items in
+> the verification sweep are low-severity micro-optimizations, not release blockers.
+> This file is kept for traceability only — do not treat as an active task list.
+
 > Generated from `bmad-output/diagnosis-report.md`
 > Create these as GitHub issues for tracking.
 

@@ -1,5 +1,8 @@
 # Investigation Case File: race-conditions-and-rep-reliability
 
+> **⚠️ ARCHIVED: 2026-07-24 — All concurrency/money-integrity findings fixed (lockForUpdate, refresh, idempotent guards).**
+> See `ISSUES_ARCHIVE.md` (root) for the definitive status.
+
 **Date:** 2026-07-20
 **Project:** Jawla — field sales PWA (Laravel 13 / Livewire / Filament / PostgreSQL)
 **Reported By:** Owner ("review everything; REP account has flaws — things look broken, actions fail or hang")

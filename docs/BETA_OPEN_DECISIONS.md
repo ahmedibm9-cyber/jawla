@@ -1,5 +1,8 @@
 # Jawla Beta v1.1 — Open Decision Register
 
+> **⚠️ ARCHIVED: 2026-07-24 — D-01 and D-02 are answered by client; D-03 deferred pending real sample file.**
+> See `ISSUES_ARCHIVE.md` (root) for the definitive status of all decisions.
+
 This compact register contains the only external decisions that may block final beta acceptance. Implementation can prepare configurable or mock-backed foundations, but an executing model must not invent the final answers.
 
 ## D-01: Pricing range behavior
@@ -85,4 +88,3 @@ Use separate immutable decisions. Sales veto prevents final approval regardless 
 4. **Reasons:** Nice-to-have — optional text field to type reason (not mandatory).
 5. **Expiration:** Rep sets the expiration date on the offer.
 6. **Race condition:** Purchasing (Odoo) never sees the offer unless Sales manager approves first.
-
