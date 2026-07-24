@@ -64,6 +64,7 @@
 
 ## Agents Chat (multi-agent coordination)
 
+- **Read `START.md` first** to understand the 4 domains and claim yours.
 - Before starting any task, **read `agents-chat.md`** to see what other
   agents are working on. Don't touch files another active agent owns.
 - **Append** your entry before starting work: agent name, task, files, status.
