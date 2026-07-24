@@ -41,6 +41,6 @@ class FilamentAuthenticate extends Middleware
 
     protected function redirectTo($request): ?string
     {
-        return route('login');
+        return route('filament.admin.auth.login');
     }
 }
