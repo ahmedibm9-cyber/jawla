@@ -32,6 +32,11 @@ class AlarmResource extends Resource
         return 'heroicon-o-bell-alert';
     }
 
+    public static function getNavigationLabel(): string
+    {
+        return app()->getLocale() === 'ar' ? 'التنبيهات' : 'Alarms';
+    }
+
     public static function getNavigationGroup(): ?string
     {
         return app()->getLocale() === 'ar' ? 'التنبيهات' : 'Alarms';
