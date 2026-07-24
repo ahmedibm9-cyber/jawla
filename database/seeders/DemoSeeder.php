@@ -450,10 +450,10 @@ class DemoSeeder extends Seeder
         $superAdmin = User::where('email', 'superadmin@jawla.test')->first();
         $warehouseKeeper = User::where('email', 'warehouse@jawla.test')->first();
         $mainWarehouse = Warehouse::where('company_id', $company->id)->where('type', 'main')->first();
-        $van1 = Warehouse::where('user_id', $rep1->id)->where('type', 'van')->first();
-        $van2 = Warehouse::where('user_id', $rep2->id)->where('type', 'van')->first();
-        $ws1 = WorkSession::where('user_id', $rep1->id)->first();
-        $ws2 = WorkSession::where('user_id', $rep2->id)->first();
+        $van1 = Warehouse::where('user_id', optional($rep1)->id)->where('type', 'van')->first();
+        $van2 = Warehouse::where('user_id', optional($rep2)->id)->where('type', 'van')->first();
+        $ws1 = WorkSession::where('user_id', optional($rep1)->id)->first();
+        $ws2 = WorkSession::where('user_id', optional($rep2)->id)->first();
         $routeCairo = Route::where('company_id', $company->id)->where('name_ar', 'like', '%القاهرة%')->first();
         $routeGiza = Route::where('company_id', $company->id)->where('name_ar', 'like', '%الجيزة%')->first();
         $routeAlex = Route::where('company_id', $company->id)->where('name_ar', 'like', '%الإسكندرية%')->first();
