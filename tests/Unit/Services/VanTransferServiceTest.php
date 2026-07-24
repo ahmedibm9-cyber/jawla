@@ -239,4 +239,178 @@ class VanTransferServiceTest extends TestCase
         $this->assertSame(0, StockMovement::where('warehouse_id', $inTransitWarehouse->id)->count());
         $this->assertSame(VanTransferStatus::Pending, $transfer->fresh()->status);
     }
+
+    public function test_cannot_ship_already_shipped_transfer(): void
+    {
+        $company = Company::factory()->create();
+        $fromUser = User::factory()->create(['company_id' => $company->id]);
+        $toUser = User::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+        $mainWarehouse = Warehouse::factory()->create([
+            'company_id' => $company->id, 'type' => 'main',
+        ]);
+        $inTransitWarehouse = Warehouse::factory()->create([
+            'company_id' => $company->id, 'type' => 'main',
+        ]);
+
+        $service = app(VanTransferService::class);
+
+        app(StockService::class)->increment(
+            $mainWarehouse->id, $product->id, null, 50.0,
+            StockReason::Initial, $product,
+        );
+
+        $transfer = $service->create(
+            companyId: $company->id,
+            fromUserId: $fromUser->id,
+            toUserId: $toUser->id,
+            items: [['product_id' => $product->id, 'quantity' => 10.0]],
+            inTransitWarehouseId: $inTransitWarehouse->id,
+        );
+
+        $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
+
+        $this->expectException(\RuntimeException::class);
+        $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
+    }
+
+    public function test_cannot_ship_by_non_source_representative(): void
+    {
+        $company = Company::factory()->create();
+        $fromUser = User::factory()->create(['company_id' => $company->id]);
+        $toUser = User::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+        $mainWarehouse = Warehouse::factory()->create([
+            'company_id' => $company->id, 'type' => 'main',
+        ]);
+        $inTransitWarehouse = Warehouse::factory()->create([
+            'company_id' => $company->id, 'type' => 'main',
+        ]);
+
+        $service = app(VanTransferService::class);
+
+        app(StockService::class)->increment(
+            $mainWarehouse->id, $product->id, null, 50.0,
+            StockReason::Initial, $product,
+        );
+
+        $transfer = $service->create(
+            companyId: $company->id,
+            fromUserId: $fromUser->id,
+            toUserId: $toUser->id,
+            items: [['product_id' => $product->id, 'quantity' => 10.0]],
+            inTransitWarehouseId: $inTransitWarehouse->id,
+        );
+
+        $this->expectException(\DomainException::class);
+        $service->ship($transfer->id, $mainWarehouse->id, $toUser->id);
+    }
+
+    public function test_cannot_receive_pending_transfer(): void
+    {
+        $company = Company::factory()->create();
+        $fromUser = User::factory()->create(['company_id' => $company->id]);
+        $toUser = User::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+
+        $service = app(VanTransferService::class);
+
+        $transfer = $service->create(
+            companyId: $company->id,
+            fromUserId: $fromUser->id,
+            toUserId: $toUser->id,
+            items: [['product_id' => $product->id, 'quantity' => 10.0]],
+        );
+
+        $this->expectException(\RuntimeException::class);
+        $service->receive($transfer->id, $toUser->id);
+    }
+
+    public function test_cannot_receive_by_non_destination_representative(): void
+    {
+        $company = Company::factory()->create();
+        $fromUser = User::factory()->create(['company_id' => $company->id]);
+        $toUser = User::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+        $mainWarehouse = Warehouse::factory()->create([
+            'company_id' => $company->id, 'type' => 'main',
+        ]);
+        $inTransitWarehouse = Warehouse::factory()->create([
+            'company_id' => $company->id, 'type' => 'main',
+        ]);
+
+        $service = app(VanTransferService::class);
+
+        app(StockService::class)->increment(
+            $mainWarehouse->id, $product->id, null, 50.0,
+            StockReason::Initial, $product,
+        );
+
+        $transfer = $service->create(
+            companyId: $company->id,
+            fromUserId: $fromUser->id,
+            toUserId: $toUser->id,
+            items: [['product_id' => $product->id, 'quantity' => 10.0]],
+            inTransitWarehouseId: $inTransitWarehouse->id,
+        );
+
+        $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
+
+        $this->expectException(\DomainException::class);
+        $service->receive($transfer->id, $fromUser->id);
+    }
+
+    public function test_cannot_cancel_shipped_transfer(): void
+    {
+        $company = Company::factory()->create();
+        $fromUser = User::factory()->create(['company_id' => $company->id]);
+        $toUser = User::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+        $mainWarehouse = Warehouse::factory()->create([
+            'company_id' => $company->id, 'type' => 'main',
+        ]);
+        $inTransitWarehouse = Warehouse::factory()->create([
+            'company_id' => $company->id, 'type' => 'main',
+        ]);
+
+        $service = app(VanTransferService::class);
+
+        app(StockService::class)->increment(
+            $mainWarehouse->id, $product->id, null, 50.0,
+            StockReason::Initial, $product,
+        );
+
+        $transfer = $service->create(
+            companyId: $company->id,
+            fromUserId: $fromUser->id,
+            toUserId: $toUser->id,
+            items: [['product_id' => $product->id, 'quantity' => 10.0]],
+            inTransitWarehouseId: $inTransitWarehouse->id,
+        );
+
+        $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
+
+        $this->expectException(\RuntimeException::class);
+        $service->cancel($transfer->id, $fromUser->id);
+    }
+
+    public function test_cannot_cancel_by_non_source_representative(): void
+    {
+        $company = Company::factory()->create();
+        $fromUser = User::factory()->create(['company_id' => $company->id]);
+        $toUser = User::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+
+        $service = app(VanTransferService::class);
+
+        $transfer = $service->create(
+            companyId: $company->id,
+            fromUserId: $fromUser->id,
+            toUserId: $toUser->id,
+            items: [['product_id' => $product->id, 'quantity' => 10.0]],
+        );
+
+        $this->expectException(\DomainException::class);
+        $service->cancel($transfer->id, $toUser->id);
+    }
 }
