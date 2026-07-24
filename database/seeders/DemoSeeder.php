@@ -438,6 +438,26 @@ class DemoSeeder extends Seeder
 
         } // end if (! $alreadySeeded)
 
+        // Resolve variables for transactional section (may be from DB if base was seeded earlier)
+        $products = Product::where('company_id', $company->id)->get();
+        $customers = Customer::where('company_id', $company->id)->where('status', 'approved')->get();
+        $stockService = app(StockServiceContract::class);
+        $rep1 = User::where('email', 'rep@jawla.test')->first();
+        $rep2 = User::where('email', 'rep2@jawla.test')->first();
+        $admin = User::where('email', 'admin@jawla.test')->first();
+        $manager = User::where('email', 'manager@jawla.test')->first();
+        $superAdmin = User::where('email', 'superadmin@jawla.test')->first();
+        $warehouseKeeper = User::where('email', 'warehouse@jawla.test')->first();
+        $mainWarehouse = Warehouse::where('company_id', $company->id)->where('type', 'main')->first();
+        $van1 = Warehouse::where('user_id', $rep1->id)->where('type', 'van')->first();
+        $van2 = Warehouse::where('user_id', $rep2->id)->where('type', 'van')->first();
+        $ws1 = WorkSession::where('user_id', $rep1->id)->first();
+        $ws2 = WorkSession::where('user_id', $rep2->id)->first();
+        $routeCairo = Route::where('company_id', $company->id)->where('name_ar', 'like', '%القاهرة%')->first();
+        $routeGiza = Route::where('company_id', $company->id)->where('name_ar', 'like', '%الجيزة%')->first();
+        $routeAlex = Route::where('company_id', $company->id)->where('name_ar', 'like', '%الإسكندرية%')->first();
+        $stockQties = [];
+
         // ═══════════════════════════════════════════════════════════
         //  TRANSACTIONAL DEMO DATA — invoices, payments, POs, etc.
         // ═══════════════════════════════════════════════════════════
