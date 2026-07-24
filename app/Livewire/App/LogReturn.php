@@ -26,6 +26,8 @@ class LogReturn extends Component
 
     public string $successMessage = '';
 
+    public string $errorMessage = '';
+
     public function mount(): void
     {
         $this->items[] = ['product_id' => '', 'quantity' => 1, 'unit_price' => 0];

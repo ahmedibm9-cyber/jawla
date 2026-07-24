@@ -17,15 +17,8 @@ class ReversalService
 
     public function reverseInvoice(Invoice $invoice, string $reason): Invoice
     {
-        $result = DB::transaction(function () use ($invoice, $reason): Invoice {
-            $cancelled = $this->invoices->cancel($invoice, auth()->id(), $reason);
-
-            Activity::log('invoice_reversed', $cancelled, 'Invoice '.$cancelled->invoice_number.' reversed: '.$reason);
-
-            return $cancelled;
-        });
-
-        return $result;
+        // ponytail: InvoiceService::cancelWithoutTransaction already logs Activity('invoice_reversed')
+        return $this->invoices->cancel($invoice, auth()->id(), $reason);
     }
 
     public function reversePayment(Payment $payment, string $reason): Payment

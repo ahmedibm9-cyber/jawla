@@ -20,6 +20,8 @@ class LogExpense extends Component
 
     public string $successMessage = '';
 
+    public string $errorMessage = '';
+
     public function submit(): void
     {
         $this->validate([

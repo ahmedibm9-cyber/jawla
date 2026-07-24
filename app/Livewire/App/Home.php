@@ -19,6 +19,10 @@ class Home extends Component
 
     public ?float $startLng = null;
 
+    public string $errorMessage = '';
+
+    public string $successMessage = '';
+
     public function mount(): void
     {
         $user = auth()->user();
