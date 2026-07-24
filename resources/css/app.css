@@ -1870,7 +1870,7 @@ dialog[open] {
     max-width: 40rem;
   }
   .more-grid {
-    --more-grid-cols: 6;
+    --more-grid-cols: 4;
   }
   .home-hero {
     padding: 32px 24px 32px;
@@ -2100,4 +2100,103 @@ dialog[open] {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ---- UI audit fix: constrain unsized logout icon (was rendering ~490px) ---- */
+.more-logout-btn svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* =====================================================================
+   Large-screen App Shell (tablet + laptop + desktop)
+   The rep app is a mobile-first PWA. On wide screens a bare centered
+   column looked broken: a full-width tab bar under a narrow column,
+   an orphaned bell, and a stark white void. Here we present the app as
+   a clean column on a branded canvas, with the header/nav constrained
+   to the column so everything reads as one intentional surface.
+   ===================================================================== */
+@media (min-width: 768px) {
+  :root {
+    --app-col: 30rem; /* 480px — comfortable phone-app width */
+  }
+
+  /* Branded full-bleed canvas so the brand fills the screen */
+  body {
+    background:
+      radial-gradient(
+        ellipse at 50% -10%,
+        rgba(255, 255, 255, 0.08) 0%,
+        transparent 55%
+      ),
+      linear-gradient(
+        160deg,
+        var(--color-brand-dark) 0%,
+        var(--color-brand) 45%,
+        #244f0f 100%
+      );
+    background-attachment: fixed;
+  }
+
+  /* The app column: header + main + tab bar share one centered width */
+  .notification-header,
+  #main,
+  .tab-bar {
+    max-width: var(--app-col);
+    margin-inline: auto;
+  }
+
+  /* Main is the card body: app background, lifted off the canvas */
+  #main {
+    background: var(--color-surface-alt);
+    min-height: calc(100dvh - 56px);
+    box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.55);
+  }
+
+  /* Header becomes the top of the card (solid, rounded top) */
+  .notification-header {
+    background: var(--color-surface-alt);
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -1px 0 0 rgba(0, 0, 0, 0.02);
+  }
+
+  /* Tab bar sits at the bottom of the card, aligned to the column */
+  .tab-bar {
+    left: 0;
+    right: 0;
+    border-radius: 18px 18px 0 0;
+    border-top: 1px solid var(--color-border-light);
+    box-shadow: 0 -6px 24px -8px rgba(0, 0, 0, 0.25);
+  }
+
+  /* Install banner + undo toast must not stretch across the canvas */
+  .pwa-install-banner,
+  .action-toast {
+    max-width: var(--app-col);
+    margin-inline: auto;
+    left: 0;
+    right: 0;
+  }
+}
+
+/* On very wide screens, keep the column comfortable, not stretched */
+@media (min-width: 1024px) {
+  :root {
+    --app-col: 30rem;
+  }
+}
+
+/* App-shell canvas: deepen the green in dark mode so it isn't jarring */
+@media (min-width: 768px) and (prefers-color-scheme: dark) {
+  body {
+    background:
+      radial-gradient(
+        ellipse at 50% -10%,
+        rgba(255, 255, 255, 0.04) 0%,
+        transparent 55%
+      ),
+      linear-gradient(160deg, #0a1f0a 0%, #12300c 55%, #08170a 100%);
+    background-attachment: fixed;
+  }
 }
