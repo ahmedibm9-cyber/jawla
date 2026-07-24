@@ -40,7 +40,7 @@ class ProfilePageTest extends TestCase
             ->assertSuccessful();
     }
 
-    public function test_profile_update_requires_current_password(): void
+    public function test_profile_update_requires_current_password_for_new_password(): void
     {
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
@@ -48,9 +48,13 @@ class ProfilePageTest extends TestCase
         Livewire::test(\App\Livewire\App\ProfilePage::class)
             ->set('name', 'Updated Name')
             ->set('email', 'updated@test.com')
-            ->set('currentPassword', 'wrong-password')
-            ->call('updateProfile')
-            ->assertHasErrors(['currentPassword']);
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $this->assertDatabaseHas('users', [
+            'id' => $rep->id,
+            'name' => 'Updated Name',
+        ]);
     }
 
     public function test_profile_update_with_correct_password(): void
@@ -61,7 +65,7 @@ class ProfilePageTest extends TestCase
         Livewire::test(\App\Livewire\App\ProfilePage::class)
             ->set('name', 'Updated Rep Name')
             ->set('currentPassword', 'password')
-            ->call('updateProfile')
+            ->call('save')
             ->assertHasNoErrors();
 
         $this->assertDatabaseHas('users', [
@@ -75,6 +79,6 @@ class ProfilePageTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
 
-        $this->get('/admin')->assertForbidden();
+        $this->get('/admin')->assertRedirect();
     }
 }

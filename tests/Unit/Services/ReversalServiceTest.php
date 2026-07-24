@@ -103,6 +103,7 @@ class ReversalServiceTest extends TestCase
     public function test_reverse_invoice_restores_customer_balance(): void
     {
         $this->customer->update(['balance' => 1000]);
+        $balanceBefore = $this->customer->fresh()->balance;
 
         $this->actingAs($this->rep);
         $invoice = app(InvoiceService::class)->create([
@@ -111,12 +112,13 @@ class ReversalServiceTest extends TestCase
             'items' => [['product_id' => $this->product->id, 'quantity' => 5, 'unit_price' => 100]],
         ]);
 
-        $balanceAfterSale = $this->customer->fresh()->balance;
+        // After sale, customer balance should have changed
+        $this->assertNotEquals($balanceBefore, $this->customer->fresh()->balance);
 
         $this->actingAs($this->admin);
         app(ReversalService::class)->reverseInvoice($invoice, 'Test reversal');
 
-        $balanceAfterReversal = $this->customer->fresh()->balance;
-        $this->assertGreaterThan($balanceAfterSale, $balanceAfterReversal);
+        // After reversal, customer balance should be restored to original
+        $this->assertEquals($balanceBefore, $this->customer->fresh()->balance);
     }
 }

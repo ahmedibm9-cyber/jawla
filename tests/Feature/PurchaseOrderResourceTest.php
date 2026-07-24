@@ -7,11 +7,6 @@ use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/**
- * US-13.4 — View Purchase Order Register (Admin)
- *
- * Tests that the admin PO register page renders and is accessible.
- */
 class PurchaseOrderResourceTest extends TestCase
 {
     use RefreshDatabase;
@@ -46,11 +41,12 @@ class PurchaseOrderResourceTest extends TestCase
         $this->get('/admin/purchase-orders')->assertOk();
     }
 
-    public function test_rep_cannot_access_po_register(): void
+    public function test_rep_is_redirected_from_admin_panel(): void
     {
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
 
-        $this->get('/admin/purchase-orders')->assertForbidden();
+        // Reps get redirected to /app by EnsureRepRole middleware, not 403
+        $this->get('/admin/purchase-orders')->assertRedirect();
     }
 }
