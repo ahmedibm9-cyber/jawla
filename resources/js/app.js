@@ -2,6 +2,19 @@ import * as Sentry from "@sentry/browser";
 import "./offline/sync.js";
 import "./pwa-register.js";
 
+// Polyfill: Filament v4 table select-all checkbox functions
+// These are normally scoped inside x-data="filamentTable(...)" but
+// the select-all checkbox element renders outside that Alpine scope.
+// Provide no-op globals so the checkbox "indeterminate" state doesn't throw.
+document.addEventListener("alpine:init", () => {
+  if (!window.getRecordsOnPage) {
+    window.getRecordsOnPage = () => [];
+    window.areRecordsSelected = () => false;
+    window.areRecordsPartiallySelected = () => false;
+    window.areRecordsToggleable = () => true;
+  }
+});
+
 const sentryDsn = document.querySelector('meta[name="sentry-dsn"]')?.content;
 if (sentryDsn) {
   Sentry.init({

@@ -35,7 +35,9 @@
             map: null,
             layer: null,
             init() {
-                setTimeout(() => {
+                const tryInit = () => {
+                    if (!window.L) { setTimeout(tryInit, 50); return; }
+                    L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
                     this.map = L.map('rep-live-map', { zoomControl: true });
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -46,7 +48,8 @@
                     // Default view (Riyadh) until we have fixes.
                     this.map.setView([24.7136, 46.6753], 6);
                     this.draw(this.points, true);
-                }, 100);
+                };
+                tryInit();
             },
             refresh(points) {
                 this.points = points ?? [];
