@@ -79,13 +79,14 @@ class InvoiceFlowTest extends TestCase
         $vanCheck = Warehouse::where('user_id', $rep->id)->where('type', 'van')->first();
         $this->assertNotNull($vanCheck, 'van warehouse for rep not found');
         $this->assertSame($van->id, $vanCheck->id, 'van mismatch');
-        // Diagnosis: stockBefore expected 10 from seeder (VAN stock)
+        // The seeder leaves the van with ample stock; the oversell amounts below
+        // are taken relative to $stockBefore so this always exceeds availability.
         $this->assertGreaterThan(0, $stockBefore, "stockBefore must be positive, got: {$stockBefore}");
 
         // Sanity: StockService directly should throw
         try {
             app(StockService::class)->decrement(
-                $van->id, $product->id, null, 40.0, StockReason::Sale, $product, $rep->id
+                $van->id, $product->id, null, $stockBefore + 40.0, StockReason::Sale, $product, $rep->id
             );
             $this->fail('StockService.decrement refused to throw on oversell');
         } catch (InsufficientStockException $e) {

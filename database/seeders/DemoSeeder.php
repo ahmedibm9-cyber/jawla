@@ -624,6 +624,22 @@ class DemoSeeder extends Seeder
                 $invoices[] = $inv;
             }
 
+            // Restock each rep's van after the randomised historical sales above,
+            // which can otherwise leave a product's van stock near zero. Reps
+            // restock their van each period, so add a healthy buffer — this keeps
+            // the demo realistic and makes stock-dependent tests deterministic
+            // (the van baseline is always ample) without per-test top-ups.
+            $van1Skus = ['VIR-PP-H030', 'VIR-PE-HD56S', 'VIR-PE-LD200', 'CHM-CACO3', 'PKG-SHRINK'];
+            $van2Skus = ['VIR-PP-H030', 'VIR-PVC-S65', 'REC-rPP-01', 'CHM-STEARATE', 'PKG-POPP'];
+            foreach ([[$van1, $van1Skus], [$van2, $van2Skus]] as [$repVan, $vanSkus]) {
+                if (! $repVan) {
+                    continue;
+                }
+                foreach ($products->whereIn('sku', $vanSkus) as $repVanProduct) {
+                    $stockService->increment($repVan->id, $repVanProduct->id, null, 150, StockReason::Initial, $repVan);
+                }
+            }
+
             // ─── Payments ─────────────────────────────────────────
             $paymentMethods = ['cash', 'cheque', 'transfer'];
             foreach ($invoices as $inv) {
