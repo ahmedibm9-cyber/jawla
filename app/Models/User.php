@@ -35,7 +35,7 @@ class User extends Authenticatable implements FilamentUser
 
     protected $fillable = [
         'uuid', 'company_id', 'name', 'email', 'phone', 'password',
-        'employee_code', 'is_active',
+        'employee_code', 'is_active', 'preferences',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -45,7 +45,27 @@ class User extends Authenticatable implements FilamentUser
         return [
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'preferences' => 'array',
         ];
+    }
+
+    /**
+     * Read a single UI preference (dot-free key) with a fallback default.
+     */
+    public function preference(string $key, mixed $default = null): mixed
+    {
+        return data_get($this->preferences, $key, $default);
+    }
+
+    /**
+     * Persist a single UI preference, merging into the existing JSON.
+     */
+    public function setPreference(string $key, mixed $value): void
+    {
+        $preferences = $this->preferences ?? [];
+        $preferences[$key] = $value;
+        $this->preferences = $preferences;
+        $this->save();
     }
 
     public function company(): BelongsTo

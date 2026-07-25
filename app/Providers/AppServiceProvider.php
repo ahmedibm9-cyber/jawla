@@ -29,6 +29,7 @@ use App\Services\VanTransferService;
 use App\Support\ActiveCompanyContext;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use Filament\Events\Auth\Login as FilamentLogin;
+use Filament\Facades\Filament;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -138,6 +139,21 @@ class AppServiceProvider extends ServiceProvider
 
         Event::listen(FilamentLogin::class, function (FilamentLogin $event): void {
             Activity::log('login', $event->user, "Admin login: {$event->user->email}");
+        });
+
+        // Per-user admin sidebar section order (set on the "Customize interface"
+        // page). Gated on a saved preference and wrapped so a malformed value can
+        // never break panel navigation for anyone.
+        Filament::serving(function (): void {
+            try {
+                $order = auth()->user()?->preference('nav_group_order');
+
+                if (is_array($order) && $order !== []) {
+                    Filament::getPanel('admin')->navigationGroups($order);
+                }
+            } catch (\Throwable) {
+                // Intentionally ignored — fall back to the default group order.
+            }
         });
 
         // Fail-fast: validate critical env vars in production

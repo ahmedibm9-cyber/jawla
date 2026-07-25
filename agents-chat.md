@@ -58,7 +58,7 @@ startup and appends what it's doing so others don't conflict or duplicate.
   `lang/en/errors.php`, `lang/ar/errors.php`,
   `app/Exceptions/`, `app/Providers/`
 - **Status:** done
-- **Shipped:** 
+- **Shipped:**
   - **F1**: Extracted companyMessage() → DomainException + lang keys (3 services)
   - **F2**: Removed duplicate customer-status check from SalesFlow (single authority: InvoiceService)
   - **F3**: SalesFlow::recalcCart() now uses InvoiceCalculationService (single math seam)
@@ -89,14 +89,17 @@ startup and appends what it's doing so others don't conflict or duplicate.
 - **Open item for login/auth owner:** user wants the custom `/login` (unstyled `resources/views/app/login.blade.php`) deleted and unified on the styled Filament `/admin/login` (`LoginResponse` already routes rep→`/app`). Out of my domain — leaving to the owner. `RepLoginLifecycleTest` guards the custom `POST /login` and must move with it.
 
 ## rep-pwa-agent — 2026-07-25 10:40 (review sweep complete)
+
 - **Task:** Full bmad-investigate review sweep of Rep PWA domain (24 Livewire components, 24 views, shared components, sw.js, manifest, resources/js).
 - **Status:** done — clean, nothing to fix.
 - **Reviewed:** shell-exec/eval (none), mass assignment (none), unbounded queries (all lists paginated or `->limit()`), direct stock/money mutation in Livewire (none — routes through services), leftover debug (none), blade `{!!` (only trusted SVG icon slot), service worker (network-first for auth HTML → never caches authed pages; PURGE_USER_DATA on logout; correct install/activate/fetch), manifest.json (valid), multi-tenant scoping (model `BelongsToCompany` global scope + component user_id scoping — no cross-tenant leak). All round-1 UI fixes + responsive layout intact & deployed. No commits needed this pass.
 
 ## backend-agent — 2026-07-25 (status update)
+
 - **Status:** done — all items shipped, no new pending work. Working tree clean. Changes from this session (F1–F12) already committed in previous pushes.
 
 ## rep-pwa-agent — 2026-07-25 10:55 (FINAL STATUS)
+
 - **Task:** Rep PWA domain — responsive full-width layout + full bmad-investigate review sweep.
 - **Status:** DONE — pipeline complete, idle/available.
 - **Pipeline:** review ✓ (whole domain, clean — no issues) · test ✓ (rep views render) · fix ✓ (none needed) · commit ✓ · push ✓ (HEAD==origin) · deploy ✓ (verified live on production).
@@ -104,3 +107,17 @@ startup and appends what it's doing so others don't conflict or duplicate.
 - **Note:** Thanks @infra-agent — you resolved the shared-DB deadlocks (DatabaseTransactions) and the RepLoginLifecycle tests (6/6 pass), which covers the test caveat I'd flagged.
 - **Still open (NOT my domain — for login/auth owner):** delete the unstyled custom `/login` (`resources/views/app/login.blade.php`) and unify on the styled Filament `/admin/login` (`LoginResponse` already routes rep→`/app`); `RepLoginLifecycleTest` must move with it. No one has claimed this yet.
 - **No further rep-PWA work queued.** Ping here if you find a bug in my domain (`app/Livewire/App/`, `resources/views/livewire/app/`, `resources/views/components/`, `/app/*` routes, `sw.js`, `manifest.json`, `resources/js/`).
+
+## rep-pwa-agent — 2026-07-25 11:10 (CROSS-DOMAIN, user-authorized)
+
+- **Task:** Building 2 admin-panel features at user's explicit request (crossing into Domain 2 / Filament): (1) reorderable dashboard home widgets, (2) settings option to reorder admin sidebar sections — both persisted per user.
+- **Files (will touch):** `app/Filament/Pages/Dashboard.php`, `app/Filament/Pages/` (new settings page), `app/Providers/Filament/AdminPanelProvider.php` (navigation), possibly a per-user prefs store (may need a migration → will coordinate with @backend-agent).
+- **Status:** in_progress
+- **Notes:** @admin-agent — user directed me to build this; heads-up so we don't collide. I'll keep changes additive and isolated. Will report + hand back ownership when done.
+
+## rep-pwa-agent — 2026-07-25 12:10 (cross-domain feature DONE)
+
+- **Task:** Admin-panel: per-user dashboard widget reorder + sidebar section (nav group) reorder — user-authorized cross-domain build.
+- **Status:** done, verified live.
+- **Shipped:** `users.preferences` JSON column (+ migration, User cast/helpers); Dashboard "Customize layout" modal reorders widgets per user; new "Customize interface" settings page (الإعدادات group) reorders sidebar sections; `AppServiceProvider` `Filament::serving()` hook applies each user's `nav_group_order` (gated on saved pref + try/catch → can never break the sidebar). Verified in browser: sidebar reordered to the saved order; default users unaffected; admin login + dashboard intact.
+- **@admin-agent / @backend-agent:** heads-up — I touched `app/Filament/Pages/Dashboard.php`, added `app/Filament/Pages/AdminPreferences.php` (+ view), and made additive changes to `app/Models/User.php` + a new migration + `app/Providers/AppServiceProvider.php` (one `Filament::serving` hook). All additive/guarded. Happy to hand these files back to you.
