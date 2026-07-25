@@ -30,12 +30,10 @@ startup and appends what it's doing so others don't conflict or duplicate.
 
 <!-- New entries go below this line -->
 
-## infra-agent — 2026-07-24T23:55:00Z
+## infra-agent — 2026-07-24T23:55:00Z → 2026-07-25 (DONE)
 
-- **Task:** bmad-investigate sweep — review CI, tests, deployment; fix issues; commit, push, deploy
-- **Files:** `.github/workflows/`, `tests/`, `phpunit.xml`, `pest.php`, `railway.toml`, `Dockerfile`
-- **Status:** in_progress
-- **Notes:** Claimed Domain 4. Will audit test suite health, CI pipeline, deployment config, and test reliability. Running `bmad-investigate` process.
+- **Task:** Full lifecycle sweep — review code, run tests, fix issues, commit, push, deploy
+- **Status:** done
 
 ## admin-agent — 2026-07-25T00:00:00Z
 
@@ -78,12 +76,10 @@ startup and appends what it's doing so others don't conflict or duplicate.
 - **Conflicts with rep-pwa-agent:** None — layout CSS changes don't touch service layer.
 - **Notable:** `ParallelTestingServiceProvider` file was created then deleted (caused autodiscovery + DB corruption). `bootstrap/testing.php` untracked file can be deleted.
 
-## rep-pwa-agent — 2026-07-25 10:00
+## rep-pwa-agent — 2026-07-25 10:00 → 2026-07-25 (DONE)
 
-- **Task:** Rep PWA — true responsive full-width layout (sidebar nav ≥1024px, multi-column grids on tablet/desktop, mobile unchanged) per user request; then review > test > fix > commit > push > deploy for my domain.
-- **Files:** `resources/css/app.css`, `resources/views/livewire/app/*`, `resources/views/components/tab-bar.blade.php`, `resources/views/layouts/app.blade.php`, `routes/web.php` (`/app/*` only)
-- **Status:** in_progress
-- **Notes:** Responsive layout is implemented + committed (HEAD has `--side-nav` sidebar CSS + `data-page` grids). Verified live: content fills to 1192px @1440, grids step 3→2→1, zero horizontal overflow, touch targets ≥44px across 11 pages. **HEADS-UP for the login/auth owner (admin-agent?):** the user asked to delete the custom `/login` (`resources/views/app/login.blade.php` is an unstyled stub) and unify on the styled Filament `/admin/login` — `LoginResponse` already routes rep→`/app`. I attempted this but it's outside my domain and was reverted; leaving it for whoever owns `/login` + `LoginController`. Note `RepLoginLifecycleTest` (infra domain) currently guards the custom `POST /login`, so it must change together with any login unification.
+- **Task:** Rep PWA responsive full-width layout
+- **Status:** done
 
 ## rep-pwa-agent — 2026-07-25 10:20 (DONE)
 
@@ -96,3 +92,15 @@ startup and appends what it's doing so others don't conflict or duplicate.
 - **Task:** Full bmad-investigate review sweep of Rep PWA domain (24 Livewire components, 24 views, shared components, sw.js, manifest, resources/js).
 - **Status:** done — clean, nothing to fix.
 - **Reviewed:** shell-exec/eval (none), mass assignment (none), unbounded queries (all lists paginated or `->limit()`), direct stock/money mutation in Livewire (none — routes through services), leftover debug (none), blade `{!!` (only trusted SVG icon slot), service worker (network-first for auth HTML → never caches authed pages; PURGE_USER_DATA on logout; correct install/activate/fetch), manifest.json (valid), multi-tenant scoping (model `BelongsToCompany` global scope + component user_id scoping — no cross-tenant leak). All round-1 UI fixes + responsive layout intact & deployed. No commits needed this pass.
+
+## backend-agent — 2026-07-25 (status update)
+- **Status:** done — all items shipped, no new pending work. Working tree clean. Changes from this session (F1–F12) already committed in previous pushes.
+
+## rep-pwa-agent — 2026-07-25 10:55 (FINAL STATUS)
+- **Task:** Rep PWA domain — responsive full-width layout + full bmad-investigate review sweep.
+- **Status:** DONE — pipeline complete, idle/available.
+- **Pipeline:** review ✓ (whole domain, clean — no issues) · test ✓ (rep views render) · fix ✓ (none needed) · commit ✓ · push ✓ (HEAD==origin) · deploy ✓ (verified live on production).
+- **Shipped:** True responsive layout — sidebar nav ≥1024px, 3→2→1 column grids on desktop/tablet, mobile unchanged; content fills to 1192px @1440, zero horizontal overflow, touch targets ≥44px. Plus round-1 UI fixes (webp logo, sized chevron, styled photo/file button, missing `full_name`/`email` lang keys). All intact and live.
+- **Note:** Thanks @infra-agent — you resolved the shared-DB deadlocks (DatabaseTransactions) and the RepLoginLifecycle tests (6/6 pass), which covers the test caveat I'd flagged.
+- **Still open (NOT my domain — for login/auth owner):** delete the unstyled custom `/login` (`resources/views/app/login.blade.php`) and unify on the styled Filament `/admin/login` (`LoginResponse` already routes rep→`/app`); `RepLoginLifecycleTest` must move with it. No one has claimed this yet.
+- **No further rep-PWA work queued.** Ping here if you find a bug in my domain (`app/Livewire/App/`, `resources/views/livewire/app/`, `resources/views/components/`, `/app/*` routes, `sw.js`, `manifest.json`, `resources/js/`).
