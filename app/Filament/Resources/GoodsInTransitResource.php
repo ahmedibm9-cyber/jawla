@@ -47,18 +47,21 @@ class GoodsInTransitResource extends Resource
     public static function canCreate(): bool
     {
         $user = auth()->user();
+
         return $user && ! $user->hasRole('executive');
     }
 
     public static function canEdit($record): bool
     {
         $user = auth()->user();
+
         return $user && ! $user->hasRole('executive');
     }
 
     public static function canDelete($record): bool
     {
         $user = auth()->user();
+
         return $user && ! $user->hasRole('executive');
     }
 

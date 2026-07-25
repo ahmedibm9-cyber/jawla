@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\App\SettingsPage;
 use App\Models\User;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,7 +37,7 @@ class SettingsPageTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
 
-        $response = Livewire::test(\App\Livewire\App\SettingsPage::class);
+        $response = Livewire::test(SettingsPage::class);
         $response->assertSuccessful();
     }
 

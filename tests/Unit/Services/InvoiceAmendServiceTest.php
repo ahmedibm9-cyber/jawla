@@ -7,7 +7,6 @@ use App\Enums\StockReason;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Models\InvoiceItem;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -21,10 +20,15 @@ class InvoiceAmendServiceTest extends TestCase
     use RefreshDatabase;
 
     private Company $company;
+
     private User $rep;
+
     private Warehouse $van;
+
     private Customer $customer;
+
     private Product $product;
+
     private Invoice $invoice;
 
     protected function setUp(): void

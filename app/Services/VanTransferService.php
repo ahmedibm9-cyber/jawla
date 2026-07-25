@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Exceptions\Domain\DomainException;
 use App\Enums\VanTransferStatus;
+use App\Exceptions\Domain\DomainException;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\VanTransfer;

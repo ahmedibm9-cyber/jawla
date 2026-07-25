@@ -17,7 +17,7 @@ class UserPolicy
             return true;
         }
 
-        return $u->hasRole('admin') && !$target->isSuperAdmin();
+        return $u->hasRole('admin') && ! $target->isSuperAdmin();
     }
 
     public function create(User $u): bool
@@ -31,7 +31,7 @@ class UserPolicy
             return true;
         }
 
-        return $u->hasRole('admin') && !$target->isSuperAdmin();
+        return $u->hasRole('admin') && ! $target->isSuperAdmin();
     }
 
     public function delete(User $u, User $target): bool
@@ -40,6 +40,6 @@ class UserPolicy
             return true;
         }
 
-        return $u->hasRole('admin') && !$target->isSuperAdmin();
+        return $u->hasRole('admin') && ! $target->isSuperAdmin();
     }
 }

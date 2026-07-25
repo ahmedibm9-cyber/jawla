@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\Exceptions\Domain\DomainException;
 use App\Models\Company;
 use App\Models\Product;
 use App\Models\ProductCategory;
@@ -10,7 +11,6 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WarehouseImportLog;
 use App\Services\StockImportService;
-use App\Exceptions\Domain\DomainException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 

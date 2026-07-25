@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\Exceptions\Domain\DomainException;
 use App\Models\CashBox;
 use App\Models\Company;
 use App\Models\User;
@@ -60,7 +61,7 @@ class ExpenseServiceTest extends TestCase
 
         CashBox::create(['user_id' => $rep->id, 'company_id' => $company->id, 'balance' => 10]);
 
-        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        $this->expectException(DomainException::class);
 
         app(ExpenseService::class)->log(
             companyId: $company->id,
@@ -136,7 +137,7 @@ class ExpenseServiceTest extends TestCase
         $rep = User::factory()->create(['company_id' => $company->id]);
         CashBox::create(['user_id' => $rep->id, 'company_id' => $company->id, 'balance' => 100]);
 
-        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        $this->expectException(DomainException::class);
 
         app(ExpenseService::class)->log(
             companyId: $company->id,
@@ -152,7 +153,7 @@ class ExpenseServiceTest extends TestCase
         $rep = User::factory()->create(['company_id' => $company->id]);
         CashBox::create(['user_id' => $rep->id, 'company_id' => $company->id, 'balance' => 100]);
 
-        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        $this->expectException(DomainException::class);
 
         app(ExpenseService::class)->log(
             companyId: $company->id,

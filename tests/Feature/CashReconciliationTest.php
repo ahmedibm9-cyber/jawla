@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exceptions\Domain\DomainException;
 use App\Filament\Resources\CashReconciliationResource\Pages\ListCashReconciliations;
 use App\Livewire\App\CashReconcile;
 use App\Models\CashBox;
@@ -72,7 +73,7 @@ class CashReconciliationTest extends TestCase
     {
         $foreignRep = User::factory()->create(['company_id' => Company::factory()->create()->id]);
 
-        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        $this->expectException(DomainException::class);
         try {
             $this->service()->submit($this->company->id, $foreignRep->id, 100.0);
         } finally {

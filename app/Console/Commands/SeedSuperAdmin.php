@@ -24,12 +24,14 @@ class SeedSuperAdmin extends Command
 
         if (User::where('email', $email)->exists()) {
             $this->info("Super admin already exists: {$email}");
+
             return self::SUCCESS;
         }
 
         $company = Company::first();
         if (! $company) {
             $this->error('No company found. Seed the demo data first.');
+
             return self::FAILURE;
         }
 
@@ -45,6 +47,7 @@ class SeedSuperAdmin extends Command
         $user->assignRole('super_admin');
 
         $this->info("Super admin created: {$email} / password");
+
         return self::SUCCESS;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\App\TodaysCustomers;
 use App\Models\Customer;
 use App\Models\User;
 use Database\Seeders\DemoSeeder;
@@ -37,7 +38,7 @@ class TodaysCustomersTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
 
-        Livewire::test(\App\Livewire\App\TodaysCustomers::class)
+        Livewire::test(TodaysCustomers::class)
             ->assertSuccessful();
     }
 
@@ -46,7 +47,7 @@ class TodaysCustomersTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
 
-        Livewire::test(\App\Livewire\App\TodaysCustomers::class)
+        Livewire::test(TodaysCustomers::class)
             ->set('search', 'رواد')
             ->assertSuccessful();
     }
@@ -56,7 +57,7 @@ class TodaysCustomersTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
 
-        Livewire::test(\App\Livewire\App\TodaysCustomers::class)
+        Livewire::test(TodaysCustomers::class)
             ->set('search', 'C-001')
             ->assertSuccessful();
     }
@@ -66,7 +67,7 @@ class TodaysCustomersTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
 
-        Livewire::test(\App\Livewire\App\TodaysCustomers::class)
+        Livewire::test(TodaysCustomers::class)
             ->assertSuccessful();
     }
 }

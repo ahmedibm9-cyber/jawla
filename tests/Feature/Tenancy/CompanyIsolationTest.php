@@ -20,8 +20,11 @@ class CompanyIsolationTest extends TestCase
     use RefreshDatabase;
 
     private Company $companyA;
+
     private Company $companyB;
+
     private User $userA;
+
     private User $userB;
 
     protected function setUp(): void

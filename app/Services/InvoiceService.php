@@ -76,7 +76,7 @@ class InvoiceService implements InvoiceContract
 
             // Issue 13: Customer must be approved before creating invoices
             if (($customer->status ?? 'approved') !== 'approved') {
-                $message = match($customer->status) {
+                $message = match ($customer->status) {
                     'pending' => app()->getLocale() === 'ar'
                         ? 'العميل في انتظار موافقة الإدارة ولا يمكن إنشاء فاتورة له'
                         : 'Customer is pending admin approval and cannot be invoiced yet',

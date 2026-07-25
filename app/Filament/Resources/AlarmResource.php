@@ -112,8 +112,8 @@ class AlarmResource extends Resource
                         "Accept Customer: {$a->title}",
                     ))
                     ->modalDescription(fn (Alarm $a) => l(
-                        "سيتم اعتماد العميل الجديد والموافقة عليه",
-                        "The new customer will be approved and activated",
+                        'سيتم اعتماد العميل الجديد والموافقة عليه',
+                        'The new customer will be approved and activated',
                     ))
                     ->action(function (Alarm $a): void {
                         abort_unless(static::canRespond(), 403);
@@ -155,8 +155,8 @@ class AlarmResource extends Resource
                         "Reject Customer: {$a->title}",
                     ))
                     ->modalDescription(fn (Alarm $a) => l(
-                        "سيتم رفض العميل الجديد وتعطيل حسابه",
-                        "The new customer will be rejected and deactivated",
+                        'سيتم رفض العميل الجديد وتعطيل حسابه',
+                        'The new customer will be rejected and deactivated',
                     ))
                     ->action(function (Alarm $a): void {
                         abort_unless(static::canRespond(), 403);

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\StockReason;
+use App\Livewire\App\StockSearch;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -40,7 +41,7 @@ class VanStockViewTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
 
-        Livewire::test(\App\Livewire\App\StockSearch::class)
+        Livewire::test(StockSearch::class)
             ->assertSuccessful();
     }
 
@@ -57,7 +58,7 @@ class VanStockViewTest extends TestCase
             StockReason::Initial, $product,
         );
 
-        Livewire::test(\App\Livewire\App\StockSearch::class)
+        Livewire::test(StockSearch::class)
             ->set('search', $product->sku)
             ->assertSuccessful();
     }
@@ -67,7 +68,7 @@ class VanStockViewTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
 
-        Livewire::test(\App\Livewire\App\StockSearch::class)
+        Livewire::test(StockSearch::class)
             ->set('search', 'a')
             ->assertSuccessful();
     }
@@ -77,7 +78,7 @@ class VanStockViewTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
 
-        Livewire::test(\App\Livewire\App\StockSearch::class)
+        Livewire::test(StockSearch::class)
             ->assertSuccessful();
     }
 

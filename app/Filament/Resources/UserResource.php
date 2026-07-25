@@ -70,7 +70,7 @@ class UserResource extends Resource
         return $table
             ->modifyQueryUsing(function ($query) {
                 $user = auth()->user();
-                if ($user && !$user->isSuperAdmin()) {
+                if ($user && ! $user->isSuperAdmin()) {
                     $query->whereDoesntHave('roles', function ($q) {
                         $q->where('name', 'super_admin');
                     });

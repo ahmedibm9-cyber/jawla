@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services;
 
 use App\Enums\StockReason;
+use App\Exceptions\Domain\DomainException;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Product;
@@ -94,7 +95,7 @@ class ReturnServiceTest extends TestCase
         $customer = Customer::factory()->create(['company_id' => $company->id, 'balance' => 200]);
         $product = Product::factory()->create(['company_id' => $company->id]);
 
-        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        $this->expectException(DomainException::class);
         app(ReturnService::class)->create(
             companyId: $company->id,
             userId: $rep->id,
@@ -121,7 +122,7 @@ class ReturnServiceTest extends TestCase
             StockReason::Initial, $product,
         );
 
-        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        $this->expectException(DomainException::class);
         app(ReturnService::class)->create(
             companyId: $company->id,
             userId: $rep->id,
@@ -139,7 +140,7 @@ class ReturnServiceTest extends TestCase
         $foreignCustomer = Customer::factory()->create(['company_id' => $foreignCompany->id, 'balance' => 500]);
         $foreignProduct = Product::factory()->create(['company_id' => $foreignCompany->id]);
 
-        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        $this->expectException(DomainException::class);
         try {
             app(ReturnService::class)->create(
                 companyId: $company->id,

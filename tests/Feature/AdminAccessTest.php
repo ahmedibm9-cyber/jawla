@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\User;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 /**
@@ -23,6 +24,7 @@ class AdminAccessTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private User $otherCompanyUser;
 
     protected function setUp(): void
@@ -216,7 +218,7 @@ class AdminAccessTest extends TestCase
         foreach ($users as $user) {
             $this->assertNotNull($user->uuid, "User {$user->id} is missing uuid");
             $this->assertTrue(
-                \Illuminate\Support\Str::isUuid($user->uuid),
+                Str::isUuid($user->uuid),
                 "User {$user->id} uuid '{$user->uuid}' is not a valid UUID",
             );
         }
@@ -234,7 +236,7 @@ class AdminAccessTest extends TestCase
         $user = User::factory()->create(['company_id' => $company->id]);
 
         $this->assertNotNull($user->uuid);
-        $this->assertTrue(\Illuminate\Support\Str::isUuid($user->uuid));
+        $this->assertTrue(Str::isUuid($user->uuid));
     }
 
     public function test_uuid_can_be_used_to_identify_user_uniquely(): void

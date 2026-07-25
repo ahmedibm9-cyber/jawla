@@ -6,7 +6,6 @@ use App\Enums\InvoiceStatus;
 use App\Enums\StockReason;
 use App\Models\Company;
 use App\Models\Customer;
-use App\Models\Invoice;
 use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -22,10 +21,15 @@ class ReversalServiceTest extends TestCase
     use DatabaseTransactions;
 
     private Company $company;
+
     private User $rep;
+
     private User $admin;
+
     private Warehouse $van;
+
     private Customer $customer;
+
     private Product $product;
 
     protected function setUp(): void

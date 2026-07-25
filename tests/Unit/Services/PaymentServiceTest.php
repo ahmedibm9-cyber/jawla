@@ -4,6 +4,7 @@ namespace Tests\Unit\Services;
 
 use App\Enums\InvoiceStatus;
 use App\Enums\StockReason;
+use App\Exceptions\Domain\DomainException;
 use App\Models\CashBox;
 use App\Models\Company;
 use App\Models\Customer;
@@ -64,7 +65,7 @@ class PaymentServiceTest extends TestCase
         $rep = User::factory()->create(['company_id' => $company->id]);
         $foreignCustomer = Customer::factory()->create(['company_id' => Company::factory()->create()->id]);
 
-        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        $this->expectException(DomainException::class);
         try {
             app(PaymentService::class)->collect(
                 companyId: $company->id,
@@ -211,7 +212,7 @@ class PaymentServiceTest extends TestCase
             'product_id' => $product->id, 'quantity' => 1, 'unit_price' => 100,
         ]);
 
-        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        $this->expectException(DomainException::class);
         app(PaymentService::class)->collect(
             $company->id, $rep->id, $customer->id, (float) $invoice->total + 1, 'cash', $invoice->id,
         );

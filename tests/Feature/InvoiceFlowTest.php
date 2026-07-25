@@ -18,6 +18,7 @@ use App\Services\InvoiceService;
 use App\Services\PaymentService;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class InvoiceFlowTest extends TestCase
@@ -39,7 +40,7 @@ class InvoiceFlowTest extends TestCase
 
         // Reset stock for this product to a known value (DemoSeeder's
         // 40-invoice loop is non-deterministic and may leave it depleted).
-        \Illuminate\Support\Facades\DB::table('stocks')->updateOrInsert(
+        DB::table('stocks')->updateOrInsert(
             ['warehouse_id' => $van->id, 'product_id' => $product->id, 'batch_id' => null],
             ['quantity' => 10],
         );
@@ -197,7 +198,7 @@ class InvoiceFlowTest extends TestCase
         // Use a product guaranteed to have stock: seed directly via
         // DB table to avoid nested-transaction issues with StockService.
         $product = Product::where('sku', 'VIR-PE-LD200')->first();
-        \Illuminate\Support\Facades\DB::table('stocks')->updateOrInsert(
+        DB::table('stocks')->updateOrInsert(
             ['warehouse_id' => $van->id, 'product_id' => $product->id, 'batch_id' => null],
             ['quantity' => 10],
         );
@@ -239,7 +240,7 @@ class InvoiceFlowTest extends TestCase
 
         // Seed sufficient stock directly (avoids DemoSeeder's non-deterministic
         // 40-invoice loop which may leave stock below the 3 units we need).
-        \Illuminate\Support\Facades\DB::table('stocks')->updateOrInsert(
+        DB::table('stocks')->updateOrInsert(
             ['warehouse_id' => $van->id, 'product_id' => $product->id, 'batch_id' => null],
             ['quantity' => 10],
         );

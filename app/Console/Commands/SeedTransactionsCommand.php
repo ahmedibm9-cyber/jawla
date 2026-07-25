@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\DB;
 class SeedTransactionsCommand extends Command
 {
     protected $signature = 'app:seed-transactions';
+
     protected $description = 'Seed transactional demo data (invoices, payments, POs, etc.)';
 
     public function handle(): int
@@ -41,6 +42,7 @@ class SeedTransactionsCommand extends Command
         if (! $company) {
             fwrite(STDERR, "[seed-transactions] ERROR: Company not found!\n");
             $this->error('Company not found. Run DemoSeeder first.');
+
             return 1;
         }
 
@@ -48,6 +50,7 @@ class SeedTransactionsCommand extends Command
         if (Invoice::where('company_id', $company->id)->exists()) {
             fwrite(STDERR, "[seed-transactions] Already seeded — skipping.\n");
             $this->info('Transactional data already seeded — skipping.');
+
             return 0;
         }
 
@@ -65,6 +68,7 @@ class SeedTransactionsCommand extends Command
 
         if ($products->isEmpty() || $customers->isEmpty()) {
             $this->error('Products or customers not found. Run DemoSeeder first.');
+
             return 1;
         }
 
@@ -89,15 +93,20 @@ class SeedTransactionsCommand extends Command
             ];
             foreach ($poDefs as $poDef) {
                 $orderDate = today()->subDays($poDef['days']);
-                $subtotal = 0; $poItems = [];
+                $subtotal = 0;
+                $poItems = [];
                 foreach ($poDef['items'] as $it) {
                     $prod = $products->firstWhere('sku', $it['sku']);
-                    if (! $prod) continue;
+                    if (! $prod) {
+                        continue;
+                    }
                     $lineTotal = $it['qty'] * $it['price'];
                     $subtotal += $lineTotal;
                     $poItems[] = ['product' => $prod, 'qty' => $it['qty'], 'price' => $it['price'], 'line' => $lineTotal];
                 }
-                if (empty($poItems)) continue;
+                if (empty($poItems)) {
+                    continue;
+                }
                 $po = PurchaseOrder::create([
                     'company_id' => $company->id, 'supplier_id' => $suppliers[$poDef['supplier']]->id,
                     'order_number' => $names->generate('purchase_order', $company->id),
@@ -124,11 +133,14 @@ class SeedTransactionsCommand extends Command
                 $rep = $i % 3 === 0 ? $rep2 : $rep1;
                 $van = $rep->id === $rep1->id ? $van1 : $van2;
                 $daysAgo = rand(0, 85);
-                if ($daysAgo < 3) $daysAgo = rand(0, 3);
+                if ($daysAgo < 3) {
+                    $daysAgo = rand(0, 3);
+                }
                 $issueDate = today()->subDays($daysAgo);
 
                 $itemCount = rand(1, 3);
-                $items = []; $subtotal = 0;
+                $items = [];
+                $subtotal = 0;
                 for ($j = 0; $j < $itemCount; $j++) {
                     $prod = $products->random();
                     $qty = rand(1, 8);
@@ -151,7 +163,10 @@ class SeedTransactionsCommand extends Command
                 }
                 if ($invStatus !== 'cancelled' && $van) {
                     foreach ($items as $it) {
-                        try { $stockService->decrement($van->id, $it['product']->id, null, $it['qty'], StockReason::Sale, $inv); } catch (\Throwable) {}
+                        try {
+                            $stockService->decrement($van->id, $it['product']->id, null, $it['qty'], StockReason::Sale, $inv);
+                        } catch (\Throwable) {
+                        }
                     }
                 }
                 $invoices[] = $inv;
@@ -160,13 +175,18 @@ class SeedTransactionsCommand extends Command
             // Payments
             $paymentMethods = ['cash', 'cheque', 'transfer'];
             foreach ($invoices as $inv) {
-                if ($inv->status === 'cancelled' || rand(1, 10) > 8) continue;
+                if ($inv->status === 'cancelled' || rand(1, 10) > 8) {
+                    continue;
+                }
                 $amount = rand(1, 10) <= 6 ? $inv->total : round($inv->total * (rand(3, 8) / 10), 2);
                 $method = $paymentMethods[array_rand($paymentMethods)];
                 Payment::create(['company_id' => $company->id, 'customer_id' => $inv->customer_id, 'user_id' => $inv->user_id, 'invoice_id' => $inv->id, 'amount' => $amount, 'method' => $method, 'collected_at' => $inv->issued_at->copy()->addDays(rand(0, 15)), 'posting_date' => $inv->issued_at]);
                 $inv->update(['paid_amount' => $inv->paid_amount + $amount, 'remaining_amount' => $inv->remaining_amount - $amount]);
-                if ($inv->remaining_amount <= 0) $inv->update(['status' => 'paid']);
-                elseif ($inv->paid_amount > 0 && $inv->status !== 'paid') $inv->update(['status' => 'partially_paid']);
+                if ($inv->remaining_amount <= 0) {
+                    $inv->update(['status' => 'paid']);
+                } elseif ($inv->paid_amount > 0 && $inv->status !== 'paid') {
+                    $inv->update(['status' => 'partially_paid']);
+                }
             }
 
             // Returns
@@ -174,11 +194,15 @@ class SeedTransactionsCommand extends Command
             foreach (collect($invoices)->where('status', 'paid')->random(min(4, count($invoices))) as $inv) {
                 $returnCount++;
                 $item = $inv->items->first();
-                if (! $item) continue;
-                $ret = ReturnRecord::create(['company_id' => $company->id, 'customer_id' => $inv->customer_id, 'user_id' => $inv->user_id, 'against_invoice_id' => $inv->id, 'return_number' => 'RET-' . now()->format('Ymd') . '-' . $returnCount, 'total' => $item->line_total, 'reason' => 'منتج تالف / Damaged product', 'status' => 'submitted', 'returned_at' => $inv->issued_at->copy()->addDays(rand(2, 10)), 'posting_date' => $inv->issued_at->copy()->addDays(rand(2, 10))]);
+                if (! $item) {
+                    continue;
+                }
+                $ret = ReturnRecord::create(['company_id' => $company->id, 'customer_id' => $inv->customer_id, 'user_id' => $inv->user_id, 'against_invoice_id' => $inv->id, 'return_number' => 'RET-'.now()->format('Ymd').'-'.$returnCount, 'total' => $item->line_total, 'reason' => 'منتج تالف / Damaged product', 'status' => 'submitted', 'returned_at' => $inv->issued_at->copy()->addDays(rand(2, 10)), 'posting_date' => $inv->issued_at->copy()->addDays(rand(2, 10))]);
                 ReturnItem::create(['return_id' => $ret->id, 'product_id' => $item->product_id, 'quantity' => $item->quantity, 'unit_price' => $item->unit_price, 'line_total' => $item->line_total]);
                 $van = Warehouse::where('user_id', $inv->user_id)->where('type', 'van')->first();
-                if ($van) $stockService->increment($van->id, $item->product_id, null, $item->quantity, StockReason::Return, $ret);
+                if ($van) {
+                    $stockService->increment($van->id, $item->product_id, null, $item->quantity, StockReason::Return, $ret);
+                }
             }
 
             // Work sessions for visits
@@ -187,7 +211,9 @@ class SeedTransactionsCommand extends Command
 
             // Visits
             foreach ($customers as $i => $cust) {
-                if ($i >= 15) break;
+                if ($i >= 15) {
+                    break;
+                }
                 $rep = $cust->route_id ? ($cust->route_id === $customers->first()->route_id ? $rep1 : $rep2) : $rep1;
                 $ws = $rep->id === $rep1->id ? $ws1 : $ws2;
                 $checkin = today()->subDays(rand(0, 7))->setTime(9 + rand(0, 5), rand(0, 59));
@@ -214,16 +240,17 @@ class SeedTransactionsCommand extends Command
                 PriceQuotationRequest::create(['company_id' => $company->id, 'customer_id' => $customers->random()->id, 'user_id' => $i % 2 === 0 ? $rep1->id : $rep2->id, 'product_id' => $products->random()->id, 'quantity_requested' => rand(5, 50), 'status' => $status, 'requested_at' => now()->subDays(rand(0, 14))]);
             }
 
-            $this->info('Invoices: ' . count($invoices));
-            $this->info('Payments: ' . Payment::count());
-            $this->info('Purchase Orders: ' . PurchaseOrder::count());
-            $this->info('Alarms: ' . Alarm::count());
-            $this->info('Visits: ' . Visit::count());
-            $this->info('Expenses: ' . Expense::count());
+            $this->info('Invoices: '.count($invoices));
+            $this->info('Payments: '.Payment::count());
+            $this->info('Purchase Orders: '.PurchaseOrder::count());
+            $this->info('Alarms: '.Alarm::count());
+            $this->info('Visits: '.Visit::count());
+            $this->info('Expenses: '.Expense::count());
         });
 
         fwrite(STDERR, "[seed-transactions] Complete.\n");
         $this->info('Transactional demo data seeded successfully.');
+
         return 0;
     }
 }

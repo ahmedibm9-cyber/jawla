@@ -27,9 +27,13 @@ class InvoiceStatusFlowTest extends TestCase
     use RefreshDatabase;
 
     private Company $company;
+
     private User $rep;
+
     private Warehouse $van;
+
     private Customer $customer;
+
     private Product $product;
 
     protected function setUp(): void

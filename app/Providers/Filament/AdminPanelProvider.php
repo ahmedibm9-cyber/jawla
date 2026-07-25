@@ -15,6 +15,8 @@ use App\Filament\Widgets\RepPerformanceWidget;
 use App\Filament\Widgets\SalesTodayWidget;
 use App\Filament\Widgets\VisitsTodayWidget;
 use App\Http\Middleware\FilamentAuthenticate;
+use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\ThrottlePost;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -22,7 +24,6 @@ use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
-use Filament\View\PanelsRenderHook;
 use Filament\Widgets\AccountWidget;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
@@ -90,8 +91,8 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                \App\Http\Middleware\SecurityHeaders::class,
-                \App\Http\Middleware\ThrottlePost::class,
+                SecurityHeaders::class,
+                ThrottlePost::class,
             ])
             ->authMiddleware([
                 FilamentAuthenticate::class,

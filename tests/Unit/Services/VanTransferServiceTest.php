@@ -4,6 +4,7 @@ namespace Tests\Unit\Services;
 
 use App\Enums\StockReason;
 use App\Enums\VanTransferStatus;
+use App\Exceptions\Domain\DomainException;
 use App\Exceptions\Domain\InsufficientStockException;
 use App\Models\Company;
 use App\Models\Product;
@@ -302,7 +303,7 @@ class VanTransferServiceTest extends TestCase
             inTransitWarehouseId: $inTransitWarehouse->id,
         );
 
-        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        $this->expectException(DomainException::class);
         $service->ship($transfer->id, $mainWarehouse->id, $toUser->id);
     }
 
@@ -356,7 +357,7 @@ class VanTransferServiceTest extends TestCase
 
         $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
 
-        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        $this->expectException(DomainException::class);
         $service->receive($transfer->id, $fromUser->id);
     }
 
@@ -410,7 +411,7 @@ class VanTransferServiceTest extends TestCase
             items: [['product_id' => $product->id, 'quantity' => 10.0]],
         );
 
-        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        $this->expectException(DomainException::class);
         $service->cancel($transfer->id, $toUser->id);
     }
 }

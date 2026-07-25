@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\App\ProfilePage;
 use App\Models\User;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,7 +37,7 @@ class ProfilePageTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
 
-        Livewire::test(\App\Livewire\App\ProfilePage::class)
+        Livewire::test(ProfilePage::class)
             ->assertSuccessful();
     }
 
@@ -45,7 +46,7 @@ class ProfilePageTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
 
-        Livewire::test(\App\Livewire\App\ProfilePage::class)
+        Livewire::test(ProfilePage::class)
             ->set('name', 'Updated Name')
             ->set('email', 'updated@test.com')
             ->call('save')
@@ -62,7 +63,7 @@ class ProfilePageTest extends TestCase
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
 
-        Livewire::test(\App\Livewire\App\ProfilePage::class)
+        Livewire::test(ProfilePage::class)
             ->set('name', 'Updated Rep Name')
             ->set('currentPassword', 'password')
             ->call('save')

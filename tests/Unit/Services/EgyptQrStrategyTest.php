@@ -10,7 +10,6 @@ use Tests\TestCase;
 
 class EgyptQrStrategyTest extends TestCase
 {
-
     private EgyptQrStrategy $strategy;
 
     protected function setUp(): void
