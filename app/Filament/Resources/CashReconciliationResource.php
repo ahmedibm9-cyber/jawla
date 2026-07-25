@@ -100,6 +100,7 @@ class CashReconciliationResource extends Resource
                         Forms\Components\Textarea::make('review_notes')->label(l('ملاحظات (اختياري)', 'Notes (optional)'))->rows(2)->maxLength(500),
                     ])
                     ->requiresConfirmation()
+                    ->modalDescription(l('اعتماد هذه التسوية النقدية يؤكد رصيد الصندوق المُبلَّغ عنه ويُقفل الجلسة. الإجراء مُسجَّل.', 'Approving this cash reconciliation confirms the reported cash-box balance and closes the session. This action is logged.'))
                     ->action(function (CashReconciliation $r, array $data) {
                         try {
                             app(CashReconciliationService::class)->approve($r, Auth::id(), $data['review_notes'] ?? '');
@@ -117,6 +118,7 @@ class CashReconciliationResource extends Resource
                         Forms\Components\Textarea::make('review_notes')->label(l('سبب التعليم', 'Reason'))->rows(2)->maxLength(500),
                     ])
                     ->requiresConfirmation()
+                    ->modalDescription(l('تعليم هذه التسوية يُشير إلى وجود فرق نقدي يحتاج لمراجعة قبل الاعتماد. الإجراء مُسجَّل.', 'Flagging this reconciliation marks a cash variance that needs review before approval. This action is logged.'))
                     ->action(function (CashReconciliation $r, array $data) {
                         try {
                             app(CashReconciliationService::class)->flag($r, Auth::id(), $data['review_notes'] ?? '');

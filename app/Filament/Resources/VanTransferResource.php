@@ -148,6 +148,7 @@ class VanTransferResource extends Resource
                     ->color('danger')
                     ->visible(fn (VanTransfer $r) => in_array($r->status, [VanTransferStatus::Pending, VanTransferStatus::Accepted]))
                     ->requiresConfirmation()
+                    ->modalDescription(l('رفض هذا التحويل يُلغيه ولن يتم نقل أي مخزون. إذا كان قد تم شحنه فسيُعاد المخزون إلى المستودع الرئيسي. الإجراء مُسجَّل.', 'Rejecting this transfer voids it and no stock moves. If it was already shipped, the stock is returned to the main warehouse. This action is logged.'))
                     ->action(function (VanTransfer $record) {
                         app(VanTransferService::class)->reject(
                             $record->id,
@@ -162,6 +163,7 @@ class VanTransferResource extends Resource
                     ->color('gray')
                     ->visible(fn (VanTransfer $r) => $r->status === VanTransferStatus::Pending)
                     ->requiresConfirmation()
+                    ->modalDescription(l('إلغاء هذا التحويل المُعلّق يوقفه نهائيًا ولن يتم نقل أي مخزون. الإجراء مُسجَّل.', 'Cancelling this pending transfer stops it permanently and no stock moves. This action is logged.'))
                     ->action(function (VanTransfer $record) {
                         app(VanTransferService::class)->cancel(
                             $record->id,

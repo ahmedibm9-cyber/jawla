@@ -55,6 +55,9 @@ class ExpenseResource extends Resource
                     ->color('danger')
                     ->visible(fn (Expense $r) => $r->cancelled_at === null)
                     ->requiresConfirmation()
+                    ->modalHeading(l('إلغاء المصروف', 'Cancel expense'))
+                    ->modalDescription(l('سيتم إلغاء هذا المصروف وإعادة مبلغه إلى صندوق النقدية. هذا الإجراء مُسجَّل ولا يمكن التراجع عنه.', 'This cancels the expense and credits its amount back to the cash box. It is logged and cannot be undone.'))
+                    ->modalSubmitActionLabel(l('تأكيد الإلغاء', 'Confirm cancel'))
                     ->action(fn (Expense $r) => app(ExpenseService::class)->cancel($r, auth()->id())),
             ])
             ->bulkActions([]);

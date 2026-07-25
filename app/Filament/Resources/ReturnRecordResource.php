@@ -55,6 +55,9 @@ class ReturnRecordResource extends Resource
                     ->color('danger')
                     ->visible(fn (ReturnRecord $r) => $r->status === 'submitted')
                     ->requiresConfirmation()
+                    ->modalHeading(l('إلغاء المرتجع', 'Cancel return'))
+                    ->modalDescription(l('سيتم إلغاء هذا المرتجع وعكس أثره على المخزون ورصيد العميل. هذا الإجراء مُسجَّل ولا يمكن التراجع عنه.', 'This cancels the return and reverses its effect on stock and the customer balance. It is logged and cannot be undone.'))
+                    ->modalSubmitActionLabel(l('تأكيد الإلغاء', 'Confirm cancel'))
                     ->action(fn (ReturnRecord $r) => app(ReturnService::class)->cancel($r, auth()->id(), __('app.admin_cancelled'))),
             ])
             ->bulkActions([]);

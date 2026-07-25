@@ -162,7 +162,9 @@ class CustomerResource extends Resource
                         User::find($c->added_by)
                             ?->notify(new CustomerApprovalOutcome($c, 'approved'));
                     })
-                    ->requiresConfirmation(),
+                    ->requiresConfirmation()
+                    ->modalHeading(l('اعتماد العميل', 'Approve customer'))
+                    ->modalDescription(l('اعتماد هذا العميل يسمح للمندوبين بإصدار فواتير له، ويُخطر مُنشئ العميل بالاعتماد.', 'Approving this customer lets reps invoice them and notifies whoever added the customer.')),
                 Action::make('reject')
                     ->label(l('رفض', 'Reject'))
                     ->icon('heroicon-o-x-mark')
@@ -186,7 +188,9 @@ class CustomerResource extends Resource
                         User::find($c->added_by)
                             ?->notify(new CustomerApprovalOutcome($c, 'rejected', $data['rejection_reason']));
                     })
-                    ->requiresConfirmation(),
+                    ->requiresConfirmation()
+                    ->modalHeading(l('رفض العميل', 'Reject customer'))
+                    ->modalDescription(l('رفض هذا العميل يُوقف تنشيطه فلا يمكن إصدار فواتير له، ويُخطر مُنشئه بالسبب. الإجراء مُسجَّل.', 'Rejecting this customer deactivates them so they cannot be invoiced, and notifies whoever added them with your reason. This action is logged.')),
                 EditAction::make(),
             ])
             ->bulkActions([DeleteBulkAction::make()]);
