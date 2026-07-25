@@ -1,0 +1,12 @@
+# Generated / minified / vendored artifacts — never reformat these.
+# lint-staged runs prettier on every staged file, which otherwise un-minifies
+# committed build output (bloating the assets the Dockerfile ships).
+public/build/
+public/js/
+public/sw.js
+vendor/
+node_modules/
+storage/
+bootstrap/cache/
+package-lock.json
+composer.lock
