@@ -104,6 +104,14 @@
     <livewire:app.action-toast />
     {{-- On-shift rep location beacon (CG3). Server enforces on-shift + dedupe. --}}
     <livewire:app.location-tracker />
+    {{-- Global offline status (UI/UX §55). Shown only while the device is offline;
+         the sync engine still queues writes and auto-flushes on reconnect. --}}
+    <div id="offline-indicator" class="offline-indicator" role="status" aria-live="polite" hidden>
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55"/><path d="M5 12.55a10.94 10.94 0 015.17-2.39"/><path d="M10.71 5.05A16 16 0 0122.58 9"/><path d="M1.42 9a15.91 15.91 0 014.7-2.88"/><path d="M8.53 16.11a6 6 0 016.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>
+      </svg>
+      <span>{{ app()->getLocale() === 'ar' ? 'غير متصل — يُحفظ عملك على الجهاز ويُزامَن تلقائيًا' : 'Offline — saved on your device, syncs automatically' }}</span>
+    </div>
   @endauth
 </body>
 </html>

@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/browser";
 import "./offline/sync.js";
+import "./offline/status-indicator.js";
 import "./pwa-register.js";
 
 // Polyfill: Filament v4 table select-all checkbox functions
