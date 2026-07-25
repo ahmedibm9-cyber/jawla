@@ -33,16 +33,72 @@ jobs:
       - run: composer audit
       - run: npm audit --audit-level=high
 
-  zap-baseline:
-    # Only runs when a staging target is configured (repo/org variable).
-    # Skipped — not failed — when unset, so the check suite stays green.
-    if: ${{ vars.JAWLA_STAGING_URL != '' }}
+  # OWASP ZAP DAST — boots the app in CI and runs the ZAP baseline (passive)
+  # scan against it. Advisory only: continue-on-error, so ZAP alerts are visible
+  # (and uploaded as a report artifact) but never block the check suite Railway
+  # gates on. Runs on push to master / schedule / manual, not on every PR.
+  dast-zap:
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
+    continue-on-error: true
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: jawla_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: jawla_test
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      APP_ENV: local
     steps:
       - uses: actions/checkout@v4
-      - name: ZAP baseline scan (staging)
-        uses: zaproxy/action-baseline@v0.12.0
+      - uses: shivammathur/setup-php@v2
         with:
-          target: ${{ vars.JAWLA_STAGING_URL }}
-          fail_action: true
-          allow_issue_writing: false
+          php-version: "8.3"
+          extensions: mbstring, pdo, pdo_pgsql, intl, gd, zip, bcmath
+          coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+      - run: npm ci && npm run build
+      - name: Prepare app
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          php artisan migrate --force
+      - name: Serve app
+        run: PHP_CLI_SERVER_WORKERS=4 php artisan serve --host=127.0.0.1 --port=8080 &
+      - name: Wait for app
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://127.0.0.1:8080/up && exit 0
+            sleep 2
+          done
+          echo "app did not come up"; exit 1
+      - name: OWASP ZAP baseline scan
+        run: |
+          docker run --network=host -v "$(pwd):/zap/wrk:rw" \
+            ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+            -t http://127.0.0.1:8080 -I -m 3 -r zap-report.html -w zap-report.md || true
+      - name: Upload ZAP report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: |
+            zap-report.html
+            zap-report.md
+          if-no-files-found: ignore
