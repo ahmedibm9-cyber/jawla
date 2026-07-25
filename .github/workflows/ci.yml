@@ -52,8 +52,13 @@ jobs:
         run: npm run build
       - name: Enforce PWA asset budgets
         run: npm run audit:pwa-assets
+      # Unit + Feature only, run serially. Browser/E2E (tests/Browser) needs a
+      # Playwright browser + running app and belongs in a dedicated E2E job.
+      # Serial (not --parallel) matches the deterministic single-database setup;
+      # parallel workers race on per-process test DBs (unmigrated relations) and
+      # amplify seeded-state flakiness.
       - name: Pest
-        run: vendor/bin/pest --parallel --processes=4
+        run: vendor/bin/pest --testsuite=Unit,Feature
         env:
           DB_HOST: 127.0.0.1
           DB_DATABASE: jawla_test
