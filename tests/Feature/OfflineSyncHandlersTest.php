@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Enums\StockReason;
 use App\Models\CashBox;
 use App\Models\Company;
 use App\Models\Customer;
@@ -11,6 +12,7 @@ use App\Models\User;
 use App\Models\Visit;
 use App\Models\Warehouse;
 use App\Models\WorkSession;
+use App\Services\Contracts\StockService;
 use App\Services\InvoiceService;
 use App\Services\Sync\SyncHandlerRegistry;
 use App\Services\Sync\SyncService;
@@ -52,6 +54,18 @@ class OfflineSyncHandlersTest extends TestCase
 
         // Ensure customer has sufficient balance for return tests
         $this->customer->update(['balance' => 50000]);
+
+        // Guarantee a deterministic van-stock baseline for the test product.
+        // DemoSeeder seeds only ~10 units into the rep's van and then replays
+        // randomised historical sales that decrement it, so leftover stock is
+        // non-deterministic and can fall below the units these tests sell —
+        // making the "no negative van stock" rule reject the sale for seeding
+        // reasons. Top up through StockService (writes a stock_movement) so the
+        // baseline is always ample.
+        $van = Warehouse::where('user_id', $this->rep->id)->where('type', 'van')->firstOrFail();
+        app(StockService::class)->increment(
+            $van->id, $this->product->id, null, 100, StockReason::Initial, $van
+        );
     }
 
     protected function tearDown(): void
