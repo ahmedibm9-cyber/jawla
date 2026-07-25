@@ -6,10 +6,13 @@ use App\Models\Company;
 use App\Models\Invoice;
 use App\Models\ProformaInvoice;
 use App\Services\EgyptQrStrategy;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class EgyptQrStrategyTest extends TestCase
 {
+    use RefreshDatabase;
+
     private EgyptQrStrategy $strategy;
 
     protected function setUp(): void

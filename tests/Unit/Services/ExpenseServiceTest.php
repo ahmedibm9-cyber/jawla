@@ -7,12 +7,12 @@ use App\Models\CashBox;
 use App\Models\Company;
 use App\Models\User;
 use App\Services\ExpenseService;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExpenseServiceTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     public function test_log_expense_creates_expense_and_decrements_cashbox(): void
     {
