@@ -52,6 +52,19 @@ jobs:
         run: npm run build
       - name: Enforce PWA asset budgets
         run: npm run audit:pwa-assets
+      # Some unit tests exercise the DB without RefreshDatabase, so the schema
+      # must exist before the suite starts. A fresh CI database is empty until
+      # the first RefreshDatabase test migrates it, and the Unit suite (which
+      # runs first) would otherwise hit "relation ... does not exist".
+      - name: Migrate test database
+        run: php artisan migrate --force
+        env:
+          DB_CONNECTION: pgsql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 5432
+          DB_DATABASE: jawla_test
+          DB_USERNAME: postgres
+          DB_PASSWORD: postgres
       # Unit + Feature only, run serially. Browser/E2E (tests/Browser) needs a
       # Playwright browser + running app and belongs in a dedicated E2E job.
       # Serial (not --parallel) matches the deterministic single-database setup;
