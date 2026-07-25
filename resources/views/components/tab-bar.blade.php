@@ -2,8 +2,8 @@
 
 <nav class="tab-bar" aria-label="Bottom navigation">
     <a href="/app" class="tab-bar-brand" aria-label="Jawla">
-        <img src="/images/green-j.webp" alt="Jawla" class="logo-light" width="90" height="30">
-        <img src="/images/white-j.webp" alt="Jawla" class="logo-dark" width="90" height="30">
+        <img src="/images/green-j.webp" alt="Jawla" class="logo-light" width="26" height="30">
+        <img src="/images/white-j.webp" alt="Jawla" class="logo-dark" width="26" height="30">
     </a>
     <a href="/app" class="tab-item {{ $active === 'home' ? 'active' : '' }}" aria-label="{{ __('app.home') }}" @if($active === 'home') aria-current="page" @endif>
         <x-heroicon-o-home />
