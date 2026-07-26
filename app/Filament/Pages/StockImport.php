@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\StockImportPreview;
 use App\Models\Warehouse;
 use App\Models\WarehouseImportLog;
 use App\Services\StockImportService;
@@ -28,6 +29,12 @@ class StockImport extends Page
     public ?array $preview = null;
 
     public ?string $fileName = null;
+
+    public ?string $previewToken = null;
+
+    public bool $requiresApproval = false;
+
+    public bool $approved = false;
 
     public static function getNavigationGroup(): ?string
     {
@@ -79,10 +86,15 @@ class StockImport extends Page
         $storedPath = is_array($data['file']) ? reset($data['file']) : $data['file'];
         $this->fileName = basename((string) $storedPath);
 
-        $this->preview = app(StockImportService::class)->preview(
+        $staged = app(StockImportService::class)->stage(
             Storage::disk('private')->path($storedPath),
             $warehouse,
+            Auth::user(),
         );
+        $this->preview = $staged['preview'];
+        $this->previewToken = $staged['token'];
+        $this->requiresApproval = $staged['requires_approval'];
+        $this->approved = false;
 
         if ($this->preview['valid'] === [] && $this->preview['errors'] !== []) {
             Notification::make()
@@ -95,19 +107,15 @@ class StockImport extends Page
     public function confirmImport(): void
     {
 
-        if ($this->preview === null || $this->preview['valid'] === []) {
+        if ($this->previewToken === null || $this->preview === null || $this->preview['valid'] === []) {
             return;
         }
 
-        $warehouse = Warehouse::where('company_id', Auth::user()->activeCompanyId())
-            ->findOrFail($this->warehouse_id);
-
         try {
-            $log = app(StockImportService::class)->apply(
-                $this->preview,
-                $warehouse,
+            $log = app(StockImportService::class)->confirm(
+                $this->previewToken,
+                Auth::user(),
                 $this->fileName ?? 'upload.csv',
-                Auth::id(),
             );
         } catch (\DomainException $e) {
             Notification::make()->title($e->getMessage())->danger()->send();
@@ -120,7 +128,57 @@ class StockImport extends Page
             ->success()
             ->send();
 
-        $this->reset(['preview', 'file', 'fileName']);
+        $this->reset(['preview', 'file', 'fileName', 'previewToken', 'requiresApproval', 'approved']);
+    }
+
+    public function approveImport(): void
+    {
+        if ($this->previewToken === null) {
+            return;
+        }
+
+        try {
+            app(StockImportService::class)->approve($this->previewToken, Auth::user());
+            $this->approved = true;
+        } catch (\DomainException $e) {
+            Notification::make()->title($e->getMessage())->danger()->send();
+
+            return;
+        }
+
+        Notification::make()
+            ->title(l('تم اعتماد تسوية المخزون.', 'Stock adjustment approved.'))
+            ->success()
+            ->send();
+    }
+
+    public function approvePendingImport(int $previewId): void
+    {
+        try {
+            app(StockImportService::class)->approveById($previewId, Auth::user());
+        } catch (\DomainException $e) {
+            Notification::make()->title($e->getMessage())->danger()->send();
+
+            return;
+        }
+
+        Notification::make()->title(l('تم اعتماد التسوية.', 'Adjustment approved.'))->success()->send();
+    }
+
+    public function getPendingApprovalsProperty()
+    {
+        if (! Auth::user()->hasRole('sales_manager')) {
+            return collect();
+        }
+
+        return StockImportPreview::query()
+            ->where('company_id', Auth::user()->activeCompanyId())
+            ->where('requires_approval', true)
+            ->where('status', 'staged')
+            ->with(['warehouse', 'stagedBy'])
+            ->latest()
+            ->limit(50)
+            ->get();
     }
 
     public function downloadTemplate(): StreamedResponse

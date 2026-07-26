@@ -15,4 +15,5 @@ enum StockReason: string
     case TransitIn = 'transit_in';
     case TransitOut = 'transit_out';
     case InterCompany = 'inter_company';
+    case Reversal = 'reversal';
 }

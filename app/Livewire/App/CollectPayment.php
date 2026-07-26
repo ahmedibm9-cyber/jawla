@@ -82,10 +82,6 @@ class CollectPayment extends Component
         $this->success = true;
         $this->successMessage = __('app.payment_collected').' — '.number_format((float) $payment->amount, 2);
 
-        // Offer a brief undo (B1) — reverses via PaymentService::cancel.
-        $this->dispatch('action-completed', type: 'payment', id: $payment->id,
-            message: $this->successMessage);
-
         try {
             $this->paymentPrintPayload = $printer->paymentPayload($payment);
         } catch (\Throwable) {

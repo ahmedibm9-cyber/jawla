@@ -149,3 +149,10 @@ startup and appends what it's doing so others don't conflict or duplicate.
 - **Files:** `railway.toml`, production bootstrap/seeding commands and seeders, tenancy context/scope/middleware/providers, Filament panel middleware, live-map view, role seeding/migration support, focused tests, and `docs/production-readiness/`.
 - **Status:** done
 - **Notes:** Phase 1 exit gates passed. The exact full CI command passed 496/496 tests and 1,402 assertions; Vite, Pint, and Playwright XSS gates passed. No production services, credentials, or data were used.
+
+## codex-remediation-agent — 2026-07-26 (Phase 2 money and inventory integrity)
+
+- **Task:** Implement PR-002, PR-003, PR-006, PR-007, PR-009, PR-010, PR-028, and PR-031 with PostgreSQL lifecycle, tamper, append-only, and concurrency evidence.
+- **Files:** Stock import, invoice/payment/return/reversal/pricing/stock services and models; forward-only migrations; related Filament/Livewire entry points; focused tests; and `docs/production-readiness/`.
+- **Status:** in_progress
+- **Notes:** All earlier ownership entries are done. Phase 2 proceeds test-first without production services, credentials, or data.

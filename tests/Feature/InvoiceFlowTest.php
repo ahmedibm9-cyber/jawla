@@ -57,10 +57,10 @@ class InvoiceFlowTest extends TestCase
             'customer_id' => $customer->id,
             'product_id' => $product->id,
             'quantity' => 5,
-            'unit_price' => 1000,
+            'unit_price' => $product->price,
         ]);
 
-        $this->assertSame(InvoiceStatus::Submitted, $invoice->status);
+        $this->assertSame(InvoiceStatus::Issued, $invoice->status);
         $this->assertSame($stockBefore - 5, (float) Stock::where('warehouse_id', $van->id)
             ->where('product_id', $product->id)->value('quantity'));
         $this->assertSame((float) $invoice->total, (float) $customer->fresh()->balance);
@@ -103,7 +103,7 @@ class InvoiceFlowTest extends TestCase
                 'customer_id' => $customer->id,
                 'product_id' => $product->id,
                 'quantity' => $stockBefore + 10,
-                'unit_price' => 1000,
+                'unit_price' => $product->price,
             ]);
         } catch (InsufficientStockException $e) {
             $threw = true;
@@ -133,7 +133,7 @@ class InvoiceFlowTest extends TestCase
                 'customer_id' => $customer->id,
                 'product_id' => $product->id,
                 'quantity' => 1,
-                'unit_price' => 100,
+                'unit_price' => $product->price,
             ]);
             $this->fail('Expected a sale without a van warehouse to be rejected.');
         } catch (\DomainException $exception) {
@@ -167,7 +167,7 @@ class InvoiceFlowTest extends TestCase
                 'customer_id' => $foreignCustomer->id,
                 'product_id' => $product->id,
                 'quantity' => 1,
-                'unit_price' => 100,
+                'unit_price' => $product->price,
             ]);
         } finally {
             $this->assertSame($invoicesBefore, Invoice::count());
@@ -202,7 +202,7 @@ class InvoiceFlowTest extends TestCase
                 'customer_id' => $customer->id,
                 'product_id' => $foreignProduct->id,
                 'quantity' => 1,
-                'unit_price' => 100,
+                'unit_price' => $foreignProduct->price,
             ]);
         } finally {
             $this->assertSame($invoicesBefore, Invoice::count());
@@ -229,7 +229,7 @@ class InvoiceFlowTest extends TestCase
             'customer_id' => $customer->id,
             'product_id' => $product->id,
             'quantity' => 2,
-            'unit_price' => 1200,
+            'unit_price' => $product->price,
         ]);
 
         $total = (float) $invoice->total;
@@ -251,7 +251,7 @@ class InvoiceFlowTest extends TestCase
         $this->assertSame($total, (float) $cashBox->balance);
     }
 
-    public function test_cancel_invoice_reverses_stock_and_balance(): void
+    public function test_rep_cannot_cancel_a_committed_invoice(): void
     {
         $rep = User::where('email', 'rep@jawla.test')->first();
         $this->actingAs($rep);
@@ -274,18 +274,22 @@ class InvoiceFlowTest extends TestCase
             'customer_id' => $customer->id,
             'product_id' => $product->id,
             'quantity' => 3,
-            'unit_price' => 1000,
+            'unit_price' => $product->price,
         ]);
 
         $balanceAfter = (float) $customer->fresh()->balance;
         $this->assertGreaterThan(0, $balanceAfter);
 
-        app(InvoiceService::class)->cancel($invoice, $rep->id, 'test cancel');
+        try {
+            app(InvoiceService::class)->cancel($invoice, $rep->id, 'test cancel');
+            $this->fail('A sales rep cancelled a committed invoice.');
+        } catch (\App\Exceptions\Domain\DomainException) {
+        }
 
         $stockAfter = (float) Stock::where('warehouse_id', $van->id)
             ->where('product_id', $product->id)->value('quantity');
-        $this->assertSame($stockBefore, $stockAfter);
-        $this->assertSame(0.0, (float) $customer->fresh()->balance);
-        $this->assertSame(InvoiceStatus::Cancelled, $invoice->fresh()->status);
+        $this->assertSame($stockBefore - 3, $stockAfter);
+        $this->assertSame($balanceAfter, (float) $customer->fresh()->balance);
+        $this->assertSame(InvoiceStatus::Issued, $invoice->fresh()->status);
     }
 }

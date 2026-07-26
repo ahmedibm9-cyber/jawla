@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\InvoiceService;
 use App\Services\Contracts\LineItemInput;
+use App\Services\Contracts\PricingService;
 use App\Support\ThermalPrintFormatter;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -54,6 +55,7 @@ class SalesFlow extends Component
         $this->selectedCustomer = Customer::find($id);
         $this->customerSearch = '';
         $this->errorMessage = '';
+        $this->recalcCart();
     }
 
     public function addToCart(int $productId): void
@@ -132,17 +134,6 @@ class SalesFlow extends Component
         $this->recalcCart();
     }
 
-    public function updatePrice(int $index, float $price): void
-    {
-        if (! isset($this->cart[$index])) {
-            return;
-        }
-
-        // Floor at 0.01 — zero-price requires explicit manager approval
-        $this->cart[$index]['price'] = max(0.01, $price);
-        $this->recalcCart();
-    }
-
     public function removeItem(int $index): void
     {
         unset($this->cart[$index]);
@@ -171,6 +162,18 @@ class SalesFlow extends Component
                 : 'Session error — please log in again';
 
             return;
+        }
+
+        if ($this->customerId > 0) {
+            foreach ($this->cart as &$cartItem) {
+                $cartItem['price'] = (float) app(PricingService::class)->effectivePrice(
+                    (int) auth()->user()->activeCompanyId(),
+                    $this->customerId,
+                    (int) $cartItem['product_id'],
+                    number_format((float) ($cartItem['quantity'] ?? 0), 3, '.', ''),
+                );
+            }
+            unset($cartItem);
         }
 
         $inputs = [];
@@ -265,10 +268,6 @@ class SalesFlow extends Component
         $this->createdInvoiceId = $invoice->id;
         $this->step = 'done';
         $this->successMessage = __('app.invoice_created').' #'.$invoice->invoice_number;
-
-        // Offer a brief undo (B1) — reverses via InvoiceService::cancel.
-        $this->dispatch('action-completed', type: 'sale', id: $invoice->id,
-            message: __('app.invoice_created').' #'.$invoice->invoice_number);
 
         try {
             /** @var ThermalPrintFormatter $printer */

@@ -153,7 +153,9 @@
                                 </div>
                                 <div class="form-group">
                                     <label for="cart-price-{{ $i }}" class="form-label">{{ __('app.price') }}</label>
-                                    <input type="number" id="cart-price-{{ $i }}" wire:model.live="cart.{{ $i }}.price" min="0" step="0.01" inputmode="decimal" class="form-input">
+                                    <output id="cart-price-{{ $i }}" class="form-input" aria-live="polite">
+                                        {{ number_format($item['price'], 2) }}
+                                    </output>
                                 </div>
                             </div>
                             <div class="text-end">

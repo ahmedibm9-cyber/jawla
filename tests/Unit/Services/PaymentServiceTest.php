@@ -14,6 +14,7 @@ use App\Models\Warehouse;
 use App\Services\Contracts\StockService;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -21,10 +22,24 @@ class PaymentServiceTest extends TestCase
 {
     use DatabaseTransactions;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(RoleSeeder::class);
+    }
+
+    private function salesRep(Company $company): User
+    {
+        $rep = User::factory()->create(['company_id' => $company->id]);
+        $rep->assignRole('sales_rep');
+
+        return $rep;
+    }
+
     public function test_collect_payment_creates_payment(): void
     {
         $company = Company::factory()->create();
-        $rep = User::factory()->create(['company_id' => $company->id]);
+        $rep = $this->salesRep($company);
         $customer = Customer::factory()->create(['company_id' => $company->id]);
 
         $payment = app(PaymentService::class)->collect(
@@ -43,7 +58,7 @@ class PaymentServiceTest extends TestCase
     public function test_collect_payment_credits_cashbox(): void
     {
         $company = Company::factory()->create();
-        $rep = User::factory()->create(['company_id' => $company->id]);
+        $rep = $this->salesRep($company);
         $customer = Customer::factory()->create(['company_id' => $company->id]);
 
         app(PaymentService::class)->collect(
@@ -62,7 +77,7 @@ class PaymentServiceTest extends TestCase
     public function test_collect_payment_rejects_a_customer_from_another_company_before_any_write(): void
     {
         $company = Company::factory()->create();
-        $rep = User::factory()->create(['company_id' => $company->id]);
+        $rep = $this->salesRep($company);
         $foreignCustomer = Customer::factory()->create(['company_id' => Company::factory()->create()->id]);
 
         $this->expectException(DomainException::class);
@@ -83,7 +98,7 @@ class PaymentServiceTest extends TestCase
     public function test_collect_payment_adopts_a_legacy_cashbox_instead_of_creating_a_second_one(): void
     {
         $company = Company::factory()->create();
-        $rep = User::factory()->create(['company_id' => $company->id]);
+        $rep = $this->salesRep($company);
         $customer = Customer::factory()->create(['company_id' => $company->id]);
         $legacyCashBox = CashBox::withoutGlobalScopes()->create([
             'company_id' => null,
@@ -107,12 +122,12 @@ class PaymentServiceTest extends TestCase
     public function test_collect_payment_updates_invoice_status_to_paid(): void
     {
         $company = Company::factory()->create();
-        $rep = User::factory()->create(['company_id' => $company->id]);
+        $rep = $this->salesRep($company);
         $van = Warehouse::factory()->create([
             'company_id' => $company->id, 'type' => 'van', 'user_id' => $rep->id,
         ]);
         $customer = Customer::factory()->create(['company_id' => $company->id]);
-        $product = Product::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id, 'price' => 500]);
 
         $this->actingAs($rep);
 
@@ -148,13 +163,15 @@ class PaymentServiceTest extends TestCase
 
     public function test_cancel_payment_reverses_cashbox_and_restores_invoice(): void
     {
+        $this->seed(RoleSeeder::class);
         $company = Company::factory()->create();
-        $rep = User::factory()->create(['company_id' => $company->id]);
+        $rep = $this->salesRep($company);
+        $rep->assignRole('sales_manager');
         $van = Warehouse::factory()->create([
             'company_id' => $company->id, 'type' => 'van', 'user_id' => $rep->id,
         ]);
         $customer = Customer::factory()->create(['company_id' => $company->id]);
-        $product = Product::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id, 'price' => 1000]);
 
         $this->actingAs($rep);
 
@@ -191,20 +208,20 @@ class PaymentServiceTest extends TestCase
         $this->assertSame(0.0, $cashBoxAfter);
 
         $invoice->refresh();
-        $this->assertSame(InvoiceStatus::PartiallyPaid, $invoice->status);
+        $this->assertSame(InvoiceStatus::Issued, $invoice->status);
         $this->assertSame(0.0, (float) $invoice->paid_amount);
         $this->assertSame($total, (float) $invoice->remaining_amount);
 
         $this->assertNotNull($payment->fresh()->cancelled_at);
     }
 
-    public function test_collect_payment_rejects_an_overpayment_without_creating_a_payment(): void
+    public function test_collect_payment_preserves_overpayment_as_customer_credit(): void
     {
         $company = Company::factory()->create();
-        $rep = User::factory()->create(['company_id' => $company->id]);
+        $rep = $this->salesRep($company);
         $van = Warehouse::factory()->create(['company_id' => $company->id, 'type' => 'van', 'user_id' => $rep->id]);
         $customer = Customer::factory()->create(['company_id' => $company->id]);
-        $product = Product::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id, 'price' => 100]);
         $this->actingAs($rep);
         app(StockService::class)->increment($van->id, $product->id, null, 10, StockReason::Initial, $product);
         $invoice = app(InvoiceService::class)->create([
@@ -212,18 +229,19 @@ class PaymentServiceTest extends TestCase
             'product_id' => $product->id, 'quantity' => 1, 'unit_price' => 100,
         ]);
 
-        $this->expectException(DomainException::class);
-        app(PaymentService::class)->collect(
+        $payment = app(PaymentService::class)->collect(
             $company->id, $rep->id, $customer->id, (float) $invoice->total + 1, 'cash', $invoice->id,
         );
 
-        $this->assertDatabaseCount('payments', 0);
+        $this->assertDatabaseCount('payments', 1);
+        $this->assertSame('1.00', $payment->unallocated_amount);
+        $this->assertDatabaseHas('customer_credits', ['payment_id' => $payment->id, 'amount' => '1.00']);
     }
 
     public function test_non_cash_method_does_not_credit_cashbox(): void
     {
         $company = Company::factory()->create();
-        $rep = User::factory()->create(['company_id' => $company->id]);
+        $rep = $this->salesRep($company);
         $customer = Customer::factory()->create(['company_id' => $company->id]);
 
         app(PaymentService::class)->collect(

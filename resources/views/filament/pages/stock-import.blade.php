@@ -1,6 +1,7 @@
 <x-filament-panels::page>
     @php($l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en)
 
+    @if (auth()->user()->hasRole('warehouse_keeper'))
     <form wire:submit.prevent="runPreview" class="space-y-6">
         {{ $this->form }}
 
@@ -36,6 +37,15 @@
             @endif
 
             @if ($preview['valid'] !== [])
+                @if ($requiresApproval)
+                    <div class="mb-4 rounded-lg border border-warning-300 bg-warning-50 p-3 text-sm text-warning-800">
+                        {{ $l(
+                            'يتضمن الملف رصيداً افتتاحياً أو فرقاً كبيراً ويتطلب اعتماد مدير المبيعات قبل التنفيذ.',
+                            'This file contains an opening balance or large variance and requires sales-manager approval before execution.',
+                        ) }}
+                    </div>
+                @endif
+
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead>
@@ -60,10 +70,25 @@
                 </div>
 
                 <div class="mt-4">
+                    @if ($requiresApproval && !$approved && auth()->user()->hasRole('sales_manager'))
+                        <x-filament::button
+                            color="warning"
+                            wire:click="approveImport"
+                            wire:loading.attr="disabled"
+                            wire:confirm="{{ $l(
+                                'أنت تعتمد رصيداً افتتاحياً أو فرق مخزون كبير. سيتم تسجيل هويتك ووقت الاعتماد. متابعة؟',
+                                'You are approving an opening balance or large stock variance. Your identity and approval time will be recorded. Continue?',
+                            ) }}"
+                        >
+                            {{ $l('اعتماد التسوية', 'Approve Adjustment') }}
+                        </x-filament::button>
+                    @endif
+
                     <x-filament::button
                         color="danger"
                         wire:click="confirmImport"
                         wire:loading.attr="disabled"
+                        @disabled($requiresApproval && !$approved)
                         wire:confirm="{{ $l(
                             'سيتم تعديل أرصدة المخزون لتطابق العد المستورد وإنشاء حركات مخزون مطابقة. لا يمكن التراجع. متابعة؟',
                             'Stock balances will be adjusted to match the imported counts and matching stock movements will be created. This cannot be undone. Continue?',
@@ -72,6 +97,37 @@
                         <span wire:loading.remove>{{ $l('تأكيد الاستيراد', 'Confirm Import') }}</span>
                         <span wire:loading>{{ $l('جاري الاستيراد…', 'Importing…') }}</span>
                     </x-filament::button>
+                </div>
+            @endif
+        </x-filament::section>
+    @endif
+    @endif
+
+    @if (auth()->user()->hasRole('sales_manager'))
+        <x-filament::section :heading="$l('تسويات تنتظر الاعتماد', 'Adjustments awaiting approval')">
+            @if ($this->pendingApprovals->isEmpty())
+                <p class="text-sm text-gray-500">{{ $l('لا توجد تسويات معلقة.', 'No pending adjustments.') }}</p>
+            @else
+                <div class="space-y-3">
+                    @foreach ($this->pendingApprovals as $pending)
+                        <div class="flex items-center justify-between gap-4 rounded-lg border p-3">
+                            <div class="text-sm">
+                                <strong>{{ $pending->warehouse?->name_ar }}</strong>
+                                <span>— {{ $pending->stagedBy?->name }}</span>
+                                <span>— {{ count($pending->parsed_rows) }} {{ $l('صف', 'rows') }}</span>
+                            </div>
+                            <x-filament::button
+                                color="warning"
+                                wire:click="approvePendingImport({{ $pending->id }})"
+                                wire:confirm="{{ $l(
+                                    'أنت تعتمد رصيداً افتتاحياً أو فرق مخزون كبير. سيتم تسجيل هويتك ووقت الاعتماد. متابعة؟',
+                                    'You are approving an opening balance or large stock variance. Your identity and approval time will be recorded. Continue?',
+                                ) }}"
+                            >
+                                {{ $l('اعتماد', 'Approve') }}
+                            </x-filament::button>
+                        </div>
+                    @endforeach
                 </div>
             @endif
         </x-filament::section>

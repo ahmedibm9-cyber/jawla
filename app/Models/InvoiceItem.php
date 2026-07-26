@@ -10,12 +10,13 @@ class InvoiceItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['invoice_id', 'product_id', 'batch_id', 'quantity', 'unit_price', 'line_total'];
+    protected $fillable = ['invoice_id', 'product_id', 'batch_id', 'quantity', 'unit_price', 'line_total', 'tax_amount'];
 
     protected $casts = [
         'quantity' => 'decimal:3',
         'unit_price' => 'decimal:2',
         'line_total' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
     ];
 
     public function invoice(): BelongsTo

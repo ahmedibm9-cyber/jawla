@@ -4,9 +4,8 @@ namespace App\Livewire\App;
 
 use App\Livewire\Concerns\CapturesPhotos;
 use App\Models\Customer;
-use App\Models\Product;
-use App\Models\Stock;
-use App\Models\Warehouse;
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use App\Services\ReturnService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -17,6 +16,8 @@ class LogReturn extends Component
     use CapturesPhotos;
 
     public ?int $customer_id = null;
+
+    public ?int $against_invoice_id = null;
 
     public string $reason = '';
 
@@ -30,12 +31,12 @@ class LogReturn extends Component
 
     public function mount(): void
     {
-        $this->items[] = ['product_id' => '', 'quantity' => 1, 'unit_price' => 0];
+        $this->addItem();
     }
 
     public function addItem(): void
     {
-        $this->items[] = ['product_id' => '', 'quantity' => 1, 'unit_price' => 0];
+        $this->items[] = ['invoice_item_id' => '', 'quantity' => 1, 'condition' => 'sellable'];
     }
 
     public function removeItem(int $index): void
@@ -47,12 +48,13 @@ class LogReturn extends Component
     public function submit(): void
     {
         $this->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'reason' => 'nullable|string|max:500',
+            'customer_id' => 'required|integer|exists:customers,id',
+            'against_invoice_id' => 'required|integer|exists:invoices,id',
+            'reason' => 'required|string|max:500',
             'items' => 'required|array|min:1',
-            'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|numeric|min:0.01|max:9999',
-            'items.*.unit_price' => 'required|numeric|min:0.01',
+            'items.*.invoice_item_id' => 'required|integer|exists:invoice_items,id',
+            'items.*.quantity' => 'required|numeric|min:0.001|max:9999',
+            'items.*.condition' => 'required|in:sellable,damaged',
         ]);
 
         try {
@@ -60,25 +62,19 @@ class LogReturn extends Component
                 companyId: auth()->user()->activeCompanyId(),
                 userId: auth()->id(),
                 customerId: $this->customer_id,
-                items: array_map(fn ($item) => [
-                    'product_id' => (int) $item['product_id'],
+                items: array_map(fn (array $item) => [
+                    'invoice_item_id' => (int) $item['invoice_item_id'],
                     'quantity' => (float) $item['quantity'],
-                    'unit_price' => (float) $item['unit_price'],
+                    'condition' => $item['condition'],
                 ], $this->items),
+                againstInvoiceId: $this->against_invoice_id,
                 reason: $this->reason,
             );
 
             $this->attachPhotos($return);
-
             $this->success = true;
             $this->successMessage = __('app.return_submitted').' — '.$return->return_number;
-
-            // Offer a brief undo (B1) — reverses via ReturnService::cancel.
-            $this->dispatch('action-completed', type: 'return', id: $return->id,
-                message: $this->successMessage);
-
-            $this->reset(['customer_id', 'reason', 'items']);
-            $this->items[] = ['product_id' => '', 'quantity' => 1, 'unit_price' => 0];
+            $this->resetForm();
         } catch (\Throwable $e) {
             $this->errorMessage = app()->getLocale() === 'ar'
                 ? 'حدث خطأ أثناء إرسال المرتجع: '.$e->getMessage()
@@ -86,56 +82,47 @@ class LogReturn extends Component
         }
     }
 
-    /**
-     * Offline path: the client has already enqueued the return to the outbox
-     * (IndexedDB) and will sync it when back online. Show the queued confirmation
-     * and clear the form — no server write happens here.
-     */
     public function queueOffline(): void
     {
         $this->success = true;
         $this->successMessage = app()->getLocale() === 'ar'
-            ? 'تم حفظ المرتجع دون اتصال وستتم مزامنته تلقائيًا عند عودة الاتصال.'
+            ? 'تم حفظ المرتجع دون اتصال وستتم مزامنته تلقائياً عند عودة الاتصال.'
             : 'Return saved offline — it will sync automatically when you are back online.';
+        $this->resetForm();
+    }
 
-        $this->reset(['customer_id', 'reason', 'items']);
-        $this->items[] = ['product_id' => '', 'quantity' => 1, 'unit_price' => 0];
+    private function resetForm(): void
+    {
+        $this->reset(['customer_id', 'against_invoice_id', 'reason', 'items']);
+        $this->addItem();
     }
 
     public function render()
     {
         $user = auth()->user();
-
+        $companyId = $user->activeCompanyId();
         $customers = Customer::query()
-            ->where('company_id', $user->activeCompanyId())
+            ->where('company_id', $companyId)
             ->where('is_active', true)
             ->where('status', 'approved')
             ->orderBy('name_ar')
             ->limit(100)
             ->get();
-
-        $products = Product::query()
-            ->where('company_id', $user->activeCompanyId())
-            ->where('is_active', true)
-            ->orderBy('name_ar')
+        $invoices = Invoice::query()
+            ->where('company_id', $companyId)
+            ->when($this->customer_id, fn ($query) => $query->where('customer_id', $this->customer_id))
+            ->whereIn('status', ['issued', 'submitted', 'partially_paid', 'paid'])
+            ->latest('issued_at')
             ->limit(100)
             ->get();
+        $invoiceLines = $this->against_invoice_id
+            ? InvoiceItem::query()
+                ->where('invoice_id', $this->against_invoice_id)
+                ->with('product:id,name_ar,name_en')
+                ->limit(200)
+                ->get()
+            : collect();
 
-        $vanWarehouse = Warehouse::where('user_id', $user->id)
-            ->where('type', 'van')->first();
-
-        $stockLookup = [];
-        if ($vanWarehouse) {
-            $stockLookup = Stock::where('warehouse_id', $vanWarehouse->id)
-                ->pluck('quantity', 'product_id')
-                ->map(fn ($q) => (float) $q)
-                ->toArray();
-        }
-
-        return view('livewire.app.log-return', [
-            'customers' => $customers,
-            'products' => $products,
-            'stockLookup' => $stockLookup,
-        ]);
+        return view('livewire.app.log-return', compact('customers', 'invoices', 'invoiceLines'));
     }
 }

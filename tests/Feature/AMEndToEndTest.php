@@ -20,6 +20,7 @@ use App\Services\ComplaintService;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
 use App\Services\PdfService;
+use App\Services\PricingService;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -136,6 +137,16 @@ class AMEndToEndTest extends TestCase
         // AM7: rep negotiates at 950 (accepted) — must be >= floor (900)
         $floor = 1000 - 100;
         $this->assertGreaterThanOrEqual($floor, 950);
+        app(PricingService::class)->createCustomerOverride(
+            manager: $manager,
+            companyId: $rep->company_id,
+            customerId: $customer->id,
+            productId: $productPP->id,
+            price: '950.00',
+            validFrom: today(),
+            validUntil: today()->addDay(),
+            reason: 'Approved AM7 negotiated price',
+        );
 
         $bankAccount = CompanyBankAccount::where('company_id', $rep->company_id)->first();
 

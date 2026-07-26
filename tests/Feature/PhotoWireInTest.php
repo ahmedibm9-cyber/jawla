@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\ReturnRecord;
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Services\InvoiceService;
 use App\Support\ActiveCompanyContext;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -91,13 +92,20 @@ class PhotoWireInTest extends TestCase
     public function test_return_attaches_captured_photos_on_save(): void
     {
         $photo = $this->orphanPhoto();
+        $invoice = app(InvoiceService::class)->create([
+            'company_id' => $this->rep->company_id,
+            'customer_id' => $this->customer->id,
+            'items' => [['product_id' => $this->product->id, 'quantity' => 2, 'unit_price' => $this->product->price]],
+        ]);
 
         Livewire::test(LogReturn::class)
             ->call('addPhoto', $photo->id)
             ->set('customer_id', $this->customer->id)
-            ->set('items.0.product_id', $this->product->id)
+            ->set('against_invoice_id', $invoice->id)
+            ->set('reason', 'Damaged package')
+            ->set('items.0.invoice_item_id', $invoice->items()->firstOrFail()->id)
             ->set('items.0.quantity', 1)
-            ->set('items.0.unit_price', 10)
+            ->set('items.0.condition', 'sellable')
             ->call('submit');
 
         $return = ReturnRecord::query()->latest('id')->firstOrFail();

@@ -13,6 +13,7 @@ use App\Services\Contracts\StockService;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
 use App\Services\ReversalService;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
 
@@ -36,9 +37,12 @@ class ReversalServiceTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(RoleSeeder::class);
         $this->company = Company::factory()->create();
         $this->rep = User::factory()->create(['company_id' => $this->company->id]);
+        $this->rep->assignRole('sales_rep');
         $this->admin = User::factory()->create(['company_id' => $this->company->id]);
+        $this->admin->assignRole('sales_manager');
         $this->van = Warehouse::factory()->create([
             'company_id' => $this->company->id, 'type' => 'van', 'user_id' => $this->rep->id,
         ]);
@@ -53,6 +57,7 @@ class ReversalServiceTest extends TestCase
 
     public function test_reverse_invoice_restores_stock(): void
     {
+        $this->product->update(['price' => 500]);
         $this->actingAs($this->rep);
         $invoice = app(InvoiceService::class)->create([
             'company_id' => $this->company->id,
@@ -67,11 +72,12 @@ class ReversalServiceTest extends TestCase
 
         $stockAfter = app(StockService::class)->balance($this->van->id, $this->product->id);
         $this->assertGreaterThan($stockBefore, $stockAfter);
-        $this->assertEquals(InvoiceStatus::Cancelled, $reversed->fresh()->status);
+        $this->assertEquals(InvoiceStatus::Voided, $reversed->fresh()->status);
     }
 
     public function test_reverse_payment_restores_invoice_balance(): void
     {
+        $this->product->update(['price' => 200]);
         $this->actingAs($this->rep);
         $invoice = app(InvoiceService::class)->create([
             'company_id' => $this->company->id,
@@ -106,6 +112,7 @@ class ReversalServiceTest extends TestCase
 
     public function test_reverse_invoice_restores_customer_balance(): void
     {
+        $this->product->update(['price' => 100]);
         $this->customer->update(['balance' => 1000]);
         $balanceBefore = $this->customer->fresh()->balance;
 

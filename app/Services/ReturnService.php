@@ -2,12 +2,19 @@
 
 namespace App\Services;
 
+use App\Enums\InvoiceStatus;
 use App\Enums\StockReason;
 use App\Exceptions\Domain\DomainException;
+use App\Models\CreditNote;
+use App\Models\CreditNoteItem;
 use App\Models\Customer;
-use App\Models\Product;
+use App\Models\CustomerCredit;
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use App\Models\ReturnItem;
 use App\Models\ReturnRecord;
+use App\Models\Reversal;
+use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\Contracts\DocumentNumberService;
 use App\Services\Contracts\StockService;
@@ -16,47 +23,80 @@ use Illuminate\Support\Facades\DB;
 
 class ReturnService
 {
-    public function __construct(
-        private readonly StockService $stock,
-    ) {}
+    public function __construct(private readonly StockService $stock) {}
 
-    public function create(int $companyId, int $userId, int $customerId, array $items, ?int $againstInvoiceId = null, ?int $visitId = null, string $reason = ''): ReturnRecord
-    {
+    public function create(
+        int $companyId,
+        int $userId,
+        int $customerId,
+        array $items,
+        ?int $againstInvoiceId = null,
+        ?int $visitId = null,
+        string $reason = '',
+    ): ReturnRecord {
         app(ActiveCompanyContext::class)->assertMatches($companyId);
 
-        return DB::transaction(function () use ($companyId, $userId, $customerId, $items, $againstInvoiceId, $visitId, $reason): ReturnRecord {
-            $vanWarehouse = Warehouse::where('user_id', $userId)
+        if ($againstInvoiceId === null) {
+            throw new DomainException('Returns must reference an original issued invoice.');
+        }
+        if ($items === []) {
+            throw new DomainException('A return requires at least one invoice line.');
+        }
+
+        return DB::transaction(function () use (
+            $companyId,
+            $userId,
+            $customerId,
+            $items,
+            $againstInvoiceId,
+            $visitId,
+            $reason,
+        ): ReturnRecord {
+            $actor = User::withoutGlobalScopes()->whereKey($userId)->lockForUpdate()->firstOrFail();
+            if (! $actor->hasCompanyAccess($companyId) || ! $actor->hasRole('sales_rep')) {
+                throw new DomainException('Only an assigned sales rep may create an invoice-linked return.');
+            }
+            $invoice = Invoice::whereKey($againstInvoiceId)
+                ->where('company_id', $companyId)
+                ->lockForUpdate()
+                ->first();
+            if (! $invoice || (int) $invoice->customer_id !== $customerId) {
+                throw new DomainException('The original invoice does not belong to this company and customer.');
+            }
+            if (! in_array($invoice->status, [
+                InvoiceStatus::Issued,
+                InvoiceStatus::Submitted,
+                InvoiceStatus::PartiallyPaid,
+                InvoiceStatus::Paid,
+            ], true)) {
+                throw new DomainException('Returns are allowed only against a non-terminal issued invoice.');
+            }
+
+            $customer = Customer::whereKey($customerId)
+                ->where('company_id', $companyId)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $van = Warehouse::where('user_id', $userId)
                 ->where('company_id', $companyId)
                 ->where('type', 'van')
                 ->where('is_active', true)
                 ->lockForUpdate()
                 ->first();
-            if (! $vanWarehouse) {
-                throw new DomainException(
-                    app()->getLocale() === 'ar'
-                        ? 'لا يمكن تسجيل مرتجع بدون مخزن سيارة نشط للمندوب'
-                        : 'A return requires an active van warehouse for the seller.'
-                );
+            if (! $van) {
+                throw new DomainException('An active same-company van warehouse is required for returns.');
             }
-            $customer = Customer::whereKey($customerId)
-                ->where('company_id', $companyId)
+            $quarantine = Warehouse::where('company_id', $companyId)
+                ->where('type', 'quarantine')
+                ->where('is_active', true)
                 ->lockForUpdate()
                 ->first();
-            if (! $customer) {
-                throw new DomainException($this->companyMessage('customer'));
-            }
-
-            $productIds = array_values(array_unique(array_column($items, 'product_id')));
-            if (Product::where('company_id', $companyId)->whereIn('id', $productIds)->count() !== count($productIds)) {
-                throw new DomainException($this->companyMessage('product'));
-            }
 
             $return = ReturnRecord::create([
                 'company_id' => $companyId,
                 'customer_id' => $customerId,
                 'user_id' => $userId,
                 'visit_id' => $visitId,
-                'against_invoice_id' => $againstInvoiceId,
+                'against_invoice_id' => $invoice->id,
                 'return_number' => app(DocumentNumberService::class)->generate('sales_return', $companyId),
                 'total' => 0,
                 'reason' => $reason,
@@ -65,42 +105,146 @@ class ReturnService
                 'posting_date' => today(),
             ]);
 
-            $total = 0;
-            foreach ($items as $item) {
-                $lineTotal = $item['unit_price'] * $item['quantity'];
-                ReturnItem::create([
-                    'return_id' => $return->id,
-                    'product_id' => $item['product_id'],
-                    'batch_id' => $item['batch_id'] ?? null,
-                    'quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price'],
-                    'line_total' => $lineTotal,
-                ]);
-                $total += $lineTotal;
+            $subtotal = '0.00';
+            $taxTotal = '0.00';
+            $seen = [];
+            foreach ($items as $input) {
+                $invoiceItemId = (int) ($input['invoice_item_id'] ?? 0);
+                if ($invoiceItemId < 1 || isset($seen[$invoiceItemId])) {
+                    throw new DomainException('Each returned invoice line must be present exactly once.');
+                }
+                $seen[$invoiceItemId] = true;
 
+                $original = InvoiceItem::whereKey($invoiceItemId)
+                    ->where('invoice_id', $invoice->id)
+                    ->lockForUpdate()
+                    ->first();
+                if (! $original) {
+                    throw new DomainException('The returned line is not part of the original invoice.');
+                }
+
+                $quantity = number_format((float) ($input['quantity'] ?? 0), 3, '.', '');
+                if (bccomp($quantity, '0.000', 3) <= 0) {
+                    throw new DomainException('Return quantity must be greater than zero.');
+                }
+                $prior = (string) ReturnItem::query()
+                    ->where('invoice_item_id', $original->id)
+                    ->whereHas('return', fn ($query) => $query->where('status', '!=', 'cancelled'))
+                    ->sum('quantity');
+                $remaining = bcsub((string) $original->quantity, $prior, 3);
+                if (bccomp($quantity, $remaining, 3) > 0) {
+                    throw new DomainException('Return quantity exceeds sold quantity less prior accepted returns.');
+                }
+
+                $condition = (string) ($input['condition'] ?? 'sellable');
+                if (! in_array($condition, ['sellable', 'damaged'], true)) {
+                    throw new DomainException('Return condition must be sellable or damaged.');
+                }
+                if ($condition === 'damaged' && $quarantine === null) {
+                    throw new DomainException('Damaged returns require an active quarantine warehouse.');
+                }
+
+                $lineTotal = number_format((float) bcmul($quantity, (string) $original->unit_price, 5), 2, '.', '');
+                $taxAmount = number_format(
+                    (float) bcmul(
+                        (string) $original->tax_amount,
+                        bcdiv($quantity, (string) $original->quantity, 8),
+                        8,
+                    ),
+                    2,
+                    '.',
+                    '',
+                );
+                $lineGross = bcadd($lineTotal, $taxAmount, 2);
+
+                $returnItem = ReturnItem::create([
+                    'return_id' => $return->id,
+                    'invoice_item_id' => $original->id,
+                    'product_id' => $original->product_id,
+                    'batch_id' => $original->batch_id,
+                    'condition' => $condition,
+                    'quantity' => $quantity,
+                    'unit_price' => $original->unit_price,
+                    'line_total' => $lineTotal,
+                    'tax_amount' => $taxAmount,
+                    'total' => $lineGross,
+                ]);
+                $subtotal = bcadd($subtotal, $lineTotal, 2);
+                $taxTotal = bcadd($taxTotal, $taxAmount, 2);
+
+                $destination = $condition === 'damaged' ? $quarantine : $van;
                 $this->stock->increment(
-                    $vanWarehouse->id,
-                    $item['product_id'],
-                    $item['batch_id'] ?? null,
-                    (float) $item['quantity'],
+                    $destination->id,
+                    $original->product_id,
+                    $original->batch_id,
+                    (float) $quantity,
                     StockReason::Return,
                     $return,
                     $userId,
                 );
             }
 
+            $total = bcadd($subtotal, $taxTotal, 2);
             $return->update(['total' => $total]);
 
-            // Guard: prevent negative customer balance
-            if ($total > (float) $customer->balance) {
-                throw new DomainException(
-                    app()->getLocale() === 'ar'
-                        ? 'قيمة المرتجع تتجاوز رصيد العميل'
-                        : 'Return value exceeds customer balance'
-                );
+            $creditNote = CreditNote::create([
+                'company_id' => $companyId,
+                'customer_id' => $customerId,
+                'invoice_id' => $invoice->id,
+                'return_id' => $return->id,
+                'created_by' => $userId,
+                'credit_number' => 'CRN-'.$return->return_number,
+                'subtotal' => $subtotal,
+                'tax_amount' => $taxTotal,
+                'total' => $total,
+                'status' => 'issued',
+                'reason' => $reason !== '' ? $reason : 'Invoice-linked return',
+                'issued_at' => now(),
+            ]);
+            foreach ($return->load('items')->items as $item) {
+                CreditNoteItem::create([
+                    'credit_note_id' => $creditNote->id,
+                    'invoice_item_id' => $item->invoice_item_id,
+                    'return_item_id' => $item->id,
+                    'product_id' => $item->product_id,
+                    'batch_id' => $item->batch_id,
+                    'quantity' => $item->quantity,
+                    'unit_price' => $item->unit_price,
+                    'line_total' => $item->line_total,
+                    'tax_amount' => $item->tax_amount,
+                    'total' => $item->total,
+                ]);
             }
 
-            $customer->decrement('balance', $total);
+            $receivableCredit = bccomp($total, (string) $invoice->remaining_amount, 2) > 0
+                ? (string) $invoice->remaining_amount
+                : $total;
+            if (bccomp($receivableCredit, '0.00', 2) > 0) {
+                $invoice->remaining_amount = bcsub((string) $invoice->remaining_amount, $receivableCredit, 2);
+                $customer->balance = bcsub((string) $customer->balance, $receivableCredit, 2);
+                $customer->save();
+            }
+            $invoice->credited_amount = bcadd((string) ($invoice->credited_amount ?? '0.00'), $total, 2);
+            if (bccomp((string) $invoice->credited_amount, (string) $invoice->total, 2) >= 0) {
+                $invoice->status = InvoiceStatus::Credited;
+            }
+            $invoice->save();
+
+            $unallocatedCredit = bcsub($total, $receivableCredit, 2);
+            if (bccomp($unallocatedCredit, '0.00', 2) > 0) {
+                CustomerCredit::create([
+                    'company_id' => $companyId,
+                    'customer_id' => $customerId,
+                    'invoice_id' => $invoice->id,
+                    'return_id' => $return->id,
+                    'created_by' => $userId,
+                    'credit_number' => 'CREDIT-'.$return->return_number,
+                    'amount' => $unallocatedCredit,
+                    'remaining_amount' => $unallocatedCredit,
+                    'status' => 'available',
+                    'reason' => 'Credit from paid invoice return',
+                ]);
+            }
 
             return $return->fresh(['items']);
         });
@@ -108,51 +252,126 @@ class ReturnService
 
     public function cancel(ReturnRecord $return, int $userId, string $reason): ReturnRecord
     {
-        return DB::transaction(function () use ($return, $userId): ReturnRecord {
+        $manager = User::withoutGlobalScopes()->findOrFail($userId);
+        if (! $manager->hasRole('sales_manager')
+            || ! $manager->hasCompanyAccess((int) $return->company_id)
+            || trim($reason) === '') {
+            throw new DomainException('A sales manager and mandatory reason are required for a return reversal.');
+        }
+
+        return DB::transaction(function () use ($return, $userId, $reason): ReturnRecord {
             $return = ReturnRecord::whereKey($return->id)->lockForUpdate()->firstOrFail();
-            if ($return->cancelled_at !== null) {
+            $existing = Reversal::where('original_type', ReturnRecord::class)
+                ->where('original_id', $return->id)
+                ->where('action', 'reverse')
+                ->lockForUpdate()
+                ->first();
+            if ($existing) {
                 return $return;
             }
-            $return->update([
-                'status' => 'cancelled',
-                'cancelled_at' => now(),
-                'cancelled_by' => $userId,
-            ]);
+            if ($return->status !== 'submitted') {
+                throw new DomainException('Only a committed return may be reversed.');
+            }
 
-            $vanWarehouse = Warehouse::where('user_id', $return->user_id)
+            $invoice = Invoice::whereKey($return->against_invoice_id)
                 ->where('company_id', $return->company_id)
-                ->where('type', 'van')->where('is_active', true)->lockForUpdate()->firstOrFail();
-            foreach ($return->items as $item) {
+                ->lockForUpdate()
+                ->firstOrFail();
+            $hasDependentPayment = $invoice->payments()
+                ->whereNull('cancelled_at')
+                ->where('created_at', '>', $return->created_at)
+                ->exists();
+            if ($hasDependentPayment) {
+                throw new DomainException('Later invoice payments must be reversed before this return.');
+            }
+
+            $credit = CustomerCredit::where('return_id', $return->id)->lockForUpdate()->first();
+            if ($credit && bccomp((string) $credit->remaining_amount, (string) $credit->amount, 2) !== 0) {
+                throw new DomainException('Customer credit has dependent usage and cannot be reversed.');
+            }
+            $creditNote = CreditNote::where('return_id', $return->id)->lockForUpdate()->firstOrFail();
+            if ($creditNote->status !== 'issued') {
+                throw new DomainException('The linked credit note is not eligible for reversal.');
+            }
+
+            $customer = Customer::whereKey($return->customer_id)
+                ->where('company_id', $return->company_id)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $van = Warehouse::where('user_id', $return->user_id)
+                ->where('company_id', $return->company_id)
+                ->where('type', 'van')
+                ->where('is_active', true)
+                ->lockForUpdate()
+                ->firstOrFail();
+            $quarantine = Warehouse::where('company_id', $return->company_id)
+                ->where('type', 'quarantine')
+                ->where('is_active', true)
+                ->lockForUpdate()
+                ->first();
+
+            foreach ($return->items()->lockForUpdate()->get() as $item) {
+                $source = $item->condition === 'damaged' ? $quarantine : $van;
+                if ($source === null) {
+                    throw new DomainException('The original return stock location is unavailable.');
+                }
                 $this->stock->decrement(
-                    $vanWarehouse->id,
+                    $source->id,
                     $item->product_id,
                     $item->batch_id,
                     (float) $item->quantity,
-                    StockReason::Adjustment,
+                    StockReason::Reversal,
                     $return,
                     $userId,
                 );
             }
 
-            Customer::whereKey($return->customer_id)
-                ->where('company_id', $return->company_id)
-                ->lockForUpdate()
-                ->firstOrFail()
-                ->increment('balance', (float) $return->total);
+            $unallocatedCredit = $credit ? (string) $credit->amount : '0.00';
+            $receivableCredit = bcsub((string) $return->total, $unallocatedCredit, 2);
+            if (bccomp($receivableCredit, '0.00', 2) > 0) {
+                $customer->balance = bcadd((string) $customer->balance, $receivableCredit, 2);
+                $customer->save();
+                $invoice->remaining_amount = bcadd(
+                    (string) $invoice->remaining_amount,
+                    $receivableCredit,
+                    2,
+                );
+            }
+            $invoice->credited_amount = bcsub(
+                (string) $invoice->credited_amount,
+                (string) $return->total,
+                2,
+            );
+            $invoice->status = bccomp((string) $invoice->remaining_amount, '0.00', 2) === 0
+                ? InvoiceStatus::Paid
+                : (bccomp((string) $invoice->paid_amount, '0.00', 2) > 0
+                    ? InvoiceStatus::PartiallyPaid
+                    : InvoiceStatus::Issued);
+            $invoice->save();
 
-            return $return;
-        });
-    }
+            if ($credit) {
+                $credit->update(['remaining_amount' => '0.00', 'status' => 'reversed']);
+            }
+            $creditNote->update(['status' => 'reversed']);
+            $return->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+                'cancelled_by' => $userId,
+            ]);
+            Reversal::create([
+                'company_id' => $return->company_id,
+                'original_type' => ReturnRecord::class,
+                'original_id' => $return->id,
+                'action' => 'reverse',
+                'performed_by' => $userId,
+                'reason' => trim($reason),
+                'status' => 'completed',
+                'amount' => $return->total,
+                'result_type' => CreditNote::class,
+                'result_id' => $creditNote->id,
+            ]);
 
-    private function companyMessage(string $resource): string
-    {
-        $english = ucfirst($resource).' does not belong to this company.';
-        $arabic = match ($resource) {
-            'customer' => 'العميل لا يتبع هذه الشركة.',
-            'product' => 'المنتج لا يتبع هذه الشركة.',
-            default => 'السجل لا يتبع هذه الشركة.',
-        };
-
-        return app()->getLocale() === 'ar' ? $arabic : $english;
+            return $return->fresh();
+        }, 3);
     }
 }

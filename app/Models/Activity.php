@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\AppendOnly;
 use App\Models\Concerns\BelongsToCompany;
 use App\Support\ActiveCompanyContext;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Request;
 
 class Activity extends Model
 {
+    use AppendOnly;
     use BelongsToCompany;
 
     protected $fillable = [

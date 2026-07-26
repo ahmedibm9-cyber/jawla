@@ -49,7 +49,7 @@ return [
     'confirm_expense_title' => 'Log expense?',
     'confirm_expense_msg' => 'The expense will be deducted from your cash box.',
     'confirm_return_title' => 'Log return?',
-    'confirm_return_msg' => 'The quantity will be added back to your van stock and the customer balance reduced.',
+    'confirm_return_msg' => 'Sellable goods return to van stock; damaged goods go to quarantine. Unpaid value reduces receivables; paid value becomes customer credit.',
     'confirm_invoice_title' => 'Create invoice?',
     'confirm_invoice_msg' => 'An invoice of :total will be created, quantities deducted from your van stock, and the customer balance updated.',
     'flag_out_of_stock' => 'Report out of stock',

@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Enums\InvoiceStatus;
+use App\Exceptions\Domain\DomainException;
 use App\Livewire\App\ActionToast;
 use App\Livewire\App\SalesFlow;
 use App\Models\Customer;
@@ -19,9 +20,8 @@ use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
- * Phase 6 / B1 — the global undo toast reverses a just-created rep write through
- * the existing transactional cancel() service (compensating transaction, not a
- * delete), guarded by ownership and not-already-cancelled.
+ * Committed rep writes do not expose a generic Undo. Corrections are performed
+ * by privileged, reasoned compensating transactions.
  */
 class ActionToastUndoTest extends TestCase
 {
@@ -66,55 +66,42 @@ class ActionToastUndoTest extends TestCase
             'items' => [[
                 'product_id' => $this->product->id,
                 'quantity' => 2,
-                'unit_price' => 10,
+                'unit_price' => $this->product->price,
             ]],
         ]);
     }
 
-    public function test_undo_reverses_a_sale_and_restores_stock(): void
+    public function test_rep_cannot_reverse_a_committed_sale(): void
     {
         $before = $this->vanStock();
         $invoice = $this->createSale();
         $this->assertSame($before - 2, $this->vanStock());
 
-        Livewire::test(ActionToast::class)
-            ->call('show', 'sale', $invoice->id, 'Invoice created')
-            ->assertSet('type', 'sale')
-            ->call('undo')
-            ->assertSet('undone', true)
-            ->assertSet('type', null);
-
-        $this->assertSame(InvoiceStatus::Cancelled, $invoice->fresh()->status);
-        $this->assertNotNull($invoice->fresh()->cancelled_at);
-        // Stock is restored by the compensating transaction.
-        $this->assertSame($before, $this->vanStock());
+        $this->expectException(DomainException::class);
+        try {
+            app(InvoiceService::class)->cancel($invoice, $this->rep->id, 'Rep undo');
+        } finally {
+            $this->assertSame(InvoiceStatus::Issued, $invoice->fresh()->status);
+            $this->assertNull($invoice->fresh()->cancelled_at);
+            $this->assertSame($before - 2, $this->vanStock());
+        }
     }
 
-    public function test_undo_refuses_another_reps_record(): void
+    public function test_completion_toast_contains_no_undo_control(): void
     {
-        $invoice = $this->createSale();
-        $other = User::factory()->create([
-            'company_id' => $this->rep->company_id,
-        ]);
-        $this->actingAs($other);
-        app(ActiveCompanyContext::class)->setFromUser($other);
-
+        app()->setLocale('en');
         Livewire::test(ActionToast::class)
-            ->call('show', 'sale', $invoice->id, 'Invoice created')
-            ->call('undo')
-            ->assertSet('undone', false)
-            ->assertSet('error', fn ($v) => $v !== '');
-
-        // The original rep's invoice is untouched.
-        $this->assertNotSame(InvoiceStatus::Cancelled, $invoice->fresh()->status);
+            ->call('show', 'Invoice created')
+            ->assertSee('Invoice created')
+            ->assertDontSee('Undo');
     }
 
-    public function test_sales_flow_dispatches_action_completed_on_submit(): void
+    public function test_sales_flow_does_not_dispatch_committed_action_undo(): void
     {
         Livewire::test(SalesFlow::class)
             ->call('selectCustomer', $this->customer->id)
             ->call('addToCart', $this->product->id)
             ->call('submit')
-            ->assertDispatched('action-completed', type: 'sale');
+            ->assertNotDispatched('action-completed');
     }
 }

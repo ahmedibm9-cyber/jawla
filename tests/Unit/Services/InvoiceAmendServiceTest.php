@@ -12,6 +12,7 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\Contracts\StockService;
 use App\Services\InvoiceService;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -22,6 +23,8 @@ class InvoiceAmendServiceTest extends TestCase
     private Company $company;
 
     private User $rep;
+
+    private User $manager;
 
     private Warehouse $van;
 
@@ -37,13 +40,17 @@ class InvoiceAmendServiceTest extends TestCase
 
         $this->company = Company::factory()->create();
         $this->rep = User::factory()->create(['company_id' => $this->company->id]);
+        $this->seed(RoleSeeder::class);
+        $this->rep->assignRole('sales_rep');
+        $this->manager = User::factory()->create(['company_id' => $this->company->id]);
+        $this->manager->assignRole('sales_manager');
         $this->van = Warehouse::factory()->create([
             'company_id' => $this->company->id,
             'type' => 'van',
             'user_id' => $this->rep->id,
         ]);
         $this->customer = Customer::factory()->create(['company_id' => $this->company->id, 'balance' => 0]);
-        $this->product = Product::factory()->create(['company_id' => $this->company->id]);
+        $this->product = Product::factory()->create(['company_id' => $this->company->id, 'price' => 500]);
 
         app(StockService::class)->increment(
             $this->van->id, $this->product->id, null, 100.0,
@@ -56,6 +63,7 @@ class InvoiceAmendServiceTest extends TestCase
             'customer_id' => $this->customer->id,
             'items' => [['product_id' => $this->product->id, 'quantity' => 10, 'unit_price' => 500]],
         ]);
+        $this->actingAs($this->manager);
     }
 
     public function test_amend_cancels_original_invoice(): void
@@ -65,8 +73,10 @@ class InvoiceAmendServiceTest extends TestCase
         $draft = app(InvoiceService::class)->amend($this->invoice);
 
         $this->assertNotEquals($originalId, $draft->id);
-        $this->assertEquals(InvoiceStatus::Cancelled, $this->invoice->fresh()->status);
-        $this->assertNotNull($this->invoice->fresh()->cancelled_at);
+        $this->assertEquals(InvoiceStatus::Credited, $this->invoice->fresh()->status);
+        $this->assertDatabaseHas('credit_notes', [
+            'invoice_id' => $this->invoice->id,
+        ]);
     }
 
     public function test_amend_creates_new_draft_with_amended_from_link(): void

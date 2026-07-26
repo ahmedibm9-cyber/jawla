@@ -72,13 +72,14 @@ class AutocompleteComponentTest extends TestCase
             ->assertSee(__('app.confirm_complaint_title'));
     }
 
-    public function test_log_return_renders_customer_and_product_autocompletes(): void
+    public function test_log_return_renders_customer_autocomplete_and_invoice_line_selectors(): void
     {
         Livewire::actingAs($this->rep)
             ->test(LogReturn::class)
             ->assertOk()
             ->assertSeeHtml('id="customer_id-hidden"')
-            ->assertSee(__('app.search_product'))
+            ->assertSeeHtml('id="against_invoice_id"')
+            ->assertSeeHtml('id="item_0_line"')
             ->assertSee(__('app.confirm_return_title'));
     }
 

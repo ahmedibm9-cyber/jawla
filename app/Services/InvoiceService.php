@@ -12,12 +12,14 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Product;
 use App\Models\ProformaInvoice;
+use App\Models\Reversal;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\Contracts\DocumentNumberService;
 use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\InvoiceService as InvoiceContract;
 use App\Services\Contracts\LineItemInput;
+use App\Services\Contracts\PricingService as PricingContract;
 use App\Services\Contracts\StockService as StockContract;
 use App\Support\ActiveCompanyContext;
 use Illuminate\Support\Facades\DB;
@@ -28,6 +30,7 @@ class InvoiceService implements InvoiceContract
         private readonly StockContract $stock,
         private readonly InvoiceCalculationService $calc,
         private readonly DocumentNumberService $numbers,
+        private readonly PricingContract $pricing,
     ) {}
 
     public function create(array $data): Invoice
@@ -41,18 +44,11 @@ class InvoiceService implements InvoiceContract
                 ->whereKey($sellerId)
                 ->lockForUpdate()
                 ->first();
-            if (! $seller || ! $seller->hasCompanyAccess($company->id)) {
+            if (! $seller || ! $seller->hasCompanyAccess($company->id) || ! $seller->hasRole('sales_rep')) {
                 throw new DomainException('errors.resource.seller');
             }
 
-            // Van warehouse is required for reps (van sales), optional for admin/manager
-            $vanWarehouse = $seller->hasRole('rep')
-                ? $this->vanWarehouseFor($seller->id, $company->id)
-                : Warehouse::where('user_id', $seller->id)
-                    ->where('company_id', $company->id)
-                    ->where('type', 'van')
-                    ->where('is_active', true)
-                    ->first();
+            $vanWarehouse = $this->vanWarehouseFor($seller->id, $company->id);
 
             // Support both multi-line (items array) and single-line (legacy)
             $items = $data['items'] ?? [
@@ -93,11 +89,22 @@ class InvoiceService implements InvoiceContract
             }
 
             $lineInputs = [];
-            foreach ($items as $item) {
+            foreach ($items as $index => $item) {
                 $prod = $products->get($item['product_id']);
+                $effectivePrice = $this->pricing->effectivePrice(
+                    $company->id,
+                    $customer->id,
+                    (int) $item['product_id'],
+                    number_format((float) $item['quantity'], 3, '.', ''),
+                );
+                if (array_key_exists('unit_price', $item)
+                    && bccomp(number_format((float) $item['unit_price'], 2, '.', ''), $effectivePrice, 2) !== 0) {
+                    throw new DomainException('Quoted price is stale or does not match the server-authoritative price.');
+                }
+                $items[$index]['unit_price'] = $effectivePrice;
                 $lineInputs[] = new LineItemInput(
                     qty: (float) $item['quantity'],
-                    unitPrice: (float) $item['unit_price'],
+                    unitPrice: (float) $effectivePrice,
                     vatApplicable: (bool) ($prod?->vat_applicable ?? true),
                 );
             }
@@ -113,7 +120,7 @@ class InvoiceService implements InvoiceContract
                 'visit_id' => $data['visit_id'] ?? null,
                 'proforma_invoice_id' => $data['proforma_invoice_id'] ?? null,
                 'invoice_number' => $invNumber,
-                'status' => InvoiceStatus::Submitted,
+                'status' => InvoiceStatus::Issued,
                 'subtotal' => $calculation->subtotal,
                 'vat_amount' => $calculation->vatAmount,
                 'total' => $calculation->total,
@@ -131,22 +138,20 @@ class InvoiceService implements InvoiceContract
                     'quantity' => $item['quantity'],
                     'unit_price' => $item['unit_price'],
                     'line_total' => $calculation->lines[$i]->lineTotal,
+                    'tax_amount' => $calculation->lines[$i]->vatAmount,
                 ]);
             }
 
-            // Decrement van stock only if seller has a van warehouse (reps have vans; admin/manager may not)
-            if ($vanWarehouse) {
-                foreach ($items as $item) {
-                    $this->stock->decrement(
-                        $vanWarehouse->id,
-                        $item['product_id'],
-                        $item['batch_id'] ?? null,
-                        (float) $item['quantity'],
-                        StockReason::Sale,
-                        $invoice,
-                        $sellerId,
-                    );
-                }
+            foreach ($items as $item) {
+                $this->stock->decrement(
+                    $vanWarehouse->id,
+                    $item['product_id'],
+                    $item['batch_id'] ?? null,
+                    (float) $item['quantity'],
+                    StockReason::Sale,
+                    $invoice,
+                    $sellerId,
+                );
             }
 
             // Customer balance update
@@ -165,34 +170,39 @@ class InvoiceService implements InvoiceContract
     public function submit(Invoice $invoice): Invoice
     {
         return DB::transaction(function () use ($invoice): Invoice {
+            $invoice = Invoice::with('items')->whereKey($invoice->id)->lockForUpdate()->firstOrFail();
             if ($invoice->status !== InvoiceStatus::Draft) {
                 throw new \RuntimeException('Only draft invoices can be submitted.');
             }
+            $seller = User::withoutGlobalScopes()->whereKey($invoice->user_id)->lockForUpdate()->firstOrFail();
+            if (! $seller->hasCompanyAccess((int) $invoice->company_id) || ! $seller->hasRole('sales_rep')) {
+                throw new DomainException('Only an assigned sales rep may issue a draft invoice.');
+            }
 
             $invoice->update([
-                'status' => InvoiceStatus::Submitted,
+                'invoice_number' => $this->numbers->generate('sales_invoice', $invoice->company_id),
+                'status' => InvoiceStatus::Issued,
                 'issued_at' => now(),
             ]);
 
-            $vanWarehouse = Warehouse::where('user_id', $invoice->user_id)
-                ->where('company_id', $invoice->company_id)
-                ->where('type', 'van')
-                ->where('is_active', true)
-                ->first();
-
-            if ($vanWarehouse) {
-                foreach ($invoice->items as $item) {
-                    $this->stock->decrement(
-                        $vanWarehouse->id,
-                        $item->product_id,
-                        $item->batch_id,
-                        (float) $item->quantity,
-                        StockReason::Sale,
-                        $invoice,
-                        $invoice->user_id,
-                    );
-                }
+            $vanWarehouse = $this->vanWarehouseFor($invoice->user_id, $invoice->company_id);
+            foreach ($invoice->items as $item) {
+                $this->stock->decrement(
+                    $vanWarehouse->id,
+                    $item->product_id,
+                    $item->batch_id,
+                    (float) $item->quantity,
+                    StockReason::Sale,
+                    $invoice,
+                    $invoice->user_id,
+                );
             }
+
+            Customer::whereKey($invoice->customer_id)
+                ->where('company_id', $invoice->company_id)
+                ->lockForUpdate()
+                ->firstOrFail()
+                ->increment('balance', (float) $invoice->total);
 
             return $invoice->fresh();
         });
@@ -200,27 +210,91 @@ class InvoiceService implements InvoiceContract
 
     public function cancel(Invoice $invoice, int $userId, string $reason): Invoice
     {
-        return DB::transaction(function () use ($invoice, $userId, $reason): Invoice {
-            $this->cancelWithoutTransaction($invoice, $userId, $reason);
+        $manager = User::withoutGlobalScopes()->findOrFail($userId);
+        if (! $manager->hasRole('sales_manager')
+            || ! $manager->hasCompanyAccess((int) $invoice->company_id)
+            || trim($reason) === '') {
+            throw new DomainException('A sales manager and mandatory reason are required to void an issued invoice.');
+        }
 
-            return $invoice;
+        return DB::transaction(function () use ($invoice, $userId, $reason): Invoice {
+            $existing = Reversal::where('original_type', Invoice::class)
+                ->where('original_id', $invoice->id)
+                ->where('action', 'void')
+                ->lockForUpdate()
+                ->first();
+            if ($existing) {
+                return $invoice->fresh();
+            }
+            $locked = Invoice::with('items')->whereKey($invoice->id)->lockForUpdate()->firstOrFail();
+            if (! $locked->issued_at?->isToday()) {
+                throw new DomainException('Only an eligible same-day invoice may be voided.');
+            }
+            if ($locked->payments()->whereNull('cancelled_at')->exists()) {
+                throw new DomainException('An invoice with payments must be corrected by credit note, not voided.');
+            }
+            if ($locked->returns()->where('status', 'submitted')->exists()
+                || $locked->creditNotes()->where('status', 'issued')->exists()) {
+                throw new DomainException('An invoice with return or credit activity cannot be voided.');
+            }
+            $this->cancelWithoutTransaction($invoice, $userId, $reason);
+            Reversal::create([
+                'company_id' => $locked->company_id,
+                'original_type' => Invoice::class,
+                'original_id' => $locked->id,
+                'action' => 'void',
+                'performed_by' => $userId,
+                'reason' => trim($reason),
+                'status' => 'completed',
+                'amount' => $locked->total,
+                'result_type' => Invoice::class,
+                'result_id' => $locked->id,
+            ]);
+
+            return $invoice->fresh();
         });
     }
 
-    public function amend(Invoice $invoice): Invoice
+    public function amend(Invoice $invoice, string $reason = 'Amendment requested'): Invoice
     {
-        return DB::transaction(function () use ($invoice): Invoice {
-            // Cancel the original invoice (no nested transaction)
-            $this->cancelWithoutTransaction($invoice, auth()->id(), 'Amendment requested');
+        $manager = auth()->user();
+        if (! $manager?->hasRole('sales_manager') || trim($reason) === '') {
+            throw new DomainException('Only a sales manager may amend an issued invoice, with a mandatory reason.');
+        }
 
-            $company = $invoice->company;
-            $newNumber = $this->numbers->generate('sales_invoice', $company->id);
+        return DB::transaction(function () use ($invoice, $reason, $manager): Invoice {
+            $invoice = Invoice::whereKey($invoice->id)->lockForUpdate()->firstOrFail();
+            if (! $manager->hasCompanyAccess((int) $invoice->company_id)) {
+                throw new DomainException('The invoice belongs to another company.');
+            }
+            if (! in_array($invoice->status, [
+                InvoiceStatus::Issued,
+                InvoiceStatus::Submitted,
+                InvoiceStatus::PartiallyPaid,
+                InvoiceStatus::Paid,
+            ], true)) {
+                throw new DomainException('Only a non-terminal issued invoice may be amended.');
+            }
+
+            $returnItems = $invoice->items->map(fn (InvoiceItem $item) => [
+                'invoice_item_id' => $item->id,
+                'quantity' => (float) $item->quantity,
+                'condition' => 'sellable',
+            ])->all();
+            app(ReturnService::class)->create(
+                companyId: $invoice->company_id,
+                userId: $invoice->user_id,
+                customerId: $invoice->customer_id,
+                items: $returnItems,
+                againstInvoiceId: $invoice->id,
+                reason: 'Invoice amendment: '.trim($reason),
+            );
 
             $draft = Invoice::create([
                 'company_id' => $invoice->company_id,
                 'customer_id' => $invoice->customer_id,
-                'user_id' => auth()->id(),
-                'invoice_number' => $newNumber,
+                'user_id' => $invoice->user_id,
+                'invoice_number' => null,
                 'status' => InvoiceStatus::Draft,
                 'subtotal' => $invoice->subtotal,
                 'vat_amount' => $invoice->vat_amount,
@@ -229,7 +303,7 @@ class InvoiceService implements InvoiceContract
                 'remaining_amount' => $invoice->total,
                 'amended_from' => $invoice->id,
                 'posting_date' => today(),
-                'issued_at' => now(),
+                'issued_at' => null,
             ]);
 
             foreach ($invoice->items as $item) {
@@ -240,6 +314,7 @@ class InvoiceService implements InvoiceContract
                     'quantity' => $item->quantity,
                     'unit_price' => $item->unit_price,
                     'line_total' => $item->line_total,
+                    'tax_amount' => $item->tax_amount,
                 ]);
             }
 
@@ -250,7 +325,7 @@ class InvoiceService implements InvoiceContract
     private function cancelWithoutTransaction(Invoice $invoice, int $userId, string $reason): void
     {
         // Re-fetch with lock to prevent double-cancel race condition
-        $invoice = Invoice::whereKey($invoice->getKey())->lockForUpdate()->firstOrFail();
+        $invoice = Invoice::with('items')->whereKey($invoice->getKey())->lockForUpdate()->firstOrFail();
 
         // Guard: don't cancel if already cancelled
         if ($invoice->status === InvoiceStatus::Cancelled) {
@@ -258,30 +333,22 @@ class InvoiceService implements InvoiceContract
         }
 
         $invoice->update([
-            'status' => InvoiceStatus::Cancelled,
+            'status' => InvoiceStatus::Voided,
             'cancelled_at' => now(),
             'cancelled_by' => $userId,
         ]);
 
-        // Reverse stock — only if seller had a van warehouse
-        $vanWarehouse = Warehouse::where('user_id', $invoice->user_id)
-            ->where('company_id', $invoice->company_id)
-            ->where('type', 'van')
-            ->where('is_active', true)
-            ->first();
-
-        if ($vanWarehouse) {
-            foreach ($invoice->items as $item) {
-                $this->stock->increment(
-                    $vanWarehouse->id,
-                    $item->product_id,
-                    $item->batch_id,
-                    (float) $item->quantity,
-                    StockReason::Adjustment,
-                    $invoice,
-                    $userId,
-                );
-            }
+        $vanWarehouse = $this->vanWarehouseFor($invoice->user_id, $invoice->company_id);
+        foreach ($invoice->items as $item) {
+            $this->stock->increment(
+                $vanWarehouse->id,
+                $item->product_id,
+                $item->batch_id,
+                (float) $item->quantity,
+                StockReason::Reversal,
+                $invoice,
+                $userId,
+            );
         }
 
         // Reverse customer balance — only the unpaid portion

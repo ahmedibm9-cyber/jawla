@@ -5,10 +5,6 @@ namespace App\Services\Sync\Handlers;
 use App\Models\User;
 use App\Services\ReturnService;
 
-/**
- * Offline return → ReturnService::create (van stock increase + balance adjust),
- * applied exactly once on sync.
- */
 class ReturnSyncHandler extends AbstractRepWriteHandler
 {
     public function __construct(private readonly ReturnService $returns) {}
@@ -22,27 +18,26 @@ class ReturnSyncHandler extends AbstractRepWriteHandler
     {
         $data = $this->validated($payload, [
             'customer_id' => ['required', 'integer'],
-            'reason' => ['nullable', 'string', 'max:500'],
-            'against_invoice_id' => ['nullable', 'integer'],
+            'reason' => ['required', 'string', 'max:500'],
+            'against_invoice_id' => ['required', 'integer'],
             'items' => ['required', 'array', 'min:1'],
-            'items.*.product_id' => ['required', 'integer'],
-            'items.*.quantity' => ['required', 'numeric', 'min:0.01'],
-            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+            'items.*.invoice_item_id' => ['required', 'integer'],
+            'items.*.quantity' => ['required', 'numeric', 'min:0.001'],
+            'items.*.condition' => ['required', 'in:sellable,damaged'],
         ]);
-
         $this->assertCustomerInCompany($rep, (int) $data['customer_id']);
 
         $return = $this->returns->create(
             companyId: $rep->activeCompanyId(),
             userId: $rep->id,
             customerId: (int) $data['customer_id'],
-            items: array_map(fn ($i) => [
-                'product_id' => (int) $i['product_id'],
-                'quantity' => (float) $i['quantity'],
-                'unit_price' => (float) $i['unit_price'],
+            items: array_map(fn (array $item) => [
+                'invoice_item_id' => (int) $item['invoice_item_id'],
+                'quantity' => (float) $item['quantity'],
+                'condition' => $item['condition'],
             ], $data['items']),
-            againstInvoiceId: isset($data['against_invoice_id']) ? (int) $data['against_invoice_id'] : null,
-            reason: $data['reason'] ?? '',
+            againstInvoiceId: (int) $data['against_invoice_id'],
+            reason: $data['reason'],
         );
 
         return ['return_id' => $return->id, 'return_number' => $return->return_number];

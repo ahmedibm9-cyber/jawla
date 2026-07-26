@@ -13,6 +13,7 @@ use App\Models\Warehouse;
 use App\Services\Contracts\StockService;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -30,6 +31,8 @@ class InvoiceStatusFlowTest extends TestCase
 
     private User $rep;
 
+    private User $manager;
+
     private Warehouse $van;
 
     private Customer $customer;
@@ -42,11 +45,15 @@ class InvoiceStatusFlowTest extends TestCase
 
         $this->company = Company::factory()->create();
         $this->rep = User::factory()->create(['company_id' => $this->company->id]);
+        $this->seed(RoleSeeder::class);
+        $this->rep->assignRole('sales_rep');
+        $this->manager = User::factory()->create(['company_id' => $this->company->id]);
+        $this->manager->assignRole('sales_manager');
         $this->van = Warehouse::factory()->create([
             'company_id' => $this->company->id, 'type' => 'van', 'user_id' => $this->rep->id,
         ]);
         $this->customer = Customer::factory()->create(['company_id' => $this->company->id, 'balance' => 0]);
-        $this->product = Product::factory()->create(['company_id' => $this->company->id]);
+        $this->product = Product::factory()->create(['company_id' => $this->company->id, 'price' => 100]);
 
         app(StockService::class)->increment(
             $this->van->id, $this->product->id, null, 100.0,
@@ -63,7 +70,7 @@ class InvoiceStatusFlowTest extends TestCase
             'items' => [['product_id' => $this->product->id, 'quantity' => 5, 'unit_price' => 100]],
         ]);
 
-        $this->assertEquals(InvoiceStatus::Submitted, $invoice->status);
+        $this->assertEquals(InvoiceStatus::Issued, $invoice->status);
     }
 
     public function test_amend_creates_draft(): void
@@ -75,10 +82,11 @@ class InvoiceStatusFlowTest extends TestCase
             'items' => [['product_id' => $this->product->id, 'quantity' => 5, 'unit_price' => 100]],
         ]);
 
-        $draft = app(InvoiceService::class)->amend($invoice);
+        $this->actingAs($this->manager);
+        $draft = app(InvoiceService::class)->amend($invoice, 'Correct customer order');
 
         $this->assertEquals(InvoiceStatus::Draft, $draft->status);
-        $this->assertEquals(InvoiceStatus::Cancelled, $invoice->fresh()->status);
+        $this->assertEquals(InvoiceStatus::Credited, $invoice->fresh()->status);
     }
 
     public function test_submit_transitions_draft_to_submitted(): void
@@ -89,11 +97,12 @@ class InvoiceStatusFlowTest extends TestCase
             'customer_id' => $this->customer->id,
             'items' => [['product_id' => $this->product->id, 'quantity' => 5, 'unit_price' => 100]],
         ]);
-        $draft = app(InvoiceService::class)->amend($invoice);
+        $this->actingAs($this->manager);
+        $draft = app(InvoiceService::class)->amend($invoice, 'Correct customer order');
 
         $submitted = app(InvoiceService::class)->submit($draft);
 
-        $this->assertEquals(InvoiceStatus::Submitted, $submitted->status);
+        $this->assertEquals(InvoiceStatus::Issued, $submitted->status);
         $this->assertNotNull($submitted->issued_at);
     }
 
@@ -120,9 +129,10 @@ class InvoiceStatusFlowTest extends TestCase
             'items' => [['product_id' => $this->product->id, 'quantity' => 5, 'unit_price' => 100]],
         ]);
 
-        $results = app(InvoiceService::class)->cancel($invoice, $this->rep->id, 'Test cancel');
+        $this->actingAs($this->manager);
+        $results = app(InvoiceService::class)->cancel($invoice, $this->manager->id, 'Same-day correction');
 
-        $this->assertEquals(InvoiceStatus::Cancelled, $invoice->fresh()->status);
+        $this->assertEquals(InvoiceStatus::Voided, $invoice->fresh()->status);
         $this->assertNotNull($invoice->fresh()->cancelled_at);
         $this->assertNotNull($results->id);
     }
@@ -136,10 +146,11 @@ class InvoiceStatusFlowTest extends TestCase
             'items' => [['product_id' => $this->product->id, 'quantity' => 5, 'unit_price' => 100]],
         ]);
 
-        app(InvoiceService::class)->cancel($invoice, $this->rep->id, 'First cancel');
-        app(InvoiceService::class)->cancel($invoice, $this->rep->id, 'Second cancel');
+        $this->actingAs($this->manager);
+        app(InvoiceService::class)->cancel($invoice, $this->manager->id, 'First correction');
+        app(InvoiceService::class)->cancel($invoice, $this->manager->id, 'Second correction');
 
-        $this->assertEquals(InvoiceStatus::Cancelled, $invoice->fresh()->status);
+        $this->assertEquals(InvoiceStatus::Voided, $invoice->fresh()->status);
     }
 
     public function test_full_payment_transitions_submitted_to_paid(): void
@@ -186,8 +197,10 @@ class InvoiceStatusFlowTest extends TestCase
         $this->assertGreaterThan(0, (float) $invoice->fresh()->remaining_amount);
     }
 
-    public function test_payment_reversal_transitions_paid_to_partially_paid(): void
+    public function test_manager_payment_reversal_transitions_paid_to_issued(): void
     {
+        $this->seed(RoleSeeder::class);
+        $this->rep->assignRole('sales_manager');
         $this->actingAs($this->rep);
         $invoice = app(InvoiceService::class)->create([
             'company_id' => $this->company->id,
@@ -209,6 +222,6 @@ class InvoiceStatusFlowTest extends TestCase
         $payment = $invoice->fresh()->payments()->first();
         app(PaymentService::class)->cancel($payment, $this->rep->id, 'Reversal test');
 
-        $this->assertEquals(InvoiceStatus::PartiallyPaid, $invoice->fresh()->status);
+        $this->assertEquals(InvoiceStatus::Issued, $invoice->fresh()->status);
     }
 }

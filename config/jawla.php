@@ -9,4 +9,8 @@ if (! in_array($mode, ['production', 'demo'], true)) {
 return [
     'mode' => $mode,
     'is_demo' => $mode === 'demo',
+    'stock_import' => [
+        'preview_ttl_minutes' => (int) env('JAWLA_STOCK_IMPORT_PREVIEW_TTL', 15),
+        'large_variance_threshold' => (string) env('JAWLA_STOCK_IMPORT_LARGE_VARIANCE', '1000.000'),
+    ],
 ];

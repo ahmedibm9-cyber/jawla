@@ -94,3 +94,23 @@ Phase 1 implements PR-005, PR-001, PR-013, and the canonical-role/bypass-removal
 - Exact isolated PostgreSQL Unit/Feature CI command: 496/496 tests, 1,402 assertions.
 
 PR-001, PR-005, and PR-013 are resolved by executable evidence. PR-014 remains in progress because the approved Phase 5 work still includes complete legacy-role removal, MFA, step-up authentication, session controls, throttling, logout, and proxy-trust hardening.
+
+## 2026-07-26 — Phase 2 evidence
+
+Phase 2 implements PR-002, PR-003, PR-006, PR-007, PR-009, PR-010, PR-028, and PR-031. Detailed traceability is in `phase-2-core-money-inventory-integrity.md`.
+
+### Exit gates
+
+- Atomic and authorized money/stock workflows: pass through locked services, manager-only approval/reversal boundaries, and same-company checks.
+- Approved return/refund lifecycle: pass for unpaid, partially/fully settled credit behavior, manager-approved cash refunds, and externally confirmed bank/card refunds.
+- Append-only history: pass through ORM guards, restrictive foreign keys, compensating records, and direct PostgreSQL delete triggers.
+- Reconciliation: pass for expected snapshot, physical count, approval, immutable delta, intervening-movement rejection, and read-only customer/cash/stock ledger drift reporting.
+- PostgreSQL concurrency: final-unit stock, duplicate payment intent, sale-versus-count, and return-versus-sale races pass on two independent connections; the concurrency file also passed three consecutive repeat runs.
+
+### Verification
+
+- Fresh PostgreSQL migrations: pass through `2026_07_26_000011`.
+- Consolidated Phase 2 focused suite: 151/151 tests, 441 assertions.
+- Exact two-worker Unit/Feature CI gate: 522/522 tests, 1,515 assertions.
+- Pint: pass after formatting the dirty Phase 2 set.
+- PHPStan: unavailable because the executable is not installed; dependencies were not changed.

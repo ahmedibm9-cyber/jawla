@@ -102,7 +102,7 @@ class OfflineSyncHandlersTest extends TestCase
     {
         $before = $this->vanStock();
         $op = ['customer_id' => $this->customer->id, 'items' => [
-            ['product_id' => $this->product->id, 'quantity' => 5, 'unit_price' => 1000],
+            ['product_id' => $this->product->id, 'quantity' => 5, 'unit_price' => $this->product->price],
         ]];
 
         $first = $this->process('sale-1', 'sale', $op);
@@ -122,7 +122,7 @@ class OfflineSyncHandlersTest extends TestCase
         $invoice = app(InvoiceService::class)->create([
             'company_id' => $this->rep->company_id,
             'customer_id' => $this->customer->id,
-            'items' => [['product_id' => $this->product->id, 'quantity' => 2, 'unit_price' => 1000]],
+            'items' => [['product_id' => $this->product->id, 'quantity' => 2, 'unit_price' => $this->product->price]],
         ]);
 
         $cashBefore = (float) CashBox::where('user_id', $this->rep->id)->value('balance');
@@ -141,10 +141,21 @@ class OfflineSyncHandlersTest extends TestCase
 
     public function test_return_applies(): void
     {
+        $invoice = app(InvoiceService::class)->create([
+            'company_id' => $this->rep->company_id,
+            'customer_id' => $this->customer->id,
+            'items' => [['product_id' => $this->product->id, 'quantity' => 2, 'unit_price' => $this->product->price]],
+        ]);
+
         $r = $this->process('ret-1', 'return', [
             'customer_id' => $this->customer->id,
             'reason' => 'damaged',
-            'items' => [['product_id' => $this->product->id, 'quantity' => 1, 'unit_price' => 1000]],
+            'against_invoice_id' => $invoice->id,
+            'items' => [[
+                'invoice_item_id' => $invoice->items()->firstOrFail()->id,
+                'quantity' => 1,
+                'condition' => 'sellable',
+            ]],
         ]);
 
         $this->assertSame('applied', $r['status']);
@@ -214,7 +225,7 @@ class OfflineSyncHandlersTest extends TestCase
 
         $r = $this->process('bad-1', 'sale', [
             'customer_id' => $theirCustomer->id,
-            'items' => [['product_id' => $this->product->id, 'quantity' => 1, 'unit_price' => 1000]],
+            'items' => [['product_id' => $this->product->id, 'quantity' => 1, 'unit_price' => $this->product->price]],
         ]);
 
         $this->assertSame('failed', $r['status']);

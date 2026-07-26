@@ -54,10 +54,6 @@ class LogExpense extends Component
             $this->success = true;
             $this->successMessage = __('app.expense_logged').' — '.number_format((float) $expense->amount, 2);
 
-            // Offer a brief undo (B1) — reverses via ExpenseService::cancel.
-            $this->dispatch('action-completed', type: 'expense', id: $expense->id,
-                message: $this->successMessage);
-
             $this->reset(['category', 'amount', 'note']);
         } catch (\Throwable $e) {
             $this->errorMessage = app()->getLocale() === 'ar'

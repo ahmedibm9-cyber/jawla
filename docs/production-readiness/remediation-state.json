@@ -31,7 +31,7 @@
     {
       "phase": 2,
       "name": "Core money and inventory integrity",
-      "status": "in_progress"
+      "status": "completed"
     },
     { "phase": 3, "name": "Offline safety", "status": "pending" },
     {
@@ -86,7 +86,7 @@
         "Core financial, stock, sync, PDF, file, location, report, widget, and Livewire entry points use active context"
       ],
       "residual_risk": "Additional new entry points must use the same context/service-boundary pattern; the release re-audit will rescan all company-bearing models and routes.",
-      "commit_hash": null,
+      "commit_hash": "13ddc22561a1f6a05465b833229773a733ee3cb0",
       "resolved": true,
       "release_blocker_remaining": false
     },
@@ -94,33 +94,61 @@
       "id": "PR-002",
       "original_severity": "critical",
       "phase": 2,
-      "status": "open",
+      "status": "resolved",
       "decision": "Use server-owned signed import state and transactional revalidation; reject negative, stale, duplicated, unknown, or cross-company rows.",
-      "changed_files": [],
-      "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Mutable browser preview can tamper with stock imports.",
-      "commit_hash": null,
-      "resolved": false,
-      "release_blocker_remaining": true
+      "changed_files": [
+        "app/Services/StockImportService.php",
+        "app/Models/StockImportPreview.php",
+        "app/Filament/Pages/StockImport.php",
+        "resources/views/filament/pages/stock-import.blade.php",
+        "tests/Feature/Inventory/StockImportIntegrityTest.php"
+      ],
+      "migrations": [
+        "database/migrations/2026_07_26_000002_create_stock_import_previews_table.php"
+      ],
+      "tests": [
+        "Stock import tamper, stale snapshot, approval, binding, and single-use coverage passed"
+      ],
+      "commands": [
+        "php artisan test --compact tests/Feature/Inventory tests/Unit/Services/StockImportServiceTest.php"
+      ],
+      "evidence": [
+        "Confirmation reparses the server file and verifies checksum, server preview, snapshot, actor, company, warehouse, approval, expiry, and single use inside the transaction"
+      ],
+      "residual_risk": "Offline/master-data import protocol remains outside the online-only stock import scope.",
+      "commit_hash": "pending_phase_2_commit",
+      "resolved": true,
+      "release_blocker_remaining": false
     },
     {
       "id": "PR-003",
       "original_severity": "critical",
       "phase": 2,
-      "status": "open",
+      "status": "resolved",
       "decision": "Permit invoice-line-linked returns only and resolve quantity, price, tax, batch, and company under locks.",
-      "changed_files": [],
-      "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Returns can create unsupported stock and credit.",
-      "commit_hash": null,
-      "resolved": false,
-      "release_blocker_remaining": true
+      "changed_files": [
+        "app/Services/ReturnService.php",
+        "app/Services/Sync/Handlers/ReturnSyncHandler.php",
+        "app/Livewire/App/LogReturn.php",
+        "app/Models/ReturnItem.php",
+        "tests/Feature/Finance/ReturnCreditIntegrityTest.php"
+      ],
+      "migrations": [
+        "database/migrations/2026_07_26_000003_create_return_credit_refund_ledger.php"
+      ],
+      "tests": [
+        "Invoice linkage, tampered line values, cumulative quantity, quarantine, and unreferenced rejection passed"
+      ],
+      "commands": [
+        "php artisan test --compact tests/Unit/Services/ReturnServiceTest.php tests/Feature/Finance/ReturnCreditIntegrityTest.php"
+      ],
+      "evidence": [
+        "Original invoice and line are locked; product, batch, price, tax, company and remaining returnable quantity are resolved server-side"
+      ],
+      "residual_risk": "Batch eligibility and FEFO are completed under PR-025 in Phase 4.",
+      "commit_hash": "pending_phase_2_commit",
+      "resolved": true,
+      "release_blocker_remaining": false
     },
     {
       "id": "PR-004",
@@ -172,7 +200,7 @@
         "Demo UI/documents are permanently marked and irreversible tax submission is disabled"
       ],
       "residual_risk": "Operators must enforce separate database and object-store resources; the documented runbook makes this a release/deployment acceptance check.",
-      "commit_hash": null,
+      "commit_hash": "13ddc22561a1f6a05465b833229773a733ee3cb0",
       "resolved": true,
       "release_blocker_remaining": false
     },
@@ -180,33 +208,63 @@
       "id": "PR-006",
       "original_severity": "critical",
       "phase": 2,
-      "status": "open",
+      "status": "resolved",
       "decision": "Remove rep undo for committed actions and implement manager-controlled immutable compensating reversals with reason, linkage, idempotency, dependency checks, and audit.",
-      "changed_files": [],
-      "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Reps can reverse committed historical financial actions.",
-      "commit_hash": null,
-      "resolved": false,
-      "release_blocker_remaining": true
+      "changed_files": [
+        "app/Livewire/App/ActionToast.php",
+        "app/Services/InvoiceService.php",
+        "app/Services/PaymentService.php",
+        "app/Services/ReturnService.php",
+        "app/Models/Reversal.php",
+        "tests/Feature/ActionToastUndoTest.php"
+      ],
+      "migrations": [
+        "database/migrations/2026_07_26_000006_create_reversals_table.php"
+      ],
+      "tests": [
+        "Rep no-undo, manager authorization, mandatory reason, dependency, idempotency and double-reversal coverage passed"
+      ],
+      "commands": [
+        "php artisan test --compact tests/Feature/ActionToastUndoTest.php tests/Unit/Services/ReversalServiceTest.php tests/Unit/Services/ReturnServiceTest.php"
+      ],
+      "evidence": [
+        "Committed-action dispatches and price/finance Undo UI were removed; compensating reversals preserve originals and create unique linked reversal records"
+      ],
+      "residual_risk": "Generic redo remains deliberately unavailable until a later accounting dependency model is approved.",
+      "commit_hash": "pending_phase_2_commit",
+      "resolved": true,
+      "release_blocker_remaining": false
     },
     {
       "id": "PR-007",
       "original_severity": "critical",
       "phase": 2,
-      "status": "open",
+      "status": "resolved",
       "decision": "Resolve server-side effective price and tax; allow only explicit effective-dated manager overrides with reason and audit.",
-      "changed_files": [],
-      "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Rep-controlled prices can corrupt invoice value and tax.",
-      "commit_hash": null,
-      "resolved": false,
-      "release_blocker_remaining": true
+      "changed_files": [
+        "app/Services/PricingService.php",
+        "app/Services/InvoiceService.php",
+        "app/Livewire/App/SalesFlow.php",
+        "resources/views/livewire/app/sales-flow.blade.php",
+        "app/Filament/Resources/ProductPriceResource.php",
+        "tests/Feature/Finance/AuthoritativePricingTest.php"
+      ],
+      "migrations": [
+        "database/migrations/2026_07_26_000005_add_audit_to_product_prices.php"
+      ],
+      "tests": [
+        "Authoritative customer override, tampered quote rejection, and non-manager denial passed"
+      ],
+      "commands": [
+        "php artisan test --compact tests/Feature/Finance/AuthoritativePricingTest.php tests/Feature/InvoiceFlowTest.php"
+      ],
+      "evidence": [
+        "Rep price input is display-only and recalculated by company/customer/product/date/quantity; manager overrides require a bounded window, reason and audit entry"
+      ],
+      "residual_risk": "Phase 4 completes exact decimal arithmetic and tax invariant hardening.",
+      "commit_hash": "pending_phase_2_commit",
+      "resolved": true,
+      "release_blocker_remaining": false
     },
     {
       "id": "PR-008",
@@ -228,33 +286,67 @@
       "id": "PR-009",
       "original_severity": "critical",
       "phase": 2,
-      "status": "open",
+      "status": "resolved",
       "decision": "Implement one invoice/payment/credit/refund state machine; reject terminal payments, amend by credit plus replacement, and reconcile lifecycle postings.",
-      "changed_files": [],
-      "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Payment, cancellation, and amendment can drift receivables and cash.",
-      "commit_hash": null,
-      "resolved": false,
-      "release_blocker_remaining": true
+      "changed_files": [
+        "app/Services/InvoiceService.php",
+        "app/Services/PaymentService.php",
+        "app/Services/LedgerReconciliationService.php",
+        "app/Models/Invoice.php",
+        "app/Models/Payment.php",
+        "tests/Feature/Finance/PaymentLifecycleIntegrityTest.php",
+        "tests/Feature/Finance/PostgresConcurrencyIntegrityTest.php",
+        "tests/Feature/Finance/LedgerReconciliationIntegrityTest.php"
+      ],
+      "migrations": [
+        "database/migrations/2026_07_26_000004_add_payment_allocation_and_idempotency.php",
+        "database/migrations/2026_07_26_000007_allow_numberless_invoice_drafts.php",
+        "database/migrations/2026_07_26_000011_snapshot_line_tax_and_reversal_amount.php"
+      ],
+      "tests": [
+        "Draft/issue/amend, terminal payment, partial/full/overpayment, intent mismatch/retry, reversal, ledger drift reporting, and real concurrent duplicate coverage passed"
+      ],
+      "commands": [
+        "php artisan test --compact tests/Feature/Finance tests/Feature/InvoiceStatusFlowTest.php tests/Unit/Services/PaymentServiceTest.php"
+      ],
+      "evidence": [
+        "Overpayment becomes customer credit; amendments credit originals and create numberless replacement drafts; concurrent one-intent payment posts once; read-only reconciliation reports customer, cash, and stock drift"
+      ],
+      "residual_risk": "Automated ledger drift correction and end-to-end exact arithmetic remain in PR-011 Phase 4.",
+      "commit_hash": "pending_phase_2_commit",
+      "resolved": true,
+      "release_blocker_remaining": false
     },
     {
       "id": "PR-010",
       "original_severity": "critical",
       "phase": 2,
-      "status": "open",
+      "status": "resolved",
       "decision": "Implement versioned stock-count sessions using the same locked mutation primitive and immutable delta movements; prove with parallel PostgreSQL tests.",
-      "changed_files": [],
-      "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Reconciliation can overwrite concurrent stock movement.",
-      "commit_hash": null,
-      "resolved": false,
-      "release_blocker_remaining": true
+      "changed_files": [
+        "app/Services/StockService.php",
+        "app/Services/StockCountService.php",
+        "app/Models/StockCountSession.php",
+        "app/Models/StockCountItem.php",
+        "tests/Feature/Inventory/StockCountIntegrityTest.php",
+        "tests/Feature/Finance/PostgresConcurrencyIntegrityTest.php"
+      ],
+      "migrations": [
+        "database/migrations/2026_07_26_000008_create_stock_count_sessions.php"
+      ],
+      "tests": [
+        "Expected snapshot, approved delta, intervening movement, simultaneous final-unit, sale-versus-count, and return-versus-sale PostgreSQL coverage passed"
+      ],
+      "commands": [
+        "php artisan test --compact tests/Feature/Inventory/StockCountIntegrityTest.php tests/Feature/Finance/PostgresConcurrencyIntegrityTest.php"
+      ],
+      "evidence": [
+        "Counts never absolute-overwrite an unexpected balance; all adjustments use the locked stock primitive and an immutable session-linked delta movement; sale/count and return/sale races preserve locked movement ordering; concurrency passed three repeat runs"
+      ],
+      "residual_risk": "Phase 4 extends the locked primitive with whole-unit and batch/FEFO rules.",
+      "commit_hash": "pending_phase_2_commit",
+      "resolved": true,
+      "release_blocker_remaining": false
     },
     {
       "id": "PR-011",
@@ -317,7 +409,7 @@
         "Production Vite build passes and the response CSP remains enforced"
       ],
       "residual_risk": "Nonce rollout, remote asset removal, and removal of legacy CSP unsafe directives remain explicitly tracked under PR-022.",
-      "commit_hash": null,
+      "commit_hash": "13ddc22561a1f6a05465b833229773a733ee3cb0",
       "resolved": true,
       "release_blocker_remaining": false
     },
@@ -352,7 +444,7 @@
         "Core rep and admin access accepts canonical roles"
       ],
       "residual_risk": "PR-014 remains a release blocker until Phase 5 removes legacy compatibility and completes MFA, step-up, session inventory/revocation, logout, throttling, and proxy-trust controls.",
-      "commit_hash": null,
+      "commit_hash": "13ddc22561a1f6a05465b833229773a733ee3cb0",
       "resolved": false,
       "release_blocker_remaining": true
     },
@@ -465,7 +557,7 @@
         "Tracked localhost cookie jar and opaque audit RAR were removed; CI blocks secret-bearing artifact filenames and runs Gitleaks"
       ],
       "residual_risk": "Infrastructure isolation is proven. Risk-driven concurrency, tenant, browser/offline, restore, migration, accessibility, and security suites remain scheduled in later phases.",
-      "commit_hash": null,
+      "commit_hash": "6c2e1d31592361f345f21031eec2594a1a55104c",
       "resolved": false,
       "release_blocker_remaining": true
     },
@@ -601,17 +693,33 @@
       "id": "PR-028",
       "original_severity": "high",
       "phase": 2,
-      "status": "open",
+      "status": "resolved",
       "decision": "Implement linked credit notes and immutable customer credit/refund transactions, including approved cash and pending bank/card refund states.",
-      "changed_files": [],
-      "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Paid returns and refunds have no valid settlement lifecycle.",
-      "commit_hash": null,
-      "resolved": false,
-      "release_blocker_remaining": true
+      "changed_files": [
+        "app/Services/ReturnService.php",
+        "app/Services/RefundService.php",
+        "app/Models/CreditNote.php",
+        "app/Models/CustomerCredit.php",
+        "app/Models/Refund.php",
+        "tests/Feature/Finance/RefundLifecycleIntegrityTest.php"
+      ],
+      "migrations": [
+        "database/migrations/2026_07_26_000003_create_return_credit_refund_ledger.php",
+        "database/migrations/2026_07_26_000010_harden_refund_lifecycle.php"
+      ],
+      "tests": [
+        "Paid return/customer credit, insufficient cash rollback, manager approval, pending external confirmation, idempotency and authorization passed"
+      ],
+      "commands": [
+        "php artisan test --compact tests/Feature/Finance/ReturnCreditIntegrityTest.php tests/Feature/Finance/RefundLifecycleIntegrityTest.php"
+      ],
+      "evidence": [
+        "Paid returns issue linked credit and customer credit; cash refunds debit sufficient cash only after approval; bank/card refunds cannot complete without external reference"
+      ],
+      "residual_risk": "External payment-provider adapters remain intentionally out of scope; confirmations currently record operator-supplied external references.",
+      "commit_hash": "pending_phase_2_commit",
+      "resolved": true,
+      "release_blocker_remaining": false
     },
     {
       "id": "PR-029",
@@ -649,17 +757,39 @@
       "id": "PR-031",
       "original_severity": "high",
       "phase": 2,
-      "status": "open",
-      "decision": "Prohibit hard deletion/cascade loss of financial, stock, audit, sequence, sync, credit, refund, and reconciliation history; archive masters and use compensation.",
-      "changed_files": [],
-      "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Deletion paths can destroy ledger evidence.",
-      "commit_hash": null,
-      "resolved": false,
-      "release_blocker_remaining": true
+      "status": "resolved",
+      "decision": "Prohibit hard deletion/cascade loss of financial, stock, expense, cash-reconciliation, transfer, audit, sequence, sync, credit, refund, and reconciliation history; archive masters and use compensation.",
+      "changed_files": [
+        "app/Models/Concerns/AppendOnly.php",
+        "app/Models/Invoice.php",
+        "app/Models/Payment.php",
+        "app/Models/ReturnRecord.php",
+        "app/Models/StockMovement.php",
+        "app/Models/Expense.php",
+        "app/Models/CashReconciliation.php",
+        "app/Models/VanTransfer.php",
+        "app/Models/VanTransferItem.php",
+        "app/Models/Activity.php",
+        "app/Models/SyncReceipt.php",
+        "database/migrations/2026_07_26_000009_enforce_append_only_ledgers.php",
+        "tests/Feature/Finance/AppendOnlyLedgerTest.php"
+      ],
+      "migrations": [
+        "database/migrations/2026_07_26_000009_enforce_append_only_ledgers.php"
+      ],
+      "tests": [
+        "ORM delete, direct PostgreSQL delete, and parent cascade deletion coverage passed"
+      ],
+      "commands": [
+        "php artisan test --compact tests/Feature/Finance/AppendOnlyLedgerTest.php"
+      ],
+      "evidence": [
+        "Ledger models reject ORM deletion; PostgreSQL triggers block direct deletes; history foreign keys use restrict semantics; corrections use compensating records"
+      ],
+      "residual_risk": "The production database role should additionally be denied destructive ledger privileges where the hosting platform supports granular grants.",
+      "commit_hash": "pending_phase_2_commit",
+      "resolved": true,
+      "release_blocker_remaining": false
     }
   ]
 }

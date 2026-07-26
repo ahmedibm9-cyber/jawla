@@ -16,5 +16,5 @@ interface StockService
 
     public function balance(int $warehouseId, int $productId, ?int $batchId = null): float;
 
-    public function reconcile(int $warehouseId, int $productId, ?int $batchId, float $countedQty, string $reason, int $userId): StockMovement;
+    public function reconcile(int $warehouseId, int $productId, ?int $batchId, float $countedQty, string $reason, int $userId, ?float $expectedQty = null, ?Model $reference = null): StockMovement;
 }

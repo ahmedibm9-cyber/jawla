@@ -10,6 +10,7 @@ class ProductPrice extends Model
     protected $fillable = [
         'product_id', 'price_list_id', 'price', 'uom',
         'min_quantity', 'customer_id', 'valid_from', 'valid_upto', 'is_active',
+        'created_by', 'reason', 'is_customer_override',
     ];
 
     protected $casts = [
@@ -18,6 +19,7 @@ class ProductPrice extends Model
         'valid_from' => 'date',
         'valid_upto' => 'date',
         'is_active' => 'boolean',
+        'is_customer_override' => 'boolean',
     ];
 
     public function product(): BelongsTo

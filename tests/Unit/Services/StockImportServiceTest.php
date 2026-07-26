@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WarehouseImportLog;
 use App\Services\StockImportService;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -28,8 +29,10 @@ class StockImportServiceTest extends TestCase
     {
         parent::setUp();
 
+        $this->seed(RoleSeeder::class);
         $company = Company::factory()->create();
         $this->user = User::factory()->create(['company_id' => $company->id]);
+        $this->user->assignRole(['warehouse_keeper', 'sales_manager']);
         $this->warehouse = Warehouse::factory()->create(['company_id' => $company->id, 'type' => 'main']);
         $category = ProductCategory::factory()->create(['company_id' => $company->id]);
         $this->product = Product::factory()->create([
@@ -84,9 +87,14 @@ class StockImportServiceTest extends TestCase
     public function test_apply_creates_matching_stock_movements(): void
     {
         $service = app(StockImportService::class);
-        $preview = $service->preview($this->fixture("sku,quantity\nSKU-IMP-1,75.5\n"), $this->warehouse);
+        $staged = $service->stage(
+            $this->fixture("sku,quantity\nSKU-IMP-1,75.5\n"),
+            $this->warehouse,
+            $this->user,
+        );
+        $service->approve($staged['token'], $this->user);
 
-        $log = $service->apply($preview, $this->warehouse, 'test.csv', $this->user->id);
+        $log = $service->confirm($staged['token'], $this->user, 'test.csv');
 
         $this->assertSame(1, $log->rows_imported);
         $this->assertEquals(75.5, (float) StockMovement::where('warehouse_id', $this->warehouse->id)
@@ -98,13 +106,16 @@ class StockImportServiceTest extends TestCase
     public function test_reimporting_same_file_is_blocked_by_checksum(): void
     {
         $service = app(StockImportService::class);
-        $preview = $service->preview($this->fixture("sku,quantity\nSKU-IMP-1,10\n"), $this->warehouse);
-        $service->apply($preview, $this->warehouse, 'test.csv', $this->user->id);
+        $path = $this->fixture("sku,quantity\nSKU-IMP-1,10\n");
+        $first = $service->stage($path, $this->warehouse, $this->user);
+        $service->approve($first['token'], $this->user);
+        $service->confirm($first['token'], $this->user, 'test.csv');
+        $second = $service->stage($path, $this->warehouse, $this->user);
 
         $this->expectException(DomainException::class);
 
         try {
-            $service->apply($preview, $this->warehouse, 'test.csv', $this->user->id);
+            $service->confirm($second['token'], $this->user, 'test.csv');
         } finally {
             $this->assertSame(1, WarehouseImportLog::count());
         }

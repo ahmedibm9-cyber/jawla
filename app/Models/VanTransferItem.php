@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\AppendOnly;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VanTransferItem extends Model
 {
+    use AppendOnly;
+
     protected $fillable = ['van_transfer_id', 'product_id', 'batch_id', 'quantity'];
 
     protected $casts = ['quantity' => 'decimal:3'];
