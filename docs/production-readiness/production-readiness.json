@@ -1,0 +1,404 @@
+{
+  "schema_version": "1.0",
+  "audit": {
+    "mode": "AUDIT_ONLY",
+    "date": "2026-07-26",
+    "repository": "jawla",
+    "branch": "master",
+    "commit": "ba768f7106b52fa8d2905daadc07cd6091ff0c26",
+    "verdict": "NOT_READY",
+    "score": 35,
+    "commercial_scope": "Synthetic-data demonstration or internal engineering pilot only",
+    "working_tree_note": "Unrelated concurrent worktree changes appeared after the revision was pinned. Static conclusions target the pinned commit."
+  },
+  "severity_counts": {
+    "critical": 10,
+    "high": 18,
+    "medium": 3,
+    "low": 0,
+    "total": 31
+  },
+  "score_breakdown": [
+    {"domain": "Financial and inventory integrity", "weight": 20, "awarded": 8},
+    {"domain": "Security and authentication", "weight": 15, "awarded": 6},
+    {"domain": "Test and release evidence", "weight": 15, "awarded": 6},
+    {"domain": "Offline/PWA reliability", "weight": 12, "awarded": 3},
+    {"domain": "Database integrity and tenancy", "weight": 10, "awarded": 4},
+    {"domain": "Deployment and disaster recovery", "weight": 10, "awarded": 1},
+    {"domain": "Monitoring and maintainability", "weight": 8, "awarded": 2},
+    {"domain": "Performance", "weight": 5, "awarded": 3},
+    {"domain": "Accessibility", "weight": 5, "awarded": 2}
+  ],
+  "top_five_blockers": [
+    "Filament tenant context is not initialized and tenant scopes fail open.",
+    "Untrusted stock, return, price, cancellation, amendment, and payment inputs can corrupt financial or stock state.",
+    "Railway production pre-deploy can create a known-password super-admin and synthetic financial data.",
+    "Offline confirmation can duplicate business intent, and queued financial actions can be irrecoverably discarded.",
+    "Concurrency, browser journeys, restore, rollback, capacity, monitoring, and signed acceptance are not proven for the release candidate."
+  ],
+  "findings": [
+    {
+      "id": "PR-001",
+      "title": "Filament tenant scope fails open",
+      "severity": "critical",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["security", "backend"],
+      "evidence": ["app/Models/Concerns/BelongsToCompany.php:13", "app/Providers/Filament/AdminPanelProvider.php:84"]
+    },
+    {
+      "id": "PR-002",
+      "title": "Stock import confirmation trusts mutable client state",
+      "severity": "critical",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["inventory", "backend", "security"],
+      "evidence": ["app/Livewire/StockImport.php:23", "app/Services/StockImportService.php:132"]
+    },
+    {
+      "id": "PR-003",
+      "title": "Returns can mint stock and credit",
+      "severity": "critical",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["finance", "inventory", "backend"],
+      "evidence": ["app/Livewire/App/LogReturn.php:47", "app/Services/ReturnService.php:46"]
+    },
+    {
+      "id": "PR-004",
+      "title": "Repeated offline confirmation creates duplicate business intents",
+      "severity": "critical",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["pwa", "sync", "product"],
+      "evidence": ["resources/js/offline/outbox.js:45", "resources/views/livewire/app/sales-flow.blade.php:194"]
+    },
+    {
+      "id": "PR-005",
+      "title": "Production pre-deploy seeds known credentials and demo finance data",
+      "severity": "critical",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["devops", "security", "product"],
+      "evidence": ["railway.toml:2", "app/Console/Commands/SeedSuperAdmin.php:23", "database/seeders/DemoSeeder.php:47"]
+    },
+    {
+      "id": "PR-006",
+      "title": "Rep cancellation and reversal break immutable financial history",
+      "severity": "critical",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["finance", "product", "security"],
+      "evidence": ["app/Livewire/App/ActionToast.php:50", "tests/Feature/ActionToastUndoTest.php:74"]
+    },
+    {
+      "id": "PR-007",
+      "title": "Rep-supplied prices are not bounded by an authoritative price policy",
+      "severity": "critical",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["sales", "finance", "backend"],
+      "evidence": ["app/Livewire/App/SalesFlow.php:135", "app/Services/InvoiceService.php:93"]
+    },
+    {
+      "id": "PR-008",
+      "title": "Unsynced financial actions can be permanently discarded",
+      "severity": "critical",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["pwa", "finance", "support"],
+      "evidence": ["resources/views/livewire/app/sync-queue.blade.php:41", "resources/js/offline/outbox.js:90"]
+    },
+    {
+      "id": "PR-009",
+      "title": "Payment and invoice amendment/cancellation can drift balances",
+      "severity": "critical",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["finance", "backend"],
+      "evidence": ["app/Services/PaymentService.php:32", "app/Services/InvoiceService.php:163"]
+    },
+    {
+      "id": "PR-010",
+      "title": "Stock reconciliation can overwrite concurrent movement",
+      "severity": "critical",
+      "status": "FAIL_NOT_VERIFIED_RUNTIME",
+      "launch_blocker": true,
+      "owners": ["inventory", "database"],
+      "evidence": ["app/Services/StockService.php:47"]
+    },
+    {
+      "id": "PR-011",
+      "title": "Monetary precision, stored balances, and database invariants are insufficient",
+      "severity": "high",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["finance", "database"],
+      "evidence": ["app/Services/InvoiceCalculationService.php:11", "database/migrations/2026_07_12_100003_create_stocks_table.php:32"]
+    },
+    {
+      "id": "PR-012",
+      "title": "Tax and e-invoice compliance is incomplete and overstated",
+      "severity": "high",
+      "status": "FAIL_NOT_VERIFIED_EXTERNAL",
+      "launch_blocker": true,
+      "owners": ["tax", "legal", "integration"],
+      "evidence": ["app/Services/Zatca/ZatcaPhase2Strategy.php:5"]
+    },
+    {
+      "id": "PR-013",
+      "title": "Stored XSS in rep live map",
+      "severity": "high",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["frontend", "security"],
+      "evidence": ["resources/views/filament/pages/rep-live-map.blade.php:62"]
+    },
+    {
+      "id": "PR-014",
+      "title": "Role and privileged-authentication model does not match the approved contract",
+      "severity": "high",
+      "status": "FAIL_PARTIAL",
+      "launch_blocker": true,
+      "owners": ["product", "security", "backend", "infrastructure"],
+      "evidence": ["database/seeders/RoleSeeder.php:13", "app/Filament/Auth/Pages/Login.php:15"]
+    },
+    {
+      "id": "PR-015",
+      "title": "Private files and continuous GPS lack production privacy proof",
+      "severity": "high",
+      "status": "FAIL_NOT_VERIFIED_EXTERNAL",
+      "launch_blocker": true,
+      "owners": ["privacy", "legal", "security", "infrastructure"],
+      "evidence": ["config/filesystems.php:19", "resources/views/livewire/app/location-tracker.blade.php:1"]
+    },
+    {
+      "id": "PR-016",
+      "title": "Offline scope, protocol evolution, and multi-device behavior are undefined",
+      "severity": "high",
+      "status": "FAIL_PARTIAL",
+      "launch_blocker": true,
+      "owners": ["product", "pwa", "backend"],
+      "evidence": ["public/sw.js:1", "app/Services/Sync/SyncService.php:66"]
+    },
+    {
+      "id": "PR-017",
+      "title": "Backup and disaster recovery are not operationally proven",
+      "severity": "high",
+      "status": "NOT_VERIFIED",
+      "launch_blocker": true,
+      "owners": ["operations", "database", "security"],
+      "evidence": ["docs/BACKUP_RESTORE.md:61", "scripts/backup.sh:7"]
+    },
+    {
+      "id": "PR-018",
+      "title": "Deployment, rollback, and CI promotion are not safe release gates",
+      "severity": "high",
+      "status": "FAIL_PARTIAL",
+      "launch_blocker": true,
+      "owners": ["devops", "qa", "database"],
+      "evidence": ["scripts/deploy.sh:39", ".github/workflows/e2e.yml:19"]
+    },
+    {
+      "id": "PR-019",
+      "title": "Current tests do not provide trustworthy release evidence",
+      "severity": "high",
+      "status": "NOT_VERIFIED",
+      "launch_blocker": true,
+      "owners": ["qa", "backend", "pwa", "devops"],
+      "evidence": ["docs/production-readiness/11-test-evidence.md"]
+    },
+    {
+      "id": "PR-020",
+      "title": "Capacity, monitoring, reconciliation alerts, and incident response are unproven",
+      "severity": "high",
+      "status": "NOT_VERIFIED",
+      "launch_blocker": true,
+      "owners": ["operations", "performance", "support", "finance"],
+      "evidence": ["docs/perf-report-2026-07-20-railway.md:3", "config/sentry.php"]
+    },
+    {
+      "id": "PR-021",
+      "title": "Specifications and operational documentation contradict implementation",
+      "severity": "high",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["technical_owner", "product_owner"],
+      "evidence": ["docs/Jawla_Production_Build_Guide.md:31", "docs/ARCHITECTURE.md:9", "railway.toml:2"]
+    },
+    {
+      "id": "PR-022",
+      "title": "CSP and telemetry privacy hardening are incomplete",
+      "severity": "medium",
+      "status": "PARTIAL",
+      "launch_blocker": false,
+      "owners": ["frontend", "security", "privacy"],
+      "evidence": ["app/Http/Middleware/SecurityHeaders.php:37", "app/Support/SentryScrubber.php:19"]
+    },
+    {
+      "id": "PR-023",
+      "title": "WCAG 2.2 AA is not demonstrated",
+      "severity": "medium",
+      "status": "FAIL_PARTIAL",
+      "launch_blocker": false,
+      "owners": ["frontend", "qa", "accessibility"],
+      "evidence": ["resources/css/app.css:40", "tests/Browser/FullDayWalkthroughTest.php:114"]
+    },
+    {
+      "id": "PR-024",
+      "title": "Scheduled operational alarms are absent",
+      "severity": "medium",
+      "status": "FAIL",
+      "launch_blocker": false,
+      "owners": ["backend", "warehouse", "operations"],
+      "evidence": ["routes/console.php:1", "app/Services/BatchService.php:24"]
+    },
+    {
+      "id": "PR-025",
+      "title": "Batch traceability is bypassed by sale and return paths",
+      "severity": "high",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["warehouse", "backend"],
+      "evidence": ["app/Livewire/App/SalesFlow.php", "app/Services/StockService.php"]
+    },
+    {
+      "id": "PR-026",
+      "title": "Van transfer authorization and exception lifecycle are inconsistent",
+      "severity": "high",
+      "status": "FAIL_PARTIAL",
+      "launch_blocker": true,
+      "owners": ["warehouse", "product", "backend"],
+      "evidence": ["app/Services/VanTransferService.php:68", "app/Filament/Resources/VanTransferResource.php:108"]
+    },
+    {
+      "id": "PR-027",
+      "title": "Invoice numbering is not proven sequential and collision-safe",
+      "severity": "high",
+      "status": "PARTIAL_NOT_VERIFIED_RUNTIME",
+      "launch_blocker": true,
+      "owners": ["database", "finance", "compliance"],
+      "evidence": ["app/Services/NumberSequenceService.php:14"]
+    },
+    {
+      "id": "PR-028",
+      "title": "Paid returns, credits, and refunds lack a valid accounting lifecycle",
+      "severity": "high",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["finance", "tax", "product", "backend"],
+      "evidence": ["app/Services/ReturnService.php:91"]
+    },
+    {
+      "id": "PR-029",
+      "title": "Issued PDFs are not immutable or reproducible",
+      "severity": "high",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["backend", "compliance"],
+      "evidence": ["app/Services/PdfService.php:51", "app/Services/PdfService.php:141"]
+    },
+    {
+      "id": "PR-030",
+      "title": "Egyptian ETA integration is a non-idempotent unsigned scaffold",
+      "severity": "high",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["compliance", "integration", "operations"],
+      "evidence": ["app/Services/Eta/EtaDocumentBuilder.php:11", "app/Services/Eta/UnsignedEtaSigner.php:7"]
+    },
+    {
+      "id": "PR-031",
+      "title": "Financial and stock history is not database-append-only",
+      "severity": "high",
+      "status": "FAIL",
+      "launch_blocker": true,
+      "owners": ["database", "backend", "audit"],
+      "evidence": ["database/migrations", "app/Policies"]
+    }
+  ],
+  "checks": [
+    {"command": "php artisan about", "result": "PASS", "scope": "local inventory only"},
+    {"command": "php artisan route:list --except-vendor", "result": "PASS", "detail": "100 routes"},
+    {"command": "php artisan route:list --path=admin -vv", "result": "PASS", "detail": "64 routes; used for middleware evidence"},
+    {"command": "composer validate --no-check-publish", "result": "PASS_WITH_WARNINGS", "detail": "six unbounded dependency constraints"},
+    {"command": "composer audit --locked --no-interaction", "result": "PASS", "detail": "no known advisories at audit time"},
+    {"command": "npm audit --audit-level=high --package-lock-only", "result": "PASS", "detail": "zero vulnerabilities at audit time"},
+    {"command": "php vendor/bin/pint --test", "result": "PASS"},
+    {"command": "php vendor/bin/phpstan analyse --no-progress --memory-limit=512M", "result": "NOT_AVAILABLE", "detail": "PHPStan executable absent"},
+    {"command": "npm run audit:pwa-assets", "result": "PASS", "detail": "JS 50.5 KiB, CSS 22.3 KiB, total 503.1 KiB gzip"}
+  ],
+  "test_runs": [
+    {
+      "scope": "Unit and Feature full attempt",
+      "result": "INVALID_INCONCLUSIVE",
+      "detail": "Did not complete after more than six minutes of shared PostgreSQL contention; exact spawned PHP processes were terminated."
+    },
+    {
+      "scope": "Financial focused suite",
+      "result": "INVALID_INCONCLUSIVE",
+      "detail": "138 tests: 98 reported pass and 40 setup errors after 542.487 seconds; shared RefreshDatabase collisions invalidate all counts."
+    },
+    {
+      "scope": "Security and tenancy focused suite",
+      "result": "INVALID_INCONCLUSIVE",
+      "detail": "38 setup deadlock errors and zero assertions; shared RefreshDatabase collisions."
+    },
+    {
+      "scope": "Offline and sync focused suite",
+      "result": "INVALID_INCONCLUSIVE",
+      "detail": "28 tests: 2 reported pass and 26 infrastructure errors after 120.537 seconds; shared RefreshDatabase collisions."
+    }
+  ],
+  "unsafe_or_out_of_scope_tests_not_run": [
+    "Development or production migrations and migrate:status",
+    "Production or staging connections",
+    "Production credentials or data",
+    "Backup and restore",
+    "Deployment and rollback",
+    "Live load testing",
+    "Browser tests requiring the collided shared database",
+    "Official ZATCA or ETA submissions",
+    "External object storage, Sentry, monitoring, email, or Railway service tests"
+  ],
+  "unverified": [
+    "Clean full isolated PostgreSQL test suite",
+    "Real two-connection financial and stock concurrency",
+    "Real-browser offline and IndexedDB lifecycle",
+    "Two-company Filament and Livewire IDOR matrix",
+    "Official tax authority validation and legal approval",
+    "Production private storage and telemetry behavior",
+    "Backup restoration, RPO, and RTO",
+    "Pinned-artifact deployment and rollback",
+    "Current production-shaped capacity",
+    "Alert delivery and incident response drill",
+    "WCAG 2.2 AA automated and manual verification",
+    "Signed multi-role UAT and commercial acceptance"
+  ],
+  "required_report_files": [
+    "00-executive-verdict.md",
+    "01-system-inventory.md",
+    "02-production-gates.md",
+    "03-risk-register.md",
+    "04-financial-workflow-traces.md",
+    "05-database-integrity.md",
+    "06-concurrency-and-idempotency.md",
+    "07-tenancy-and-rbac.md",
+    "08-offline-pwa-sync.md",
+    "09-security-review.md",
+    "10-zatca-and-invoice-compliance.md",
+    "11-test-evidence.md",
+    "12-accessibility.md",
+    "13-performance.md",
+    "14-deployment-and-rollback.md",
+    "15-backup-and-disaster-recovery.md",
+    "16-monitoring-and-incidents.md",
+    "17-maintainability.md",
+    "18-commercial-fitness.md",
+    "19-remediation-roadmap.md",
+    "20-owner-decisions-required.md",
+    "OWNER_DECISIONS_REQUIRED.md",
+    "production-readiness.json"
+  ],
+  "next_action": "Freeze a release-remediation branch, resolve owner decisions, and close P0 findings beginning with production seeding containment and fail-closed tenant isolation. Re-audit a pinned artifact after isolated tests, restore, rollback, monitoring, compliance, accessibility, capacity, privacy, and UAT evidence exist."
+}

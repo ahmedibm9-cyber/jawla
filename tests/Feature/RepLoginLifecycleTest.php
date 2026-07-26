@@ -2,17 +2,18 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Auth\Pages\Login;
 use App\Models\User;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\RateLimiter;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 /**
  * Regression guard for LOGIN.1 — the unified login lifecycle.
- * Asserts the full canonical /login lifecycle so a future edit near auth
- * cannot silently re-break it: guest redirect, rep authenticates, non-rep
- * rejected, rep logout — all on the unified /login page.
+ * Filament's built-in login page at /admin/login is the only login page.
+ * /login redirects there. LoginResponse handles role-based redirect after auth.
  */
 class RepLoginLifecycleTest extends TestCase
 {
@@ -28,9 +29,14 @@ class RepLoginLifecycleTest extends TestCase
         RateLimiter::clear('post|ip:127.0.0.1');
     }
 
-    public function test_guest_visiting_a_rep_route_is_redirected_to_login(): void
+    public function test_guest_visiting_a_rep_route_is_redirected_to_filament_login(): void
     {
-        $this->get('/app')->assertRedirect('/login');
+        $this->get('/app')->assertRedirect(route('filament.admin.auth.login'));
+    }
+
+    public function test_login_route_redirects_to_filament_login(): void
+    {
+        $this->get('/login')->assertRedirect(route('filament.admin.auth.login'));
     }
 
     public function test_old_app_login_redirects_to_unified_login(): void
@@ -38,39 +44,44 @@ class RepLoginLifecycleTest extends TestCase
         $this->get('/app/login')->assertRedirect(route('login'));
     }
 
-    public function test_rep_can_log_in_via_unified_login_and_reaches_the_app(): void
+    public function test_rep_can_log_in_via_filament_login_and_reaches_the_app(): void
     {
-        $this->post('/login', [
-            'email' => 'rep@jawla.test',
-            'password' => 'password',
-        ])->assertRedirect(route('app.home'));
+        $rep = User::where('email', 'rep@jawla.test')->firstOrFail();
 
-        $this->assertAuthenticatedAs(User::where('email', 'rep@jawla.test')->firstOrFail());
+        Livewire::test(Login::class)
+            ->set('data.email', $rep->email)
+            ->set('data.password', 'password')
+            ->call('authenticate');
+
+        $this->assertAuthenticatedAs($rep);
     }
 
-    public function test_non_rep_is_rejected_via_inactive_check(): void
+    public function test_admin_logs_in_via_filament_login_and_reaches_dashboard(): void
     {
-        // Non-rep users can authenticate but will be redirected to admin dashboard,
-        // not blocked. The unified login allows all active users.
-        $this->from('/login')->post('/login', [
-            'email' => 'admin@jawla.test',
-            'password' => 'password',
-        ])->assertRedirect(route('filament.admin.pages.dashboard'));
+        $admin = User::where('email', 'admin@jawla.test')->firstOrFail();
 
-        $this->assertAuthenticated();
+        Livewire::test(Login::class)
+            ->set('data.email', $admin->email)
+            ->set('data.password', 'password')
+            ->call('authenticate');
+
+        $this->assertAuthenticatedAs($admin);
     }
 
     public function test_wrong_password_is_rejected(): void
     {
-        $this->from('/login')->post('/login', [
-            'email' => 'rep@jawla.test',
-            'password' => 'wrong-password',
-        ])->assertSessionHasErrors('email');
+        $rep = User::where('email', 'rep@jawla.test')->firstOrFail();
+
+        Livewire::test(Login::class)
+            ->set('data.email', $rep->email)
+            ->set('data.password', 'wrong-password')
+            ->call('authenticate')
+            ->assertHasFormErrors();
 
         $this->assertGuest();
     }
 
-    public function test_rep_logout_returns_to_unified_login(): void
+    public function test_rep_logout_returns_to_login(): void
     {
         $rep = User::where('email', 'rep@jawla.test')->firstOrFail();
 

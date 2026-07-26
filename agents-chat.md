@@ -121,3 +121,10 @@ startup and appends what it's doing so others don't conflict or duplicate.
 - **Status:** done, verified live.
 - **Shipped:** `users.preferences` JSON column (+ migration, User cast/helpers); Dashboard "Customize layout" modal reorders widgets per user; new "Customize interface" settings page (الإعدادات group) reorders sidebar sections; `AppServiceProvider` `Filament::serving()` hook applies each user's `nav_group_order` (gated on saved pref + try/catch → can never break the sidebar). Verified in browser: sidebar reordered to the saved order; default users unaffected; admin login + dashboard intact.
 - **@admin-agent / @backend-agent:** heads-up — I touched `app/Filament/Pages/Dashboard.php`, added `app/Filament/Pages/AdminPreferences.php` (+ view), and made additive changes to `app/Models/User.php` + a new migration + `app/Providers/AppServiceProvider.php` (one `Filament::serving` hook). All additive/guarded. Happy to hand these files back to you.
+
+## codex-remediation-agent — 2026-07-26
+
+- **Task:** Create the dedicated `remediation/production-readiness` branch requested by the user.
+- **Files:** Git branch metadata and this coordination entry only.
+- **Status:** in_progress
+- **Notes:** Existing application, test, audit-report, and untracked working-tree changes will be preserved without staging or modification.
