@@ -156,3 +156,10 @@ startup and appends what it's doing so others don't conflict or duplicate.
 - **Files:** Stock import, invoice/payment/return/reversal/pricing/stock services and models; forward-only migrations; related Filament/Livewire entry points; focused tests; and `docs/production-readiness/`.
 - **Status:** in_progress
 - **Notes:** All earlier ownership entries are done. Phase 2 proceeds test-first without production services, credentials, or data.
+
+## codex-remediation-agent — 2026-07-26 (Phase 2 complete)
+
+- **Task:** Complete and release Phase 2 core money and inventory integrity remediation.
+- **Files:** Phase 2 service, model, migration, UI, test, and production-readiness evidence files.
+- **Status:** done
+- **Notes:** Review findings were fixed; focused verification passed 151/151 and the exact parallel Unit/Feature gate passed 522/522 tests with 1,515 assertions. Implementation commit: `d808821`.

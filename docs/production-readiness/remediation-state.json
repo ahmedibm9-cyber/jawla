@@ -116,7 +116,7 @@
         "Confirmation reparses the server file and verifies checksum, server preview, snapshot, actor, company, warehouse, approval, expiry, and single use inside the transaction"
       ],
       "residual_risk": "Offline/master-data import protocol remains outside the online-only stock import scope.",
-      "commit_hash": "pending_phase_2_commit",
+      "commit_hash": "d808821883b43aa6acbab687ed598ac650a226a7",
       "resolved": true,
       "release_blocker_remaining": false
     },
@@ -146,7 +146,7 @@
         "Original invoice and line are locked; product, batch, price, tax, company and remaining returnable quantity are resolved server-side"
       ],
       "residual_risk": "Batch eligibility and FEFO are completed under PR-025 in Phase 4.",
-      "commit_hash": "pending_phase_2_commit",
+      "commit_hash": "d808821883b43aa6acbab687ed598ac650a226a7",
       "resolved": true,
       "release_blocker_remaining": false
     },
@@ -231,7 +231,7 @@
         "Committed-action dispatches and price/finance Undo UI were removed; compensating reversals preserve originals and create unique linked reversal records"
       ],
       "residual_risk": "Generic redo remains deliberately unavailable until a later accounting dependency model is approved.",
-      "commit_hash": "pending_phase_2_commit",
+      "commit_hash": "d808821883b43aa6acbab687ed598ac650a226a7",
       "resolved": true,
       "release_blocker_remaining": false
     },
@@ -262,7 +262,7 @@
         "Rep price input is display-only and recalculated by company/customer/product/date/quantity; manager overrides require a bounded window, reason and audit entry"
       ],
       "residual_risk": "Phase 4 completes exact decimal arithmetic and tax invariant hardening.",
-      "commit_hash": "pending_phase_2_commit",
+      "commit_hash": "d808821883b43aa6acbab687ed598ac650a226a7",
       "resolved": true,
       "release_blocker_remaining": false
     },
@@ -313,7 +313,7 @@
         "Overpayment becomes customer credit; amendments credit originals and create numberless replacement drafts; concurrent one-intent payment posts once; read-only reconciliation reports customer, cash, and stock drift"
       ],
       "residual_risk": "Automated ledger drift correction and end-to-end exact arithmetic remain in PR-011 Phase 4.",
-      "commit_hash": "pending_phase_2_commit",
+      "commit_hash": "d808821883b43aa6acbab687ed598ac650a226a7",
       "resolved": true,
       "release_blocker_remaining": false
     },
@@ -344,7 +344,7 @@
         "Counts never absolute-overwrite an unexpected balance; all adjustments use the locked stock primitive and an immutable session-linked delta movement; sale/count and return/sale races preserve locked movement ordering; concurrency passed three repeat runs"
       ],
       "residual_risk": "Phase 4 extends the locked primitive with whole-unit and batch/FEFO rules.",
-      "commit_hash": "pending_phase_2_commit",
+      "commit_hash": "d808821883b43aa6acbab687ed598ac650a226a7",
       "resolved": true,
       "release_blocker_remaining": false
     },
@@ -717,7 +717,7 @@
         "Paid returns issue linked credit and customer credit; cash refunds debit sufficient cash only after approval; bank/card refunds cannot complete without external reference"
       ],
       "residual_risk": "External payment-provider adapters remain intentionally out of scope; confirmations currently record operator-supplied external references.",
-      "commit_hash": "pending_phase_2_commit",
+      "commit_hash": "d808821883b43aa6acbab687ed598ac650a226a7",
       "resolved": true,
       "release_blocker_remaining": false
     },
@@ -787,7 +787,7 @@
         "Ledger models reject ORM deletion; PostgreSQL triggers block direct deletes; history foreign keys use restrict semantics; corrections use compensating records"
       ],
       "residual_risk": "The production database role should additionally be denied destructive ledger privileges where the hosting platform supports granular grants.",
-      "commit_hash": "pending_phase_2_commit",
+      "commit_hash": "d808821883b43aa6acbab687ed598ac650a226a7",
       "resolved": true,
       "release_blocker_remaining": false
     }
