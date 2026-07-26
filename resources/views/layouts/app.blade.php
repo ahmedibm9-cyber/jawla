@@ -40,7 +40,16 @@
   @livewireStyles
 </head>
 <body>
-  <x-runtime-banners />
+  @if(config('jawla.is_demo'))
+      <div
+          role="status"
+          aria-label="Demo / Evaluation mode"
+          style="position:sticky;top:0;z-index:9999;padding:.5rem 1rem;text-align:center;background:#7c2d12;color:#fff;font-weight:700"
+      >
+          DEMO / EVALUATION — SAMPLE, NOT A TAX INVOICE ·
+          وضع تجريبي / للتقييم — عينة، وليست فاتورة ضريبية
+      </div>
+  @endif
   <a href="#main" class="skip-link">{{ __('app.skip_to_content') }}</a>
   @auth
     @php
@@ -53,6 +62,7 @@
       $hasCriticalNotification = (bool) ($notificationSummary->has_critical ?? false);
     @endphp
     <header class="notification-header">
+      <x-_active-company panel="rep" />
       {{-- CG2 offline sync-status badge: pending/failed count from the outbox --}}
       <a href="/app/sync-queue" aria-label="{{ app()->getLocale() === 'ar' ? 'قائمة المزامنة' : 'Sync queue' }}"
          class="notification-fab"
