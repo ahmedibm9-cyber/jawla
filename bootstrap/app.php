@@ -25,7 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         // All unauthenticated users are redirected to the unified login page.
-        $middleware->redirectGuestsTo('/login');
+        $middleware->redirectGuestsTo('/admin/login');
 
         $middleware->web(append: [
             SecurityHeaders::class,

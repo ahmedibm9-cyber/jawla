@@ -65,15 +65,16 @@ jobs:
           DB_DATABASE: jawla_test
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
-      # Unit + Feature only, run serially. Browser/E2E (tests/Browser) needs a
-      # Playwright browser + running app and belongs in a dedicated E2E job.
-      # Serial (not --parallel) matches the deterministic single-database setup;
-      # parallel workers race on per-process test DBs (unmigrated relations) and
-      # amplify seeded-state flakiness.
+      # Browser/E2E has its own job. Unit and Feature use Laravel's isolated
+      # per-worker PostgreSQL databases; the base database is migrated above so
+      # DatabaseTransactions tests are safe even when scheduled first.
       - name: Pest
-        run: vendor/bin/pest --testsuite=Unit,Feature
+        run: php artisan test --parallel --recreate-databases --drop-databases --processes=2 --compact --testsuite=Unit,Feature
         env:
+          APP_ENV: testing
+          DB_CONNECTION: pgsql
           DB_HOST: 127.0.0.1
+          DB_PORT: 5432
           DB_DATABASE: jawla_test
           DB_USERNAME: postgres
           DB_PASSWORD: postgres
@@ -83,4 +84,6 @@ jobs:
         run: npm audit --audit-level=high
       - name: Block obvious committed secrets
         run: |
+          test -z "$(git ls-files | grep -Ei '(^|/)(cookies(\.txt)?|.*\.cookies\.txt|.*\.(pem|p12|pfx|key))$')" \
+            || { echo "::error::Tracked credential, cookie, or private-key artifact detected"; exit 1; }
           ! git grep -nEi '(aws_secret_access_key\s*[:=]\s*[^$[:space:]]|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|eta_(client_)?secret\s*[:=]\s*[^$])' -- ':!*.lock' ':!docs/**'

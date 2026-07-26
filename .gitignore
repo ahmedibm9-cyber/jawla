@@ -13,6 +13,9 @@
 /.vscode
 /.zed
 /auth.json
+/cookies.txt
+*.cookies.txt
+/docs/production-readiness/*.rar
 /node_modules
 /public/fonts-manifest.dev.json
 /public/hot

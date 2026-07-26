@@ -126,5 +126,19 @@ startup and appends what it's doing so others don't conflict or duplicate.
 
 - **Task:** Create the dedicated `remediation/production-readiness` branch requested by the user.
 - **Files:** Git branch metadata and this coordination entry only.
+- **Status:** done
+- **Notes:** Created and switched to `remediation/production-readiness`; existing untracked `.claude/settings.local.json` was preserved.
+
+## codex-remediation-agent — 2026-07-26 (production remediation)
+
+- **Task:** Execute the approved production-readiness remediation prompt phase by phase, beginning with reliable isolated PostgreSQL test evidence and remediation state.
+- **Files:** Phase 0 initially owns `phpunit.xml`, `tests/`, CI/test configuration, and `docs/production-readiness/remediation-*`; later files will be claimed per phase before edits.
 - **Status:** in_progress
-- **Notes:** Existing application, test, audit-report, and untracked working-tree changes will be preserved without staging or modification.
+- **Notes:** No other active entry currently owns these files. Existing `.claude/settings.local.json` remains untouched. No production services, credentials, deployment, or production data will be used.
+
+## codex-remediation-agent — 2026-07-26 (Phase 0 baseline regression)
+
+- **Task:** Repair the existing unified-login regression exposed by the isolated sequential baseline without changing its assertion.
+- **Files:** `bootstrap/app.php`, `tests/Feature/RepLoginLifecycleTest.php` (test read/run only).
+- **Status:** done
+- **Notes:** Red evidence was guest `/app` redirecting to `/login`; `bootstrap/app.php` now redirects unauthenticated requests directly to `/admin/login`. Focused lifecycle passed 7/7 and affected auth coverage passed 18/18.
