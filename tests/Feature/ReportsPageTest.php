@@ -22,10 +22,10 @@ class ReportsPageTest extends TestCase
         $this->seed(RoleSeeder::class);
     }
 
-    private function adminUser(): User
+    private function reportingUser(): User
     {
         $u = User::factory()->create();
-        $u->assignRole('admin');
+        $u->assignRole('sales_manager');
 
         return $u;
     }
@@ -66,7 +66,7 @@ class ReportsPageTest extends TestCase
 
     public function test_invoices_tab_returns_paginator(): void
     {
-        $user = $this->adminUser();
+        $user = $this->reportingUser();
         Livewire::actingAs($user)
             ->test(ReportsPage::class)
             ->assertSet('tab', 'visit_reports')
@@ -76,7 +76,7 @@ class ReportsPageTest extends TestCase
 
     public function test_invoices_tab_shows_pagination_with_more_than_100(): void
     {
-        $user = $this->adminUser();
+        $user = $this->reportingUser();
         Invoice::factory(101)->create([
             'company_id' => $user->company_id,
             'user_id' => $user->id,
@@ -90,7 +90,7 @@ class ReportsPageTest extends TestCase
 
     public function test_proformas_and_quotations_tabs_render(): void
     {
-        $user = $this->adminUser();
+        $user = $this->reportingUser();
         ProformaInvoice::factory(5)->create(['company_id' => $user->company_id, 'user_id' => $user->id]);
         PriceQuotationRequest::factory(5)->create(['company_id' => $user->company_id, 'user_id' => $user->id]);
 

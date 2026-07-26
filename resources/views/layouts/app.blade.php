@@ -40,6 +40,7 @@
   @livewireStyles
 </head>
 <body>
+  <x-runtime-banners />
   <a href="#main" class="skip-link">{{ __('app.skip_to_content') }}</a>
   @auth
     @php

@@ -32,7 +32,7 @@ abstract class AbstractRepWriteHandler implements SyncHandler
     protected function assertCustomerInCompany(User $rep, int $customerId): void
     {
         $ok = Customer::query()
-            ->where('company_id', $rep->company_id)
+            ->where('company_id', $rep->activeCompanyId())
             ->whereKey($customerId)
             ->exists();
 

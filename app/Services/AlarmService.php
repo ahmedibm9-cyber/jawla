@@ -84,7 +84,7 @@ class AlarmService implements Contracts\AlarmService
 
         $roles = $roleMap[$type] ?? ['admin'];
 
-        return User::where('company_id', $companyId)
+        return User::forCompany($companyId)
             ->where('is_active', true)
             ->whereHas('roles', fn ($q) => $q->whereIn('name', $roles))
             ->pluck('id')

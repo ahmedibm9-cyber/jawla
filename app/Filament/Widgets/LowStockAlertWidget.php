@@ -24,11 +24,11 @@ class LowStockAlertWidget extends StatsOverviewWidget
 
         try {
             // Get main warehouse(s) for the company
-            $mainWarehouses = Warehouse::where('company_id', $user->company_id)
+            $mainWarehouses = Warehouse::where('company_id', $user->activeCompanyId())
                 ->where('type', 'main')
                 ->pluck('id');
 
-            $vanWarehouses = Warehouse::where('company_id', $user->company_id)
+            $vanWarehouses = Warehouse::where('company_id', $user->activeCompanyId())
                 ->where('type', 'van')
                 ->pluck('id');
 

@@ -13,7 +13,7 @@ class LoginResponse implements Responsable
     {
         $user = Filament::auth()->user();
 
-        if ($user && $user->hasRole('rep')) {
+        if ($user && $user->hasAnyRole(['sales_rep', 'rep'])) {
             return redirect()->intended('/app');
         }
 

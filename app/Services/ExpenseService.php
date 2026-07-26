@@ -6,12 +6,15 @@ use App\Exceptions\Domain\DomainException;
 use App\Models\CashBox;
 use App\Models\Expense;
 use App\Models\User;
+use App\Support\ActiveCompanyContext;
 use Illuminate\Support\Facades\DB;
 
 class ExpenseService
 {
     public function log(int $companyId, int $userId, string $category, float $amount, string $note = '', ?int $workSessionId = null): Expense
     {
+        app(ActiveCompanyContext::class)->assertMatches($companyId);
+
         if ($amount <= 0) {
             throw new DomainException(
                 app()->getLocale() === 'ar'
@@ -72,7 +75,7 @@ class ExpenseService
     private function ensureCashBox(int $userId, int $companyId): CashBox
     {
         $user = User::withoutGlobalScopes()->whereKey($userId)->lockForUpdate()->firstOrFail();
-        if ($user->company_id !== $companyId) {
+        if (! $user->hasCompanyAccess($companyId)) {
             throw new DomainException('Cash box user does not belong to this company.');
         }
 

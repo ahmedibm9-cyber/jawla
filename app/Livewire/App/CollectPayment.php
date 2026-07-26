@@ -64,7 +64,7 @@ class CollectPayment extends Component
 
         try {
             $payment = app(PaymentService::class)->collect(
-                companyId: auth()->user()->company_id,
+                companyId: auth()->user()->activeCompanyId(),
                 userId: auth()->id(),
                 customerId: $this->customer_id,
                 amount: (float) $this->amount,
@@ -120,7 +120,7 @@ class CollectPayment extends Component
         $user = auth()->user();
 
         $customers = Customer::query()
-            ->where('company_id', $user->company_id)
+            ->where('company_id', $user->activeCompanyId())
             ->where('is_active', true)
             ->where('status', 'approved')
             ->orderBy('name_ar')
@@ -130,7 +130,7 @@ class CollectPayment extends Component
         $invoices = [];
         if ($this->customer_id) {
             $invoices = Invoice::query()
-                ->where('company_id', auth()->user()->company_id)
+                ->where('company_id', auth()->user()->activeCompanyId())
                 ->where('customer_id', $this->customer_id)
                 ->whereIn('status', ['submitted', 'partially_paid'])
                 ->whereRaw('remaining_amount > 0')

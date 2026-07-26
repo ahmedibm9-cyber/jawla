@@ -42,7 +42,7 @@ class LocationPingService
         }
 
         return LocationPing::create([
-            'company_id' => $rep->company_id,
+            'company_id' => $rep->activeCompanyId(),
             'user_id' => $rep->id,
             'work_session_id' => $session->id,
             'latitude' => $latitude,

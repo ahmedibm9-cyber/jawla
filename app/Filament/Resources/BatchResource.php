@@ -47,12 +47,12 @@ class BatchResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->whereHas('product', fn ($q) => $q->where('company_id', Auth::user()?->company_id));
+            ->whereHas('product', fn ($q) => $q->where('company_id', Auth::user()?->activeCompanyId()));
     }
 
     public static function form(Schema $schema): Schema
     {
-        $companyId = Auth::user()?->company_id;
+        $companyId = Auth::user()?->activeCompanyId();
 
         return $schema->schema([
             Section::make(l('بيانات الدفعة', 'Batch Details'))->schema([

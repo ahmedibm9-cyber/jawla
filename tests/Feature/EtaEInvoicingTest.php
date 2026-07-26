@@ -95,7 +95,11 @@ class EtaEInvoicingTest extends TestCase
 
     public function test_submit_records_acceptance_when_configured_with_a_working_client(): void
     {
-        config(['eta.enabled' => true, 'eta.taxpayer_rin' => '999888777']);
+        config([
+            'jawla.is_demo' => false,
+            'eta.enabled' => true,
+            'eta.taxpayer_rin' => '999888777',
+        ]);
         $this->app->bind(EtaClient::class, fn () => new class implements EtaClient
         {
             public function submit(array $document): EtaResult
@@ -115,7 +119,11 @@ class EtaEInvoicingTest extends TestCase
 
     public function test_submit_records_rejection_with_errors(): void
     {
-        config(['eta.enabled' => true, 'eta.taxpayer_rin' => '999888777']);
+        config([
+            'jawla.is_demo' => false,
+            'eta.enabled' => true,
+            'eta.taxpayer_rin' => '999888777',
+        ]);
         $this->app->bind(EtaClient::class, fn () => new class implements EtaClient
         {
             public function submit(array $document): EtaResult

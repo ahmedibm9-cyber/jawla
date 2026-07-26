@@ -134,7 +134,7 @@ class GoodsInTransitResource extends Resource
                     ->visible(fn (GoodsInTransit $r) => ! in_array($r->status, ['received', 'cancelled'], true) && auth()->user()->hasAnyRole(['admin', 'warehouse_keeper', 'purchasing']))
                     ->form([
                         Forms\Components\Select::make('warehouse_id')->label(l('المستودع', 'Warehouse'))
-                            ->options(fn () => Warehouse::where('company_id', Auth::user()->company_id)->where('type', 'main')->pluck('name_ar', 'id'))
+                            ->options(fn () => Warehouse::where('company_id', Auth::user()->activeCompanyId())->where('type', 'main')->pluck('name_ar', 'id'))
                             ->required(),
                     ])
                     ->requiresConfirmation()

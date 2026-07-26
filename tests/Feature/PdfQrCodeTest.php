@@ -8,9 +8,11 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Payment;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\ProformaInvoice;
 use App\Models\User;
 use App\Services\PdfService;
+use App\Support\ActiveCompanyContext;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
@@ -41,14 +43,18 @@ class PdfQrCodeTest extends TestCase
             'tax_number' => $overrides['tax_number'] ?? '300000000000003',
             'vat_percent' => $overrides['vat_percent'] ?? 15.00,
         ]);
+        app(ActiveCompanyContext::class)->setCompanyId($company->id);
 
         $customer = Customer::factory()->create([
             'company_id' => $company->id,
+            'route_id' => null,
             'status' => 'approved',
         ]);
 
+        $category = ProductCategory::factory()->create(['company_id' => $company->id]);
         $product = Product::factory()->create([
             'company_id' => $company->id,
+            'category_id' => $category->id,
             'name_ar' => 'منتج',
             'price' => 1000,
             'vat_applicable' => true,

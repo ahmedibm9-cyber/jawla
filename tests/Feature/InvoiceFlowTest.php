@@ -10,12 +10,14 @@ use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\Stock;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\Contracts\StockService;
 use App\Services\InvoiceService;
 use App\Services\PaymentService;
+use App\Support\ActiveCompanyContext;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -146,7 +148,14 @@ class InvoiceFlowTest extends TestCase
     {
         $rep = User::where('email', 'rep@jawla.test')->firstOrFail();
         $product = Product::where('sku', 'VIR-PP-H030')->firstOrFail();
-        $foreignCustomer = Customer::factory()->create(['company_id' => Company::factory()->create()->id]);
+        $foreignCompany = Company::factory()->create();
+        $foreignCustomer = app(ActiveCompanyContext::class)->runWithCompany(
+            $foreignCompany->id,
+            fn () => Customer::factory()->create([
+                'company_id' => $foreignCompany->id,
+                'route_id' => null,
+            ]),
+        );
         $this->actingAs($rep);
         $invoicesBefore = Invoice::count();
         $movementsBefore = Stock::count();
@@ -170,7 +179,18 @@ class InvoiceFlowTest extends TestCase
     {
         $rep = User::where('email', 'rep@jawla.test')->firstOrFail();
         $customer = Customer::where('status', 'approved')->firstOrFail();
-        $foreignProduct = Product::factory()->create(['company_id' => Company::factory()->create()->id]);
+        $foreignCompany = Company::factory()->create();
+        $foreignProduct = app(ActiveCompanyContext::class)->runWithCompany(
+            $foreignCompany->id,
+            function () use ($foreignCompany): Product {
+                $category = ProductCategory::factory()->create(['company_id' => $foreignCompany->id]);
+
+                return Product::factory()->create([
+                    'company_id' => $foreignCompany->id,
+                    'category_id' => $category->id,
+                ]);
+            },
+        );
         $this->actingAs($rep);
         $invoicesBefore = Invoice::count();
         $movementsBefore = Stock::count();

@@ -11,6 +11,10 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        $this->call(DemoSeeder::class);
+        $this->call(RoleSeeder::class);
+
+        if (config('jawla.mode') === 'demo') {
+            $this->call(DemoSeeder::class);
+        }
     }
 }

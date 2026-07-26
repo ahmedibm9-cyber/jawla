@@ -16,7 +16,7 @@ class EnsureRepRole
             return redirect()->route('filament.admin.auth.login');
         }
 
-        abort_unless($user->is_active && $user->hasRole('rep'), 403);
+        abort_unless($user->is_active && $user->hasAnyRole(['sales_rep', 'rep']), 403);
 
         return $next($request);
     }

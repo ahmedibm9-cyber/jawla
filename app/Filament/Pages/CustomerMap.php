@@ -42,7 +42,7 @@ class CustomerMap extends Page
     public function getPointsProperty(): array
     {
         return Customer::query()
-            ->where('company_id', Auth::user()?->company_id)
+            ->where('company_id', Auth::user()?->activeCompanyId())
             ->whereNotNull('latitude')
             ->whereNotNull('longitude')
             ->with('route')

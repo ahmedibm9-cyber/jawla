@@ -19,11 +19,11 @@ class PendingQuotationsWidget extends StatsOverviewWidget
 
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
-        $pending = PriceQuotationRequest::where('company_id', $user->company_id)
+        $pending = PriceQuotationRequest::where('company_id', $user->activeCompanyId())
             ->where('status', 'requested')
             ->count();
 
-        $priced = PriceQuotationRequest::where('company_id', $user->company_id)
+        $priced = PriceQuotationRequest::where('company_id', $user->activeCompanyId())
             ->where('status', 'priced')
             ->count();
 

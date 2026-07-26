@@ -64,7 +64,7 @@ class ApiTokens extends Page
      */
     public function getTokensProperty(): Collection
     {
-        $companyUserIds = User::where('company_id', Auth::user()?->company_id)->pluck('id');
+        $companyUserIds = User::forCompany(Auth::user()->activeCompanyId())->pluck('id');
 
         return PersonalAccessToken::query()
             ->where('tokenable_type', User::class)
@@ -101,7 +101,7 @@ class ApiTokens extends Page
     {
         abort_unless(self::canAccess(), 403);
 
-        $companyUserIds = User::where('company_id', Auth::user()?->company_id)->pluck('id');
+        $companyUserIds = User::forCompany(Auth::user()->activeCompanyId())->pluck('id');
 
         $token = PersonalAccessToken::query()
             ->where('tokenable_type', User::class)

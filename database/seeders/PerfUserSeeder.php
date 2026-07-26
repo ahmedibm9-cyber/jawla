@@ -20,6 +20,10 @@ class PerfUserSeeder extends Seeder
 {
     public function run(): void
     {
+        if (config('jawla.mode') !== 'demo') {
+            throw new \LogicException('PerfUserSeeder may run only when JAWLA_MODE=demo.');
+        }
+
         $company = Company::query()->orderBy('id')->first();
         if ($company === null) {
             $this->command?->warn('PerfUserSeeder: no company found — run DemoSeeder first.');
@@ -28,7 +32,11 @@ class PerfUserSeeder extends Seeder
         }
 
         $count = (int) (env('PERF_POOL_SIZE') ?: 20);
-        $password = Hash::make((string) (env('PERF_POOL_PASSWORD') ?: 'password'));
+        $plainPassword = (string) env('PERF_POOL_PASSWORD');
+        if (strlen($plainPassword) < 16) {
+            throw new \LogicException('PERF_POOL_PASSWORD must be explicitly set to at least 16 characters.');
+        }
+        $password = Hash::make($plainPassword);
 
         for ($i = 1; $i <= $count; $i++) {
             $user = User::firstOrCreate(
@@ -42,8 +50,8 @@ class PerfUserSeeder extends Seeder
                 ],
             );
 
-            if (! $user->hasRole('rep')) {
-                $user->assignRole('rep');
+            if (! $user->hasRole('sales_rep')) {
+                $user->assignRole(['sales_rep', 'rep']);
             }
         }
 

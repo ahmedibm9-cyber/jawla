@@ -24,7 +24,7 @@ class TodaysCustomers extends Component
     public function render()
     {
         $customers = Customer::query()
-            ->where('company_id', auth()->user()->company_id)
+            ->where('company_id', auth()->user()->activeCompanyId())
             ->when($this->search, fn ($q) => $q->where(function ($q) {
                 $q->where('name_ar', 'ilike', "%{$this->search}%")
                     ->orWhere('name_en', 'ilike', "%{$this->search}%")

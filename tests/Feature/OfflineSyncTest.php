@@ -199,7 +199,10 @@ class OfflineSyncTest extends TestCase
 
         $svc = app(SyncService::class);
         $a = $svc->process($this->rep, [['key' => 'shared', 'type' => 'make_photo', 'payload' => []]]);
-        $b = $svc->process($otherRep, [['key' => 'shared', 'type' => 'make_photo', 'payload' => []]]);
+        $b = app(ActiveCompanyContext::class)->runWithCompany(
+            $otherCompany->id,
+            fn () => $svc->process($otherRep, [['key' => 'shared', 'type' => 'make_photo', 'payload' => []]]),
+        );
 
         $this->assertSame('applied', $a[0]['status']);
         $this->assertSame('applied', $b[0]['status']); // same key, different company → not a duplicate

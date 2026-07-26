@@ -32,7 +32,7 @@ class PaymentSyncHandler extends AbstractRepWriteHandler
         $this->assertCustomerInCompany($rep, (int) $data['customer_id']);
 
         $payment = $this->payments->collect(
-            companyId: $rep->company_id,
+            companyId: $rep->activeCompanyId(),
             userId: $rep->id,
             customerId: (int) $data['customer_id'],
             amount: (float) $data['amount'],

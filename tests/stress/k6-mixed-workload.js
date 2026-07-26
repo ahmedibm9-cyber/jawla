@@ -18,14 +18,18 @@ export const options = {
 
 const BASE_URL = __ENV.BASE_URL || "http://localhost:8000";
 
-const credentials = [
-  { email: "admin@jawla.test", password: "password", landing: "/admin" },
-  { email: "manager@jawla.test", password: "password", landing: "/admin" },
-  { email: "rep@jawla.test", password: "password", landing: "/app" },
-  { email: "accounts@jawla.test", password: "password", landing: "/admin" },
-  { email: "warehouse@jawla.test", password: "password", landing: "/admin" },
-  { email: "executive@jawla.test", password: "password", landing: "/admin" },
-];
+if (!__ENV.LOGIN_CREDENTIALS_JSON) {
+  throw new Error(
+    "LOGIN_CREDENTIALS_JSON is required; no default credentials are embedded."
+  );
+}
+
+const credentials = JSON.parse(__ENV.LOGIN_CREDENTIALS_JSON);
+if (!Array.isArray(credentials) || credentials.length === 0) {
+  throw new Error(
+    "LOGIN_CREDENTIALS_JSON must contain at least one credential."
+  );
+}
 
 function extractFirst(text, pattern) {
   const match = text.match(pattern);

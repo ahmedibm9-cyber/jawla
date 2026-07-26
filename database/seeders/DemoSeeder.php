@@ -34,17 +34,28 @@ use App\Models\Warehouse;
 use App\Models\WorkSession;
 use App\Services\Contracts\StockService as StockServiceContract;
 use App\Services\NumberSequenceService;
+use App\Support\ActiveCompanyContext;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class DemoSeeder extends Seeder
 {
     public function run(): void
     {
+        if (config('jawla.mode') !== 'demo') {
+            throw new \LogicException('DemoSeeder may run only when JAWLA_MODE=demo.');
+        }
+
         echo "\n=== DEMO SEEDER RUNNING ===\n";
         $this->call(RoleSeeder::class);
 
         $company = Company::where('name_en', 'Global Plastic Company (GPC)')->first();
+        if ($company !== null) {
+            app(ActiveCompanyContext::class)->setCompanyId($company->id);
+        }
         $alreadySeeded = Product::where('company_id', $company?->id)->exists();
 
         if (! $alreadySeeded) {
@@ -64,6 +75,7 @@ class DemoSeeder extends Seeder
                 'address' => 'القطعة 218 – المنطقة الصناعية 3 – مدينة 6 أكتوبر – الجيزة',
                 'phone' => '01070790207',
             ]);
+            app(ActiveCompanyContext::class)->setCompanyId($company->id);
 
             CompanyBankAccount::create([
                 'company_id' => $company->id,
@@ -117,15 +129,36 @@ class DemoSeeder extends Seeder
             }
 
             // ─── Users ─────────────────────────────────────────────────────
-            $superAdmin = User::factory()->create(['company_id' => $company->id, 'name' => 'Super Admin', 'email' => 'superadmin@jawla.test', 'employee_code' => 'EMP-000'])->assignRole('super_admin');
-            $admin = User::factory()->create(['company_id' => $company->id, 'name' => 'عمرو حكيم', 'email' => 'admin@jawla.test', 'employee_code' => 'EMP-001'])->assignRole('admin');
-            $manager = User::factory()->create(['company_id' => $company->id, 'name' => 'مدير المبيعات', 'email' => 'manager@jawla.test', 'employee_code' => 'EMP-002'])->assignRole('sales_manager');
-            User::factory()->create(['company_id' => $company->id, 'name' => 'مالية', 'email' => 'accounts@jawla.test', 'employee_code' => 'EMP-003'])->assignRole('accounts');
-            User::factory()->create(['company_id' => $company->id, 'name' => 'مشتريات', 'email' => 'purchasing@jawla.test', 'employee_code' => 'EMP-004'])->assignRole('purchasing');
-            $warehouseKeeper = User::factory()->create(['company_id' => $company->id, 'name' => 'أمين المستودع', 'email' => 'warehouse@jawla.test', 'employee_code' => 'EMP-005'])->assignRole('warehouse_keeper');
-            User::factory()->create(['company_id' => $company->id, 'name' => 'محمد طه', 'email' => 'executive@jawla.test', 'employee_code' => 'EMP-006'])->assignRole('executive');
-            $rep1 = User::factory()->create(['company_id' => $company->id, 'name' => 'أحمد سعيد', 'email' => 'rep@jawla.test', 'employee_code' => 'EMP-007'])->assignRole('rep');
-            $rep2 = User::factory()->create(['company_id' => $company->id, 'name' => 'محمد علي', 'email' => 'rep2@jawla.test', 'employee_code' => 'EMP-008'])->assignRole('rep');
+            $demoCredentials = [];
+            $createDemoUser = function (array $attributes, array $roles) use ($company, &$demoCredentials): User {
+                $password = Str::password(24);
+                $email = strtolower((string) $attributes['email']);
+                $demoCredentials[$email] = $password;
+
+                $user = User::factory()->create($attributes + [
+                    'company_id' => $company->id,
+                    'password' => Hash::make($password),
+                ]);
+                $user->syncRoles($roles);
+
+                return $user;
+            };
+
+            $superAdmin = $createDemoUser(['name' => 'Setup Administrator', 'email' => 'superadmin@jawla.test', 'employee_code' => 'EMP-000'], ['super_admin', 'hr_admin']);
+            $admin = $createDemoUser(['name' => 'عمرو حكيم', 'email' => 'admin@jawla.test', 'employee_code' => 'EMP-001'], ['admin', 'hr_admin']);
+            $manager = $createDemoUser(['name' => 'مدير المبيعات', 'email' => 'manager@jawla.test', 'employee_code' => 'EMP-002'], ['sales_manager']);
+            $createDemoUser(['name' => 'مالية', 'email' => 'accounts@jawla.test', 'employee_code' => 'EMP-003'], ['accounts', 'system_viewer']);
+            $createDemoUser(['name' => 'مشتريات', 'email' => 'purchasing@jawla.test', 'employee_code' => 'EMP-004'], ['purchasing']);
+            $warehouseKeeper = $createDemoUser(['name' => 'أمين المستودع', 'email' => 'warehouse@jawla.test', 'employee_code' => 'EMP-005'], ['warehouse_keeper']);
+            $createDemoUser(['name' => 'محمد طه', 'email' => 'executive@jawla.test', 'employee_code' => 'EMP-006'], ['executive', 'system_viewer']);
+            $rep1 = $createDemoUser(['name' => 'أحمد سعيد', 'email' => 'rep@jawla.test', 'employee_code' => 'EMP-007'], ['rep', 'sales_rep']);
+            $rep2 = $createDemoUser(['name' => 'محمد علي', 'email' => 'rep2@jawla.test', 'employee_code' => 'EMP-008'], ['rep', 'sales_rep']);
+
+            Storage::disk('private')->put(
+                'demo-credentials.json',
+                json_encode($demoCredentials, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR)
+            );
+            @chmod(Storage::disk('private')->path('demo-credentials.json'), 0600);
 
             // ─── Warehouses ────────────────────────────────────────────────
             $mainWarehouse = Warehouse::factory()->create([
@@ -797,13 +830,6 @@ class DemoSeeder extends Seeder
         echo "  Company: شركة اللدائن العالمية (GPC)\n";
         echo '  Products: '.count($products)." across 4 categories\n";
         echo '  Customers: '.count($customers)." across 3 routes\n";
-        echo "  Super Admin: superadmin@jawla.test / password\n";
-        echo "  Admin: admin@jawla.test / password\n";
-        echo "  Manager: manager@jawla.test / password\n";
-        echo "  Rep 1: rep@jawla.test / password\n";
-        echo "  Rep 2: rep2@jawla.test / password\n";
-        echo "  Finance: accounts@jawla.test / password\n";
-        echo "  Warehouse: warehouse@jawla.test / password\n";
-        echo "  Executive: executive@jawla.test / password\n";
+        echo "  Credentials: storage/app/private/demo-credentials.json (mode 0600)\n";
     }
 }

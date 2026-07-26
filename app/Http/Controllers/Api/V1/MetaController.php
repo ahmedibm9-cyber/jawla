@@ -22,7 +22,7 @@ class MetaController
             'data' => [
                 'user_id' => $user->id,
                 'name' => $user->name,
-                'company_id' => $user->company_id,
+                'company_id' => $user->activeCompanyId(),
                 'token_name' => $token->name,
                 'abilities' => $token->abilities,
                 'available_abilities' => ApiAbilities::keys(),

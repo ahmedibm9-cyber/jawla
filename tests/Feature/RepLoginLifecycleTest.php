@@ -7,6 +7,7 @@ use App\Models\User;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -50,7 +51,7 @@ class RepLoginLifecycleTest extends TestCase
 
         Livewire::test(Login::class)
             ->set('data.email', $rep->email)
-            ->set('data.password', 'password')
+            ->set('data.password', $this->demoPassword($rep->email))
             ->call('authenticate');
 
         $this->assertAuthenticatedAs($rep);
@@ -62,7 +63,7 @@ class RepLoginLifecycleTest extends TestCase
 
         Livewire::test(Login::class)
             ->set('data.email', $admin->email)
-            ->set('data.password', 'password')
+            ->set('data.password', $this->demoPassword($admin->email))
             ->call('authenticate');
 
         $this->assertAuthenticatedAs($admin);
@@ -87,5 +88,16 @@ class RepLoginLifecycleTest extends TestCase
 
         $this->actingAs($rep)->post('/app/logout')->assertRedirect(route('login'));
         $this->assertGuest();
+    }
+
+    private function demoPassword(string $email): string
+    {
+        $credentials = json_decode(
+            Storage::disk('private')->get('demo-credentials.json'),
+            true,
+            flags: JSON_THROW_ON_ERROR,
+        );
+
+        return $credentials[$email];
     }
 }

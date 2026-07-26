@@ -32,7 +32,7 @@ class LogComplaint extends Component
         $user = auth()->user();
 
         $complaint = $service->log(
-            companyId: $user->company_id,
+            companyId: $user->activeCompanyId(),
             userId: $user->id,
             customerId: $validated['customer_id'],
             type: $validated['complaint_type'],
@@ -63,7 +63,7 @@ class LogComplaint extends Component
     public function render()
     {
         return view('livewire.app.log-complaint', [
-            'customers' => Customer::where('company_id', auth()->user()->company_id)
+            'customers' => Customer::where('company_id', auth()->user()->activeCompanyId())
                 ->where('is_active', true)
                 ->where('status', 'approved')
                 ->orderBy('name_ar')

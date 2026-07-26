@@ -4,6 +4,7 @@ namespace App\Services\Sync;
 
 use App\Models\SyncReceipt;
 use App\Models\User;
+use App\Support\ActiveCompanyContext;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
 
@@ -31,6 +32,8 @@ class SyncService
      */
     public function process(User $rep, array $operations): array
     {
+        app(ActiveCompanyContext::class)->assertMatches($rep->activeCompanyId());
+
         $results = [];
 
         foreach ($operations as $op) {
@@ -77,7 +80,7 @@ class SyncService
                 }
 
                 $receipt = SyncReceipt::create([
-                    'company_id' => $rep->company_id,
+                    'company_id' => $rep->activeCompanyId(),
                     'user_id' => $rep->id,
                     'idempotency_key' => $key,
                     'operation_type' => $type,
@@ -115,7 +118,7 @@ class SyncService
     private function findReceipt(User $rep, string $key, bool $lock = false): ?SyncReceipt
     {
         $query = SyncReceipt::withoutGlobalScopes()
-            ->where('company_id', $rep->company_id)
+            ->where('company_id', $rep->activeCompanyId())
             ->where('idempotency_key', $key);
 
         if ($lock) {

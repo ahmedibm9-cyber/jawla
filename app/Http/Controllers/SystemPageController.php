@@ -17,7 +17,7 @@ class SystemPageController extends Controller
     {
         $user = auth()->user();
 
-        if ($user && $user->hasRole('rep')) {
+        if ($user && $user->hasAnyRole(['sales_rep', 'rep'])) {
             return redirect('/app');
         }
 

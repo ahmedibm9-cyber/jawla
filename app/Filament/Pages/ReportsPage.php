@@ -39,7 +39,7 @@ class ReportsPage extends Page
     public function getVisitsProperty()
     {
         $q = VisitReport::whereHas('visit.customer', function ($q) {
-            $q->where('company_id', Auth::user()->company_id);
+            $q->where('company_id', Auth::user()->activeCompanyId());
         })->with(['visit.customer', 'visit.user'])->latest();
 
         if ($this->fromDate) {
@@ -54,7 +54,7 @@ class ReportsPage extends Page
 
     public function getQuotationsProperty()
     {
-        $q = PriceQuotationRequest::where('company_id', Auth::user()->company_id)
+        $q = PriceQuotationRequest::where('company_id', Auth::user()->activeCompanyId())
             ->with(['customer', 'product', 'quotation'])
             ->latest();
 
@@ -70,7 +70,7 @@ class ReportsPage extends Page
 
     public function getProformasProperty()
     {
-        $q = ProformaInvoice::where('company_id', Auth::user()->company_id)
+        $q = ProformaInvoice::where('company_id', Auth::user()->activeCompanyId())
             ->with(['customer', 'items'])
             ->latest();
 
@@ -86,7 +86,7 @@ class ReportsPage extends Page
 
     public function getInvoicesProperty()
     {
-        $q = Invoice::where('company_id', Auth::user()->company_id)
+        $q = Invoice::where('company_id', Auth::user()->activeCompanyId())
             ->with(['customer', 'items'])
             ->latest();
 

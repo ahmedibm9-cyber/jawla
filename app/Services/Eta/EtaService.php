@@ -24,7 +24,9 @@ class EtaService
 
     public function isEnabled(): bool
     {
-        return (bool) config('eta.enabled') && (string) config('eta.taxpayer_rin') !== '';
+        return ! config('jawla.is_demo')
+            && (bool) config('eta.enabled')
+            && (string) config('eta.taxpayer_rin') !== '';
     }
 
     public function submit(Invoice $invoice): Invoice

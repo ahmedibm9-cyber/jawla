@@ -50,7 +50,7 @@ class StockImport extends Page
         return $schema->schema([
             Forms\Components\Select::make('warehouse_id')
                 ->label(l('المستودع', 'Warehouse'))
-                ->options(fn () => Warehouse::where('company_id', Auth::user()->company_id)
+                ->options(fn () => Warehouse::where('company_id', Auth::user()->activeCompanyId())
                     ->where('is_active', true)
                     ->orderBy('name_ar')
                     ->pluck('name_ar', 'id'))
@@ -73,7 +73,7 @@ class StockImport extends Page
     {
         $data = $this->form->getState();
 
-        $warehouse = Warehouse::where('company_id', Auth::user()->company_id)
+        $warehouse = Warehouse::where('company_id', Auth::user()->activeCompanyId())
             ->findOrFail($data['warehouse_id']);
 
         $storedPath = is_array($data['file']) ? reset($data['file']) : $data['file'];
@@ -99,7 +99,7 @@ class StockImport extends Page
             return;
         }
 
-        $warehouse = Warehouse::where('company_id', Auth::user()->company_id)
+        $warehouse = Warehouse::where('company_id', Auth::user()->activeCompanyId())
             ->findOrFail($this->warehouse_id);
 
         try {
@@ -135,7 +135,7 @@ class StockImport extends Page
     public function getRecentImportsProperty()
     {
         return WarehouseImportLog::query()
-            ->whereHas('warehouse', fn ($q) => $q->where('company_id', Auth::user()->company_id))
+            ->whereHas('warehouse', fn ($q) => $q->where('company_id', Auth::user()->activeCompanyId()))
             ->with(['warehouse', 'importedBy'])
             ->latest('imported_at')
             ->limit(10)

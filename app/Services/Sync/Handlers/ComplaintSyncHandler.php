@@ -30,7 +30,7 @@ class ComplaintSyncHandler extends AbstractRepWriteHandler
         $this->assertCustomerInCompany($rep, (int) $data['customer_id']);
 
         $complaint = $this->complaints->log(
-            companyId: $rep->company_id,
+            companyId: $rep->activeCompanyId(),
             userId: $rep->id,
             customerId: (int) $data['customer_id'],
             type: $data['type'],

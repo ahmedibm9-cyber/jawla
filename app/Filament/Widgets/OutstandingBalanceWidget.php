@@ -22,11 +22,11 @@ class OutstandingBalanceWidget extends StatsOverviewWidget
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
         try {
-            $outstanding = Invoice::where('company_id', $user->company_id)
+            $outstanding = Invoice::where('company_id', $user->activeCompanyId())
                 ->whereIn('status', ['submitted', 'partially_paid'])
                 ->sum('remaining_amount');
 
-            $overdueCount = Invoice::where('company_id', $user->company_id)
+            $overdueCount = Invoice::where('company_id', $user->activeCompanyId())
                 ->whereIn('status', ['submitted', 'partially_paid'])
                 ->whereDate('issued_at', '<', now()->subDays(30))
                 ->count();

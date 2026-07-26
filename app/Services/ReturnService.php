@@ -11,6 +11,7 @@ use App\Models\ReturnRecord;
 use App\Models\Warehouse;
 use App\Services\Contracts\DocumentNumberService;
 use App\Services\Contracts\StockService;
+use App\Support\ActiveCompanyContext;
 use Illuminate\Support\Facades\DB;
 
 class ReturnService
@@ -21,6 +22,8 @@ class ReturnService
 
     public function create(int $companyId, int $userId, int $customerId, array $items, ?int $againstInvoiceId = null, ?int $visitId = null, string $reason = ''): ReturnRecord
     {
+        app(ActiveCompanyContext::class)->assertMatches($companyId);
+
         return DB::transaction(function () use ($companyId, $userId, $customerId, $items, $againstInvoiceId, $visitId, $reason): ReturnRecord {
             $vanWarehouse = Warehouse::where('user_id', $userId)
                 ->where('company_id', $companyId)

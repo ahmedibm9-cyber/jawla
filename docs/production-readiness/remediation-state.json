@@ -4,7 +4,7 @@
   "branch": "remediation/production-readiness",
   "audit_commit": "ba768f7106b52fa8d2905daadc07cd6091ff0c26",
   "starting_commit": "d605f0d062fcad2be9d195a5aa4aa69b37819c3e",
-  "current_phase": 1,
+  "current_phase": 2,
   "overall_status": "in_progress",
   "started_at": "2026-07-26",
   "baseline": {
@@ -27,11 +27,11 @@
       "name": "Reliable test and branch safety",
       "status": "completed"
     },
-    { "phase": 1, "name": "Catastrophic containment", "status": "in_progress" },
+    { "phase": 1, "name": "Catastrophic containment", "status": "completed" },
     {
       "phase": 2,
       "name": "Core money and inventory integrity",
-      "status": "pending"
+      "status": "in_progress"
     },
     { "phase": 3, "name": "Offline safety", "status": "pending" },
     {
@@ -56,17 +56,39 @@
       "id": "PR-001",
       "original_severity": "critical",
       "phase": 1,
-      "status": "open",
+      "status": "resolved",
       "decision": "Make company context mandatory and fail closed across all entry points; enforce service ownership and a generated two-company matrix.",
-      "changed_files": [],
-      "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Filament and other entry points may access cross-company records while context is absent.",
+      "changed_files": [
+        "app/Support/ActiveCompanyContext.php",
+        "app/Models/Concerns/BelongsToCompany.php",
+        "app/Http/Middleware/SetActiveCompanyContext.php",
+        "app/Http/Controllers/CompanyContextController.php",
+        "app/Models/User.php",
+        "resources/views/components/runtime-banners.blade.php",
+        "tests/Feature/Tenancy/CompanyIsolationMatrixTest.php"
+      ],
+      "migrations": [
+        "database/migrations/2026_07_26_000001_create_company_user_table.php"
+      ],
+      "tests": [
+        "CompanyIsolationMatrixTest: 9/9 passed, 20 assertions",
+        "Phase 1 focused PHP gate: 23/23 passed, 84 assertions",
+        "Affected regression bundle: 91/91 passed, 312 assertions"
+      ],
+      "commands": [
+        "php artisan test --compact tests/Feature/Tenancy/CompanyIsolationMatrixTest.php",
+        "php artisan test --compact tests/Feature/Deployment/ProductionDeploymentSafetyTest.php tests/Feature/Security/MapPopupXssTest.php tests/Feature/Tenancy/CompanyIsolationMatrixTest.php tests/Feature/Roles/RoleSeederTest.php"
+      ],
+      "evidence": [
+        "Absent enforced context yields zero company-scoped rows and rejects writes",
+        "Web, API, Filament, map, service, and switch positive/negative paths are covered",
+        "Company switching is visible, membership-checked, session-bound, and activity-logged",
+        "Core financial, stock, sync, PDF, file, location, report, widget, and Livewire entry points use active context"
+      ],
+      "residual_risk": "Additional new entry points must use the same context/service-boundary pattern; the release re-audit will rescan all company-bearing models and routes.",
       "commit_hash": null,
-      "resolved": false,
-      "release_blocker_remaining": true
+      "resolved": true,
+      "release_blocker_remaining": false
     },
     {
       "id": "PR-002",
@@ -120,17 +142,39 @@
       "id": "PR-005",
       "original_severity": "critical",
       "phase": 1,
-      "status": "open",
+      "status": "resolved",
       "decision": "Remove demo/bootstrap commands from production deploy; implement explicit demo mode and secure one-time production bootstrap with generated credentials.",
-      "changed_files": [],
+      "changed_files": [
+        "railway.toml",
+        "config/jawla.php",
+        "database/seeders/DatabaseSeeder.php",
+        "database/seeders/DemoSeeder.php",
+        "database/seeders/PerfUserSeeder.php",
+        "app/Console/Commands/BootstrapProduction.php",
+        "app/Services/PdfService.php",
+        "resources/views/components/runtime-banners.blade.php",
+        "docs/production-readiness/deployment-modes-and-bootstrap.md"
+      ],
       "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Production deployment can seed known credentials and synthetic financial data.",
+      "tests": [
+        "ProductionDeploymentSafetyTest: production deploy, seeder refusal, bootstrap, generated credentials, banner, watermark, and integration-disable cases",
+        "Phase 1 focused PHP gate: 23/23 passed, 84 assertions"
+      ],
+      "commands": [
+        "php artisan test --compact tests/Feature/Deployment/ProductionDeploymentSafetyTest.php",
+        "source credential/default scan across railway.toml, app, database, config, stress tests, resources, and routes"
+      ],
+      "evidence": [
+        "Production predeploy contains no seeder or bootstrap command",
+        "JAWLA_MODE defaults to production and DemoSeeder refuses any other mode",
+        "Demo credentials are generated per identity into private mode-0600 storage and are never printed",
+        "Production bootstrap requires an empty database, explicit confirmation, and a strong environment-supplied secret",
+        "Demo UI/documents are permanently marked and irreversible tax submission is disabled"
+      ],
+      "residual_risk": "Operators must enforce separate database and object-store resources; the documented runbook makes this a release/deployment acceptance check.",
       "commit_hash": null,
-      "resolved": false,
-      "release_blocker_remaining": true
+      "resolved": true,
+      "release_blocker_remaining": false
     },
     {
       "id": "PR-006",
@@ -248,30 +292,66 @@
       "id": "PR-013",
       "original_severity": "high",
       "phase": 1,
-      "status": "open",
+      "status": "resolved",
       "decision": "Render popup data as text or strictly encoded context, audit raw HTML sinks, add browser payload tests, and harden CSP.",
-      "changed_files": [],
+      "changed_files": [
+        "resources/js/maps/popup-content.js",
+        "resources/js/app.js",
+        "resources/views/filament/pages/customer-map.blade.php",
+        "resources/views/filament/pages/rep-live-map.blade.php",
+        "tests/Feature/Security/MapPopupXssTest.php",
+        "tests/e2e/map-popup-xss.spec.mjs"
+      ],
       "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Stored user content can execute in privileged map viewers.",
+      "tests": [
+        "MapPopupXssTest contextual sink/source audit passes",
+        "Playwright rep/customer stored payload corpus: 2/2 passed"
+      ],
+      "commands": [
+        "npx.cmd playwright test tests/e2e/map-popup-xss.spec.mjs --reporter=line",
+        "npm.cmd run build"
+      ],
+      "evidence": [
+        "Leaflet popup content is constructed with textContent/createTextNode DOM APIs",
+        "Element, event-handler, SVG, and URL-oriented stored payloads remain inert in both privileged maps",
+        "Production Vite build passes and the response CSP remains enforced"
+      ],
+      "residual_risk": "Nonce rollout, remote asset removal, and removal of legacy CSP unsafe directives remain explicitly tracked under PR-022.",
       "commit_hash": null,
-      "resolved": false,
-      "release_blocker_remaining": true
+      "resolved": true,
+      "release_blocker_remaining": false
     },
     {
       "id": "PR-014",
       "original_severity": "high",
       "phase": 1,
-      "status": "open",
+      "status": "in_progress",
       "decision": "Migrate to five canonical roles; require admin MFA, dangerous-action step-up, session inventory/revocation, POST logout, identity-aware throttling, and correct proxy trust.",
-      "changed_files": [],
+      "changed_files": [
+        "database/seeders/RoleSeeder.php",
+        "app/Providers/AuthServiceProvider.php",
+        "app/Http/Middleware/EnsureRepRole.php",
+        "app/Http/Middleware/FilamentAuthenticate.php",
+        "tests/Feature/Roles/RoleSeederTest.php",
+        "tests/Feature/Gates/ProductGatesTest.php",
+        "tests/Feature/AdminAccessTest.php"
+      ],
       "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Legacy broad roles and incomplete privileged authentication remain.",
+      "tests": [
+        "RoleSeederTest proves all five canonical roles and read-only system_viewer",
+        "ProductGatesTest and AdminAccessTest prove removal of legacy global bypass behavior",
+        "Phase 1 focused PHP gate: 23/23 passed, 84 assertions"
+      ],
+      "commands": [
+        "php artisan test --compact tests/Feature/Roles/RoleSeederTest.php tests/Feature/Gates/ProductGatesTest.php tests/Feature/AdminAccessTest.php"
+      ],
+      "evidence": [
+        "sales_rep, sales_manager, hr_admin, warehouse_keeper, and system_viewer are provisioned",
+        "Global super_admin/admin Gate::before bypass is removed",
+        "system_viewer has no mutation permission",
+        "Core rep and admin access accepts canonical roles"
+      ],
+      "residual_risk": "PR-014 remains a release blocker until Phase 5 removes legacy compatibility and completes MFA, step-up, session inventory/revocation, logout, throttling, and proxy-trust controls.",
       "commit_hash": null,
       "resolved": false,
       "release_blocker_remaining": true

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
+use App\Support\ActiveCompanyContext;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Request;
@@ -40,7 +41,9 @@ class Activity extends Model
         $user = auth()->user();
 
         return self::create([
-            'company_id' => $user?->company_id ?? ($subject?->company_id ?? null),
+            'company_id' => app(ActiveCompanyContext::class)->id()
+                ?? $user?->company_id
+                ?? ($subject?->company_id ?? null),
             'user_id' => $user?->id,
             'type' => $type,
             'subject_type' => $subject ? $subject::class : null,

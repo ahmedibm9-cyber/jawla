@@ -19,6 +19,7 @@ use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\InvoiceService as InvoiceContract;
 use App\Services\Contracts\LineItemInput;
 use App\Services\Contracts\StockService as StockContract;
+use App\Support\ActiveCompanyContext;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceService implements InvoiceContract
@@ -31,15 +32,16 @@ class InvoiceService implements InvoiceContract
 
     public function create(array $data): Invoice
     {
+        app(ActiveCompanyContext::class)->assertMatches((int) $data['company_id']);
+
         return DB::transaction(function () use ($data): Invoice {
             $company = Company::findOrFail($data['company_id']);
             $sellerId = $data['user_id'] ?? auth()->id();
             $seller = User::withoutGlobalScopes()
                 ->whereKey($sellerId)
-                ->where('company_id', $company->id)
                 ->lockForUpdate()
                 ->first();
-            if (! $seller) {
+            if (! $seller || ! $seller->hasCompanyAccess($company->id)) {
                 throw new DomainException('errors.resource.seller');
             }
 

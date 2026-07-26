@@ -204,7 +204,13 @@ class OfflineSyncHandlersTest extends TestCase
     public function test_cross_company_customer_is_rejected(): void
     {
         $other = Company::factory()->create();
-        $theirCustomer = Customer::factory()->create(['company_id' => $other->id]);
+        $theirCustomer = app(ActiveCompanyContext::class)->runWithCompany(
+            $other->id,
+            fn () => Customer::factory()->create([
+                'company_id' => $other->id,
+                'route_id' => null,
+            ]),
+        );
 
         $r = $this->process('bad-1', 'sale', [
             'customer_id' => $theirCustomer->id,

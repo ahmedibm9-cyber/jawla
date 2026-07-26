@@ -112,10 +112,14 @@ class HttpEtaClientTest extends TestCase
         $this->assertInstanceOf(NullEtaClient::class, app(EtaClient::class));
 
         config([
+            'jawla.is_demo' => false,
             'eta.enabled' => true,
             'eta.api_base_url' => 'https://api.preprod.eta.test',
             'eta.id_base_url' => 'https://id.preprod.eta.test',
         ]);
         $this->assertInstanceOf(HttpEtaClient::class, app(EtaClient::class));
+
+        config(['jawla.is_demo' => true]);
+        $this->assertInstanceOf(NullEtaClient::class, app(EtaClient::class));
     }
 }

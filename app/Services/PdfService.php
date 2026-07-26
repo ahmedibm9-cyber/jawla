@@ -99,6 +99,7 @@ class PdfService
         ];
 
         $methodName = $methodMap[$payment->method] ?? $payment->method;
+        $demoBanner = $this->demoWatermark();
 
         return <<<HTML
 <!doctype html>
@@ -112,6 +113,7 @@ h1{color:#6DB83B;margin:0}
 .qr{width:100px;height:100px;margin:8px 0}
 .detail-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee}
 </style></head><body>
+{$demoBanner}
 <div class="header">
   <div>
     <h1>".e($company?->name_ar)."</h1>
@@ -177,6 +179,7 @@ HTML;
 
         $number = $type === 'proforma' ? $doc->proforma_number : $doc->invoice_number;
         $date = $doc->posting_date?->format('Y-m-d') ?? '';
+        $demoBanner = $this->demoWatermark();
 
         return <<<HTML
 <!doctype html>
@@ -191,6 +194,7 @@ h1{color:#4DB848;margin:0}
 .bank-box{background:#F5F5F4;border:1px solid #ddd;padding:12px;margin:16px 0;text-align:$textAlign}
 .qr{width:100px;height:100px;margin:8px 0}
 </style></head><body>
+{$demoBanner}
 <div class="header">
   <div>
     <h1>".e($company?->name_ar)."</h1>
@@ -226,5 +230,18 @@ HTML;
         $qr = (new Generator)->size(100)->generate($data);
 
         return '<div class="qr">'.$qr.'</div>';
+    }
+
+    private function demoWatermark(): string
+    {
+        if (! config('jawla.is_demo')) {
+            return '';
+        }
+
+        return '<div style="border:3px solid #9a3412;color:#9a3412;padding:10px;'
+            .'margin-bottom:16px;text-align:center;font-size:18px;font-weight:bold">'
+            .'SAMPLE — NOT A TAX INVOICE<br>'
+            .'عينة — ليست فاتورة ضريبية'
+            .'</div>';
     }
 }

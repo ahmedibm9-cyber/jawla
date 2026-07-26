@@ -6,7 +6,9 @@ use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\User;
+use App\Support\ActiveCompanyContext;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
@@ -80,16 +82,13 @@ class AdminAccessTest extends TestCase
         }
     }
 
-    public function test_admin_can_access_all_custom_pages(): void
+    public function test_legacy_admin_with_hr_role_has_only_explicit_custom_page_access(): void
     {
         $this->actingAs($this->admin);
 
         $pages = [
             '/admin/dashboard',
             '/admin/activity-log',
-            '/admin/reports-page',
-            '/admin/collect-payment',
-            '/admin/stock-import',
             '/admin/customer-map',
             '/admin/rep-live-map',
             '/admin/supplier-comparison',
@@ -99,6 +98,10 @@ class AdminAccessTest extends TestCase
         foreach ($pages as $url) {
             $response = $this->get($url);
             $response->assertOk();
+        }
+
+        foreach (['/admin/reports-page', '/admin/collect-payment', '/admin/stock-import'] as $url) {
+            $this->get($url)->assertForbidden();
         }
     }
 
@@ -144,13 +147,18 @@ class AdminAccessTest extends TestCase
     {
         $myCustomer = Customer::factory()->create([
             'company_id' => $this->admin->company_id,
+            'route_id' => null,
             'name_en' => 'My Customer',
         ]);
 
-        $otherCustomer = Customer::factory()->create([
-            'company_id' => $this->otherCompanyUser->company_id,
-            'name_en' => 'Other Customer',
-        ]);
+        $otherCustomer = app(ActiveCompanyContext::class)->runWithCompany(
+            $this->otherCompanyUser->company_id,
+            fn () => Customer::factory()->create([
+                'company_id' => $this->otherCompanyUser->company_id,
+                'route_id' => null,
+                'name_en' => 'Other Customer',
+            ]),
+        );
 
         $myVisible = Customer::where('company_id', $this->admin->company_id)->get();
         $this->assertTrue($myVisible->contains('id', $myCustomer->id));
@@ -159,10 +167,17 @@ class AdminAccessTest extends TestCase
 
     public function test_user_cannot_access_another_companys_invoices(): void
     {
-        Customer::factory()->create(['company_id' => $this->admin->company_id]);
-        $otherCustomer = Customer::factory()->create([
-            'company_id' => $this->otherCompanyUser->company_id,
+        Customer::factory()->create([
+            'company_id' => $this->admin->company_id,
+            'route_id' => null,
         ]);
+        $otherCustomer = app(ActiveCompanyContext::class)->runWithCompany(
+            $this->otherCompanyUser->company_id,
+            fn () => Customer::factory()->create([
+                'company_id' => $this->otherCompanyUser->company_id,
+                'route_id' => null,
+            ]),
+        );
 
         $myInvoice = Invoice::factory()->create([
             'company_id' => $this->admin->company_id,
@@ -170,11 +185,14 @@ class AdminAccessTest extends TestCase
             'user_id' => $this->admin->id,
         ]);
 
-        $otherInvoice = Invoice::factory()->create([
-            'company_id' => $this->otherCompanyUser->company_id,
-            'customer_id' => $otherCustomer->id,
-            'user_id' => $this->otherCompanyUser->id,
-        ]);
+        $otherInvoice = app(ActiveCompanyContext::class)->runWithCompany(
+            $this->otherCompanyUser->company_id,
+            fn () => Invoice::factory()->create([
+                'company_id' => $this->otherCompanyUser->company_id,
+                'customer_id' => $otherCustomer->id,
+                'user_id' => $this->otherCompanyUser->id,
+            ]),
+        );
 
         $myVisible = Invoice::where('company_id', $this->admin->company_id)->get();
         $this->assertTrue($myVisible->contains('id', $myInvoice->id));
@@ -183,15 +201,30 @@ class AdminAccessTest extends TestCase
 
     public function test_user_cannot_access_another_companys_products(): void
     {
+        $myCategory = ProductCategory::factory()->create([
+            'company_id' => $this->admin->company_id,
+        ]);
+        $otherCategory = app(ActiveCompanyContext::class)->runWithCompany(
+            $this->otherCompanyUser->company_id,
+            fn () => ProductCategory::factory()->create([
+                'company_id' => $this->otherCompanyUser->company_id,
+            ]),
+        );
+
         $myProduct = Product::factory()->create([
             'company_id' => $this->admin->company_id,
+            'category_id' => $myCategory->id,
             'name_en' => 'My Product',
         ]);
 
-        $otherProduct = Product::factory()->create([
-            'company_id' => $this->otherCompanyUser->company_id,
-            'name_en' => 'Other Product',
-        ]);
+        $otherProduct = app(ActiveCompanyContext::class)->runWithCompany(
+            $this->otherCompanyUser->company_id,
+            fn () => Product::factory()->create([
+                'company_id' => $this->otherCompanyUser->company_id,
+                'category_id' => $otherCategory->id,
+                'name_en' => 'Other Product',
+            ]),
+        );
 
         $myVisible = Product::where('company_id', $this->admin->company_id)->get();
         $this->assertTrue($myVisible->contains('id', $myProduct->id));
@@ -250,13 +283,14 @@ class AdminAccessTest extends TestCase
 
     // ─── Gate: admin full_access ───────────────────────────────────
 
-    public function test_admin_role_bypasses_all_gates(): void
+    public function test_legacy_admin_no_longer_bypasses_all_gates(): void
     {
         $this->actingAs($this->admin);
 
-        $this->assertTrue($this->admin->can('reports.view'));
-        $this->assertTrue($this->admin->can('payments.collect'));
-        $this->assertTrue($this->admin->can('stock.import'));
+        $this->assertTrue($this->admin->can('users.manage'));
+        $this->assertFalse($this->admin->can('reports.view'));
+        $this->assertFalse($this->admin->can('payments.collect'));
+        $this->assertFalse($this->admin->can('stock.import'));
     }
 
     public function test_non_admin_role_is_gated_correctly(): void

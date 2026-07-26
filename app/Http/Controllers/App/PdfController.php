@@ -15,7 +15,7 @@ class PdfController extends Controller
     public function proforma(ProformaInvoice $proforma, PdfService $pdf): Response
     {
         abort_unless(
-            $proforma->company_id === auth()->user()->company_id
+            $proforma->company_id === auth()->user()->activeCompanyId()
             && $proforma->user_id === auth()->id(),
             403
         );
@@ -28,7 +28,7 @@ class PdfController extends Controller
     public function receipt(Payment $payment, PdfService $pdf): Response
     {
         abort_unless(
-            $payment->company_id === auth()->user()->company_id
+            $payment->company_id === auth()->user()->activeCompanyId()
             && $payment->user_id === auth()->id(),
             403
         );
@@ -41,7 +41,7 @@ class PdfController extends Controller
     public function invoice(Invoice $invoice, PdfService $pdf): Response
     {
         abort_unless(
-            $invoice->company_id === auth()->user()->company_id
+            $invoice->company_id === auth()->user()->activeCompanyId()
             && $invoice->user_id === auth()->id(),
             403
         );

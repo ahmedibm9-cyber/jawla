@@ -71,3 +71,26 @@ No finding is marked resolved yet.
 ### Residual PR-019 work
 
 The test infrastructure portion is complete, but PR-019 remains open until later phases add and pass the required tenant-negative, financial concurrency/lifecycle, offline browser, migration, restore/rollback, PDF/QR, accessibility, security, and operational suites.
+
+## 2026-07-26 — Phase 1 evidence
+
+Phase 1 implements PR-005, PR-001, PR-013, and the canonical-role/bypass-removal portion of PR-014. Detailed traceability is in `phase-1-catastrophic-containment.md`.
+
+### Exit gates
+
+- No known/default credentials: pass. Production bootstrap requires an environment-supplied strong secret; demo passwords are generated; performance credentials have no default fallback.
+- No production demo seeding: pass. Production predeploy runs no seeder/bootstrap, and `DemoSeeder` independently refuses production mode.
+- Tenant negative matrix: pass. The focused matrix passed 9/9 tests and 20 assertions.
+- Stored map XSS: pass. DOM-only popup construction passed contextual sink tests and 2/2 real-browser payload suites.
+- Canonical role provisioning: pass. All five canonical roles are seeded; the global legacy authorization bypass is gone; `system_viewer` mutation is denied.
+
+### Verification
+
+- Phase 1 focused PHP gate: 23/23 tests, 84 assertions.
+- Affected regression bundle: 91/91 tests, 312 assertions.
+- Pint verification: pass.
+- Vite production build: pass, 337 modules transformed.
+- Playwright stored-XSS suite: 2/2 passed.
+- Exact isolated PostgreSQL Unit/Feature CI command: 496/496 tests, 1,402 assertions.
+
+PR-001, PR-005, and PR-013 are resolved by executable evidence. PR-014 remains in progress because the approved Phase 5 work still includes complete legacy-role removal, MFA, step-up authentication, session controls, throttling, logout, and proxy-trust hardening.

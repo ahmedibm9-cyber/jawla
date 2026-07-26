@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Company;
 use App\Models\NamingSeries;
+use App\Support\ActiveCompanyContext;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
@@ -11,6 +12,8 @@ class NumberSequenceService implements Contracts\DocumentNumberService
 {
     public function generate(string $docType, int $companyId): string
     {
+        app(ActiveCompanyContext::class)->assertMatches($companyId);
+
         return DB::transaction(function () use ($docType, $companyId): string {
             $series = NamingSeries::where('name', $docType)
                 ->where('company_id', $companyId)

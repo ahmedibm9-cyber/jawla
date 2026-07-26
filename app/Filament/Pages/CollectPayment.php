@@ -45,7 +45,7 @@ class CollectPayment extends Page
         return $schema->schema([
             Forms\Components\Select::make('customer_id')
                 ->label(l('العميل', 'Customer'))
-                ->options(fn () => Customer::where('company_id', Auth::user()->company_id)
+                ->options(fn () => Customer::where('company_id', Auth::user()->activeCompanyId())
                     ->where('is_active', true)
                     ->orderBy('name_ar')
                     ->pluck('name_ar', 'id'))
@@ -84,7 +84,7 @@ class CollectPayment extends Page
         $data = $this->form->getState();
 
         $payment = app(PaymentService::class)->collect(
-            companyId: Auth::user()->company_id,
+            companyId: Auth::user()->activeCompanyId(),
             userId: Auth::id(),
             customerId: $data['customer_id'],
             amount: (float) $data['amount'],

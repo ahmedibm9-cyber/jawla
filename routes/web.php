@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\App\LoginController;
 use App\Http\Controllers\App\PdfController;
+use App\Http\Controllers\CompanyContextController;
 use App\Http\Controllers\SystemPageController;
 use App\Livewire\App\AddCustomer;
 use App\Livewire\App\CashReconcile;
@@ -42,6 +43,10 @@ Route::get('/health', [SystemPageController::class, 'health']);
 Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
     ->middleware('throttle:10,1')
     ->name('locale.switch');
+
+Route::post('/company/switch', [CompanyContextController::class, 'update'])
+    ->middleware(['auth', 'throttle:post'])
+    ->name('company.switch');
 
 // Admin (Filament) is auto-registered by the panel provider.
 

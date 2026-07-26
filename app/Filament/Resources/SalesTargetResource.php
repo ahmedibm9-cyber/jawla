@@ -45,12 +45,12 @@ class SalesTargetResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $companyId = Auth::user()?->company_id;
+        $companyId = Auth::user()?->activeCompanyId();
 
         return $schema->schema([
             Section::make(l('الهدف', 'Target'))->schema([
                 Forms\Components\Select::make('user_id')->label(l('المندوب', 'Rep'))
-                    ->options(fn () => User::where('company_id', $companyId)
+                    ->options(fn () => User::forCompany($companyId)
                         ->whereHas('roles', fn ($q) => $q->where('name', 'rep'))
                         ->pluck('name', 'id'))
                     ->searchable()->required(),

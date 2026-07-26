@@ -99,7 +99,7 @@ class SubmitPurchaseOffer extends Component
         }
 
         PurchaseRequest::create([
-            'company_id' => $user->company_id,
+            'company_id' => $user->activeCompanyId(),
             'user_id' => $user->id,
             'supplier_id' => $validated['supplier_id'],
             'product_id' => $validated['product_id'],
@@ -119,7 +119,7 @@ class SubmitPurchaseOffer extends Component
 
     public function render()
     {
-        $companyId = auth()->user()->company_id;
+        $companyId = auth()->user()->activeCompanyId();
 
         return view('livewire.app.submit-purchase-offer', [
             'products' => Product::where('company_id', $companyId)

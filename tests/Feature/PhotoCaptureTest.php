@@ -60,7 +60,10 @@ class PhotoCaptureTest extends TestCase
     public function test_service_attaches_to_a_parent_record(): void
     {
         $photo = app(PhotoService::class)->store(UploadedFile::fake()->image('a.jpg'), $this->rep);
-        $customer = Customer::factory()->create(['company_id' => $this->company->id]);
+        $customer = Customer::factory()->create([
+            'company_id' => $this->company->id,
+            'route_id' => null,
+        ]);
 
         app(PhotoService::class)->attach($photo, $customer);
 
@@ -123,7 +126,13 @@ class PhotoCaptureTest extends TestCase
 
         $other = Company::factory()->create();
         $otherRep = User::factory()->create(['company_id' => $other->id]);
-        Photo::factory()->create(['company_id' => $other->id, 'user_id' => $otherRep->id]);
+        app(ActiveCompanyContext::class)->runWithCompany(
+            $other->id,
+            fn () => Photo::factory()->create([
+                'company_id' => $other->id,
+                'user_id' => $otherRep->id,
+            ]),
+        );
 
         // Under the rep's active-company scope, only own-company photos are visible.
         $this->assertSame(1, Photo::count());

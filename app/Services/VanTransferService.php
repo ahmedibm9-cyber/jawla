@@ -11,6 +11,7 @@ use App\Models\VanTransferItem;
 use App\Models\Warehouse;
 use App\Services\Contracts\StockService as StockServiceContract;
 use App\Services\Contracts\VanTransferService as VanTransferServiceContract;
+use App\Support\ActiveCompanyContext;
 use Illuminate\Support\Facades\DB;
 
 class VanTransferService implements VanTransferServiceContract
@@ -21,6 +22,8 @@ class VanTransferService implements VanTransferServiceContract
 
     public function create(int $companyId, int $fromUserId, int $toUserId, array $items, ?int $inTransitWarehouseId = null): VanTransfer
     {
+        app(ActiveCompanyContext::class)->assertMatches($companyId);
+
         return DB::transaction(function () use ($companyId, $fromUserId, $toUserId, $items, $inTransitWarehouseId): VanTransfer {
             $participants = User::withoutGlobalScopes()
                 ->whereIn('id', [$fromUserId, $toUserId])

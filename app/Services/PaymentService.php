@@ -10,12 +10,15 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\User;
 use App\Services\Contracts\PaymentService as PaymentServiceContract;
+use App\Support\ActiveCompanyContext;
 use Illuminate\Support\Facades\DB;
 
 class PaymentService implements PaymentServiceContract
 {
     public function collect(int $companyId, int $userId, int $customerId, float $amount, string $method, ?int $invoiceId = null, ?int $visitId = null, ?string $notes = null): Payment
     {
+        app(ActiveCompanyContext::class)->assertMatches($companyId);
+
         return DB::transaction(function () use ($companyId, $userId, $customerId, $amount, $method, $invoiceId, $visitId, $notes): Payment {
             if ($amount <= 0) {
                 throw new DomainException('Payment amount must be greater than zero.');
@@ -127,7 +130,7 @@ class PaymentService implements PaymentServiceContract
         // A cash box is unique per user. Lock the user row before looking it up
         // so concurrent first collections cannot create competing cash boxes.
         $user = User::withoutGlobalScopes()->whereKey($userId)->lockForUpdate()->firstOrFail();
-        if ($user->company_id !== $companyId) {
+        if (! $user->hasCompanyAccess($companyId)) {
             throw new DomainException('Cash box user does not belong to this company.');
         }
 

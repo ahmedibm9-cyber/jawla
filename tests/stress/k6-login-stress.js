@@ -55,19 +55,23 @@ function decodeHtml(value) {
 // noise. Set PERF_POOL_SIZE=N (with PERF_POOL_PASSWORD) to spread load across
 // perf-rep-1..N@jawla.test — seed them first with database/seeders/PerfUserSeeder.
 const poolSize = parseInt(__ENV.PERF_POOL_SIZE || "0", 10);
+if (
+  !(__ENV.LOGIN_EMAIL && __ENV.LOGIN_PASSWORD) &&
+  !(poolSize > 0 && __ENV.PERF_POOL_PASSWORD)
+) {
+  throw new Error(
+    "Provide LOGIN_EMAIL and LOGIN_PASSWORD, or PERF_POOL_SIZE and PERF_POOL_PASSWORD."
+  );
+}
 const credentials =
   __ENV.LOGIN_EMAIL && __ENV.LOGIN_PASSWORD
     ? [{ email: __ENV.LOGIN_EMAIL, password: __ENV.LOGIN_PASSWORD }]
     : poolSize > 0
       ? Array.from({ length: poolSize }, (_, i) => ({
           email: `perf-rep-${i + 1}@jawla.test`,
-          password: __ENV.PERF_POOL_PASSWORD || "password",
+          password: __ENV.PERF_POOL_PASSWORD,
         }))
-      : [
-          { email: "admin@jawla.test", password: "password" },
-          { email: "manager@jawla.test", password: "password" },
-          { email: "rep@jawla.test", password: "password" },
-        ];
+      : [];
 
 export default function () {
   const loginPage = http.get(`${BASE_URL}/admin/login`);

@@ -28,7 +28,7 @@ class ExpenseSyncHandler extends AbstractRepWriteHandler
         ]);
 
         $expense = $this->expenses->log(
-            companyId: $rep->company_id,
+            companyId: $rep->activeCompanyId(),
             userId: $rep->id,
             category: $data['category'],
             amount: (float) $data['amount'],

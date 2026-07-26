@@ -18,14 +18,14 @@ class OutOfStockService implements OutOfStockServiceContract
     public function raise(User $rep, int $productId, float $quantity, ?int $customerId = null, ?string $notes = null): OutOfStockRequest
     {
         $product = Product::withoutGlobalScopes()
-            ->where('company_id', $rep->company_id)
+            ->where('company_id', $rep->activeCompanyId())
             ->findOrFail($productId);
 
         return DB::transaction(function () use ($rep, $product, $quantity, $customerId, $notes): OutOfStockRequest {
             // Idempotency: reuse an existing open request for this rep+product
             // so retries and double-taps never fan out a second alarm.
             $existing = OutOfStockRequest::withoutGlobalScopes()
-                ->where('company_id', $rep->company_id)
+                ->where('company_id', $rep->activeCompanyId())
                 ->where('user_id', $rep->id)
                 ->where('product_id', $product->id)
                 ->where('status', 'open')
@@ -37,7 +37,7 @@ class OutOfStockService implements OutOfStockServiceContract
             }
 
             $request = OutOfStockRequest::create([
-                'company_id' => $rep->company_id,
+                'company_id' => $rep->activeCompanyId(),
                 'user_id' => $rep->id,
                 'customer_id' => $customerId,
                 'product_id' => $product->id,

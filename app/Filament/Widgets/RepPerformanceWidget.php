@@ -37,7 +37,7 @@ class RepPerformanceWidget extends StatsOverviewWidget
 
         try {
             // Get reps in company
-            $reps = User::where('company_id', $user->company_id)
+            $reps = User::forCompany($user->activeCompanyId())
                 ->whereHas('roles', fn ($q) => $q->where('name', 'rep'))
                 ->withCount(['visits as visits_today' => fn ($q) => $q->whereDate('checkin_at', $today)])
                 ->withSum('invoices as sales_today', fn ($q) => $q->whereDate('issued_at', $today)->whereNotIn('status', ['cancelled']))

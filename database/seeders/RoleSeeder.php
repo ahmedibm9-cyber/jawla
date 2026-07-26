@@ -43,6 +43,8 @@ class RoleSeeder extends Seeder
             'invoices.view_own', 'payments.collect', 'returns.create',
             'expenses.log', 'purchase_requests.submit', 'alarms.flag_out_of_stock',
             'complaints.submit', 'cashbox.view', 'van_transfers.request',
+            // HR administration
+            'users.manage', 'roles.assign', 'routes.assign',
         ];
 
         foreach ($permissions as $permission) {
@@ -87,6 +89,24 @@ class RoleSeeder extends Seeder
                 'expenses.log', 'purchase_requests.submit', 'alarms.flag_out_of_stock',
                 'complaints.submit', 'cashbox.view', 'van_transfers.request',
             ],
+            'sales_rep' => [
+                'sessions.manage', 'visits.view_assigned', 'visits.execute',
+                'visits.custom', 'customers.add', 'customers.view_own',
+                'products.view', 'products.view_stock', 'pricing.request',
+                'pricing.negotiate', 'proformas.create', 'invoices.create',
+                'invoices.view_own', 'payments.collect', 'returns.create',
+                'expenses.log', 'purchase_requests.submit', 'alarms.flag_out_of_stock',
+                'complaints.submit', 'cashbox.view', 'van_transfers.request',
+            ],
+            'hr_admin' => [
+                'users.manage', 'roles.assign', 'routes.assign',
+            ],
+            'system_viewer' => [
+                'customers.view_all', 'stock.view', 'invoices.view_all',
+                'payments.view_all', 'reports.view', 'reports.sales',
+                'reports.visits', 'reports.financial', 'reports.stock',
+                'reports.purchasing', 'alarms.view',
+            ],
         ];
 
         foreach ($rolePermissions as $roleName => $perms) {
@@ -94,7 +114,8 @@ class RoleSeeder extends Seeder
             $role->syncPermissions($perms);
         }
 
-        // Super Admin — bypasses all permission checks via Gate::before
+        // Legacy role retained only until the explicit role-assignment migration
+        // in the later PR-014 phase. It no longer receives a Gate bypass.
         Role::firstOrCreate(['name' => 'super_admin', 'guard_name' => 'web']);
     }
 }

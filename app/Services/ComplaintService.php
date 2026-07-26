@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Complaint;
 use App\Notifications\ComplaintResolved;
+use App\Support\ActiveCompanyContext;
 use Illuminate\Support\Facades\DB;
 
 class ComplaintService
@@ -14,6 +15,8 @@ class ComplaintService
 
     public function log(int $companyId, int $userId, int $customerId, string $type, string $description, ?int $visitId = null): Complaint
     {
+        app(ActiveCompanyContext::class)->assertMatches($companyId);
+
         return DB::transaction(function () use ($companyId, $userId, $customerId, $type, $description, $visitId): Complaint {
             $complaint = Complaint::create([
                 'company_id' => $companyId,

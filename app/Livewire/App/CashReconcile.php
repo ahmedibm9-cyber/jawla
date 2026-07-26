@@ -30,7 +30,7 @@ class CashReconcile extends Component
 
         try {
             $reconciliation = app(CashReconciliationService::class)->submit(
-                companyId: auth()->user()->company_id,
+                companyId: auth()->user()->activeCompanyId(),
                 userId: auth()->id(),
                 countedAmount: (float) $this->counted_amount,
                 notes: $this->notes,

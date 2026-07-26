@@ -33,7 +33,7 @@ class ReturnSyncHandler extends AbstractRepWriteHandler
         $this->assertCustomerInCompany($rep, (int) $data['customer_id']);
 
         $return = $this->returns->create(
-            companyId: $rep->company_id,
+            companyId: $rep->activeCompanyId(),
             userId: $rep->id,
             customerId: (int) $data['customer_id'],
             items: array_map(fn ($i) => [

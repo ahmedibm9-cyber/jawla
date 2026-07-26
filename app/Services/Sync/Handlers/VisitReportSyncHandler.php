@@ -33,7 +33,7 @@ class VisitReportSyncHandler extends AbstractRepWriteHandler
         ]);
 
         $visit = Visit::query()
-            ->whereHas('customer', fn ($q) => $q->where('company_id', $rep->company_id))
+            ->whereHas('customer', fn ($q) => $q->where('company_id', $rep->activeCompanyId()))
             ->findOrFail((int) $data['visit_id']);
 
         $report = $this->reports->submit($visit, [

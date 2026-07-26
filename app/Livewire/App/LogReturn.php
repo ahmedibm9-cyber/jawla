@@ -57,7 +57,7 @@ class LogReturn extends Component
 
         try {
             $return = app(ReturnService::class)->create(
-                companyId: auth()->user()->company_id,
+                companyId: auth()->user()->activeCompanyId(),
                 userId: auth()->id(),
                 customerId: $this->customer_id,
                 items: array_map(fn ($item) => [
@@ -107,7 +107,7 @@ class LogReturn extends Component
         $user = auth()->user();
 
         $customers = Customer::query()
-            ->where('company_id', $user->company_id)
+            ->where('company_id', $user->activeCompanyId())
             ->where('is_active', true)
             ->where('status', 'approved')
             ->orderBy('name_ar')
@@ -115,7 +115,7 @@ class LogReturn extends Component
             ->get();
 
         $products = Product::query()
-            ->where('company_id', $user->company_id)
+            ->where('company_id', $user->activeCompanyId())
             ->where('is_active', true)
             ->orderBy('name_ar')
             ->limit(100)

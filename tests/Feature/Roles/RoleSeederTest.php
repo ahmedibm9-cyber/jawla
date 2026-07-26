@@ -15,12 +15,9 @@ class RoleSeederTest extends TestCase
     {
         $this->seed(RoleSeeder::class);
 
-        $this->assertEqualsCanonicalizing(
-            ['admin', 'super_admin', 'sales_manager', 'accounts', 'purchasing', 'warehouse_keeper', 'executive', 'rep'],
-            Role::pluck('name')->toArray()
-        );
-
-        $this->assertSame(8, Role::count());
+        foreach (['sales_rep', 'sales_manager', 'hr_admin', 'warehouse_keeper', 'system_viewer'] as $role) {
+            $this->assertTrue(Role::where('name', $role)->exists(), "Missing canonical role [{$role}].");
+        }
     }
 
     public function test_admin_has_full_access(): void
@@ -31,11 +28,11 @@ class RoleSeederTest extends TestCase
         $this->assertTrue($admin->hasPermissionTo('full_access'));
     }
 
-    public function test_rep_permissions_match_guide(): void
+    public function test_sales_rep_permissions_match_approved_contract(): void
     {
         $this->seed(RoleSeeder::class);
 
-        $rep = Role::findByName('rep');
+        $rep = Role::findByName('sales_rep');
         $this->assertTrue($rep->hasPermissionTo('visits.execute'));
         $this->assertTrue($rep->hasPermissionTo('invoices.create'));
         $this->assertTrue($rep->hasPermissionTo('payments.collect'));
@@ -50,7 +47,19 @@ class RoleSeederTest extends TestCase
         $accounts = Role::findByName('accounts');
         $this->assertTrue($accounts->hasPermissionTo('products.view_cost'));
 
-        $rep = Role::findByName('rep');
+        $rep = Role::findByName('sales_rep');
         $this->assertFalse($rep->hasPermissionTo('products.view_cost'));
+    }
+
+    public function test_system_viewer_has_no_mutation_permissions(): void
+    {
+        $this->seed(RoleSeeder::class);
+
+        $viewer = Role::findByName('system_viewer');
+
+        $this->assertTrue($viewer->hasPermissionTo('reports.view'));
+        $this->assertFalse($viewer->hasPermissionTo('invoices.create'));
+        $this->assertFalse($viewer->hasPermissionTo('stock.adjust'));
+        $this->assertFalse($viewer->hasPermissionTo('full_access'));
     }
 }

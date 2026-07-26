@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/browser";
+import "./maps/popup-content.js";
 import "./offline/sync.js";
 import "./pwa-register.js";
 

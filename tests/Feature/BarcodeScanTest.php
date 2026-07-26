@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Livewire\App\SalesFlow;
 use App\Models\Company;
 use App\Models\Product;
+use App\Models\ProductCategory;
 use App\Models\User;
 use App\Support\ActiveCompanyContext;
 use Database\Seeders\RoleSeeder;
@@ -25,6 +26,8 @@ class BarcodeScanTest extends TestCase
 
     private User $rep;
 
+    private ProductCategory $category;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -33,6 +36,7 @@ class BarcodeScanTest extends TestCase
         $this->rep = User::factory()->create(['company_id' => $this->company->id]);
         $this->rep->assignRole('rep');
         app(ActiveCompanyContext::class)->setFromUser($this->rep);
+        $this->category = ProductCategory::factory()->create(['company_id' => $this->company->id]);
     }
 
     protected function tearDown(): void
@@ -43,7 +47,11 @@ class BarcodeScanTest extends TestCase
 
     private function product(array $attrs): Product
     {
-        return Product::factory()->create(array_merge(['company_id' => $this->company->id, 'is_active' => true], $attrs));
+        return Product::factory()->create(array_merge([
+            'company_id' => $this->company->id,
+            'category_id' => $this->category->id,
+            'is_active' => true,
+        ], $attrs));
     }
 
     public function test_scan_adds_product_by_barcode(): void
@@ -95,7 +103,15 @@ class BarcodeScanTest extends TestCase
     public function test_barcode_lookup_is_company_scoped(): void
     {
         $other = Company::factory()->create();
-        Product::factory()->create(['company_id' => $other->id, 'barcode' => 'SHARED9', 'is_active' => true]);
+        app(ActiveCompanyContext::class)->runWithCompany($other->id, function () use ($other): void {
+            $category = ProductCategory::factory()->create(['company_id' => $other->id]);
+            Product::factory()->create([
+                'company_id' => $other->id,
+                'category_id' => $category->id,
+                'barcode' => 'SHARED9',
+                'is_active' => true,
+            ]);
+        });
 
         $component = Livewire::actingAs($this->rep)
             ->test(SalesFlow::class)

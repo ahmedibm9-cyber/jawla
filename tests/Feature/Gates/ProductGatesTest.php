@@ -73,9 +73,16 @@ class ProductGatesTest extends TestCase
         $this->assertTrue(Gate::forUser($user)->allows('products.view_cost'));
     }
 
-    public function test_executive_can_view_cost(): void
+    public function test_legacy_executive_cannot_view_cost(): void
     {
         $user = $this->makeUser('executive');
+
+        $this->assertFalse(Gate::forUser($user)->allows('products.view_cost'));
+    }
+
+    public function test_system_viewer_can_view_cost_read_only(): void
+    {
+        $user = $this->makeUser('system_viewer');
 
         $this->assertTrue(Gate::forUser($user)->allows('products.view_cost'));
     }

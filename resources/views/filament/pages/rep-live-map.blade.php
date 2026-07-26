@@ -61,9 +61,8 @@
                 const bounds = [];
                 points.forEach((p) => {
                     const marker = L.marker([p.lat, p.lng]);
-                    const parts = [`<strong>${p.name ?? ''}</strong>`, `${p.seen_at} (${p.minutes_ago}m)`];
-                    if (p.accuracy) parts.push(`±${Math.round(p.accuracy)}m`);
-                    marker.bindPopup(parts.join('<br>'));
+                    const content = JawlaMapPopups.rep(p);
+                    marker.bindPopup(content);
                     marker.addTo(this.layer);
                     bounds.push([p.lat, p.lng]);
                 });

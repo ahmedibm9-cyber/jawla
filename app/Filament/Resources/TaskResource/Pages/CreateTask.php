@@ -11,7 +11,7 @@ class CreateTask extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['company_id'] = auth()->user()->company_id;
+        $data['company_id'] = auth()->user()->activeCompanyId();
         $data['created_by'] = auth()->id();
 
         return $data;

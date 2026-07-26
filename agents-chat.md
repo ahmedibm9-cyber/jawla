@@ -142,3 +142,10 @@ startup and appends what it's doing so others don't conflict or duplicate.
 - **Files:** `bootstrap/app.php`, `tests/Feature/RepLoginLifecycleTest.php` (test read/run only).
 - **Status:** done
 - **Notes:** Red evidence was guest `/app` redirecting to `/login`; `bootstrap/app.php` now redirects unauthenticated requests directly to `/admin/login`. Focused lifecycle passed 7/7 and affected auth coverage passed 18/18.
+
+## codex-remediation-agent — 2026-07-26 (Phase 1 critical security blockers)
+
+- **Task:** Close PR005 production seed/bootstrap exposure, PR001 fail-closed tenant isolation, PR013 live-map XSS, and the essential PR014 canonical-role provisioning gate.
+- **Files:** `railway.toml`, production bootstrap/seeding commands and seeders, tenancy context/scope/middleware/providers, Filament panel middleware, live-map view, role seeding/migration support, focused tests, and `docs/production-readiness/`.
+- **Status:** done
+- **Notes:** Phase 1 exit gates passed. The exact full CI command passed 496/496 tests and 1,402 assertions; Vite, Pint, and Playwright XSS gates passed. No production services, credentials, or data were used.

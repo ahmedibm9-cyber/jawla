@@ -19,12 +19,12 @@ class SalesTodayWidget extends StatsOverviewWidget
 
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
-        $sales = Invoice::where('company_id', $user->company_id)
+        $sales = Invoice::where('company_id', $user->activeCompanyId())
             ->whereDate('issued_at', today())
             ->whereNotIn('status', ['cancelled'])
             ->sum('total');
 
-        $count = Invoice::where('company_id', $user->company_id)
+        $count = Invoice::where('company_id', $user->activeCompanyId())
             ->whereDate('issued_at', today())
             ->whereNotIn('status', ['cancelled'])
             ->count();

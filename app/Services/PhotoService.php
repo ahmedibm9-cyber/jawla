@@ -35,7 +35,7 @@ class PhotoService
         $path = $file->store(self::DIRECTORY, $disk);
 
         return Photo::create([
-            'company_id' => $rep->company_id,
+            'company_id' => $rep->activeCompanyId(),
             'user_id' => $rep->id,
             'photable_type' => $photable?->getMorphClass(),
             'photable_id' => $photable?->getKey(),

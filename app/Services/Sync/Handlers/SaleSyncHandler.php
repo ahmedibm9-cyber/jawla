@@ -34,7 +34,7 @@ class SaleSyncHandler extends AbstractRepWriteHandler
         $this->assertCustomerInCompany($rep, (int) $data['customer_id']);
 
         $invoice = $this->invoices->create([
-            'company_id' => $rep->company_id,
+            'company_id' => $rep->activeCompanyId(),
             'customer_id' => (int) $data['customer_id'],
             'visit_id' => $data['visit_id'] ?? null,
             'items' => array_map(fn ($i) => [

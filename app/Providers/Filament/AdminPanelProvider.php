@@ -16,6 +16,7 @@ use App\Filament\Widgets\SalesTodayWidget;
 use App\Filament\Widgets\VisitsTodayWidget;
 use App\Http\Middleware\FilamentAuthenticate;
 use App\Http\Middleware\SecurityHeaders;
+use App\Http\Middleware\SetActiveCompanyContext;
 use App\Http\Middleware\ThrottlePost;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -89,6 +90,7 @@ class AdminPanelProvider extends PanelProvider
                 ShareErrorsFromSession::class,
                 PreventRequestForgery::class,
                 SubstituteBindings::class,
+                SetActiveCompanyContext::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 SecurityHeaders::class,
@@ -97,6 +99,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 FilamentAuthenticate::class,
             ])
+            ->renderHook('panels::body.start', fn (): string => view('components.runtime-banners')->render())
             ->renderHook('panels::head.start', fn (): string => '<link rel="preload" href="'.secure_asset('images/black-j.webp').'" as="image" fetchpriority="high">')
             ->renderHook('panels::body.end', fn (): string => '<script>window.areRecordsPartiallySelected??=()=>!1;window.getRecordsOnPage??=()=>[];window.areRecordsSelected??=()=>!1;window.areRecordsToggleable??=()=>!0;</script>');
     }

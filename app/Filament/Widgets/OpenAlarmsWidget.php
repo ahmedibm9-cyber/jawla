@@ -19,12 +19,12 @@ class OpenAlarmsWidget extends StatsOverviewWidget
 
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
-        $critical = Alarm::where('company_id', $user->company_id)
+        $critical = Alarm::where('company_id', $user->activeCompanyId())
             ->where('severity', 'critical')
             ->where('is_read', false)
             ->count();
 
-        $unack = Alarm::where('company_id', $user->company_id)
+        $unack = Alarm::where('company_id', $user->activeCompanyId())
             ->where('is_read', false)
             ->count();
 

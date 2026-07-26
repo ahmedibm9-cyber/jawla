@@ -43,7 +43,7 @@ class LogExpense extends Component
 
         try {
             $expense = app(ExpenseService::class)->log(
-                companyId: auth()->user()->company_id,
+                companyId: auth()->user()->activeCompanyId(),
                 userId: auth()->id(),
                 category: $this->category,
                 amount: (float) $this->amount,

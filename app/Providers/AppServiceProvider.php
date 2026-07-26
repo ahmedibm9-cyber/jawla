@@ -70,7 +70,8 @@ class AppServiceProvider extends ServiceProvider
         // provisioned — the last go-live gate. No call-site changes required.
         $this->app->bind(EtaSigner::class, UnsignedEtaSigner::class);
         $this->app->bind(EtaClient::class, function () {
-            $configured = (bool) config('eta.enabled')
+            $configured = ! config('jawla.is_demo')
+                && (bool) config('eta.enabled')
                 && (string) config('eta.api_base_url') !== ''
                 && (string) config('eta.id_base_url') !== '';
 

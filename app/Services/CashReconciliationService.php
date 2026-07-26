@@ -7,6 +7,7 @@ use App\Models\Activity;
 use App\Models\CashBox;
 use App\Models\CashReconciliation;
 use App\Models\User;
+use App\Support\ActiveCompanyContext;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -19,13 +20,14 @@ class CashReconciliationService
 {
     public function submit(int $companyId, int $userId, float $countedAmount, string $notes = '', ?int $workSessionId = null): CashReconciliation
     {
+        app(ActiveCompanyContext::class)->assertMatches($companyId);
+
         return DB::transaction(function () use ($companyId, $userId, $countedAmount, $notes, $workSessionId): CashReconciliation {
             $user = User::withoutGlobalScopes()
                 ->whereKey($userId)
-                ->where('company_id', $companyId)
                 ->lockForUpdate()
                 ->first();
-            if (! $user) {
+            if (! $user || ! $user->hasCompanyAccess($companyId)) {
                 throw new DomainException('errors.resource.seller');
             }
 
@@ -70,10 +72,9 @@ class CashReconciliationService
             $fresh = CashReconciliation::whereKey($reconciliation->getKey())->lockForUpdate()->firstOrFail();
             $reviewer = User::withoutGlobalScopes()
                 ->whereKey($reviewerId)
-                ->where('company_id', $fresh->company_id)
                 ->lockForUpdate()
                 ->first();
-            if (! $reviewer) {
+            if (! $reviewer || ! $reviewer->hasCompanyAccess($fresh->company_id)) {
                 throw new DomainException('errors.resource.reviewer');
             }
 

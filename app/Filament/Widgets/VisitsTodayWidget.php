@@ -17,7 +17,7 @@ class VisitsTodayWidget extends StatsOverviewWidget
             return [];
         }
 
-        $companyId = $user->company_id;
+        $companyId = $user->activeCompanyId();
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
         try {

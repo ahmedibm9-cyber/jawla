@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Support\ActiveCompanyContext;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -30,6 +32,12 @@ class User extends Authenticatable implements FilamentUser
         static::creating(function (User $user) {
             if (blank($user->uuid)) {
                 $user->uuid = (string) Str::uuid();
+            }
+        });
+
+        static::created(function (User $user): void {
+            if ($user->company_id !== null) {
+                $user->companies()->syncWithoutDetaching([$user->company_id]);
             }
         });
     }
@@ -72,6 +80,30 @@ class User extends Authenticatable implements FilamentUser
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function companies(): BelongsToMany
+    {
+        return $this->belongsToMany(Company::class)->withTimestamps();
+    }
+
+    public function hasCompanyAccess(int $companyId): bool
+    {
+        return (int) $this->company_id === $companyId
+            || $this->companies()->whereKey($companyId)->exists();
+    }
+
+    public function activeCompanyId(): int
+    {
+        return app(ActiveCompanyContext::class)->id() ?? (int) $this->company_id;
+    }
+
+    public function scopeForCompany(Builder $query, int $companyId): Builder
+    {
+        return $query->where(function (Builder $query) use ($companyId): void {
+            $query->where('company_id', $companyId)
+                ->orWhereHas('companies', fn (Builder $companies) => $companies->whereKey($companyId));
+        });
     }
 
     public function vanWarehouse(): HasOne
@@ -148,6 +180,7 @@ class User extends Authenticatable implements FilamentUser
     {
         return $this->is_active && $this->hasAnyRole([
             'super_admin', 'admin', 'sales_manager', 'accounts', 'purchasing', 'warehouse_keeper', 'executive',
+            'hr_admin', 'system_viewer',
         ]);
     }
 }
