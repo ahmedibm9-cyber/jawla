@@ -52,6 +52,9 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('4rem')
             ->defaultAvatarProvider(CompanyAvatarProvider::class)
             ->spa()
+            ->plugins([
+                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+            ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
@@ -81,6 +84,10 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-language')
                     ->url(fn () => route('locale.switch', 'ar'))
                     ->visible(fn () => app()->getLocale() !== 'ar'),
+                'replay_tour' => MenuItem::make()
+                    ->label(__('app.tour_replay'))
+                    ->icon('heroicon-o-play-circle')
+                    ->url('#'),
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -101,6 +108,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook('panels::topbar.end', fn (): string => view('components._active-company', ['panel' => 'admin'])->render())
             ->renderHook('panels::head.start', fn (): string => '<link rel="preload" href="'.secure_asset('images/black-j.webp').'" as="image" fetchpriority="high">')
-            ->renderHook('panels::body.end', fn (): string => '<script>window.areRecordsPartiallySelected??=()=>!1;window.getRecordsOnPage??=()=>[];window.areRecordsSelected??=()=>!1;window.areRecordsToggleable??=()=>!0;</script>');
+            ->renderHook('panels::head.end', fn (): string => view('filament.onboarding-head')->render())
+            ->renderHook('panels::body.end', fn (): string => '<script>window.areRecordsPartiallySelected??=()=>!1;window.getRecordsOnPage??=()=>[];window.areRecordsSelected??=()=>!1;window.areRecordsToggleable??=()=>!0;</script>' . view('filament.onboarding-body')->render());
     }
 }

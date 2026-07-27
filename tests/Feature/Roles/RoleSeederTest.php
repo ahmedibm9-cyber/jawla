@@ -25,7 +25,8 @@ class RoleSeederTest extends TestCase
         $this->seed(RoleSeeder::class);
 
         $admin = Role::findByName('admin');
-        $this->assertTrue($admin->hasPermissionTo('full_access'));
+        $totalPermissions = \Spatie\Permission\Models\Permission::count();
+        $this->assertEquals($totalPermissions, $admin->permissions->count(), 'Admin should have all permissions.');
     }
 
     public function test_sales_rep_permissions_match_approved_contract(): void
@@ -36,7 +37,6 @@ class RoleSeederTest extends TestCase
         $this->assertTrue($rep->hasPermissionTo('visits.execute'));
         $this->assertTrue($rep->hasPermissionTo('invoices.create'));
         $this->assertTrue($rep->hasPermissionTo('payments.collect'));
-        $this->assertFalse($rep->hasPermissionTo('full_access'));
         $this->assertFalse($rep->hasPermissionTo('products.view_cost'));
     }
 
@@ -60,6 +60,5 @@ class RoleSeederTest extends TestCase
         $this->assertTrue($viewer->hasPermissionTo('reports.view'));
         $this->assertFalse($viewer->hasPermissionTo('invoices.create'));
         $this->assertFalse($viewer->hasPermissionTo('stock.adjust'));
-        $this->assertFalse($viewer->hasPermissionTo('full_access'));
     }
 }

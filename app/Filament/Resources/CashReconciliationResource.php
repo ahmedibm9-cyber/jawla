@@ -95,7 +95,7 @@ class CashReconciliationResource extends Resource
                     ->label(l('اعتماد', 'Approve'))
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn (CashReconciliation $r) => $r->status === 'pending' && auth()->user()->hasAnyRole(['admin', 'sales_manager', 'accounts']))
+                    ->visible(fn (CashReconciliation $r) => $r->status === 'pending' && auth()->user()->can('update:cash_reconciliation'))
                     ->form([
                         Forms\Components\Textarea::make('review_notes')->label(l('ملاحظات (اختياري)', 'Notes (optional)'))->rows(2)->maxLength(500),
                     ])
@@ -113,7 +113,7 @@ class CashReconciliationResource extends Resource
                     ->label(l('تعليم', 'Flag'))
                     ->icon('heroicon-o-flag')
                     ->color('danger')
-                    ->visible(fn (CashReconciliation $r) => $r->status === 'pending' && auth()->user()->hasAnyRole(['admin', 'sales_manager', 'accounts']))
+                    ->visible(fn (CashReconciliation $r) => $r->status === 'pending' && auth()->user()->can('update:cash_reconciliation'))
                     ->form([
                         Forms\Components\Textarea::make('review_notes')->label(l('سبب التعليم', 'Reason'))->rows(2)->maxLength(500),
                     ])

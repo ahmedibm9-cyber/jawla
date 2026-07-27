@@ -8,26 +8,26 @@ class VanTransferPolicy
 {
     public function viewAny(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'warehouse_keeper', 'sales_manager']);
+        return $u->can('view_any:van_transfer');
     }
 
     public function view(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'warehouse_keeper', 'sales_manager']);
+        return $u->can('view:van_transfer');
     }
 
     public function create(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'warehouse_keeper']);
+        return $u->can('create:van_transfer');
     }
 
     public function update(User $u): bool
     {
-        return $u->hasRole('admin');
+        return $u->can('update:van_transfer');
     }
 
     public function delete(User $u): bool
     {
-        return $u->hasRole('admin');
+        return $u->can('delete:van_transfer');
     }
 }

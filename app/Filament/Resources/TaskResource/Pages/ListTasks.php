@@ -16,7 +16,7 @@ class ListTasks extends ListRecords
         return [
             Actions\CreateAction::make()
                 ->label(l('إضافة مهمة', 'Add Task'))
-                ->visible(fn () => ! auth()->user()->hasRole('executive')),
+                ->visible(fn () => auth()->user()?->can('create:task') ?? false),
         ];
     }
 }

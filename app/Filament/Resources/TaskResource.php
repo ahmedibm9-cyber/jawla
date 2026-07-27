@@ -41,23 +41,17 @@ class TaskResource extends Resource
 
     public static function canCreate(): bool
     {
-        $user = auth()->user();
-
-        return $user && ! $user->hasRole('executive');
+        return auth()->user()?->can('create:task') ?? false;
     }
 
     public static function canEdit($record): bool
     {
-        $user = auth()->user();
-
-        return $user && ! $user->hasRole('executive');
+        return auth()->user()?->can('update:task') ?? false;
     }
 
     public static function canDelete($record): bool
     {
-        $user = auth()->user();
-
-        return $user && ! $user->hasRole('executive');
+        return auth()->user()?->can('delete:task') ?? false;
     }
 
     public static function form(Schema $schema): Schema

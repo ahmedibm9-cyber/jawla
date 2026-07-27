@@ -36,7 +36,7 @@ class ProductPriceResource extends Resource
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasRole('sales_manager') ?? false;
+        return auth()->user()?->can('view_any:product_price') ?? false;
     }
 
     public static function form(Schema $schema): Schema

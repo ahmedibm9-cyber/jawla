@@ -22,7 +22,7 @@ class RepPerformanceWidget extends StatsOverviewWidget
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
         // Only show for managers/admins
-        if (! $user->hasAnyRole(['admin', 'super_admin', 'sales_manager'])) {
+        if (! $user->can('reports.view')) {
             return [
                 Stat::make(
                     $lang === 'ar' ? 'أداء المندوبين' : 'Rep Performance',

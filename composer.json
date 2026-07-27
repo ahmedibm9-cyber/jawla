@@ -17,6 +17,7 @@
     "ext-pdo": "*",
     "ext-pdo_pgsql": "*",
     "ext-zip": "*",
+    "bezhansalleh/filament-shield": "*",
     "blade-ui-kit/blade-heroicons": "^2.5",
     "filament/filament": "^4.0",
     "laravel/framework": "^13.8",

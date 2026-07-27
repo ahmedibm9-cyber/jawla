@@ -8,31 +8,26 @@ class CompanyPolicy
 {
     public function viewAny(User $u): bool
     {
-        return $this->access($u);
+        return $u->can('view_any:company');
     }
 
     public function view(User $u): bool
     {
-        return $this->access($u);
+        return $u->can('view:company');
     }
 
     public function create(User $u): bool
     {
-        return $u->hasRole('admin');
+        return $u->can('create:company');
     }
 
     public function update(User $u): bool
     {
-        return $u->hasRole('admin');
+        return $u->can('update:company');
     }
 
     public function delete(User $u): bool
     {
-        return $u->hasRole('admin');
-    }
-
-    private function access(User $u): bool
-    {
-        return $u->hasAnyRole(['admin', 'executive']);
+        return $u->can('delete:company');
     }
 }

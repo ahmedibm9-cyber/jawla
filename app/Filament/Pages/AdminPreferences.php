@@ -38,7 +38,7 @@ class AdminPreferences extends Page
 
     public static function canAccess(): bool
     {
-        return Auth::user()?->hasRole('admin') ?? false;
+        return Auth::user()?->can('admin_preferences.view') ?? false;
     }
 
     public function mount(): void

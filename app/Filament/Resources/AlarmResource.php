@@ -243,7 +243,7 @@ class AlarmResource extends Resource
     {
         $user = auth()->user();
 
-        return $user !== null && ($user->hasRole('admin') || $user->can('alarms.respond'));
+        return $user?->can('alarms.respond') ?? false;
     }
 
     public static function getPages(): array

@@ -44,7 +44,7 @@ class InvoiceService implements InvoiceContract
                 ->whereKey($sellerId)
                 ->lockForUpdate()
                 ->first();
-            if (! $seller || ! $seller->hasCompanyAccess($company->id) || ! $seller->hasRole('sales_rep')) {
+            if (! $seller || ! $seller->hasCompanyAccess($company->id) || ! $seller->can('create:invoice')) {
                 throw new DomainException('errors.resource.seller');
             }
 
@@ -175,7 +175,7 @@ class InvoiceService implements InvoiceContract
                 throw new \RuntimeException('Only draft invoices can be submitted.');
             }
             $seller = User::withoutGlobalScopes()->whereKey($invoice->user_id)->lockForUpdate()->firstOrFail();
-            if (! $seller->hasCompanyAccess((int) $invoice->company_id) || ! $seller->hasRole('sales_rep')) {
+            if (! $seller->hasCompanyAccess((int) $invoice->company_id) || ! $seller->can('update:invoice')) {
                 throw new DomainException('Only an assigned sales rep may issue a draft invoice.');
             }
 
@@ -211,7 +211,7 @@ class InvoiceService implements InvoiceContract
     public function cancel(Invoice $invoice, int $userId, string $reason): Invoice
     {
         $manager = User::withoutGlobalScopes()->findOrFail($userId);
-        if (! $manager->hasRole('sales_manager')
+        if (! $manager->can('update:invoice')
             || ! $manager->hasCompanyAccess((int) $invoice->company_id)
             || trim($reason) === '') {
             throw new DomainException('A sales manager and mandatory reason are required to void an issued invoice.');
@@ -258,7 +258,7 @@ class InvoiceService implements InvoiceContract
     public function amend(Invoice $invoice, string $reason = 'Amendment requested'): Invoice
     {
         $manager = auth()->user();
-        if (! $manager?->hasRole('sales_manager') || trim($reason) === '') {
+        if (! $manager?->can('update:invoice') || trim($reason) === '') {
             throw new DomainException('Only a sales manager may amend an issued invoice, with a mandatory reason.');
         }
 

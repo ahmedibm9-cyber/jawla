@@ -167,7 +167,7 @@ class StockImport extends Page
 
     public function getPendingApprovalsProperty()
     {
-        if (! Auth::user()->hasRole('sales_manager')) {
+        if (! Auth::user()->can('view_any:stock')) {
             return collect();
         }
 

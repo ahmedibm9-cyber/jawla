@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     @php($l = fn (string $ar, string $en) => app()->getLocale() === 'ar' ? $ar : $en)
 
-    @if (auth()->user()->hasRole('warehouse_keeper'))
+    @if (auth()->user()->can('stock.import'))
     <form wire:submit.prevent="runPreview" class="space-y-6">
         {{ $this->form }}
 
@@ -70,7 +70,7 @@
                 </div>
 
                 <div class="mt-4">
-                    @if ($requiresApproval && !$approved && auth()->user()->hasRole('sales_manager'))
+                    @if ($requiresApproval && !$approved && auth()->user()->can('stock.adjust'))
                         <x-filament::button
                             color="warning"
                             wire:click="approveImport"
@@ -103,7 +103,7 @@
     @endif
     @endif
 
-    @if (auth()->user()->hasRole('sales_manager'))
+    @if (auth()->user()->can('stock.adjust'))
         <x-filament::section :heading="$l('تسويات تنتظر الاعتماد', 'Adjustments awaiting approval')">
             @if ($this->pendingApprovals->isEmpty())
                 <p class="text-sm text-gray-500">{{ $l('لا توجد تسويات معلقة.', 'No pending adjustments.') }}</p>

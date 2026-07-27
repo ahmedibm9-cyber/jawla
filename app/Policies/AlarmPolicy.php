@@ -8,26 +8,26 @@ class AlarmPolicy
 {
     public function viewAny(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'executive']);
+        return $u->can('view_any:alarm');
     }
 
     public function view(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'executive']);
+        return $u->can('view:alarm');
     }
 
     public function create(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager']);
+        return $u->can('create:alarm');
     }
 
     public function update(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'executive']);
+        return $u->can('update:alarm');
     }
 
     public function delete(User $u): bool
     {
-        return $u->hasRole('admin');
+        return $u->can('delete:alarm');
     }
 }

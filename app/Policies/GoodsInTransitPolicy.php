@@ -8,7 +8,7 @@ class GoodsInTransitPolicy
 {
     public function viewAny(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'purchasing', 'warehouse_keeper', 'executive']);
+        return $u->can('view_any:goods_in_transit');
     }
 
     public function view(User $u): bool
@@ -18,16 +18,16 @@ class GoodsInTransitPolicy
 
     public function create(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'purchasing', 'warehouse_keeper']);
+        return $u->can('create:goods_in_transit');
     }
 
     public function update(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'purchasing', 'warehouse_keeper']);
+        return $u->can('update:goods_in_transit');
     }
 
     public function delete(User $u): bool
     {
-        return $u->hasRole('admin');
+        return $u->can('delete:goods_in_transit');
     }
 }

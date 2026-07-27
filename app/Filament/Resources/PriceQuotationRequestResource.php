@@ -82,7 +82,7 @@ class PriceQuotationRequestResource extends Resource
                 Action::make('set_price')
                     ->label(app()->getLocale() === 'ar' ? 'تسعير' : 'Set Price')
                     ->icon('heroicon-o-pencil-square')
-                    ->visible(fn (PriceQuotationRequest $r) => $r->status === 'requested' && auth()->user()->hasAnyRole(['admin', 'accounts']))
+                    ->visible(fn (PriceQuotationRequest $r) => $r->status === 'requested' && auth()->user()->can('update:price_quotation_request'))
                     ->form([
                         Forms\Components\TextInput::make('base_price')->label(app()->getLocale() === 'ar' ? 'السعر الأساسي' : 'Base Price')->numeric()->required(),
                         Forms\Components\TextInput::make('manager_plus')->label(app()->getLocale() === 'ar' ? 'الحد الأعلى (±)' : 'Plus Range')->numeric()->default(0),

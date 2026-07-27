@@ -8,26 +8,26 @@ class ReturnRecordPolicy
 {
     public function viewAny(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'accounts']);
+        return $u->can('view_any:return_record');
     }
 
     public function view(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'accounts']);
+        return $u->can('view:return_record');
     }
 
     public function create(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager']);
+        return $u->can('create:return_record');
     }
 
     public function update(User $u): bool
     {
-        return $u->hasRole('admin');
+        return $u->can('update:return_record');
     }
 
     public function delete(User $u): bool
     {
-        return $u->hasRole('admin');
+        return $u->can('delete:return_record');
     }
 }

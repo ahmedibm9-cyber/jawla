@@ -106,7 +106,7 @@ class PurchaseRequestResource extends Resource
                     ->label(l('موافقة Sales', 'Sales Approve'))
                     ->icon('heroicon-o-check')
                     ->color('info')
-                    ->visible(fn (PurchaseRequest $r) => $r->status === 'pending' && ! $r->isExpired() && auth()->user()->hasAnyRole(['admin', 'sales_manager']))
+                    ->visible(fn (PurchaseRequest $r) => $r->status === 'pending' && ! $r->isExpired() && auth()->user()->can('update:purchase_request'))
                     ->form([
                         Forms\Components\Textarea::make('notes')->label(l('ملاحظات (اختياري)', 'Notes (optional)'))->rows(2)->maxLength(500),
                     ])
@@ -124,7 +124,7 @@ class PurchaseRequestResource extends Resource
                     ->label(l('رفض Sales', 'Sales Reject'))
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
-                    ->visible(fn (PurchaseRequest $r) => $r->status === 'pending' && auth()->user()->hasAnyRole(['admin', 'sales_manager']))
+                    ->visible(fn (PurchaseRequest $r) => $r->status === 'pending' && auth()->user()->can('update:purchase_request'))
                     ->form([
                         Forms\Components\Textarea::make('notes')->label(l('سبب الرفض (اختياري)', 'Rejection reason (optional)'))->rows(2)->maxLength(500),
                     ])
@@ -142,7 +142,7 @@ class PurchaseRequestResource extends Resource
                     ->label(l('موافقة Purchasing', 'Purchasing Approve'))
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn (PurchaseRequest $r) => $r->status === 'sales_approved' && ! $r->isExpired() && auth()->user()->hasAnyRole(['admin', 'purchasing']))
+                    ->visible(fn (PurchaseRequest $r) => $r->status === 'sales_approved' && ! $r->isExpired() && auth()->user()->can('update:purchase_request'))
                     ->form([
                         Forms\Components\Textarea::make('notes')->label(l('ملاحظات (اختياري)', 'Notes (optional)'))->rows(2)->maxLength(500),
                     ])
@@ -162,7 +162,7 @@ class PurchaseRequestResource extends Resource
                     ->label(l('رفض Purchasing', 'Purchasing Reject'))
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
-                    ->visible(fn (PurchaseRequest $r) => $r->status === 'sales_approved' && auth()->user()->hasAnyRole(['admin', 'purchasing']))
+                    ->visible(fn (PurchaseRequest $r) => $r->status === 'sales_approved' && auth()->user()->can('update:purchase_request'))
                     ->form([
                         Forms\Components\Textarea::make('notes')->label(l('سبب الرفض (اختياري)', 'Rejection reason (optional)'))->rows(2)->maxLength(500),
                     ])

@@ -38,7 +38,7 @@ class SupplierComparison extends Page
 
     public static function canAccess(): bool
     {
-        return Auth::user()?->hasAnyRole(['admin', 'purchasing', 'sales_manager']) ?? false;
+        return Auth::user()?->can('view_any:purchase_request') ?? false;
     }
 
     /**

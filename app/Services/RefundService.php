@@ -42,7 +42,7 @@ class RefundService
         ): Refund {
             $requester = User::withoutGlobalScopes()->whereKey($requestedBy)->lockForUpdate()->firstOrFail();
             if (! $requester->hasCompanyAccess($companyId)
-                || ! $requester->hasAnyRole(['sales_rep', 'sales_manager'])) {
+                || ! $requester->can('refunds.request')) {
                 throw new DomainException('Only an authorized sales user may request a refund.');
             }
 
@@ -191,7 +191,7 @@ class RefundService
     private function assertManager(int $managerId, int $companyId): void
     {
         $manager = User::withoutGlobalScopes()->whereKey($managerId)->lockForUpdate()->firstOrFail();
-        if (! $manager->hasCompanyAccess($companyId) || ! $manager->hasRole('sales_manager')) {
+        if (! $manager->hasCompanyAccess($companyId) || ! $manager->can('update:invoice')) {
             throw new DomainException('A same-company sales manager must approve the refund.');
         }
     }

@@ -35,7 +35,7 @@ class RepLiveMap extends Page
 
     public static function canAccess(): bool
     {
-        return Auth::user()?->hasAnyRole(['admin', 'sales_manager', 'executive']) ?? false;
+        return Auth::user()?->can('view:rep_live_map') ?? false;
     }
 
     /**

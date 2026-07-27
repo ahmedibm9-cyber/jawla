@@ -8,12 +8,12 @@ class CashReconciliationPolicy
 {
     public function viewAny(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'accounts']);
+        return $u->can('view_any:cash_reconciliation');
     }
 
     public function view(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'accounts']);
+        return $u->can('view:cash_reconciliation');
     }
 
     public function create(User $u): bool
@@ -23,11 +23,11 @@ class CashReconciliationPolicy
 
     public function update(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'accounts']);
+        return $u->can('update:cash_reconciliation');
     }
 
     public function delete(User $u): bool
     {
-        return $u->hasRole('admin');
+        return $u->can('delete:cash_reconciliation');
     }
 }

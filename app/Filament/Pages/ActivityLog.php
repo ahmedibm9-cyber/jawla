@@ -39,7 +39,7 @@ class ActivityLog extends Page
     {
         $user = auth()->user();
 
-        return $user?->hasAnyRole(['admin', 'sales_manager']) ?? false;
+        return $user?->can('reports.view') ?? false;
     }
 
     public function reverse(int $activityId): void
@@ -47,7 +47,7 @@ class ActivityLog extends Page
         $activity = Activity::findOrFail($activityId);
         $user = auth()->user();
 
-        if (! $user || ! $user->hasAnyRole(['admin', 'sales_manager'])) {
+        if (! $user || ! $user->can('reports.view')) {
             Notification::make()->danger()->title(__('Unauthorized'))->send();
 
             return;

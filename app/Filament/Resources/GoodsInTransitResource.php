@@ -46,23 +46,17 @@ class GoodsInTransitResource extends Resource
 
     public static function canCreate(): bool
     {
-        $user = auth()->user();
-
-        return $user && ! $user->hasRole('executive');
+        return auth()->user()?->can('create:goods_in_transit') ?? false;
     }
 
     public static function canEdit($record): bool
     {
-        $user = auth()->user();
-
-        return $user && ! $user->hasRole('executive');
+        return auth()->user()?->can('update:goods_in_transit') ?? false;
     }
 
     public static function canDelete($record): bool
     {
-        $user = auth()->user();
-
-        return $user && ! $user->hasRole('executive');
+        return auth()->user()?->can('delete:goods_in_transit') ?? false;
     }
 
     public static function form(Schema $schema): Schema
@@ -131,7 +125,7 @@ class GoodsInTransitResource extends Resource
                     ->label(l('استلام', 'Receive'))
                     ->icon('heroicon-o-check-circle')
                     ->color('success')
-                    ->visible(fn (GoodsInTransit $r) => ! in_array($r->status, ['received', 'cancelled'], true) && auth()->user()->hasAnyRole(['admin', 'warehouse_keeper', 'purchasing']))
+                    ->visible(fn (GoodsInTransit $r) => ! in_array($r->status, ['received', 'cancelled'], true) && auth()->user()->can('update:goods_in_transit'))
                     ->form([
                         Forms\Components\Select::make('warehouse_id')->label(l('المستودع', 'Warehouse'))
                             ->options(fn () => Warehouse::where('company_id', Auth::user()->activeCompanyId())->where('type', 'main')->pluck('name_ar', 'id'))
@@ -148,7 +142,7 @@ class GoodsInTransitResource extends Resource
                         }
                     }),
                 EditAction::make()
-                    ->visible(fn () => ! auth()->user()->hasRole('executive')),
+                    ->visible(fn () => auth()->user()?->can('update:goods_in_transit') ?? false),
             ])
             ->bulkActions([]);
     }

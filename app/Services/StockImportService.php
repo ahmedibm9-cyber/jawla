@@ -237,14 +237,14 @@ class StockImportService
     private function authorizeImporter(User $user, Warehouse $warehouse): void
     {
         if (! $user->hasCompanyAccess((int) $warehouse->company_id)
-            || ! $user->hasRole('warehouse_keeper')) {
+            || ! $user->can('stock.import')) {
             throw new DomainException('Stock import execution requires an assigned warehouse keeper.');
         }
     }
 
     private function approveLocked(StockImportPreview $staged, User $manager): StockImportPreview
     {
-        if (! $manager->hasRole('sales_manager')
+        if (! $manager->can('update:stock')
             || ! $manager->hasCompanyAccess((int) $staged->company_id)) {
             throw new DomainException('Only a same-company sales manager may approve this stock adjustment.');
         }

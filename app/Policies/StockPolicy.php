@@ -7,23 +7,23 @@ use App\Models\User;
 
 class StockPolicy
 {
-    public function viewAny(User $user): bool
+    public function viewAny(User $u): bool
     {
-        return $user->hasAnyRole(['admin', 'warehouse_keeper', 'sales_manager', 'accounts']);
+        return $u->can('view_any:stock');
     }
 
-    public function view(User $user, Stock $stock): bool
+    public function view(User $u, Stock $stock): bool
     {
-        return $user->hasAnyRole(['admin', 'warehouse_keeper', 'sales_manager', 'accounts']);
+        return $u->can('view:stock');
     }
 
-    public function adjust(User $user, Stock $stock): bool
+    public function adjust(User $u, Stock $stock): bool
     {
-        return $user->hasAnyRole(['admin', 'warehouse_keeper']);
+        return $u->can('stock.adjust');
     }
 
-    public function import(User $user): bool
+    public function import(User $u): bool
     {
-        return $user->hasAnyRole(['admin', 'warehouse_keeper']);
+        return $u->can('stock.import');
     }
 }

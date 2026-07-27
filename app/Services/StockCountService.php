@@ -19,7 +19,7 @@ class StockCountService
     public function open(Warehouse $warehouse, User $keeper, array $productIds): StockCountSession
     {
         app(ActiveCompanyContext::class)->assertMatches((int) $warehouse->company_id);
-        if (! $keeper->hasRole('warehouse_keeper') || ! $keeper->hasCompanyAccess((int) $warehouse->company_id)) {
+        if (! $keeper->can('update:stock') || ! $keeper->hasCompanyAccess((int) $warehouse->company_id)) {
             throw new DomainException('Only an assigned warehouse keeper may open a stock count.');
         }
         $ids = array_values(array_unique(array_map('intval', $productIds)));
@@ -79,7 +79,7 @@ class StockCountService
 
     public function approveAndApply(StockCountSession $session, User $manager): StockCountSession
     {
-        if (! $manager->hasRole('sales_manager') || ! $manager->hasCompanyAccess((int) $session->company_id)) {
+        if (! $manager->can('update:stock') || ! $manager->hasCompanyAccess((int) $session->company_id)) {
             throw new DomainException('Only an assigned sales manager may approve a stock count.');
         }
 

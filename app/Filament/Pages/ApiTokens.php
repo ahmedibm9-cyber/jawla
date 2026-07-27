@@ -48,7 +48,7 @@ class ApiTokens extends Page
 
     public static function canAccess(): bool
     {
-        return Auth::user()?->hasRole('admin') ?? false;
+        return Auth::user()?->can('api_tokens.view') ?? false;
     }
 
     /** Bilingual ability labels for the create form. */

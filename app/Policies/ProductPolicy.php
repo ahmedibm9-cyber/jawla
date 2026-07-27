@@ -8,7 +8,7 @@ class ProductPolicy
 {
     public function viewAny(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'accounts', 'purchasing', 'warehouse_keeper', 'executive', 'rep']);
+        return $u->can('view_any:product');
     }
 
     public function view(User $u): bool
@@ -18,16 +18,16 @@ class ProductPolicy
 
     public function create(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'accounts']);
+        return $u->can('create:product');
     }
 
     public function update(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'accounts']);
+        return $u->can('update:product');
     }
 
     public function delete(User $u): bool
     {
-        return $u->hasRole('admin');
+        return $u->can('delete:product');
     }
 }

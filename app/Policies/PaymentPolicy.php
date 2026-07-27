@@ -8,26 +8,26 @@ class PaymentPolicy
 {
     public function viewAny(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'accounts']);
+        return $u->can('view_any:payment');
     }
 
     public function view(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'accounts']);
+        return $u->can('view:payment');
     }
 
     public function create(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager']);
+        return $u->can('create:payment');
     }
 
     public function update(User $u): bool
     {
-        return $u->hasRole('admin');
+        return $u->can('update:payment');
     }
 
     public function delete(User $u): bool
     {
-        return $u->hasRole('admin');
+        return $u->can('delete:payment');
     }
 }

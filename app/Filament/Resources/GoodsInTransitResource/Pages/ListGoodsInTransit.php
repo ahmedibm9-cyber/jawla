@@ -16,7 +16,7 @@ class ListGoodsInTransit extends ListRecords
         return [
             CreateAction::make()
                 ->label(l('إضافة شحنة واردة', 'Add Incoming Shipment'))
-                ->visible(fn () => ! auth()->user()->hasRole('executive')),
+                ->visible(fn () => auth()->user()?->can('create:goods_in_transit') ?? false),
         ];
     }
 }

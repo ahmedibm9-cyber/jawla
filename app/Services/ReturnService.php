@@ -53,7 +53,7 @@ class ReturnService
             $reason,
         ): ReturnRecord {
             $actor = User::withoutGlobalScopes()->whereKey($userId)->lockForUpdate()->firstOrFail();
-            if (! $actor->hasCompanyAccess($companyId) || ! $actor->hasRole('sales_rep')) {
+            if (! $actor->hasCompanyAccess($companyId) || ! $actor->can('create:return_record')) {
                 throw new DomainException('Only an assigned sales rep may create an invoice-linked return.');
             }
             $invoice = Invoice::whereKey($againstInvoiceId)
@@ -253,7 +253,7 @@ class ReturnService
     public function cancel(ReturnRecord $return, int $userId, string $reason): ReturnRecord
     {
         $manager = User::withoutGlobalScopes()->findOrFail($userId);
-        if (! $manager->hasRole('sales_manager')
+        if (! $manager->can('update:return_record')
             || ! $manager->hasCompanyAccess((int) $return->company_id)
             || trim($reason) === '') {
             throw new DomainException('A sales manager and mandatory reason are required for a return reversal.');

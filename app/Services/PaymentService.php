@@ -49,7 +49,7 @@ class PaymentService implements PaymentServiceContract
             ): Payment {
                 $collector = User::withoutGlobalScopes()->whereKey($userId)->lockForUpdate()->firstOrFail();
                 if (! $collector->hasCompanyAccess($companyId)
-                    || ! $collector->hasAnyRole(['sales_rep', 'sales_manager'])) {
+                    || ! $collector->can('payments.collect')) {
                     throw new DomainException('Only an assigned sales user may collect a payment.');
                 }
                 if ($intentId !== null) {
@@ -171,7 +171,7 @@ class PaymentService implements PaymentServiceContract
     public function cancel(Payment $payment, int $userId, string $reason): Payment
     {
         $manager = User::withoutGlobalScopes()->findOrFail($userId);
-        if (! $manager->hasRole('sales_manager') || trim($reason) === '') {
+        if (! $manager->can('update:payment') || trim($reason) === '') {
             throw new DomainException('A sales manager and mandatory reason are required for payment reversal.');
         }
 

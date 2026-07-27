@@ -8,12 +8,12 @@ class PurchaseOrderPolicy
 {
     public function viewAny(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'purchasing']);
+        return $u->can('view_any:purchase_order');
     }
 
     public function view(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'purchasing']);
+        return $u->can('view:purchase_order');
     }
 
     // POs are only created by PurchaseRequestService on purchasing approval

@@ -35,7 +35,7 @@ class PricingService implements PricingServiceContract
         $base = new Money((string) $product->price);
 
         $rep = User::with('roles', 'company')->find($repId);
-        $isRep = $rep && $rep->hasRole('sales_rep');
+        $isRep = $rep && $rep->can('create:invoice');
 
         if (! $isRep) {
             return new PriceRange($base, Money::zero(), Money::zero());
@@ -99,7 +99,7 @@ class PricingService implements PricingServiceContract
         CarbonInterface $validUntil,
         string $reason,
     ): ProductPrice {
-        if (! $manager->hasRole('sales_manager') || ! $manager->hasCompanyAccess($companyId)) {
+        if (! $manager->can('update:product_price') || ! $manager->hasCompanyAccess($companyId)) {
             throw new DomainException('Only an assigned sales manager may create a customer price override.');
         }
         if (trim($reason) === '' || bccomp($price, '0.00', 2) <= 0 || $validUntil->lt($validFrom)) {

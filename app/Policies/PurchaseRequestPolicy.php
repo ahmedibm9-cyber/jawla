@@ -8,26 +8,26 @@ class PurchaseRequestPolicy
 {
     public function viewAny(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'purchasing']);
+        return $u->can('view_any:purchase_request');
     }
 
     public function view(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'purchasing']);
+        return $u->can('view:purchase_request');
     }
 
     public function create(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager']);
+        return $u->can('create:purchase_request');
     }
 
     public function update(User $u): bool
     {
-        return $u->hasAnyRole(['admin', 'sales_manager', 'purchasing']);
+        return $u->can('update:purchase_request');
     }
 
     public function delete(User $u): bool
     {
-        return $u->hasRole('admin');
+        return $u->can('delete:purchase_request');
     }
 }
