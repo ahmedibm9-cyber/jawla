@@ -108,7 +108,7 @@
         @if($errorMessage)
             <div class="card bg-danger/10 text-danger mb-4 flex justify-between items-center" aria-live="polite">
                 <span>{{ $errorMessage }}</span>
-                <button type="button" wire:click="$set('errorMessage', '')" aria-label="{{ __('app.clear') }}" class="text-danger bg-transparent border-0 cursor-pointer text-lg px-2">&times;</button>
+                <button type="button" wire:click="$set('errorMessage', '')" aria-label="{{ __('app.clear') }}" class="btn-ghost-close">&times;</button>
             </div>
         @endif
 

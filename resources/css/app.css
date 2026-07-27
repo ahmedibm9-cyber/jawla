@@ -1338,7 +1338,8 @@
   justify-content: center;
   margin: 0 auto 24px;
   animation: successPop 0.4s ease-out;
-  box-shadow: 0 4px 16px rgba(109, 184, 59, 0.3);
+  box-shadow: 0 4px 16px
+    color-mix(in srgb, var(--color-success) 30%, transparent);
 }
 
 .success-checkmark svg {
@@ -2255,6 +2256,22 @@ dialog[open] {
   width: 20px;
   height: 20px;
   flex-shrink: 0;
+}
+
+/* ---- Ghost close button (dismiss / clear) ---- */
+.btn-ghost-close {
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  padding: 4px 8px;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* =====================================================================

@@ -36,7 +36,7 @@
                     </div>
                 @else
                     <input type="text" id="customerSearch" wire:model.live.debounce.300ms="customerSearch" autocomplete="off" class="form-input"
-                        placeholder="{{ app()->getLocale() === 'ar' ? 'ابحث عن عميل…' : 'Search customer…' }}">
+                        placeholder="{{ __('app.search_customer_ph') }}">
                     @if($customers->isNotEmpty())
                         <div class="mt-2 space-y-1">
                             @foreach($customers as $c)

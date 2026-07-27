@@ -7,7 +7,7 @@
     <div class="page-body">
         <div class="form-group">
             <input type="text" wire:model.live.debounce.300ms="search" aria-label="{{ app()->getLocale() === 'ar' ? 'بحث' : 'Search' }}" autocomplete="off" class="form-input"
-                placeholder="{{ app()->getLocale() === 'ar' ? 'ابحث بالكود أو الاسم…' : 'Search by SKU or name…' }}">
+                placeholder="{{ __('app.search_product_ph') }}">
         </div>
 
         @if($flagMessage)

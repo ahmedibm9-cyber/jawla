@@ -5,13 +5,13 @@
         @if($successMessage)
             <div class="toast toast-success relative top-0 mb-4" role="status" style="transform:none">
                 <span>{{ $successMessage }}</span>
-                <button type="button" wire:click="$set('successMessage', '')" aria-label="{{ __('app.clear') }}" class="text-success bg-transparent border-0 cursor-pointer text-lg px-2">&times;</button>
+                <button type="button" wire:click="$set('successMessage', '')" aria-label="{{ __('app.clear') }}" class="btn-ghost-close">&times;</button>
             </div>
         @endif
         @if($errorMessage)
             <div class="toast toast-error relative top-0 mb-4" role="alert" style="transform:none">
                 <span>{{ $errorMessage }}</span>
-                <button type="button" wire:click="$set('errorMessage', '')" aria-label="{{ __('app.clear') }}" class="text-danger bg-transparent border-0 cursor-pointer text-lg px-2">&times;</button>
+                <button type="button" wire:click="$set('errorMessage', '')" aria-label="{{ __('app.clear') }}" class="btn-ghost-close">&times;</button>
             </div>
         @endif
         <div class="home-hero">

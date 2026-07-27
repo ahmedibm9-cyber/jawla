@@ -16,7 +16,7 @@
                 <div class="success-actions">
                     <x-ds.bluetooth-print-button :payload="$paymentPrintPayload" :label="__('app.print_receipt')" />
                     <a href="/app/pdf/receipt/{{ $lastPaymentId }}" target="_blank" class="btn btn-primary no-underline text-center">{{ __('app.view_receipt') }}</a>
-                    <button class="btn btn-outline" wire:click="$set('success', false)">{{ __('app.collect_another') ?? __('app.collect_payment') }}</button>
+                    <button class="btn btn-outline" wire:click="$set('success', false)">{{ __('app.collect_another') }}</button>
                 </div>
             </div>
         @else

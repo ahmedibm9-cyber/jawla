@@ -1,6 +1,6 @@
 <div class="main-content">
     <x-page-header :title="__('app.log_return')">
-        <x-slot:icon><svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="22" height="22"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg></x-slot:icon>
+        <x-slot:icon><x-heroicon-o-arrow-uturn-left width="22" height="22" /></x-slot:icon>
     </x-page-header>
 
     <div class="page-body">
@@ -30,7 +30,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="against_invoice_id" class="form-label">{{ app()->getLocale() === 'ar' ? 'الفاتورة الأصلية' : 'Original invoice' }} *</label>
+                    <label for="against_invoice_id" class="form-label">{{ __('app.original_invoice') }} *</label>
                     <select wire:model.live="against_invoice_id" id="against_invoice_id" class="form-select" required>
                         <option value="">---</option>
                         @foreach ($invoices as $invoice)
@@ -50,7 +50,7 @@
                     @foreach ($items as $index => $item)
                         <div class="border border-border rounded-lg p-3 mb-3">
                             <div class="form-group">
-                                <label for="item_{{ $index }}_line" class="form-label">{{ app()->getLocale() === 'ar' ? 'بند الفاتورة' : 'Invoice line' }}</label>
+                                <label for="item_{{ $index }}_line" class="form-label">{{ __('app.invoice_line') }}</label>
                                 <select wire:model="items.{{ $index }}.invoice_item_id" id="item_{{ $index }}_line" class="form-select" required>
                                     <option value="">---</option>
                                     @foreach ($invoiceLines as $line)
@@ -66,10 +66,10 @@
                                     <input type="number" step="0.001" min="0.001" wire:model="items.{{ $index }}.quantity" id="item_{{ $index }}_qty" class="form-input">
                                 </div>
                                 <div class="form-group">
-                                    <label for="item_{{ $index }}_condition" class="form-label">{{ app()->getLocale() === 'ar' ? 'الحالة' : 'Condition' }}</label>
+                                    <label for="item_{{ $index }}_condition" class="form-label">{{ __('app.condition') }}</label>
                                     <select wire:model="items.{{ $index }}.condition" id="item_{{ $index }}_condition" class="form-select">
-                                        <option value="sellable">{{ app()->getLocale() === 'ar' ? 'صالح للبيع' : 'Sellable' }}</option>
-                                        <option value="damaged">{{ app()->getLocale() === 'ar' ? 'تالف — إلى الحجر' : 'Damaged — quarantine' }}</option>
+                                        <option value="sellable">{{ __('app.sellable') }}</option>
+                                        <option value="damaged">{{ __('app.damaged_quarantine') }}</option>
                                     </select>
                                 </div>
                             </div>

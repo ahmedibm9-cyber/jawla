@@ -1,4 +1,3 @@
-@php($ar = app()->getLocale() === 'ar')
 <div class="main-content">
     <x-page-header :title="__('app.van_transfers')">
         <x-slot:icon><svg fill='none' stroke='currentColor' viewBox='0 0 24 24' width='22' height='22'><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z'/><path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0'/></svg></x-slot:icon>
@@ -9,7 +8,7 @@
             <x-ds.toast type="success" :message="$successMessage" />
         @endif
         @if($errorMessage)
-            <div class="toast toast-error relative top-0 mb-4" role="alert" style="transform:none">{{ $errorMessage }}</div>
+            <x-ds.toast type="error" :message="$errorMessage" />
         @endif
 
         {{-- Incoming --}}
@@ -21,14 +20,14 @@
                         <strong class="block">{{ __('app.from') }}: {{ $t->fromUser?->name ?? '—' }}</strong>
                         <small class="text-text-muted">{{ $t->created_at->format('Y-m-d H:i') }}</small>
                     </div>
-                    <span class="badge {{ $t->status->value === 'shipped' ? 'bg-blue-100 text-blue-700' : 'bg-amber-100 text-amber-700' }}">
+                    <span class="badge {{ $t->status->value === 'shipped' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' }}">
                         {{ __('app.transfer_status_'.$t->status->value) }}
                     </span>
                 </div>
                 <ul class="mt-2 text-sm text-text-secondary">
                     @foreach($t->items as $item)
                         <li class="flex justify-between">
-                            <span>{{ $ar ? $item->product?->name_ar : ($item->product?->name_en ?? $item->product?->name_ar) }}</span>
+                            <span>{{ app()->getLocale() === 'ar' ? $item->product?->name_ar : ($item->product?->name_en ?? $item->product?->name_ar) }}</span>
                             <span dir="ltr">× {{ rtrim(rtrim(number_format((float) $item->quantity, 3), '0'), '.') }}</span>
                         </li>
                     @endforeach
@@ -39,7 +38,10 @@
                             <button type="button" class="btn btn-primary w-full">{{ __('app.receive_transfer') }}</button>
                         </x-slot:trigger>
                         <x-slot:confirm>
-                            <button type="button" wire:click="receive({{ $t->id }})" wire:loading.attr="disabled" class="btn btn-primary w-full">{{ __('app.confirm') }}</button>
+                            <button type="button" wire:click="receive({{ $t->id }})" wire:loading.attr="disabled" class="btn btn-primary w-full">
+                                <span wire:loading.remove>{{ __('app.confirm') }}</span>
+                                <span wire:loading>{{ __('app.saving') }}&hellip;</span>
+                            </button>
                         </x-slot:confirm>
                     </x-ds.modal>
                 @endif
@@ -58,7 +60,7 @@
                             <strong class="block">{{ __('app.to') }}: {{ $t->toUser?->name ?? '—' }}</strong>
                             <small class="text-text-muted">{{ $t->created_at->format('Y-m-d H:i') }}</small>
                         </div>
-                        <span class="badge bg-gray-100 text-gray-700">{{ __('app.transfer_status_'.$t->status->value) }}</span>
+                        <span class="badge bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300">{{ __('app.transfer_status_'.$t->status->value) }}</span>
                     </div>
                 </div>
             @endforeach
