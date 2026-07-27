@@ -8,6 +8,12 @@
             <x-ds.toast type="success" :message="$successMessage" />
         @endif
 
+        <div wire:loading.delay class="space-y-4" aria-hidden="true">
+            <x-ds.skeleton height="72px" />
+            <x-ds.skeleton height="72px" />
+            <x-ds.skeleton height="72px" />
+        </div>
+
         @if($editing)
             {{-- Edit Mode --}}
             <form wire:submit="save">

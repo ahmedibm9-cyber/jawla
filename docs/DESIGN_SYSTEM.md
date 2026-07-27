@@ -6,13 +6,13 @@
 
 - **60% neutral:** `#F8FAFC` (slate-50), `#FFFFFF` — backgrounds, whitespace
 - **30% secondary:** `#0F172A` (slate-900), `#1E293B` (slate-800), `#475569` (slate-600) — text, structure
-- **10% accent:** `#6DB83B` (Jawla Green) — primary actions, active states, CTAs only
+- **10% accent:** `#3d7a18` (Jawla Green) — primary actions, active states, CTAs only
 
 ## Brand colors
 
 | Role          | Token         | Hex       | Usage                            |
 | ------------- | ------------- | --------- | -------------------------------- |
-| Primary       | `primary-500` | `#6DB83B` | CTAs, active nav, logo mark      |
+| Primary       | `primary-500` | `#3d7a18` | CTAs, active nav, logo mark      |
 | Primary hover | `primary-400` | `#7EC54E` | Hover states                     |
 | Primary dark  | `primary-600` | `#5BA82E` | Pressed states                   |
 | Accent        | `accent-600`  | `#D97706` | Waypoints, badges, notifications |
@@ -30,7 +30,7 @@
 
 | State   | Hex       | Tailwind                      |
 | ------- | --------- | ----------------------------- |
-| Success | `#6DB83B` | `text-success` / `bg-success` |
+| Success | `#3d7a18` | `text-success` / `bg-success` |
 | Warning | `#D97706` | `text-warning` / `bg-warning` |
 | Danger  | `#DC2626` | `text-danger` / `bg-danger`   |
 | Info    | `#2563EB` | `text-info` / `bg-info`       |

@@ -7,14 +7,14 @@
     <div class="page-body">
 
     @if($errorMessage)
-        <div class="card bg-red-50 text-danger mb-3 flex justify-between items-center" aria-live="polite">
+        <div class="card bg-red-50 text-danger dark:bg-red-900/20 dark:text-red-400 mb-3 flex justify-between items-center" aria-live="polite">
             <span>{{ $errorMessage }}</span>
             <button type="button" wire:click="$set('errorMessage', '')" aria-label="{{ __('app.clear') }}" class="text-danger bg-transparent border-0 cursor-pointer text-lg px-2">&times;</button>
         </div>
     @endif
 
     @if($successMessage)
-        <div class="card bg-green-50 text-green-700 mb-3" aria-live="polite">{{ $successMessage }}</div>
+        <div class="card bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400 mb-3" aria-live="polite">{{ $successMessage }}</div>
     @endif
 
     {{-- List View --}}
@@ -22,8 +22,8 @@
         <h4 class="text-text-secondary m-0 mb-2">{{ __('app.pending_quotations') }}</h4>
 
         <div wire:loading.delay wire:target="step" class="space-y-2 mb-3" aria-hidden="true">
-            <x-ds.skeleton height="56px" />
-            <x-ds.skeleton height="56px" />
+            <x-ds.skeleton height="72px" />
+            <x-ds.skeleton height="72px" />
         </div>
 
         @forelse($priced as $r)

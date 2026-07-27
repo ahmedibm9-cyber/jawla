@@ -11,7 +11,7 @@
         </div>
 
         @if($flagMessage)
-            <div class="card mb-3 {{ $flagMessageType === 'success' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-800' }} flex justify-between items-center" aria-live="polite">
+            <div class="card mb-3 {{ $flagMessageType === 'success' ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400' : 'bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400' }} flex justify-between items-center" aria-live="polite">
                 <span>{{ $flagMessage }}</span>
                 <button type="button" wire:click="$set('flagMessage', '')" class="bg-transparent border-0 cursor-pointer text-lg px-2" aria-label="{{ __('app.clear') }}">&times;</button>
             </div>

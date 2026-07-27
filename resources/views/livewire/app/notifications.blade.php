@@ -29,7 +29,7 @@
                         : '/app';
                 @endphp
                 <a href="{{ $notifUrl }}"
-                   class="card block no-underline text-inherit mb-2 {{ $isNew ? 'border-2 border-accent' : '' }}">
+                   class="card block no-underline text-inherit mb-2 {{ $isNew ? 'border-2 border-brand' : '' }}">
                     <div class="flex items-start gap-2">
                         @if($isCritical)
                             <span class="mt-1 shrink-0 inline-block w-2.5 h-2.5 rounded-full bg-red-600" aria-hidden="true"></span>

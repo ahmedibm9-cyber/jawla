@@ -1,0 +1,903 @@
+# Repo Production Structure — Implementation Plan
+
+> **For Claude:** Use `@skills/writing-plans/SKILL.md` to implement this plan task-by-task.
+
+**Goal:** Add the missing repository structure files from the production-grade research report — AGENTS.md, Makefile, specs template, runbooks, security enhancements, CI/CD hardening, and database docs — so agents and humans can understand, reproduce, verify, and deploy the project safely.
+
+**Architecture:** Thin additions on top of an already-solid Laravel repo. No reorganization of existing `docs/` (kept flat). No new directories for `agents/`, `evals/`, or `config/schemas/` (YAGNI). Each task is an independent file creation or small edit — safe to commit separately.
+
+**Tech Stack:** Laravel 13, PHP 8.3, PostgreSQL 16, Pest, Playwright, GitHub Actions, Railway.
+
+---
+
+## Task 1: Create `AGENTS.md`
+
+**Files:**
+
+- Create: `AGENTS.md`
+
+**Step 1: Write AGENTS.md**
+
+```markdown
+# AGENTS.md — Agent instructions for Jawla
+
+## Purpose
+
+Jawla (جولة) is a bilingual (Arabic/English) field-sales CRM/ERP. Reps run
+their daily "jawla": check in, pick a route, visit customers with GPS, sell
+from van stock, collect cash, record returns. Admins manage master data and
+see everything live.
+
+## Repository map
+```
+
+app/ Laravel application (Filament admin, Livewire PWA, Services, Models)
+config/ Laravel config files
+database/ migrations, seeders, factories
+docs/ Architecture, business rules, security, deployment, specs
+public/ Web root (compiled assets, images, service worker)
+resources/ Blade views, JS, CSS, lang files
+routes/ web.php, api.php, console.php
+scripts/ deploy, backup, restore, verify
+tests/ Pest (Feature, Unit) + Playwright (Browser, e2e)
+
+```
+
+## Supported commands
+
+| Action | Command |
+|--------|---------|
+| Setup | `make setup` |
+| Dev server | `make dev` |
+| Lint (PHP) | `make lint` |
+| Typecheck | `make typecheck` |
+| Unit + Feature tests | `make test` |
+| E2E tests | `make test-e2e` |
+| Full verify | `make verify` |
+| Build assets | `make build` |
+| Database migrate | `make migrate` |
+| Database seed | `make seed` |
+| Smoke test | `make smoke` |
+
+## Architecture rules
+
+- Monolithic Laravel 13 app. One codebase, one server, one PostgreSQL database.
+- Admin panel at `/admin` (Filament 4). Rep PWA at `/app` (Livewire 3 + Tailwind).
+- All business logic lives in `app/Services/`. Controllers and Livewire components
+  delegate to services — they never contain business rules.
+- Money mutations (invoices, payments, returns, expenses, cash box, van transfers)
+  happen inside `DB::transaction()` via a Service. Never from a controller directly.
+- Stock changes ONLY through `StockService`, which always writes a matching
+  `stock_movements` row. Never update `stocks.quantity` directly.
+- Model relationships use `with()` to prevent N+1. Do not disable
+  `preventLazyLoading`.
+- Pagination on every list. Never `->get()` an unbounded query.
+- RTL Arabic + LTR English must work everywhere from the first commit.
+
+## Security rules
+
+- Secrets only in `.env`. Nothing secret reaches the frontend, JS bundles,
+  Blade output, or logs. No API keys, tokens, or PATs in code.
+- No shell execution: never use `exec`, `shell_exec`, `system`, `passthru`,
+  `proc_open`, `eval`. No user input reaches a command line.
+- All writes go through Form Requests or Livewire validation server-side.
+  Use `$fillable` — never `$request->all()` into a model.
+- Password hashing = argon2id. TLS enforced. Sessions httpOnly + secure
+  in prod + regenerated on login.
+- Rate-limit login (5/min per IP+email) and every POST route (60/min per user).
+- Every destructive or financial action requires a confirmation modal that
+  states the exact consequence, bilingually.
+- Never commit API keys, passwords, private keys, access tokens, cloud
+  credentials, production `.env` files, or real customer data.
+
+## Database and migration rules
+
+- Every schema change goes through a migration in `database/migrations/`.
+- Migrations are immutable after release.
+- Destructive operations (DROP, TRUNCATE) require explicit review.
+- Large data migrations are separated from schema migrations.
+- Seed data is for development/testing only — never production data.
+- Tests must use isolated databases (RefreshDatabase).
+
+## Testing expectations
+
+- Write Pest tests alongside each phase (not in a "phase 13 test push").
+- Feature tests must include the failure path for every money/stock flow.
+- E2E: at minimum, rep day flow + admin master-data flow + RTL smoke.
+- Run `make verify` before reporting any task complete.
+
+## Files agents must not modify
+
+- `docs/BUSINESS_RULES.md` — spec, not implementation
+- `docs/SECURITY.md` — spec, not implementation
+- `.env` — secrets, never committed
+- `composer.lock` / `package-lock.json` — only via `composer install` / `npm ci`
+- `database/database.sqlite` — test artifact
+
+## Generated files
+
+- `public/build/` — Vite output, regenerated by `npm run build`
+- `bootstrap/cache/` — Laravel cache, regenerated by `php artisan optimize`
+- `storage/` — runtime logs, cache, compiled views
+
+## Definition of done
+
+A task is complete when ALL of these pass:
+
+1. `make verify` exits 0 (lint + typecheck + test + build)
+2. Business rules enforced at the service layer
+3. Bilingual AR/EN + RTL verified for any UI change
+4. Confirmation modal for any destructive/financial action
+5. No new packages beyond the locked stack without explicit approval
+6. `composer audit` and `npm audit --audit-level=high` clean
+7. Relevant docs updated (architecture, business rules, or deployment as needed)
+```
+
+**Step 2: Verify the file reads correctly**
+
+Run: `cat AGENTS.md | head -5`
+Expected: Shows the purpose section header.
+
+**Step 3: Commit**
+
+```bash
+git add AGENTS.md
+git commit -m "docs: add AGENTS.md with agent instructions and repo conventions"
+```
+
+---
+
+## Task 2: Create `Makefile`
+
+**Files:**
+
+- Create: `Makefile`
+
+**Step 1: Write Makefile**
+
+```makefile
+.PHONY: setup dev lint typecheck test test-e2e verify build migrate seed smoke
+
+setup:
+	composer install
+	cp -n .env.example .env || true
+	php artisan key:generate
+	php artisan migrate --force
+	npm install
+	npm run dev
+
+dev:
+	npx concurrently -c "#93c5fd,#c4b5fd,#fb7185,#fdba74" \
+		"php artisan serve" \
+		"php artisan queue:listen --tries=1 --timeout=0" \
+		"php artisan pail --timeout=0" \
+		"npm run dev" \
+		--names=server,queue,logs,vite --kill-others
+
+lint:
+	vendor/bin/pint --test
+
+typecheck:
+	vendor/bin/phpstan analyse
+
+test:
+	php artisan test --testsuite=Unit,Feature
+
+test-e2e:
+	php artisan test tests/Browser
+
+build:
+	npm run build
+
+migrate:
+	php artisan migrate --force
+
+seed:
+	php artisan db:seed --class=DemoSeeder
+
+smoke:
+	@echo "Running smoke tests..."
+	php artisan route:list --columns=method,uri > /dev/null
+	php artisan config:cache > /dev/null
+	php artisan view:cache > /dev/null
+	@echo "Smoke tests passed."
+
+verify: lint typecheck test build
+	@echo "All checks passed."
+```
+
+**Step 2: Verify the Makefile parses**
+
+Run: `make -n verify`
+Expected: Dry-run prints the lint, typecheck, test, build commands.
+
+**Step 3: Commit**
+
+```bash
+git add Makefile
+git commit -m "build: add Makefile with stable command interface for agents"
+```
+
+---
+
+## Task 3: Create `scripts/verify`
+
+**Files:**
+
+- Create: `scripts/verify`
+
+**Step 1: Write scripts/verify**
+
+```bash
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=== Jawla verification ==="
+
+echo "1/5 Lint..."
+vendor/bin/pint --test
+
+echo "2/5 Typecheck..."
+vendor/bin/phpstan analyse
+
+echo "3/5 Tests..."
+php artisan test --testsuite=Unit,Feature
+
+echo "4/5 Build..."
+npm run build
+
+echo "5/5 Audit..."
+composer audit
+npm audit --audit-level=high
+
+echo "=== All checks passed ==="
+```
+
+**Step 2: Make executable**
+
+Run: `chmod +x scripts/verify`
+Expected: File is executable.
+
+**Step 3: Commit**
+
+```bash
+git add scripts/verify
+git commit -m "build: add scripts/verify for single-command change validation"
+```
+
+---
+
+## Task 4: Create `specs/templates/feature.md`
+
+**Files:**
+
+- Create: `specs/templates/feature.md`
+
+**Step 1: Write the feature spec template**
+
+```markdown
+# Feature: [Name]
+
+## Problem
+
+What user or business problem does this solve?
+
+## User outcome
+
+What does the user see or experience when this is done?
+
+## In scope
+
+- Item 1
+- Item 2
+
+## Out of scope
+
+- Item 1
+- Item 2
+
+## User roles
+
+Which roles interact with this feature? (rep, sales_manager, warehouse_keeper, hr_admin, system_viewer)
+
+## Functional requirements
+
+1. Given [context], when [action], then [outcome].
+2. ...
+
+## Business rules
+
+Reference `docs/BUSINESS_RULES.md` for non-negotiables. List any feature-specific rules:
+
+- Rule 1
+- Rule 2
+
+## Validation rules
+
+| Field | Rule | Error message (AR/EN) |
+| ----- | ---- | --------------------- |
+|       |      |                       |
+
+## Permissions
+
+| Action | Allowed roles |
+| ------ | ------------- |
+|        |               |
+
+## Error cases
+
+- What happens when [failure scenario]?
+- What happens when [edge case]?
+
+## Data changes
+
+New tables, columns, or relationships. Migration strategy.
+
+## API changes
+
+New or modified endpoints. Link to OpenAPI spec if applicable.
+
+## UI states
+
+- Loading
+- Empty
+- Error
+- Success
+
+## Accessibility requirements
+
+- Keyboard navigation
+- Screen reader labels
+- Color contrast
+
+## Observability requirements
+
+- What is logged?
+- What metrics are emitted?
+- What alerts fire?
+
+## Acceptance criteria
+
+- [ ] Criterion 1
+- [ ] Criterion 2
+- [ ] Criterion 3
+
+## Rollback considerations
+
+- Can this migration be reversed?
+- What data cleanup is needed on rollback?
+```
+
+**Step 2: Commit**
+
+```bash
+git add specs/templates/feature.md
+git commit -m "docs: add feature spec template for structured requirements"
+```
+
+---
+
+## Task 5: Create `docs/operations/runbooks/` and `docs/operations/troubleshooting/`
+
+**Files:**
+
+- Create: `docs/operations/runbooks/deploy-failure.md`
+- Create: `docs/operations/runbooks/database-restore.md`
+- Create: `docs/operations/runbooks/high-error-rate.md`
+- Create: `docs/operations/runbooks/credential-rotation.md`
+- Create: `docs/operations/troubleshooting/common-issues.md`
+
+**Step 1: Write deploy-failure.md**
+
+```markdown
+# Runbook: Deploy failure
+
+## Symptom
+
+Deploy script exits non-zero or health check fails after deploy.
+
+## Immediate actions
+
+1. Check deploy logs: `scripts/deploy.sh` output or Railway deploy logs.
+2. If migration failed: `php artisan migrate:status` to see which batch failed.
+3. If health check failed: `curl -sf http://localhost/up` and check PHP-FPM/Nginx.
+
+## Rollback
+
+1. `git log --oneline -5` to find last good commit.
+2. `git checkout <good-commit> -- .`
+3. Run `scripts/deploy.sh` again.
+4. Verify health check passes.
+
+## Prevention
+
+- Run `make verify` before pushing.
+- Never push migrations without testing rollback path.
+```
+
+**Step 2: Write database-restore.md**
+
+````markdown
+# Runbook: Database restore
+
+## Prerequisites
+
+- `DATABASE_URL` for target database
+- Encrypted backup archive (`*.dump.age`)
+- `BACKUP_AGE_IDENTITY_FILE` for decryption
+- `pg_restore` and `age` CLI tools
+
+## Steps
+
+1. Provision scratch database (never restore to production without approval).
+2. Decrypt and restore:
+   ```bash
+   BACKUP_FILE=jawla_YYYYMMDD.dump.age \
+   TARGET_DATABASE_URL=postgres://.../target_db \
+   BACKUP_AGE_IDENTITY_FILE=/secure/path/key.txt \
+   ALLOW_SCRATCH_RESTORE=1 bash scripts/restore-backup.sh
+   ```
+````
+
+3. Point app at target DB via `.env`.
+4. Verify: `php artisan migrate:status` matches code.
+5. Spot-check: latest invoice visible, seeded rep can log in.
+6. Record date + outcome in `docs/BACKUP_RESTORE.md`.
+
+````
+
+**Step 3: Write high-error-rate.md**
+
+```markdown
+# Runbook: High error rate
+
+## Symptom
+Sentry shows spike in errors, or monitoring alerts fire.
+
+## Immediate actions
+1. Check Sentry for the error group and stack trace.
+2. Check Railway metrics: CPU, memory, response time.
+3. Check recent deploys: did a new release go out?
+4. Check database: connection pool exhaustion? Slow queries?
+
+## Triage
+- If caused by a deploy: rollback (see deploy-failure runbook).
+- If database: check `SHOW processlist` / `pg_stat_activity`.
+- If external service (Sentry, S3, ETA): check status pages, disable if degraded.
+
+## Communication
+- Notify team in incident channel.
+- If customer-facing: update status page.
+````
+
+**Step 4: Write credential-rotation.md**
+
+```markdown
+# Runbook: Credential rotation
+
+## When
+
+- After a suspected compromise
+- On a scheduled rotation (quarterly for production secrets)
+- When a team member with access leaves
+
+## Steps
+
+1. Generate new secret (e.g., `php artisan key:generate` for APP_KEY).
+2. Update in hosting environment (Railway dashboard / Forge .env).
+3. Restart the application.
+4. Verify: login works, API calls succeed, Sentry receives events.
+5. Revoke old secret if provider supports it.
+6. Record rotation date in security log.
+```
+
+**Step 5: Write common-issues.md**
+
+```markdown
+# Troubleshooting: Common issues
+
+## "Relation does not exist" in tests
+
+Run `php artisan migrate --force` against the test database. Unit tests
+may run before any RefreshDatabase test migrates the schema.
+
+## Vite build fails
+
+Run `npm ci` to reinstall from lockfile. Check Node version matches
+`.nvmrc` or `package.json` engines.
+
+## Playwright tests timeout
+
+Increase timeout in `tests/Pest.php` `beforeEach`. Check that the app
+server is running and accessible at the configured URL.
+
+## Stock quantity mismatch
+
+Stock must only be changed via `StockService`. If `stocks.quantity` and
+`stock_movements` don't reconcile, check for direct `DB::table('stocks')->update()`
+calls — those bypass the movement logging.
+
+## Invoice number gap
+
+Numbers are per-company and sequential. A gap means a transaction was
+rolled back. Check the invoice table for the missing sequence and verify
+the `InvoiceService` transaction boundaries.
+```
+
+**Step 6: Commit**
+
+```bash
+git add docs/operations/
+git commit -m "docs: add runbooks and troubleshooting for operational scenarios"
+```
+
+---
+
+## Task 6: Enhance `docs/SECURITY.md` with threat model and secrets policy
+
+**Files:**
+
+- Modify: `docs/SECURITY.md`
+
+**Step 1: Append threat model and secrets policy to docs/SECURITY.md**
+
+Add after the existing `## Automation` section:
+
+```markdown
+## Threat model
+
+### Sensitive assets
+
+- Customer PII (names, phone numbers, addresses)
+- Financial data (invoices, payments, balances)
+- Van stock quantities (inventory accuracy)
+- User credentials and sessions
+- Company configuration (VAT rates, pricing)
+
+### Trust boundaries
+
+1. **Browser → Laravel**: Session-cookie auth, CSRF tokens, server-side policies.
+2. **Laravel → PostgreSQL**: Eloquent ORM only, parameterized queries, no raw SQL.
+3. **Laravel → External services**: Sentry (error), S3 (backup), ETA (invoicing).
+   Failed external dependency must not make a financial mutation appear complete.
+
+### Entry points
+
+- `/admin/*` — Filament admin panel (requires auth + role)
+- `/app/*` — Rep PWA (requires auth + rep role)
+- `/app/sync` — Offline sync endpoint (requires auth, idempotent)
+- `/api/*` — API routes (if any, rate-limited)
+
+### Abuse cases
+
+- IDOR: rep accessing another company's data → mitigated by company scope
+- Stock manipulation: direct DB update bypassing StockService → mitigated by
+  `StockService` being the only write path, audited via `stock_movements`
+- Session hijacking: mitigated by httpOnly + secure + sameSite cookies,
+  session regeneration on login
+- CSRF on financial actions: mitigated by Laravel CSRF tokens + confirmation modals
+- Invoice tampering: numbers are sequential, server-generated, immutable
+
+### Mitigations
+
+- Company scope on all queries (spatie/laravel-permission + global scope)
+- `$fillable` whitelist on all models
+- Rate limiting on login and POST routes
+- OWASP ZAP baseline scan weekly
+- `composer audit` + `npm audit` on every push
+- Dependabot for dependency updates
+
+### Residual risks
+
+- Offline sync: rep could theoretically queue conflicting operations;
+  idempotency keys and server-side conflict detection mitigate this
+- ETA integration: external service availability is outside our control
+
+## Secrets policy
+
+### What is a secret
+
+- Database credentials (`DB_PASSWORD`, `DATABASE_URL`)
+- Application key (`APP_KEY`)
+- Cache/session/queue credentials (`REDIS_URL`, `REDIS_PASSWORD`)
+- API keys (Sentry DSN, S3 keys, ETA credentials)
+- Any token that grants access to a system
+
+### Where secrets live
+
+- **Production**: Set in Railway dashboard (or Forge .env). Never in code.
+- **Development**: `.env` file, gitignored. Use `.env.example` as template.
+- **CI/CD**: GitHub Actions secrets. Never hardcoded in workflow files.
+
+### Rotation
+
+- Rotate immediately on suspected compromise.
+- Rotate quarterly for production database and Redis credentials.
+- Rotate APP_KEY only if compromise is suspected (invalidates all sessions).
+
+### Access control
+
+- Only team members with production access may view production secrets.
+- Backup credentials are separate from application credentials.
+- Never share secrets via Slack, email, or chat. Use the hosting dashboard.
+
+### What never gets committed
+
+- `.env` files
+- API keys or tokens in source code
+- Private keys (`.pem`, `.p12`, `.pfx`)
+- Database connection strings with passwords
+- Backup encryption keys
+- Agent chat transcripts containing secrets
+```
+
+**Step 2: Commit**
+
+```bash
+git add docs/SECURITY.md
+git commit -m "docs: add threat model and secrets policy to security documentation"
+```
+
+---
+
+## Task 7: Add `.github/ISSUE_TEMPLATE/config.yml` and `security.yml` issue template
+
+**Files:**
+
+- Create: `.github/ISSUE_TEMPLATE/config.yml`
+- Create: `.github/ISSUE_TEMPLATE/security.yml`
+
+**Step 1: Write config.yml**
+
+```yaml
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: mailto:security@jawla.app
+    about: Report security vulnerabilities privately. Do not open a public issue.
+```
+
+**Step 2: Write security.yml**
+
+```yaml
+name: Security vulnerability
+description: Report a security vulnerability (private — do not include sensitive data in description)
+labels: ["security"]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Vulnerability description
+      description: Describe the vulnerability. Do NOT include credentials, tokens, or real data.
+      placeholder: "e.g., SQL injection in /api/customers endpoint"
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical (data breach, RCE)
+        - High (auth bypass, privilege escalation)
+        - Medium (XSS, IDOR)
+        - Low (information disclosure)
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. Go to ...\n2. Click ...\n3. See error"
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      placeholder: "What data or systems are affected?"
+```
+
+**Step 3: Commit**
+
+```bash
+git add .github/ISSUE_TEMPLATE/
+git commit -m "ci: add security issue template and config.yml for issue forms"
+```
+
+---
+
+## Task 8: Add `.github/workflows/deploy.yml`
+
+**Files:**
+
+- Create: `.github/workflows/deploy.yml`
+
+**Step 1: Write deploy.yml**
+
+```yaml
+name: deploy
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to staging
+        run: |
+          echo "Staging deploy triggered. Railway auto-deploys from master."
+          echo "Verify at: https://jawla-staging.up.railway.app/up"
+
+  deploy-production:
+    needs: deploy-staging
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://jawla-production.up.railway.app
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy to production
+        run: |
+          echo "Production deploy triggered. Railway auto-deploys from master."
+          echo "Verify at: https://jawla-production.up.railway.app/up"
+      - name: Post-deploy smoke
+        run: |
+          for i in $(seq 1 10); do
+            curl -sf https://jawla-production.up.railway.app/up && exit 0
+            sleep 5
+          done
+          echo "Health check failed"; exit 1
+```
+
+**Step 2: Commit**
+
+```bash
+git add .github/workflows/deploy.yml
+git commit -m "ci: add deploy workflow with staging and production environments"
+```
+
+---
+
+## Task 9: Create `database/README.md`
+
+**Files:**
+
+- Create: `database/README.md`
+
+**Step 1: Write database/README.md**
+
+```markdown
+# Database
+
+## Structure
+
+- `migrations/` — Schema changes, one file per change, timestamped.
+- `seeders/` — Development/test data. `DemoSeeder` reproduces the AM1→AM9 narrative.
+- `factories/` — Model factories for tests.
+
+## Migration rules
+
+1. Every schema change goes through a migration. Never edit a migration after release.
+2. Destructive operations (DROP COLUMN, TRUNCATE) require explicit review.
+3. Large data migrations are separated from schema migrations.
+4. Rollback strategy must be considered for every migration.
+5. Production data is never stored in the repository.
+
+## Seed data
+
+- `DatabaseSeeder` → calls `DemoSeeder` for development.
+- `RoleSeeder` → creates the five roles with permissions.
+- `PerfUserSeeder` → creates performance test users.
+- Seed data is for development/testing only — never run in production.
+
+## Testing
+
+- Tests use `RefreshDatabase` trait for isolation.
+- Each test worker gets its own PostgreSQL database.
+- Never assert against data left over from a previous test.
+```
+
+**Step 2: Commit**
+
+```bash
+git add database/README.md
+git commit -m "docs: add database README with migration and seed data rules"
+```
+
+---
+
+## Task 10: Create `CHANGELOG.md`
+
+**Files:**
+
+- Create: `CHANGELOG.md`
+
+**Step 1: Write CHANGELOG.md**
+
+```markdown
+# Changelog
+
+All notable changes to Jawla will be documented in this file.
+
+Format based on [Keep a Changelog](https://keepachangelog.com/).
+
+## [Unreleased]
+
+### Added
+
+- AGENTS.md with comprehensive agent instructions
+- Makefile for stable command interface
+- scripts/verify for single-command validation
+- Feature spec template in specs/templates/
+- Runbooks for deploy failure, database restore, high error rate, credential rotation
+- Troubleshooting guide for common issues
+- Threat model and secrets policy in docs/SECURITY.md
+- Deploy workflow with staging/production environments
+- Security issue template
+- database/README.md with migration rules
+
+## [0.1.0] - 2026-07-27
+
+### Added
+
+- Initial release with AM1→AM9 demo flow
+- Admin panel (Filament 4) and Rep PWA (Livewire 3)
+- Stock management with atomic operations
+- Invoice flow with VAT and ZATCA QR encoding
+- Role-based access control (5 roles)
+- Bilingual Arabic/English with RTL support
+- CI pipeline with Pest tests, Pint linting, PHPStan
+- Security scanning with Gitleaks and OWASP ZAP
+- Railway deployment with PostgreSQL and Redis
+- Encrypted off-host backup with restore drill
+```
+
+**Step 2: Commit**
+
+```bash
+git add CHANGELOG.md
+git commit -m "docs: add CHANGELOG.md for release documentation"
+```
+
+---
+
+## Task 11: Update `CLAUDE.md` to reference `AGENTS.md`
+
+**Files:**
+
+- Modify: `CLAUDE.md`
+
+**Step 1: Add reference to AGENTS.md**
+
+Add at the top of CLAUDE.md, after the first line:
+
+```markdown
+> **Canonical agent instructions:** `AGENTS.md` is the single source of truth
+> for agent behavior, commands, and constraints. This file provides additional
+> context specific to Claude Code workflows.
+```
+
+**Step 2: Commit**
+
+```bash
+git add CLAUDE.md
+git commit -m "docs: update CLAUDE.md to reference AGENTS.md as canonical source"
+```
+
+---
+
+## Verification
+
+After all tasks, run:
+
+```bash
+make verify
+```
+
+Expected: lint, typecheck, tests, and build all pass. No new dependencies introduced.

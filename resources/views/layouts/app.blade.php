@@ -30,6 +30,7 @@
   <meta name="sentry-dsn" content="{{ config('sentry.dsn') }}">
   <meta name="sentry-environment" content="{{ config('sentry.environment', config('app.env', 'production')) }}">
   @endif
+  <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta name="robots" content="noindex, nofollow">
   @auth
   <meta name="jawla-offline-identity" content="{{ hash_hmac('sha256', (string) auth()->id(), (string) config('app.key')) }}">
@@ -37,7 +38,20 @@
   @filamentStyles
   @vite(['resources/css/app.css', 'resources/js/app.js'])
   <style>:root{-webkit-tap-highlight-color:transparent}[x-cloak]{display:none!important}</style>
+  <script>
+    // Initialize dark mode before paint to prevent flash
+    (function() {
+      const saved = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (saved === 'dark' || (!saved && prefersDark)) {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
   @livewireStyles
+  @auth
+  <x-onboarding-trigger role="rep" />
+  @endauth
 </head>
 <body>
   @if(config('jawla.is_demo'))

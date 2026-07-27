@@ -68,7 +68,7 @@
     />
 
     <div class="page-body" x-effect="step = $wire.step; window.scrollTo(0,0)">
-    <div x-show="!online" x-cloak class="card bg-amber-50 text-amber-800 mb-3 flex items-center gap-2">
+    <div x-show="!online" x-cloak class="card bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400 mb-3 flex items-center gap-2">
         <x-heroicon-o-signal-slash width="18" height="18" aria-hidden="true" />
         <span>{{ app()->getLocale() === 'ar' ? 'غير متصل — سيتم حفظ المسودة' : 'Offline — draft will be saved' }}</span>
     </div>

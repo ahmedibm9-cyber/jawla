@@ -42,6 +42,12 @@
                 </div>
                 <span class="more-tile-label">{{ __('app.settings') }}</span>
             </a>
+            <button type="button" class="more-tile" onclick="window.JawlaOnboarding?.start('rep')">
+                <div class="more-tile-icon more-icon-green">
+                    <x-heroicon-o-play-circle />
+                </div>
+                <span class="more-tile-label">{{ __('app.tour_replay') }}</span>
+            </button>
         </div>
     </div>
 

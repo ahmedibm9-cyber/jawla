@@ -17,30 +17,14 @@
         <div class="home-hero">
             <div class="home-hero-content">
                 <div class="home-hero-brand">
-                    {{-- Hero is always the brand-green gradient, so the mark is always white (never green-on-green). --}}
                     <img src="/images/white-j.webp" alt="Jawla" class="home-hero-logo" width="29" height="33">
                 </div>
-                <div class="home-hero-top">
-                    <div>
-                        <h1 class="home-hero-title">{{ __('app.welcome', ['name' => $user->name]) }}</h1>
-                        <p class="home-hero-subtitle">{{ __('app.today_visits') }}: {{ $visitCount }}</p>
-                    </div>
-                    <div class="home-hero-avatar">
-                        {{ strtoupper(substr($user->name, 0, 1)) }}
-                    </div>
+                <div>
+                    <h1 class="home-hero-title">{{ __('app.welcome', ['name' => $user->name]) }}</h1>
+                    <p class="home-hero-subtitle">
+                        {{ $pendingCount }} {{ __('app.visits_pending') }} · {{ $completedCount }} {{ __('app.visits_done') }}
+                    </p>
                 </div>
-            </div>
-        </div>
-
-        {{-- Stats Grid --}}
-        <div class="home-stats">
-            <div class="home-stat-card home-stat-pending">
-                <div class="home-stat-number">{{ $pendingCount }}</div>
-                <div class="home-stat-label">{{ __('app.visits_pending') }}</div>
-            </div>
-            <div class="home-stat-card home-stat-done">
-                <div class="home-stat-number">{{ $completedCount }}</div>
-                <div class="home-stat-label">{{ __('app.visits_done') }}</div>
             </div>
         </div>
 
@@ -84,59 +68,34 @@
             @endif
         </div>
 
-        {{-- Open Tasks --}}
+        {{-- Tasks Badge --}}
         @if($openTasks->isNotEmpty())
             <div class="home-section">
-                <h3 class="home-section-title">{{ __('app.tasks') }}</h3>
-                @foreach($openTasks as $task)
-                    <div class="card flex justify-between items-center min-w-0">
-                        <div>
-                            <strong class="block text-sm">{{ $task->title }}</strong>
-                            @if($task->note)
-                                <small class="text-text-secondary">{{ $task->note }}</small>
-                            @endif
-                            @if($task->customer)
-                                <small class="block text-text-secondary">{{ $task->customer->name_ar }}</small>
-                            @endif
-                            @if($task->due_date)
-                                <small class="block text-warning text-xs">{{ __('app.due', ['date' => $task->due_date->translatedFormat('j F Y')]) }}</small>
-                            @endif
-                        </div>
-                        <button wire:click="completeTask({{ $task->id }})" class="btn btn-outline text-success text-sm" aria-label="{{ __('app.done') }}">
-                            {{ __('app.done') }}
-                        </button>
-                    </div>
-                @endforeach
+                <button class="tasks-badge" wire:click="$dispatch('showTasks')">
+                    <x-heroicon-o-clock class="w-5 h-5" />
+                    <span>{{ $openTasks->count() }} {{ __('app.tasks') }}</span>
+                    <x-heroicon-o-chevron-right class="w-4 h-4" />
+                </button>
             </div>
         @endif
 
-        {{-- Quick Actions --}}
+        {{-- Start Work --}}
         <div class="home-section">
             <button class="btn btn-primary btn-lg w-full" wire:click="startWork">
-                {{ __('app.start_work') }}
+                {{ __('app.start_day') }}
             </button>
         </div>
 
-        {{-- Quick Action Buttons --}}
+        {{-- Quick Actions --}}
         <div class="home-section">
-            <div class="grid grid-cols-3 gap-3">
-                <a href="/app/sell" class="quick-action-card">
-                    <div class="quick-action-icon">
-                        <x-heroicon-o-shopping-cart class="w-6 h-6" />
-                    </div>
-                    <span class="quick-action-label">{{ __('app.quick_sale') }}</span>
+            <div class="quick-actions-row">
+                <a href="/app/sell" class="quick-action-pill">
+                    <x-heroicon-o-plus class="w-5 h-5" />
+                    <span>{{ __('app.new_invoice') }}</span>
                 </a>
-                <a href="/app/visits" class="quick-action-card">
-                    <div class="quick-action-icon">
-                        <x-heroicon-o-map-pin class="w-6 h-6" />
-                    </div>
-                    <span class="quick-action-label">{{ __('app.log_visit') }}</span>
-                </a>
-                <a href="/app/stock" class="quick-action-card">
-                    <div class="quick-action-icon">
-                        <x-heroicon-o-cube class="w-6 h-6" />
-                    </div>
-                    <span class="quick-action-label">{{ __('app.check_stock') }}</span>
+                <a href="/app/visits" class="quick-action-pill">
+                    <x-heroicon-o-map-pin class="w-5 h-5" />
+                    <span>{{ __('app.check_in') }}</span>
                 </a>
             </div>
         </div>

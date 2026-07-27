@@ -13,8 +13,7 @@ use Tests\TestCase;
 
 /**
  * Regression guard for LOGIN.1 — the unified login lifecycle.
- * Filament's built-in login page at /admin/login is the only login page.
- * /login redirects there. LoginResponse handles role-based redirect after auth.
+ * The login page is served at /login. LoginResponse handles role-based redirect after auth.
  */
 class RepLoginLifecycleTest extends TestCase
 {
@@ -41,14 +40,14 @@ class RepLoginLifecycleTest extends TestCase
         }
     }
 
-    public function test_guest_visiting_a_rep_route_is_redirected_to_filament_login(): void
+    public function test_guest_visiting_a_rep_route_is_redirected_to_login(): void
     {
-        $this->get('/app')->assertRedirect(route('filament.admin.auth.login'));
+        $this->get('/app')->assertRedirect(route('login'));
     }
 
-    public function test_login_route_redirects_to_filament_login(): void
+    public function test_login_route_serves_the_login_page(): void
     {
-        $this->get('/login')->assertRedirect(route('filament.admin.auth.login'));
+        $this->get('/login')->assertOk();
     }
 
     public function test_old_app_login_redirects_to_unified_login(): void

@@ -6,7 +6,7 @@
 
     <div class="page-body">
         @if($successMessage)
-            <div class="toast toast-success relative top-0 mb-4" aria-live="polite" style="transform:none">{{ $successMessage }}</div>
+            <x-ds.toast type="success" :message="$successMessage" />
         @endif
 
         @if($resubmit)

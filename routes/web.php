@@ -1,5 +1,7 @@
 <?php
 
+use App\Filament\Auth\Pages\Login;
+use App\Http\Controllers\Api\OnboardingController;
 use App\Http\Controllers\App\LoginController;
 use App\Http\Controllers\App\PdfController;
 use App\Http\Controllers\CompanyContextController;
@@ -29,9 +31,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [SystemPageController::class, 'root']);
 
-// Unified login — Filament's built-in login page is the only login page.
+// Unified login — serves the Filament login page directly at /login.
 // Reps and admins both authenticate here; LoginResponse redirects by role.
-Route::get('/login', fn () => redirect()->route('filament.admin.auth.login'))->name('login');
+Route::get('/login', Login::class)->name('login');
 
 // Catch /admin root — Filament registers sub-pages but not the bare prefix
 Route::get('/admin', [SystemPageController::class, 'adminRoot']);
@@ -47,6 +49,10 @@ Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
 Route::post('/company/switch', [CompanyContextController::class, 'update'])
     ->middleware(['auth', 'throttle:post'])
     ->name('company.switch');
+
+Route::post('/api/onboarding/complete', [OnboardingController::class, 'complete'])
+    ->middleware(['auth', 'throttle:post'])
+    ->name('api.onboarding.complete');
 
 // Admin (Filament) is auto-registered by the panel provider.
 

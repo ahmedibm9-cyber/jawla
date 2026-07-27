@@ -20,12 +20,12 @@
     </x-page-header>
 
     <div class="page-body">
-        <div x-show="gpsDenied" x-cloak class="card bg-amber-50 text-amber-800 mb-4" role="alert">
+        <div x-show="gpsDenied" x-cloak class="card bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400 mb-4" role="alert">
             {{ __('app.could_not_get_location') }}
             <button type="button" class="btn btn-outline text-sm mt-2 w-full" x-on:click="getPosition()">{{ __('app.retry') }}</button>
         </div>
         @if($successMessage)
-            <div class="toast toast-success relative top-0 mb-4" aria-live="polite" style="transform:none">{{ $successMessage }}</div>
+            <x-ds.toast type="success" :message="$successMessage" />
         @endif
 
         <form wire:submit="submit">

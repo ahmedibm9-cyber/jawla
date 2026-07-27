@@ -10,7 +10,7 @@ class SystemPageController extends Controller
 {
     public function root(): RedirectResponse
     {
-        return redirect()->route('filament.admin.auth.login');
+        return redirect()->route('login');
     }
 
     public function adminRoot(): RedirectResponse
@@ -25,7 +25,7 @@ class SystemPageController extends Controller
             return redirect('/admin/dashboard');
         }
 
-        return redirect()->route('filament.admin.auth.login');
+        return redirect()->route('login');
     }
 
     public function offline(): Response
@@ -55,6 +55,6 @@ class SystemPageController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('filament.admin.auth.login');
+        return redirect()->route('login');
     }
 }

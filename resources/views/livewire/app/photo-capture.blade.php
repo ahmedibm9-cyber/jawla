@@ -32,6 +32,8 @@
                     <img src="{{ $p['url'] }}" alt="{{ $p['name'] }}"
                         class="w-full h-24 object-cover rounded-lg border border-border">
                     <button type="button" wire:click="removePhoto({{ $p['id'] }})"
+                        x-data
+                        x-on:click.prevent="if(confirm('{{ $arPhoto ? 'هل تريد حذف هذه الصورة؟' : 'Remove this photo?' }}')) { $wire.removePhoto({{ $p['id'] }}); }"
                         aria-label="{{ $arPhoto ? 'حذف الصورة' : 'Remove photo' }}"
                         class="absolute top-1 end-1 bg-danger text-white rounded-full w-11 h-11 flex items-center justify-center text-sm border-0 cursor-pointer">
                         &times;

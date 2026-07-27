@@ -7,7 +7,7 @@
 
 | Element       | Value                            |
 | ------------- | -------------------------------- |
-| Primary Color | `#059669` (Emerald 600)          |
+| Primary Color | `#3d7a18` (Jawla Green)          |
 | Accent Color  | `#D97706` (Amber 600)            |
 | Primary Font  | IBM Plex Sans Arabic             |
 | Voice         | Professional, Clear, Trustworthy |
@@ -44,7 +44,7 @@ The brand's core color. Represents growth, prosperity, and the Egyptian landscap
 | `emerald-200` | `#A7F3D0` | 167,243,208 | Light borders                        |
 | `emerald-400` | `#34D399` | 52,211,153  | Secondary actions                    |
 | `emerald-500` | `#10B981` | 16,185,129  | Hover states                         |
-| `emerald-600` | `#059669` | 5,150,105   | **Primary — CTAs, active nav, logo** |
+| `emerald-600` | `#3d7a18` | 61,122,24   | **Primary — CTAs, active nav, logo** |
 | `emerald-700` | `#047857` | 4,120,87    | Active/pressed states                |
 | `emerald-800` | `#065F46` | 6,95,70     | Dark mode primary                    |
 | `emerald-900` | `#064E3B` | 6,78,59     | Dark mode text                       |
@@ -83,7 +83,7 @@ Clean, modern foundation. Never pure black — use `slate-900` for text.
 
 | State   | Hex       | Usage                               |
 | ------- | --------- | ----------------------------------- |
-| Success | `#059669` | Completed visits, positive balances |
+| Success | `#3d7a18` | Completed visits, positive balances |
 | Warning | `#D97706` | Pending approvals, low stock alerts |
 | Danger  | `#DC2626` | OOS alarms, destructive actions     |
 | Info    | `#2563EB` | Informational messages, links       |

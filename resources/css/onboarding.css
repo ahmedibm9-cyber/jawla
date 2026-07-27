@@ -1,0 +1,193 @@
+/* Shepherd.js overrides for JAWLA onboarding tour */
+/* Matches JAWLA design system: #3d7a18 green, IBM Plex Sans Arabic, RTL-aware */
+
+.shepherd-element {
+  max-width: 340px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  font-family: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  z-index: 10000;
+  overflow: visible;
+}
+
+.shepherd-element.shepherd.RTL,
+[dir="rtl"] .shepherd-element {
+  direction: rtl;
+  text-align: right;
+}
+
+.shepherd-header {
+  background: #3d7a18;
+  color: #fff;
+  border-radius: 12px 12px 0 0;
+  padding: 14px 16px 10px;
+}
+
+.shepherd-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.shepherd-text {
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: #334155;
+  background: #fff;
+}
+
+[dir="rtl"] .shepherd-text {
+  color: #0f172a;
+}
+
+.shepherd-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px 14px;
+  gap: 8px;
+  background: #fff;
+  border-radius: 0 0 12px 12px;
+}
+
+.shepherd-button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    opacity 0.15s;
+  font-family: inherit;
+  min-height: 36px;
+}
+
+.shepherd-button.shepherd-button-secondary {
+  background: transparent;
+  color: #64748b;
+}
+
+.shepherd-button.shepherd-button-secondary:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.shepherd-button.shepherd-button-primary {
+  background: #3d7a18;
+  color: #fff;
+}
+
+.shepherd-button.shepherd-button-primary:hover {
+  background: #5a9e30;
+}
+
+.shepherd-button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.shepherd-cancel-icon {
+  display: none;
+}
+
+.shepherd-has-cancel-icon .shepherd-cancel-icon {
+  display: block;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.shepherd-has-cancel-icon .shepherd-cancel-icon:hover {
+  color: #fff;
+}
+
+/* Step counter badge */
+.shepherd-step-counter {
+  font-size: 0.6875rem;
+  color: rgba(255, 255, 255, 0.75);
+  margin-top: 2px;
+}
+
+/* Arrow */
+.shepherd-arrow:before {
+  background: #fff;
+}
+
+.shepherd-element.shepherd-element-attached-bottom .shepherd-arrow:before {
+  background: #fff;
+}
+
+/* Spotlight overlay */
+.shepherd-modal-overlay-container {
+  opacity: 0.4;
+}
+
+/* Highlight pulse for interactive elements */
+.shepherd-highlight-pulse {
+  animation: shepherd-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes shepherd-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(61, 122, 24, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(61, 122, 24, 0);
+  }
+}
+
+/* Welcome step gets larger */
+.shepherd-welcome .shepherd-header {
+  padding: 18px 16px 14px;
+}
+
+.shepherd-welcome .shepherd-title {
+  font-size: 1.125rem;
+}
+
+/* Mobile adjustments */
+@media (max-width: 480px) {
+  .shepherd-element {
+    max-width: calc(100vw - 32px);
+    margin: 0 16px;
+  }
+}
+
+/* Dark mode */
+@media (prefers-color-scheme: dark) {
+  .shepherd-text {
+    color: #e2e8f0;
+    background: #1e293b;
+  }
+
+  [dir="rtl"] .shepherd-text {
+    color: #e2e8f0;
+  }
+
+  .shepherd-footer {
+    background: #1e293b;
+  }
+
+  .shepherd-button.shepherd-button-secondary {
+    color: #94a3b8;
+  }
+
+  .shepherd-button.shepherd-button-secondary:hover {
+    background: #334155;
+    color: #e2e8f0;
+  }
+
+  .shepherd-arrow:before {
+    background: #1e293b;
+  }
+}
