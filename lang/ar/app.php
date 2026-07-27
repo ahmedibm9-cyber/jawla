@@ -353,4 +353,12 @@ return [
     'sync_conflict' => 'تعارض',
     'sync_retry' => 'إعادة',
     'sync_discard' => 'حذف',
+    'collect_another' => 'تحصيل آخر',
+    'original_invoice' => 'الفاتورة الأصلية',
+    'invoice_line' => 'بند الفاتورة',
+    'condition' => 'الحالة',
+    'sellable' => 'صالح للبيع',
+    'damaged_quarantine' => 'تالف — إلى الحجر',
+    'search_customer_ph' => 'ابحث عن عميل…',
+    'search_product_ph' => 'ابحث بالكود أو الاسم…',
 ];

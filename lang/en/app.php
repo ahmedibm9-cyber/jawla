@@ -353,4 +353,12 @@ return [
     'sync_conflict' => 'Conflict',
     'sync_retry' => 'Retry',
     'sync_discard' => 'Discard',
+    'collect_another' => 'Collect Another Payment',
+    'original_invoice' => 'Original Invoice',
+    'invoice_line' => 'Invoice Line',
+    'condition' => 'Condition',
+    'sellable' => 'Sellable',
+    'damaged_quarantine' => 'Damaged — quarantine',
+    'search_customer_ph' => 'Search customer…',
+    'search_product_ph' => 'Search by SKU or name…',
 ];

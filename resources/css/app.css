@@ -1295,6 +1295,20 @@
   margin-top: 4px;
 }
 
+/* ---- Alert ---- */
+.alert {
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+.alert-danger {
+  background: var(--color-danger-bg, #fef2f2);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger-border, #fecaca);
+}
+
 .form-hint {
   font-size: 0.8rem;
   color: var(--color-text-muted);
