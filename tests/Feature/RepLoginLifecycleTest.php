@@ -100,15 +100,4 @@ class RepLoginLifecycleTest extends TestCase
         $this->actingAs($rep)->post('/app/logout')->assertRedirect(route('login'));
         $this->assertGuest();
     }
-
-    private function demoPassword(string $email): string
-    {
-        $credentials = json_decode(
-            Storage::disk('private')->get('demo-credentials.json'),
-            true,
-            flags: JSON_THROW_ON_ERROR,
-        );
-
-        return $credentials[$email];
-    }
 }
