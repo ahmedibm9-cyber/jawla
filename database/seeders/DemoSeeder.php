@@ -455,6 +455,7 @@ class DemoSeeder extends Seeder
 
             // ─── Work sessions ─────────────────────────────────────────────
             $ws1 = WorkSession::create([
+                'company_id' => $company->id,
                 'user_id' => $rep1->id,
                 'route_id' => $routeCairo->id,
                 'started_at' => now()->subHours(2),
@@ -463,6 +464,7 @@ class DemoSeeder extends Seeder
             ]);
 
             $ws2 = WorkSession::create([
+                'company_id' => $company->id,
                 'user_id' => $rep2->id,
                 'route_id' => $routeGiza->id,
                 'started_at' => now()->subHours(3),
@@ -622,6 +624,7 @@ class DemoSeeder extends Seeder
                 }
 
                 $inv = Invoice::create([
+                    'uuid' => (string) Str::uuid(),
                     'company_id' => $company->id,
                     'customer_id' => $cust->id,
                     'user_id' => $rep->id,

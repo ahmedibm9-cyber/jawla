@@ -6,8 +6,8 @@ use App\Filament\Auth\Pages\Login;
 use App\Models\User;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
 use Tests\TestCase;
 
@@ -20,6 +20,9 @@ class RepLoginLifecycleTest extends TestCase
 {
     use DatabaseTransactions;
 
+    /** @var array<string, string> email → known password (avoids shared-file race) */
+    private array $knownPasswords = [];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -28,6 +31,14 @@ class RepLoginLifecycleTest extends TestCase
         // Clear rate limiter to avoid 405/429 when running in parallel
         // (multiple processes share the same IP-based key).
         RateLimiter::clear('post|ip:127.0.0.1');
+
+        // Set known passwords directly — avoids reading from the shared
+        // demo-credentials.json which races between parallel CI processes.
+        foreach (['rep@jawla.test', 'admin@jawla.test'] as $email) {
+            $password = 'test-'.$email;
+            User::where('email', $email)->update(['password' => Hash::make($password)]);
+            $this->knownPasswords[$email] = $password;
+        }
     }
 
     public function test_guest_visiting_a_rep_route_is_redirected_to_filament_login(): void
@@ -51,7 +62,7 @@ class RepLoginLifecycleTest extends TestCase
 
         Livewire::test(Login::class)
             ->set('data.email', $rep->email)
-            ->set('data.password', $this->demoPassword($rep->email))
+            ->set('data.password', $this->knownPasswords[$rep->email])
             ->call('authenticate');
 
         $this->assertAuthenticatedAs($rep);
@@ -63,7 +74,7 @@ class RepLoginLifecycleTest extends TestCase
 
         Livewire::test(Login::class)
             ->set('data.email', $admin->email)
-            ->set('data.password', $this->demoPassword($admin->email))
+            ->set('data.password', $this->knownPasswords[$admin->email])
             ->call('authenticate');
 
         $this->assertAuthenticatedAs($admin);

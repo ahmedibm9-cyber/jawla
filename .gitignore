@@ -39,8 +39,16 @@ Thumbs.db
 !public/images/*.png
 !public/icons/*.png
 
-# Archived issue/bug documents
 /.archive/
+/.recovery/
+/screenshots/
+/research/
+/tasks/
 
-# Old git state dumps
-/recovery/
+# Agent tool directories (local only, never commit)
+/.codex/
+/.windsurf/
+/.qwen/
+/.Zcode/
+/.antigravity/
+/.VScode/
