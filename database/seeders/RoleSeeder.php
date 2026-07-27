@@ -117,13 +117,13 @@ class RoleSeeder extends Seeder
             'sales_manager' => [
                 // Resources
                 'view_any:customer', 'view:customer', 'create:customer', 'update:customer',
-                'view_any:invoice', 'view:invoice',
+                'view_any:invoice', 'view:invoice', 'update:invoice',
                 'view_any:proforma_invoice', 'view:proforma_invoice', 'create:proforma_invoice', 'update:proforma_invoice',
-                'view_any:return_record', 'view:return_record', 'create:return_record',
-                'view_any:payment', 'view:payment', 'create:payment',
+                'view_any:return_record', 'view:return_record', 'create:return_record', 'update:return_record',
+                'view_any:payment', 'view:payment', 'create:payment', 'update:payment',
                 'view_any:expense', 'view:expense', 'create:expense',
                 'view_any:cash_reconciliation', 'view:cash_reconciliation', 'update:cash_reconciliation',
-                'view_any:stock', 'view:stock',
+                'view_any:stock', 'view:stock', 'update:stock',
                 'view_any:batch', 'view:batch',
                 'view_any:goods_in_transit', 'view:goods_in_transit',
                 'view_any:purchase_request', 'view:purchase_request', 'create:purchase_request', 'update:purchase_request',
@@ -225,6 +225,9 @@ class RoleSeeder extends Seeder
                 'invoices.view_own', 'payments.collect', 'returns.create',
                 'expenses.log', 'purchase_requests.submit', 'alarms.flag_out_of_stock',
                 'complaints.submit', 'cashbox.view', 'van_transfers.request',
+                // Shield resource permissions required by services that gate on
+                // can('create:...') / can('update:...') instead of custom names.
+                'create:invoice', 'create:return_record',
             ],
 
             'rep' => [
@@ -236,6 +239,8 @@ class RoleSeeder extends Seeder
                 'invoices.view_own', 'payments.collect', 'returns.create',
                 'expenses.log', 'purchase_requests.submit', 'alarms.flag_out_of_stock',
                 'complaints.submit', 'cashbox.view', 'van_transfers.request',
+                // Shield resource permissions required by services (see sales_rep).
+                'create:invoice', 'create:return_record',
             ],
 
             'hr_admin' => [

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "=== Jawla verification ==="
+
+echo "1/5 Lint..."
+vendor/bin/pint --test
+
+echo "2/5 Typecheck..."
+vendor/bin/phpstan analyse
+
+echo "3/5 Tests..."
+php artisan test --testsuite=Unit,Feature
+
+echo "4/5 Build..."
+npm run build
+
+echo "5/5 Audit..."
+composer audit
+npm audit --audit-level=high
+
+echo "=== All checks passed ==="
