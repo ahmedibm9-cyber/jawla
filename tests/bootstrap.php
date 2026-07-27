@@ -16,6 +16,13 @@ use Tests\Support\TestingDatabaseGuard;
 
 require_once __DIR__.'/../vendor/autoload.php';
 
+// Pin the test env vars into both OS env and $_ENV BEFORE Laravel boots.
+// Laravel's Dotenv load() does not overwrite values that are already set
+// in the environment when it runs, so this guarantees the phpunit.xml
+// <env> values actually win over the project's .env (which still points
+// at the development database).
+require __DIR__.'/_env.php';
+
 $environment = (string) getenv('APP_ENV');
 $connection = (string) getenv('DB_CONNECTION');
 $database = (string) getenv('DB_DATABASE');
