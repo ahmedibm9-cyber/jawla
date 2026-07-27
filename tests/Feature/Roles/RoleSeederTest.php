@@ -4,6 +4,7 @@ namespace Tests\Feature\Roles;
 
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -25,7 +26,7 @@ class RoleSeederTest extends TestCase
         $this->seed(RoleSeeder::class);
 
         $admin = Role::findByName('admin');
-        $totalPermissions = \Spatie\Permission\Models\Permission::count();
+        $totalPermissions = Permission::count();
         $this->assertEquals($totalPermissions, $admin->permissions->count(), 'Admin should have all permissions.');
     }
 

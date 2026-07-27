@@ -18,6 +18,7 @@ use App\Http\Middleware\FilamentAuthenticate;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetActiveCompanyContext;
 use App\Http\Middleware\ThrottlePost;
+use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -53,7 +54,7 @@ class AdminPanelProvider extends PanelProvider
             ->defaultAvatarProvider(CompanyAvatarProvider::class)
             ->spa()
             ->plugins([
-                \BezhanSalleh\FilamentShield\FilamentShieldPlugin::make(),
+                FilamentShieldPlugin::make(),
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
@@ -109,6 +110,6 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook('panels::topbar.end', fn (): string => view('components._active-company', ['panel' => 'admin'])->render())
             ->renderHook('panels::head.start', fn (): string => '<link rel="preload" href="'.secure_asset('images/black-j.webp').'" as="image" fetchpriority="high">')
             ->renderHook('panels::head.end', fn (): string => view('filament.onboarding-head')->render())
-            ->renderHook('panels::body.end', fn (): string => '<script>window.areRecordsPartiallySelected??=()=>!1;window.getRecordsOnPage??=()=>[];window.areRecordsSelected??=()=>!1;window.areRecordsToggleable??=()=>!0;</script>' . view('filament.onboarding-body')->render());
+            ->renderHook('panels::body.end', fn (): string => '<script>window.areRecordsPartiallySelected??=()=>!1;window.getRecordsOnPage??=()=>[];window.areRecordsSelected??=()=>!1;window.areRecordsToggleable??=()=>!0;</script>'.view('filament.onboarding-body')->render());
     }
 }
