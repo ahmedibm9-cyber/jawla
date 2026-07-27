@@ -4,5 +4,9 @@ namespace App\Services\Contracts;
 
 interface DocumentNumberService
 {
-    public function generate(string $docType, int $companyId): string;
+    /**
+     * Allocate the next gapless legal number for $docType in $companyId's
+     * scope, optionally for a specific calendar $year (defaults to current).
+     */
+    public function generate(string $docType, int $companyId, ?int $year = null): string;
 }

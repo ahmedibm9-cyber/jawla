@@ -15,12 +15,13 @@ class NamingSeries extends Model
 
     protected $fillable = [
         'name', 'prefix', 'series_format', 'current_number',
-        'pad_length', 'company_id', 'is_active',
+        'pad_length', 'company_id', 'year', 'is_active',
     ];
 
     protected $casts = [
         'current_number' => 'integer',
         'pad_length' => 'integer',
+        'year' => 'integer',
         'is_active' => 'boolean',
     ];
 }

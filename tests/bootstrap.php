@@ -53,6 +53,13 @@ if (! $exists->fetchColumn()) {
 $app = require __DIR__.'/../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 
+// Force APP_ENV=testing on the bootstrapped app instance. Without this,
+// .env's APP_ENV=local wins (Laravel uses mutable Dotenv) and the unit
+// suite misbehaves as a non-test environment: app()->runningUnitTests()
+// returns false, the ActiveCompanyContext's "unscoped" flag stays off,
+// and every service-level unit test trips the tenancy guard.
+$app['env'] = 'testing';
+
 // DatabaseTransactions tests can run before the first RefreshDatabase test.
 if (! $app->make('db')->connection()->getSchemaBuilder()->hasTable('migrations')) {
     $app->make(Kernel::class)->call('migrate', [

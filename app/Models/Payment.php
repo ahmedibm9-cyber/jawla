@@ -17,7 +17,7 @@ class Payment extends Model
     protected $fillable = [
         'company_id', 'customer_id', 'user_id', 'invoice_id', 'visit_id',
         'mode_of_payment_id', 'amount', 'allocated_amount', 'unallocated_amount', 'intent_id',
-        'method', 'exchange_rate', 'base_amount',
+        'payment_number', 'method', 'exchange_rate', 'base_amount',
         'collected_at', 'posting_date', 'notes',
         'cancelled_at', 'cancelled_by',
     ];

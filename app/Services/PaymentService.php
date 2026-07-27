@@ -11,6 +11,7 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Reversal;
 use App\Models\User;
+use App\Services\Contracts\DocumentNumberService;
 use App\Services\Contracts\PaymentService as PaymentServiceContract;
 use App\Support\ActiveCompanyContext;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -109,6 +110,7 @@ class PaymentService implements PaymentServiceContract
                     'allocated_amount' => $allocated,
                     'unallocated_amount' => $unallocated,
                     'intent_id' => $intentId,
+                    'payment_number' => app(DocumentNumberService::class)->generate('payment', $companyId),
                     'method' => $method,
                     'collected_at' => now(),
                     'posting_date' => today(),
@@ -140,7 +142,7 @@ class PaymentService implements PaymentServiceContract
                         'invoice_id' => $invoiceId,
                         'payment_id' => $payment->id,
                         'created_by' => $userId,
-                        'credit_number' => 'CREDIT-PAY-'.$payment->id,
+                        'credit_number' => app(DocumentNumberService::class)->generate('credit_note', $companyId),
                         'amount' => $unallocated,
                         'remaining_amount' => $unallocated,
                         'status' => 'available',

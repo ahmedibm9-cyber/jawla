@@ -9,6 +9,7 @@ cash, record returns. Admins manage master data and see everything live.
 > This repo starts as a scaffold and is filled phase by phase per the guide.
 
 ## Tech
+
 - Laravel 13 (PHP 8.3) monolith · Filament 4 (admin) · Livewire 3 + Tailwind 3 (rep PWA)
 - PostgreSQL 16 · spatie/laravel-permission · spatie/laravel-activitylog
 - Leaflet + OpenStreetMap · mpdf · simple-qrcode · Pest · Playwright
@@ -17,6 +18,7 @@ cash, record returns. Admins manage master data and see everything live.
 ## Quick start
 
 Short version:
+
 1. `cp .env.example .env` and fill values.
 2. `composer install && npm install`
 3. `php artisan key:generate && php artisan migrate --seed`
@@ -24,15 +26,21 @@ Short version:
 
 ### Demo credentials (via DemoSeeder)
 
-| Role            | Email                | Password |
-|-----------------|----------------------|----------|
-| Admin           | admin@jawla.test     | password |
-| Sales Manager   | manager@jawla.test   | password |
-| Finance         | accounts@jawla.test  | password |
-| Purchasing      | purchasing@jawla.test| password |
-| Warehouse       | warehouse@jawla.test | password |
-| Executive       | executive@jawla.test | password |
-| Rep             | rep@jawla.test       | password |
+> All demo accounts share the same password in this environment. **Do not use this pattern outside the demo seeder** — see `docs/SECURITY.md` and the credential-rotation runbook before any production change.
+
+| Role           | Email                 | Password  | Panel  |
+| -------------- | --------------------- | --------- | ------ |
+| Super Admin    | superadmin@jawla.test | 123456789 | /admin |
+| Admin          | admin@jawla.test      | 123456789 | /admin |
+| Sales Manager  | manager@jawla.test    | 123456789 | /admin |
+| Finance        | accounts@jawla.test   | 123456789 | /admin |
+| Purchasing     | purchasing@jawla.test | 123456789 | /admin |
+| Warehouse      | warehouse@jawla.test  | 123456789 | /admin |
+| Executive      | executive@jawla.test  | 123456789 | /admin |
+| Rep #1 (Cairo) | rep@jawla.test        | 123456789 | /app   |
+| Rep #2 (Giza)  | rep2@jawla.test       | 123456789 | /app   |
+
+Generated values are also dumped to `storage/app/private/demo-credentials.json` on every seed run.
 
 - Admin panel: http://localhost:8000/admin
 - Rep app: http://localhost:8000/app
@@ -40,6 +48,7 @@ Short version:
 ### Demo walkthrough — AM1→AM9 narrative
 
 The seed data reproduces the client's voice-message narrative:
+
 1. Manager assigns 5 visits (DailyVisitAssignments seeded for rep, today).
 2. Rep logs in at /app → sees today's 5 visits on Home.
 3. Rep taps visit → GPS geofence check (1.5km) → Confirm Arrival → visit report with signature → visit closed.
@@ -55,6 +64,7 @@ The seed data reproduces the client's voice-message narrative:
 ### Tests
 
 `php artisan test` — 32 tests, 105 assertions covering:
+
 - Auth + roles (admin/rep login, rate limit, locale switch)
 - Stock service increment/decrement/transfer + insufficient stock rollback
 - Company isolation (tenancy guard)
@@ -67,10 +77,12 @@ The seed data reproduces the client's voice-message narrative:
 A free-tier deployment for client demos. Uses Docker + Render Blueprint.
 
 ### Prerequisites
+
 - GitHub repo with this code pushed
 - Render account (https://render.com)
 
 ### Steps
+
 1. Push code to GitHub (include `Dockerfile`, `render.yaml`, `scripts/render-start.sh`).
 2. Go to https://dashboard.render.com → New → Blueprint.
 3. Select your GitHub repo. Render reads `render.yaml` and provisions:
@@ -85,15 +97,18 @@ A free-tier deployment for client demos. Uses Docker + Render Blueprint.
 7. After deploy, visit `https://<your-app>.onrender.com/` — redirects to `/app` (rep login).
 
 ### Demo URLs
+
 - Rep app: `https://<your-app>.onrender.com/app`
 - Admin panel: `https://<your-app>.onrender.com/admin`
 
 ### Free-tier limitations
+
 - **Cold start:** service sleeps after 15 min idle → ~30s wake on first request.
 - **PostgreSQL:** free for 90 days, then must upgrade or data is deleted.
 - **File storage:** ephemeral — generated PDFs/signatures are lost on redeploy. Acceptable for demo; switch to S3/R2 for persistence.
 
 ## Docs index
+
 - `docs/ARCHITECTURE.md` — stack + boundaries.
 - `docs/BUSINESS_RULES.md` — non-negotiables (stock, atomic sales, VAT).
 - `docs/ROLES_MATRIX.md` — five roles × permissions.
@@ -105,4 +120,5 @@ A free-tier deployment for client demos. Uses Docker + Render Blueprint.
 - `docs/BACKUP_RESTORE.md` — nightly backup + restore drill.
 
 ## Licence
+
 Proprietary — Fulla Chemical Trading Co. All rights reserved.

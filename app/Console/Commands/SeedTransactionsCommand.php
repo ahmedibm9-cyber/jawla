@@ -180,7 +180,17 @@ class SeedTransactionsCommand extends Command
                 }
                 $amount = rand(1, 10) <= 6 ? $inv->total : round($inv->total * (rand(3, 8) / 10), 2);
                 $method = $paymentMethods[array_rand($paymentMethods)];
-                Payment::create(['company_id' => $company->id, 'customer_id' => $inv->customer_id, 'user_id' => $inv->user_id, 'invoice_id' => $inv->id, 'amount' => $amount, 'method' => $method, 'collected_at' => $inv->issued_at->copy()->addDays(rand(0, 15)), 'posting_date' => $inv->issued_at]);
+                Payment::create([
+                    'company_id' => $company->id,
+                    'customer_id' => $inv->customer_id,
+                    'user_id' => $inv->user_id,
+                    'invoice_id' => $inv->id,
+                    'amount' => $amount,
+                    'method' => $method,
+                    'payment_number' => $names->generate('payment', $company->id, (int) $inv->issued_at->format('Y')),
+                    'collected_at' => $inv->issued_at->copy()->addDays(rand(0, 15)),
+                    'posting_date' => $inv->issued_at,
+                ]);
                 $inv->update(['paid_amount' => $inv->paid_amount + $amount, 'remaining_amount' => $inv->remaining_amount - $amount]);
                 if ($inv->remaining_amount <= 0) {
                     $inv->update(['status' => 'paid']);

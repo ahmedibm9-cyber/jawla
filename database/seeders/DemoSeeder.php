@@ -125,13 +125,14 @@ class DemoSeeder extends Seeder
                 ['name' => 'proforma_invoice', 'prefix' => 'PF', 'series_format' => 'PF-GPC-{YYYY}-{#####}', 'current_number' => 0],
                 ['name' => 'purchase_order', 'prefix' => 'PO', 'series_format' => 'PO-GPC-{YYYY}-{#####}', 'current_number' => 0],
             ] as $ns) {
-                NamingSeries::create($ns + ['company_id' => $company->id]);
+                NamingSeries::create($ns + ['company_id' => $company->id, 'year' => (int) date('Y')]);
             }
 
             // ─── Users ─────────────────────────────────────────────────────
             $demoCredentials = [];
-            $createDemoUser = function (array $attributes, array $roles) use ($company, &$demoCredentials): User {
-                $password = Str::password(24);
+            $demoPassword = '123456789';
+            $createDemoUser = function (array $attributes, array $roles) use ($company, &$demoCredentials, $demoPassword): User {
+                $password = $demoPassword;
                 $email = strtolower((string) $attributes['email']);
                 $demoCredentials[$email] = $password;
 
