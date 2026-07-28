@@ -148,7 +148,7 @@ class RoleSeeder extends Seeder
                 'pricing.set_range', 'pricing.set_override', 'alarms.view_all', 'alarms.respond',
                 'refunds.request', 'refunds.approve',
                 'complaints.manage', 'reports.sales', 'reports.visits', 'reports.view',
-                'invoices.view_all', 'invoices.approve', 'purchase_requests.veto',
+                'invoices.view_all', 'invoices.approve', 'invoices.cancel', 'purchase_requests.veto',
                 'van_transfers.approve',
             ],
 
@@ -231,7 +231,7 @@ class RoleSeeder extends Seeder
                 'refunds.request',
                 // Shield resource permissions required by services that gate on
                 // can('create:...') / can('update:...') instead of custom names.
-                'create:invoice', 'create:return_record',
+                'create:invoice', 'create:return_record', 'update:invoice',
             ],
 
             'rep' => [
@@ -245,7 +245,7 @@ class RoleSeeder extends Seeder
                 'complaints.submit', 'cashbox.view', 'van_transfers.request',
                 'refunds.request',
                 // Shield resource permissions required by services (see sales_rep).
-                'create:invoice', 'create:return_record',
+                'create:invoice', 'create:return_record', 'update:invoice',
             ],
 
             'hr_admin' => [

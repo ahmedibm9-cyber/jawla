@@ -11,6 +11,15 @@ return [
         'insufficient' => 'الكمية غير متوفرة للمنتج رقم :product (المتاح: :available)',
     ],
 
+    'batch' => [
+        'not_found' => 'الlot رقم :batch غير موجود.',
+        'inactive' => 'الlot :batch غير نشط.',
+        'expired' => 'الlot :batch منتهي الصلاحية.',
+        'product_mismatch' => 'الlot لا يتبع هذا المنتج.',
+        'cross_company' => 'الlot لا يتبع هذه الشركة.',
+        'fefo_violation' => 'لا يمكن اختيار lot :given — الـ lot :expected تاريخ انتهائه أقرب وله مخزون متاح (FEFO).',
+    ],
+
     'price' => [
         'out_of_range' => 'السعر :price خارج النطاق المسموح للمنتج :product',
     ],

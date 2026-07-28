@@ -46,6 +46,79 @@ class VanTransferServiceTest extends TestCase
         $this->assertSame($product->id, $transfer->items->first()->product_id);
     }
 
+    public function test_approve_pending_transfer(): void
+    {
+        $company = Company::factory()->create();
+        $fromUser = User::factory()->create(['company_id' => $company->id]);
+        $toUser = User::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+
+        $service = app(VanTransferService::class);
+
+        $transfer = $service->create(
+            companyId: $company->id,
+            fromUserId: $fromUser->id,
+            toUserId: $toUser->id,
+            items: [['product_id' => $product->id, 'quantity' => 10.0]],
+        );
+
+        $approved = $service->approve($transfer->id, $toUser->id);
+
+        $this->assertSame(VanTransferStatus::Accepted, $approved->status);
+        $this->assertNotNull($approved->accepted_at);
+    }
+
+    public function test_cannot_approve_by_source_representative(): void
+    {
+        $company = Company::factory()->create();
+        $fromUser = User::factory()->create(['company_id' => $company->id]);
+        $toUser = User::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+
+        $service = app(VanTransferService::class);
+
+        $transfer = $service->create(
+            companyId: $company->id,
+            fromUserId: $fromUser->id,
+            toUserId: $toUser->id,
+            items: [['product_id' => $product->id, 'quantity' => 10.0]],
+        );
+
+        $this->expectException(DomainException::class);
+        $service->approve($transfer->id, $fromUser->id);
+    }
+
+    public function test_cannot_approve_already_shipped_transfer(): void
+    {
+        $company = Company::factory()->create();
+        $fromUser = User::factory()->create(['company_id' => $company->id]);
+        $toUser = User::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+        $mainWarehouse = Warehouse::factory()->create(['company_id' => $company->id, 'type' => 'main']);
+        $inTransitWarehouse = Warehouse::factory()->create(['company_id' => $company->id, 'type' => 'main']);
+
+        $service = app(VanTransferService::class);
+
+        app(StockService::class)->increment(
+            $mainWarehouse->id, $product->id, null, 50.0,
+            StockReason::Initial, $product,
+        );
+
+        $transfer = $service->create(
+            companyId: $company->id,
+            fromUserId: $fromUser->id,
+            toUserId: $toUser->id,
+            items: [['product_id' => $product->id, 'quantity' => 10.0]],
+            inTransitWarehouseId: $inTransitWarehouse->id,
+        );
+
+        $service->approve($transfer->id, $toUser->id);
+        $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
+
+        $this->expectException(\RuntimeException::class);
+        $service->approve($transfer->id, $toUser->id);
+    }
+
     public function test_ship_van_transfer_decrements_stock(): void
     {
         $company = Company::factory()->create();
@@ -61,7 +134,6 @@ class VanTransferServiceTest extends TestCase
 
         $service = app(VanTransferService::class);
 
-        // Seed stock in main warehouse
         app(StockService::class)->increment(
             $mainWarehouse->id, $product->id, null, 50.0,
             StockReason::Initial, $product,
@@ -75,6 +147,7 @@ class VanTransferServiceTest extends TestCase
             inTransitWarehouseId: $inTransitWarehouse->id,
         );
 
+        $service->approve($transfer->id, $toUser->id);
         $shipped = $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
 
         $this->assertSame(VanTransferStatus::Shipped, $shipped->status);
@@ -119,6 +192,7 @@ class VanTransferServiceTest extends TestCase
             inTransitWarehouseId: $inTransitWarehouse->id,
         );
 
+        $service->approve($transfer->id, $toUser->id);
         $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
         $received = $service->receive($transfer->id, $toUser->id);
 
@@ -127,6 +201,50 @@ class VanTransferServiceTest extends TestCase
         $this->assertSame(40.0, (float) app(StockService::class)->balance($mainWarehouse->id, $product->id));
         $this->assertSame(0.0, (float) app(StockService::class)->balance($inTransitWarehouse->id, $product->id));
         $this->assertSame(10.0, (float) app(StockService::class)->balance($vanWarehouse->id, $product->id));
+    }
+
+    public function test_receive_partial_quantity_records_exception(): void
+    {
+        $company = Company::factory()->create();
+        $fromUser = User::factory()->create(['company_id' => $company->id]);
+        $toUser = User::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+        $mainWarehouse = Warehouse::factory()->create(['company_id' => $company->id, 'type' => 'main']);
+        $inTransitWarehouse = Warehouse::factory()->create(['company_id' => $company->id, 'type' => 'main']);
+        $vanWarehouse = Warehouse::factory()->create(['company_id' => $company->id, 'type' => 'van', 'user_id' => $toUser->id]);
+
+        $service = app(VanTransferService::class);
+
+        app(StockService::class)->increment(
+            $mainWarehouse->id, $product->id, null, 50.0,
+            StockReason::Initial, $product,
+        );
+
+        $transfer = $service->create(
+            companyId: $company->id,
+            fromUserId: $fromUser->id,
+            toUserId: $toUser->id,
+            items: [['product_id' => $product->id, 'quantity' => 10.0]],
+            inTransitWarehouseId: $inTransitWarehouse->id,
+        );
+
+        $service->approve($transfer->id, $toUser->id);
+        $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
+
+        // Receive only 7 of 10
+        $received = $service->receive($transfer->id, $toUser->id, [
+            $transfer->items->first()->id => 7.0,
+        ]);
+
+        $this->assertSame(VanTransferStatus::Received, $received->status);
+        $this->assertSame(7.0, (float) $received->items->first()->received_quantity);
+        $this->assertSame(3.0, (float) $received->items->first()->exception_quantity);
+        $this->assertSame('shortage', $received->items->first()->exception_reason);
+        $this->assertNotNull($received->items->first()->exceptioned_at);
+
+        // Only 7 moved to van, 3 remain in transit
+        $this->assertSame(7.0, (float) app(StockService::class)->balance($vanWarehouse->id, $product->id));
+        $this->assertSame(3.0, (float) app(StockService::class)->balance($inTransitWarehouse->id, $product->id));
     }
 
     public function test_reject_pending_transfer(): void
@@ -148,6 +266,26 @@ class VanTransferServiceTest extends TestCase
         $rejected = $service->reject($transfer->id, $toUser->id);
 
         $this->assertSame(VanTransferStatus::Rejected, $rejected->status);
+    }
+
+    public function test_cannot_reject_by_source_representative(): void
+    {
+        $company = Company::factory()->create();
+        $fromUser = User::factory()->create(['company_id' => $company->id]);
+        $toUser = User::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+
+        $service = app(VanTransferService::class);
+
+        $transfer = $service->create(
+            companyId: $company->id,
+            fromUserId: $fromUser->id,
+            toUserId: $toUser->id,
+            items: [['product_id' => $product->id, 'quantity' => 10.0]],
+        );
+
+        $this->expectException(DomainException::class);
+        $service->reject($transfer->id, $fromUser->id);
     }
 
     public function test_cancel_pending_transfer(): void
@@ -194,6 +332,8 @@ class VanTransferServiceTest extends TestCase
             inTransitWarehouseId: $inTransitWarehouse->id,
         );
 
+        $service->approve($transfer->id, $toUser->id);
+
         $this->expectException(InsufficientStockException::class);
         $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
     }
@@ -214,7 +354,6 @@ class VanTransferServiceTest extends TestCase
 
         $service = app(VanTransferService::class);
 
-        // Seed stock for product but NOT product2
         app(StockService::class)->increment(
             $mainWarehouse->id, $product->id, null, 50.0,
             StockReason::Initial, $product,
@@ -231,6 +370,8 @@ class VanTransferServiceTest extends TestCase
             inTransitWarehouseId: $inTransitWarehouse->id,
         );
 
+        $service->approve($transfer->id, $toUser->id);
+
         try {
             $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
         } catch (InsufficientStockException $e) {
@@ -238,7 +379,7 @@ class VanTransferServiceTest extends TestCase
 
         $this->assertSame(50.0, (float) app(StockService::class)->balance($mainWarehouse->id, $product->id));
         $this->assertSame(0, StockMovement::where('warehouse_id', $inTransitWarehouse->id)->count());
-        $this->assertSame(VanTransferStatus::Pending, $transfer->fresh()->status);
+        $this->assertSame(VanTransferStatus::Accepted, $transfer->fresh()->status);
     }
 
     public function test_cannot_ship_already_shipped_transfer(): void
@@ -269,6 +410,7 @@ class VanTransferServiceTest extends TestCase
             inTransitWarehouseId: $inTransitWarehouse->id,
         );
 
+        $service->approve($transfer->id, $toUser->id);
         $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
 
         $this->expectException(\RuntimeException::class);
@@ -302,6 +444,8 @@ class VanTransferServiceTest extends TestCase
             items: [['product_id' => $product->id, 'quantity' => 10.0]],
             inTransitWarehouseId: $inTransitWarehouse->id,
         );
+
+        $service->approve($transfer->id, $toUser->id);
 
         $this->expectException(DomainException::class);
         $service->ship($transfer->id, $mainWarehouse->id, $toUser->id);
@@ -355,6 +499,7 @@ class VanTransferServiceTest extends TestCase
             inTransitWarehouseId: $inTransitWarehouse->id,
         );
 
+        $service->approve($transfer->id, $toUser->id);
         $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
 
         $this->expectException(DomainException::class);
@@ -389,6 +534,7 @@ class VanTransferServiceTest extends TestCase
             inTransitWarehouseId: $inTransitWarehouse->id,
         );
 
+        $service->approve($transfer->id, $toUser->id);
         $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
 
         $this->expectException(\RuntimeException::class);
@@ -413,5 +559,34 @@ class VanTransferServiceTest extends TestCase
 
         $this->expectException(DomainException::class);
         $service->cancel($transfer->id, $toUser->id);
+    }
+
+    public function test_cannot_ship_pending_transfer(): void
+    {
+        $company = Company::factory()->create();
+        $fromUser = User::factory()->create(['company_id' => $company->id]);
+        $toUser = User::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create(['company_id' => $company->id]);
+        $mainWarehouse = Warehouse::factory()->create(['company_id' => $company->id, 'type' => 'main']);
+        $inTransitWarehouse = Warehouse::factory()->create(['company_id' => $company->id, 'type' => 'main']);
+
+        $service = app(VanTransferService::class);
+
+        app(StockService::class)->increment(
+            $mainWarehouse->id, $product->id, null, 50.0,
+            StockReason::Initial, $product,
+        );
+
+        $transfer = $service->create(
+            companyId: $company->id,
+            fromUserId: $fromUser->id,
+            toUserId: $toUser->id,
+            items: [['product_id' => $product->id, 'quantity' => 10.0]],
+            inTransitWarehouseId: $inTransitWarehouse->id,
+        );
+
+        // Pending → ship should fail (must approve first)
+        $this->expectException(\RuntimeException::class);
+        $service->ship($transfer->id, $mainWarehouse->id, $fromUser->id);
     }
 }

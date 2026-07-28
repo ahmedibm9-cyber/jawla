@@ -11,6 +11,15 @@ return [
         'insufficient' => 'Insufficient stock for product ID :product (available: :available)',
     ],
 
+    'batch' => [
+        'not_found' => 'Batch ID :batch does not exist.',
+        'inactive' => 'Batch :batch is inactive.',
+        'expired' => 'Batch :batch has expired.',
+        'product_mismatch' => 'Batch does not belong to this product.',
+        'cross_company' => 'Batch does not belong to this company.',
+        'fefo_violation' => 'Cannot pick batch :given — batch :expected has earlier expiry and available stock (FEFO).',
+    ],
+
     'price' => [
         'out_of_range' => 'Price :price is outside the allowed range for product :product',
     ],

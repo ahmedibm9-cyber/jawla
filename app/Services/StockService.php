@@ -5,8 +5,10 @@ namespace App\Services;
 use App\Enums\StockReason;
 use App\Exceptions\Domain\DomainException;
 use App\Exceptions\Domain\InsufficientStockException;
+use App\Models\Batch;
 use App\Models\Stock;
 use App\Models\StockMovement;
+use App\Models\Warehouse;
 use App\Services\Contracts\StockService as StockServiceContract;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -48,6 +50,10 @@ class StockService implements StockServiceContract
     public function reconcile(int $warehouseId, int $productId, ?int $batchId, float $countedQty, string $reason, int $userId, ?float $expectedQty = null, ?Model $reference = null): StockMovement
     {
         return DB::transaction(function () use ($warehouseId, $productId, $batchId, $countedQty, $userId, $expectedQty, $reference): StockMovement {
+            if ($batchId !== null) {
+                $this->validateBatchEligibility($warehouseId, $productId, $batchId, 0);
+            }
+
             DB::table('warehouses')->where('id', $warehouseId)->lockForUpdate()->first();
             $stock = Stock::where('warehouse_id', $warehouseId)
                 ->where('product_id', $productId)
@@ -90,6 +96,10 @@ class StockService implements StockServiceContract
     private function move(int $warehouseId, int $productId, ?int $batchId, float $qty, StockReason $reason, Model $ref, ?int $userId): StockMovement
     {
         return DB::transaction(function () use ($warehouseId, $productId, $batchId, $qty, $reason, $ref, $userId): StockMovement {
+            if ($batchId !== null) {
+                $this->validateBatchEligibility($warehouseId, $productId, $batchId, $qty);
+            }
+
             $stock = Stock::where('warehouse_id', $warehouseId)
                 ->where('product_id', $productId)
                 ->where('batch_id', $batchId)
@@ -128,5 +138,46 @@ class StockService implements StockServiceContract
                 'user_id' => $userId,
             ]);
         });
+    }
+
+    private function validateBatchEligibility(int $warehouseId, int $productId, int $batchId, float $qty): void
+    {
+        $batch = Batch::with('product')->find($batchId);
+
+        if (! $batch) {
+            throw new DomainException('errors.batch.not_found', ['batch' => $batchId]);
+        }
+
+        if (! $batch->is_active) {
+            throw new DomainException('errors.batch.inactive', ['batch' => $batch->batch_number]);
+        }
+
+        if ($batch->isExpired()) {
+            throw new DomainException('errors.batch.expired', ['batch' => $batch->batch_number]);
+        }
+
+        if ($batch->product_id !== $productId) {
+            throw new DomainException('errors.batch.product_mismatch');
+        }
+
+        // Cross-company check: batch's product company must match warehouse company
+        $warehouse = Warehouse::find($warehouseId);
+        if ($batch->product->company_id !== $warehouse->company_id) {
+            throw new DomainException('errors.batch.cross_company');
+        }
+
+        // FEFO guard on decrements: reject if a lower-expiry batch has stock
+        if ($qty < 0) {
+            $fefoBatch = Batch::fefoForProduct($productId)->first();
+            if ($fefoBatch && $fefoBatch->id !== $batchId) {
+                $fefoStock = Stock::where('batch_id', $fefoBatch->id)->sum('quantity');
+                if ($fefoStock > 0) {
+                    throw new DomainException('errors.batch.fefo_violation', [
+                        'expected' => $fefoBatch->batch_number,
+                        'given' => $batch->batch_number,
+                    ]);
+                }
+            }
+        }
     }
 }

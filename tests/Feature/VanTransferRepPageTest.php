@@ -72,6 +72,8 @@ class VanTransferRepPageTest extends TestCase
             inTransitWarehouseId: $this->inTransit->id,
         );
 
+        $svc->approve($transfer->id, $this->toRep->id);
+
         return $svc->ship($transfer->id, $this->fromVan->id, $this->fromRep->id);
     }
 

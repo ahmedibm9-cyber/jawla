@@ -65,12 +65,29 @@ class VanTransferService implements VanTransferServiceContract
         });
     }
 
+    public function approve(int $transferId, int $userId): VanTransfer
+    {
+        return DB::transaction(function () use ($transferId, $userId): VanTransfer {
+            $transfer = VanTransfer::whereKey($transferId)->lockForUpdate()->firstOrFail();
+
+            throw_if($transfer->status !== VanTransferStatus::Pending, new \RuntimeException('Only pending transfers can be approved.'));
+            throw_if($transfer->to_user_id !== $userId, new DomainException('Only the destination representative can approve this transfer.'));
+
+            $transfer->update([
+                'status' => VanTransferStatus::Accepted,
+                'accepted_at' => now(),
+            ]);
+
+            return $transfer->fresh();
+        });
+    }
+
     public function ship(int $transferId, int $fromWarehouseId, int $userId): VanTransfer
     {
         return DB::transaction(function () use ($transferId, $fromWarehouseId, $userId): VanTransfer {
             $transfer = VanTransfer::with('items')->whereKey($transferId)->lockForUpdate()->firstOrFail();
 
-            throw_if($transfer->status !== VanTransferStatus::Pending, new \RuntimeException('Only pending transfers can be shipped.'));
+            throw_if($transfer->status !== VanTransferStatus::Accepted, new \RuntimeException('Only accepted transfers can be shipped.'));
             throw_if($transfer->from_user_id !== $userId, new DomainException('Only the source representative can ship this transfer.'));
 
             Warehouse::whereKey($fromWarehouseId)
@@ -102,9 +119,9 @@ class VanTransferService implements VanTransferServiceContract
         });
     }
 
-    public function receive(int $transferId, int $userId): VanTransfer
+    public function receive(int $transferId, int $userId, ?array $itemQuantities = null): VanTransfer
     {
-        return DB::transaction(function () use ($transferId, $userId): VanTransfer {
+        return DB::transaction(function () use ($transferId, $userId, $itemQuantities): VanTransfer {
             $transfer = VanTransfer::with('items')->whereKey($transferId)->lockForUpdate()->firstOrFail();
 
             throw_if($transfer->status !== VanTransferStatus::Shipped, new \RuntimeException('Only shipped transfers can be received.'));
@@ -123,15 +140,28 @@ class VanTransferService implements VanTransferServiceContract
             throw_if(! $vanWarehouse, new \RuntimeException('Destination van warehouse not found for user.'));
 
             foreach ($transfer->items as $item) {
-                $this->stock->transfer(
-                    $inTransitId,
-                    $vanWarehouse->id,
-                    $item->product_id,
-                    $item->batch_id,
-                    (float) $item->quantity,
-                    $transfer,
-                    $userId,
-                );
+                $ordered = (float) $item->quantity;
+                $received = $itemQuantities[$item->id] ?? $ordered;
+                $exception = max(0, $ordered - $received);
+
+                $item->update([
+                    'received_quantity' => $received,
+                    'exception_quantity' => $exception > 0 ? $exception : null,
+                    'exception_reason' => $exception > 0 ? 'shortage' : null,
+                    'exceptioned_at' => $exception > 0 ? now() : null,
+                ]);
+
+                if ($received > 0) {
+                    $this->stock->transfer(
+                        $inTransitId,
+                        $vanWarehouse->id,
+                        $item->product_id,
+                        $item->batch_id,
+                        $received,
+                        $transfer,
+                        $userId,
+                    );
+                }
             }
 
             $transfer->update([
@@ -145,10 +175,11 @@ class VanTransferService implements VanTransferServiceContract
 
     public function reject(int $transferId, int $userId): VanTransfer
     {
-        return DB::transaction(function () use ($transferId): VanTransfer {
+        return DB::transaction(function () use ($transferId, $userId): VanTransfer {
             $transfer = VanTransfer::whereKey($transferId)->lockForUpdate()->firstOrFail();
 
             throw_if(! in_array($transfer->status, [VanTransferStatus::Pending, VanTransferStatus::Accepted]), new \RuntimeException('Only pending or accepted transfers can be rejected.'));
+            throw_if($transfer->to_user_id !== $userId, new DomainException('Only the destination representative can reject this transfer.'));
 
             $transfer->update(['status' => VanTransferStatus::Rejected]);
 

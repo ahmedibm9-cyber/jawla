@@ -10,9 +10,17 @@ class VanTransferItem extends Model
 {
     use AppendOnly;
 
-    protected $fillable = ['van_transfer_id', 'product_id', 'batch_id', 'quantity'];
+    protected $fillable = [
+        'van_transfer_id', 'product_id', 'batch_id', 'quantity',
+        'received_quantity', 'exception_quantity', 'exception_reason', 'exceptioned_at',
+    ];
 
-    protected $casts = ['quantity' => 'decimal:3'];
+    protected $casts = [
+        'quantity' => 'decimal:3',
+        'received_quantity' => 'decimal:3',
+        'exception_quantity' => 'decimal:3',
+        'exceptioned_at' => 'datetime',
+    ];
 
     public function vanTransfer(): BelongsTo
     {

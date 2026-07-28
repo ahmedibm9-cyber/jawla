@@ -128,8 +128,18 @@ class InvoiceService implements InvoiceContract
                 'remaining_amount' => $calculation->total,
                 'posting_date' => today(),
                 'issued_at' => now(),
+                'snapshot_company' => $this->buildCompanySnapshot($company),
+                'snapshot_customer' => $this->buildCustomerSnapshot($customer),
+                'snapshot_totals' => [
+                    'subtotal' => $calculation->subtotal,
+                    'vat_amount' => $calculation->vatAmount,
+                    'total' => $calculation->total,
+                    'currency' => 'EGP',
+                    'vat_percent' => $company->vat_percent,
+                ],
             ]);
 
+            $snapshotItems = [];
             foreach ($items as $i => $item) {
                 InvoiceItem::create([
                     'invoice_id' => $invoice->id,
@@ -140,7 +150,18 @@ class InvoiceService implements InvoiceContract
                     'line_total' => $calculation->lines[$i]->lineTotal,
                     'tax_amount' => $calculation->lines[$i]->vatAmount,
                 ]);
+                $prod = $products->get($item['product_id']);
+                $snapshotItems[] = [
+                    'product_id' => $item['product_id'],
+                    'product_name_ar' => $prod->name_ar ?? '',
+                    'product_name_en' => $prod->name_en ?? '',
+                    'quantity' => $item['quantity'],
+                    'unit_price' => $item['unit_price'],
+                    'line_total' => $calculation->lines[$i]->lineTotal,
+                    'tax_amount' => $calculation->lines[$i]->vatAmount,
+                ];
             }
+            $invoice->update(['snapshot_items' => $snapshotItems]);
 
             foreach ($items as $item) {
                 $this->stock->decrement(
@@ -211,7 +232,7 @@ class InvoiceService implements InvoiceContract
     public function cancel(Invoice $invoice, int $userId, string $reason): Invoice
     {
         $manager = User::withoutGlobalScopes()->findOrFail($userId);
-        if (! $manager->can('update:invoice')
+        if (! $manager->can('invoices.cancel')
             || ! $manager->hasCompanyAccess((int) $invoice->company_id)
             || trim($reason) === '') {
             throw new DomainException('A sales manager and mandatory reason are required to void an issued invoice.');
@@ -387,5 +408,28 @@ class InvoiceService implements InvoiceContract
         }
 
         return $warehouse;
+    }
+
+    private function buildCompanySnapshot(Company $company): array
+    {
+        return [
+            'name_ar' => $company->name_ar,
+            'name_en' => $company->name_en,
+            'tax_number' => $company->tax_number,
+            'address' => $company->address,
+            'vat_percent' => $company->vat_percent,
+            'bank_name' => $company->bank_name,
+            'bank_iban' => $company->bank_iban,
+        ];
+    }
+
+    private function buildCustomerSnapshot(Customer $customer): array
+    {
+        return [
+            'name_ar' => $customer->name_ar,
+            'name_en' => $customer->name_en,
+            'code' => $customer->code,
+            'address' => $customer->address,
+        ];
     }
 }
