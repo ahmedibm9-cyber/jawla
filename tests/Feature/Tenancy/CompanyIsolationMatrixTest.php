@@ -4,7 +4,10 @@ namespace Tests\Feature\Tenancy;
 
 use App\Models\Company;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\User;
+use App\Policies\CustomerPolicy;
+use App\Policies\InvoicePolicy;
 use App\Services\NumberSequenceService;
 use App\Support\ActiveCompanyContext;
 use App\Support\ApiAbilities;
@@ -177,5 +180,45 @@ class CompanyIsolationMatrixTest extends TestCase
         $this->withHeader('X-Jawla-Company', (string) $this->companyB->id)
             ->getJson('/api/v1/customers')
             ->assertForbidden();
+    }
+
+    public function test_policy_denies_view_on_foreign_company_record(): void
+    {
+        $this->user->assignRole('sales_manager');
+        $foreign = Customer::factory()->create(['company_id' => $this->companyB->id]);
+
+        $policy = app(CustomerPolicy::class);
+
+        $this->assertFalse($policy->view($this->user, $foreign));
+    }
+
+    public function test_policy_allows_view_on_own_company_record(): void
+    {
+        $this->user->assignRole('sales_manager');
+        $own = Customer::factory()->create(['company_id' => $this->companyA->id]);
+
+        $policy = app(CustomerPolicy::class);
+
+        $this->assertTrue($policy->view($this->user, $own));
+    }
+
+    public function test_policy_denies_update_on_foreign_company_record(): void
+    {
+        $this->user->assignRole('sales_manager');
+        $foreign = Customer::factory()->create(['company_id' => $this->companyB->id]);
+
+        $policy = app(CustomerPolicy::class);
+
+        $this->assertFalse($policy->update($this->user, $foreign));
+    }
+
+    public function test_policy_denies_delete_on_foreign_company_record(): void
+    {
+        $this->user->assignRole('sales_manager');
+        $foreign = Customer::factory()->create(['company_id' => $this->companyB->id]);
+
+        $policy = app(CustomerPolicy::class);
+
+        $this->assertFalse($policy->delete($this->user, $foreign));
     }
 }

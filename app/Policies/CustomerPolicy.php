@@ -2,18 +2,22 @@
 
 namespace App\Policies;
 
+use App\Models\Customer;
 use App\Models\User;
+use App\Policies\Concerns\ChecksCompanyOwnership;
 
 class CustomerPolicy
 {
+    use ChecksCompanyOwnership;
+
     public function viewAny(User $u): bool
     {
         return $u->can('view_any:customer');
     }
 
-    public function view(User $u): bool
+    public function view(User $u, Customer $model): bool
     {
-        return true;
+        return $this->matchesCompany($u, $model);
     }
 
     public function create(User $u): bool
@@ -21,13 +25,13 @@ class CustomerPolicy
         return $u->can('create:customer');
     }
 
-    public function update(User $u): bool
+    public function update(User $u, Customer $model): bool
     {
-        return $u->can('update:customer');
+        return $u->can('update:customer') && $this->matchesCompany($u, $model);
     }
 
-    public function delete(User $u): bool
+    public function delete(User $u, Customer $model): bool
     {
-        return $u->can('delete:customer');
+        return $u->can('delete:customer') && $this->matchesCompany($u, $model);
     }
 }

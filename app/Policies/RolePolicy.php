@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace App\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Policies\Concerns\ChecksCompanyOwnership;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Spatie\Permission\Models\Role;
 
 class RolePolicy
 {
     use HandlesAuthorization;
+    use ChecksCompanyOwnership;
 
     public function viewAny(AuthUser $authUser): bool
     {
@@ -19,7 +21,7 @@ class RolePolicy
 
     public function view(AuthUser $authUser, Role $role): bool
     {
-        return $authUser->can('view:role');
+        return $authUser->can('view:role') && $this->matchesCompany($authUser, $role);
     }
 
     public function create(AuthUser $authUser): bool
@@ -29,12 +31,12 @@ class RolePolicy
 
     public function update(AuthUser $authUser, Role $role): bool
     {
-        return $authUser->can('update:role');
+        return $authUser->can('update:role') && $this->matchesCompany($authUser, $role);
     }
 
     public function delete(AuthUser $authUser, Role $role): bool
     {
-        return $authUser->can('delete:role');
+        return $authUser->can('delete:role') && $this->matchesCompany($authUser, $role);
     }
 
     public function deleteAny(AuthUser $authUser): bool
