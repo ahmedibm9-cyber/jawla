@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureRecentPasswordConfirmation;
 use App\Http\Middleware\EnsureRepRole;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetActiveCompanyContext;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'ensure.rep' => EnsureRepRole::class,
+            'step-up' => EnsureRecentPasswordConfirmation::class,
         ]);
 
         // All unauthenticated users are redirected to the unified login page.

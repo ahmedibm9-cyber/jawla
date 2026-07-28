@@ -16,6 +16,20 @@ use Livewire\Component;
  */
 class LocationTracker extends Component
 {
+    public bool $showNotice = false;
+
+    public function mount(): void
+    {
+        $user = Auth::user();
+        if ($user === null) {
+            return;
+        }
+
+        $this->showNotice = \App\Models\WorkSession::where('user_id', $user->id)
+            ->whereNull('ended_at')
+            ->exists();
+    }
+
     public function recordPing(float $latitude, float $longitude, ?float $accuracy = null): void
     {
         $rep = Auth::user();
