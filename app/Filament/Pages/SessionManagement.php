@@ -2,9 +2,9 @@
 
 namespace App\Filament\Pages;
 
+use App\Services\SessionService;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
-use Illuminate\Support\Facades\DB;
 
 class SessionManagement extends Page
 {
@@ -16,69 +16,30 @@ class SessionManagement extends Page
     protected static ?string $slug = 'admin/sessions';
     protected string $view = 'filament.pages.session-management';
 
-    /** @return array<int, object{id: string, user_name: string, user_email: string, ip_address: string|null, user_agent: string, last_active: string, is_current: bool}> */
     public function getSessions(): array
     {
-        $sessions = DB::table('sessions')
-            ->join('users', 'sessions.user_id', '=', 'users.id')
-            ->select('sessions.*', 'users.name as user_name', 'users.email as user_email')
-            ->orderByDesc('sessions.last_activity')
-            ->get();
-
-        return $sessions->map(fn ($s) => (object) [
-            'id' => $s->id,
-            'user_name' => $s->user_name,
-            'user_email' => $s->user_email,
-            'ip_address' => $s->ip_address,
-            'user_agent' => $this->parseUserAgent($s->user_agent),
-            'last_active' => now()->diffInSeconds(now()->subSeconds(now()->timestamp - $s->last_activity)) . 's ago',
-            'is_current' => $s->id === session()->getId(),
-        ])->toArray();
+        return app(SessionService::class)
+            ->listActiveSessions((int) session()->getId());
     }
 
     public function revokeSession(string $sessionId): void
     {
-        DB::table('sessions')->where('id', $sessionId)->delete();
+        app(SessionService::class)->revokeSession($sessionId);
 
         Notification::make()
-            ->title('Session revoked')
+            ->title(__('app.session_revoked'))
             ->success()
             ->send();
     }
 
     public function revokeAllExceptCurrent(): void
     {
-        $currentId = session()->getId();
-
-        $revoked = DB::table('sessions')
-            ->where('id', '!=', $currentId)
-            ->delete();
+        $revoked = app(SessionService::class)
+            ->revokeAllExceptCurrent(session()->getId());
 
         Notification::make()
-            ->title("Revoked {$revoked} other sessions")
+            ->title(__('app.sessions_revoked_count', ['count' => $revoked]))
             ->success()
             ->send();
-    }
-
-    private function parseUserAgent(?string $ua): string
-    {
-        if (! $ua) {
-            return 'Unknown';
-        }
-
-        if (str_contains($ua, 'Firefox')) {
-            return 'Firefox';
-        }
-        if (str_contains($ua, 'Edg')) {
-            return 'Edge';
-        }
-        if (str_contains($ua, 'Chrome')) {
-            return 'Chrome';
-        }
-        if (str_contains($ua, 'Safari')) {
-            return 'Safari';
-        }
-
-        return substr($ua, 0, 40) . '...';
     }
 }

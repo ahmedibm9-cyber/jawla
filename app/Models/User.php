@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
@@ -170,16 +169,6 @@ class User extends Authenticatable implements FilamentUser
     public function stockMovements(): HasMany
     {
         return $this->hasMany(StockMovement::class);
-    }
-
-    /**
-     * Revoke all active sessions for this user (force logout everywhere).
-     */
-    public function revokeAllSessions(): int
-    {
-        return (int) DB::table('sessions')
-            ->where('user_id', $this->id)
-            ->delete();
     }
 
     public function isSuperAdmin(): bool

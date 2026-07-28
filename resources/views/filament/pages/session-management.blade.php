@@ -6,14 +6,14 @@
     <div class="space-y-4">
         <div class="flex items-center justify-between">
             <p class="text-sm text-gray-500 dark:text-gray-400">
-                {{ count($sessions) }} active session(s)
+                {{ count($sessions) }} {{ __('app.active_sessions') }}
             </p>
             <x-filament::button
-                wire:click="revokeAllExceptCurrent"
+                wire:click="confirmRevokeAll"
                 color="danger"
                 size="sm"
             >
-                Revoke All Others
+                {{ __('app.revoke_all_others') }}
             </x-filament::button>
         </div>
 
@@ -31,14 +31,14 @@
                                 </span>
                                 @if ($session->is_current)
                                     <x-filament::badge color="success" size="sm">
-                                        Current
+                                        {{ __('app.current_session') }}
                                     </x-filament::badge>
                                 @endif
                             </div>
                             <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                                <span>{{ $session->ip_address ?? 'Unknown IP' }}</span>
+                                <span>{{ $session->ip_address ?? __('app.unknown_ip') }}</span>
                                 <span>{{ $session->user_agent }}</span>
-                                <span>{{ $session->last_active }}</span>
+                                <span>{{ \Illuminate\Support\Carbon::now()->subSeconds(now()->timestamp - $session->last_activity)->diffForHumans() }}</span>
                             </div>
                         </div>
 
@@ -48,14 +48,14 @@
                                 icon="heroicon-o-x-mark"
                                 color="danger"
                                 size="sm"
-                                label="Revoke session"
+                                label="{{ __('app.revoke_session') }}"
                             />
                         @endunless
                     </div>
                 </div>
             @empty
                 <div class="text-center text-gray-500 dark:text-gray-400 py-8">
-                    No active sessions.
+                    {{ __('app.no_active_sessions') }}
                 </div>
             @endforelse
         </div>

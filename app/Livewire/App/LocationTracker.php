@@ -3,6 +3,7 @@
 namespace App\Livewire\App;
 
 use App\Services\LocationPingService;
+use App\Services\SessionService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
@@ -25,9 +26,7 @@ class LocationTracker extends Component
             return;
         }
 
-        $this->showNotice = \App\Models\WorkSession::where('user_id', $user->id)
-            ->whereNull('ended_at')
-            ->exists();
+        $this->showNotice = app(SessionService::class)->isUserOnShift($user->id);
     }
 
     public function recordPing(float $latitude, float $longitude, ?float $accuracy = null): void

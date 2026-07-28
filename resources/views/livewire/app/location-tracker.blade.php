@@ -6,10 +6,7 @@
             aria-live="polite"
             style="position:fixed;bottom:4.5rem;left:50%;transform:translateX(-50%);z-index:9998;max-width:90vw;padding:.375rem .75rem;border-radius:.5rem;background:rgba(15,23,42,.85);color:#f1f5f9;font-size:.75rem;text-align:center;backdrop-filter:blur(4px)"
         >
-            📍 {{ app()->getLocale() === 'ar'
-                ? 'تمكّنتك النشطة — يتم تتبع موقعك الجغرافي'
-                : 'On-shift — your location is being tracked'
-            }}
+            📍 {{ __('app.on_shift_location_tracked') }}
         </div>
     @endif
 
