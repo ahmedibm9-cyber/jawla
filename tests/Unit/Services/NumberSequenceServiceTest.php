@@ -241,32 +241,6 @@ class NumberSequenceServiceTest extends TestCase
         $this->assertSame(range(1, $count), $tails);
     }
 
-    public function test_select_for_update_serializes_two_connections(): void
-    {
-        // Direct lock test on PostgreSQL: a row held with FOR UPDATE on
-        // connection A blocks the same row on connection B until A commits.
-        // This is the SQL-level guarantee the service relies on.
-        //
-        // To exercise two truly independent connections, the suite must be
-        // configured with a second connection (e.g. `pgsql_alt`) and
-        // `RefreshDatabase` must not be holding the default connection
-        // open. Default `phpunit.xml` ships only a single `pgsql`
-        // connection, so the proof is skipped here. To run it:
-        //   1. add `<env name="DB_CONNECTION_ALT" value="pgsql_alt"/>` and
-        //      a `pgsql_alt` entry in `config/database.php`
-        //   2. switch this test to `DatabaseMigrations` (or
-        //      `DatabaseTruncation`) so the per-test transaction does not
-        //      conflict with PDO-level `beginTransaction()` on the
-        //      default connection.
-        if (DB::connection()->getDriverName() !== 'pgsql') {
-            $this->markTestSkipped('Concurrent allocation proof requires PostgreSQL.');
-        }
-        $this->markTestSkipped(
-            'Cross-connection FOR UPDATE proof requires a second DB connection '
-            .'and a non-RefreshDatabase test isolation strategy; configure and re-enable.'
-        );
-    }
-
     public function test_concurrent_generation_yields_distinct_sequential_numbers(): void
     {
         if (DB::connection()->getDriverName() !== 'pgsql') {
