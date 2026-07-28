@@ -1,4 +1,42 @@
-@include('onboarding-translations')
+@php
+    $onboardingTranslations = [
+        'tour_welcome' => __('app.tour_welcome'),
+        'tour_welcome_desc' => __('app.tour_welcome_desc'),
+        'tour_todays_plan' => __('app.tour_todays_plan'),
+        'tour_todays_plan_desc' => __('app.tour_todays_plan_desc'),
+        'tour_visits' => __('app.tour_visits'),
+        'tour_visits_desc' => __('app.tour_visits_desc'),
+        'tour_tab_bar' => __('app.tour_tab_bar'),
+        'tour_tab_bar_desc' => __('app.tour_tab_bar_desc'),
+        'tour_quotations' => __('app.tour_quotations'),
+        'tour_quotations_desc' => __('app.tour_quotations_desc'),
+        'tour_more_menu' => __('app.tour_more_menu'),
+        'tour_more_menu_desc' => __('app.tour_more_menu_desc'),
+        'tour_notifications' => __('app.tour_notifications'),
+        'tour_notifications_desc' => __('app.tour_notifications_desc'),
+        'tour_offline' => __('app.tour_offline'),
+        'tour_offline_desc' => __('app.tour_offline_desc'),
+        'tour_admin_welcome' => __('app.tour_admin_welcome'),
+        'tour_admin_welcome_desc' => __('app.tour_admin_welcome_desc'),
+        'tour_admin_sidebar' => __('app.tour_admin_sidebar'),
+        'tour_admin_sidebar_desc' => __('app.tour_admin_sidebar_desc'),
+        'tour_admin_sales' => __('app.tour_admin_sales'),
+        'tour_admin_sales_desc' => __('app.tour_admin_sales_desc'),
+        'tour_admin_inventory' => __('app.tour_admin_inventory'),
+        'tour_admin_inventory_desc' => __('app.tour_admin_inventory_desc'),
+        'tour_admin_alarms' => __('app.tour_admin_alarms'),
+        'tour_admin_alarms_desc' => __('app.tour_admin_alarms_desc'),
+        'tour_admin_reports' => __('app.tour_admin_reports'),
+        'tour_admin_reports_desc' => __('app.tour_admin_reports_desc'),
+        'tour_admin_user_menu' => __('app.tour_admin_user_menu'),
+        'tour_admin_user_menu_desc' => __('app.tour_admin_user_menu_desc'),
+        'tour_admin_maps' => __('app.tour_admin_maps'),
+        'tour_admin_maps_desc' => __('app.tour_admin_maps_desc'),
+        'tour_next' => __('app.tour_next'),
+        'tour_back' => __('app.tour_back'),
+        'tour_finish' => __('app.tour_finish'),
+    ];
+@endphp
 
 <script>
     window.__onboarding = @json($onboardingTranslations);
