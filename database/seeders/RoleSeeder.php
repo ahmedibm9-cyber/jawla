@@ -44,6 +44,8 @@ class RoleSeeder extends Seeder
             'complaints.submit', 'cashbox.view', 'van_transfers.request',
             // HR administration
             'users.manage', 'roles.assign', 'routes.assign',
+            // Restricted settings pages
+            'admin_preferences.view', 'api_tokens.view',
             // Stock / Purchasing
             'stock.view', 'suppliers.manage',
         ];
@@ -214,9 +216,12 @@ class RoleSeeder extends Seeder
                 'view_any:alarm', 'view:alarm', 'update:alarm',
                 'view_any:task', 'view:task',
                 'view_any:sales_target', 'view:sales_target',
+                // Pages
+                'view:rep_live_map', 'view:customer_map',
                 // Custom
                 'alarms.view', 'reports.dashboard_view', 'reports.sales_view',
                 'reports.visits_view', 'reports.stock_view', 'reports.intercompany_view',
+                'reports.view',
             ],
 
             'sales_rep' => [

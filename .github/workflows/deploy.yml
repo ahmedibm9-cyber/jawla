@@ -1,40 +1,171 @@
 name: deploy
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
     branches: [master]
   workflow_dispatch:
+    inputs:
+      release_sha:
+        description: Full Git commit SHA to promote
+        required: true
+        type: string
 
 permissions:
   contents: read
 
-jobs:
-  deploy-staging:
-    runs-on: ubuntu-latest
-    environment: staging
-    steps:
-      - uses: actions/checkout@v4
-      - name: Deploy to staging
-        run: |
-          echo "Staging deploy triggered. Railway auto-deploys from master."
-          echo "Verify at: https://jawla-staging.up.railway.app/up"
+concurrency:
+  group: jawla-production-promotion
+  cancel-in-progress: false
 
-  deploy-production:
-    needs: deploy-staging
+jobs:
+  prepare:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      release_sha: ${{ steps.release.outputs.release_sha }}
+    steps:
+      - id: release
+        name: Resolve immutable release
+        env:
+          RELEASE_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || inputs.release_sha }}
+        run: |
+          if ! [[ "$RELEASE_SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "release_sha must be a full 40-character Git SHA"
+            exit 64
+          fi
+          echo "release_sha=$RELEASE_SHA" >> "$GITHUB_OUTPUT"
+
+  deploy-staging:
+    needs: prepare
     runs-on: ubuntu-latest
     environment:
-      name: production
-      url: https://jawla-production.up.railway.app
+      name: staging
+      url: ${{ vars.STAGING_URL }}
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_PROJECT_ID: ${{ vars.RAILWAY_PROJECT_ID }}
+      RAILWAY_SERVICE_ID: ${{ vars.RAILWAY_SERVICE_ID }}
+      STAGING_URL: ${{ vars.STAGING_URL }}
+      RELEASE_SHA: ${{ needs.prepare.outputs.release_sha }}
     steps:
       - uses: actions/checkout@v4
-      - name: Deploy to production
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned Railway CLI
+        run: npm install --global @railway/cli@5.23.3
+      - name: Deploy exact release to staging
+        run: >-
+          railway up --ci
+          --project "$RAILWAY_PROJECT_ID"
+          --environment staging
+          --service "$RAILWAY_SERVICE_ID"
+          --message "Jawla staging $RELEASE_SHA"
+      - name: Verify staging readiness
         run: |
-          echo "Production deploy triggered. Railway auto-deploys from master."
-          echo "Verify at: https://jawla-production.up.railway.app/up"
-      - name: Post-deploy smoke
-        run: |
-          for i in $(seq 1 10); do
-            curl -sf https://jawla-production.up.railway.app/up && exit 0
+          test -n "$STAGING_URL"
+          for i in $(seq 1 30); do
+            if curl -fsS "${STAGING_URL%/}/health" | jq -e '.status == "ok" and .db == "ok" and .cache == "ok"'; then
+              exit 0
+            fi
             sleep 5
           done
-          echo "Health check failed"; exit 1
+          echo "staging readiness check failed"
+          exit 1
+      - name: Capture deployment evidence
+        run: >-
+          railway deployment list
+          --project "$RAILWAY_PROJECT_ID"
+          --environment staging
+          --service "$RAILWAY_SERVICE_ID"
+          --limit 5
+          --json > staging-deployments.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: staging-deployment-${{ env.RELEASE_SHA }}
+          path: staging-deployments.json
+
+  staging-dast:
+    needs: [prepare, deploy-staging]
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      STAGING_URL: ${{ vars.STAGING_URL }}
+      RELEASE_SHA: ${{ needs.prepare.outputs.release_sha }}
+    steps:
+      - name: OWASP ZAP staging baseline
+        run: |
+          test -n "$STAGING_URL"
+          docker run -v "${GITHUB_WORKSPACE}:/zap/wrk:rw" \
+            ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
+            -t "${STAGING_URL%/}" -I -m 5 \
+            -r staging-zap.html -w staging-zap.md
+      - name: Upload staging ZAP evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-zap-${{ env.RELEASE_SHA }}
+          path: |
+            staging-zap.html
+            staging-zap.md
+          if-no-files-found: error
+
+  deploy-production:
+    needs: [prepare, staging-dast]
+    runs-on: ubuntu-latest
+    # Configure required reviewers on this GitHub environment. Approval is the
+    # explicit human promotion gate after staging readiness and DAST succeed.
+    environment:
+      name: production
+      url: ${{ vars.PRODUCTION_URL }}
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_PROJECT_ID: ${{ vars.RAILWAY_PROJECT_ID }}
+      RAILWAY_SERVICE_ID: ${{ vars.RAILWAY_SERVICE_ID }}
+      PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+      RELEASE_SHA: ${{ needs.prepare.outputs.release_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_SHA }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install pinned Railway CLI
+        run: npm install --global @railway/cli@5.23.3
+      - name: Deploy approved release to production
+        run: >-
+          railway up --ci
+          --project "$RAILWAY_PROJECT_ID"
+          --environment production
+          --service "$RAILWAY_SERVICE_ID"
+          --message "Jawla production $RELEASE_SHA"
+      - name: Verify production readiness
+        run: |
+          test -n "$PRODUCTION_URL"
+          for i in $(seq 1 30); do
+            if curl -fsS "${PRODUCTION_URL%/}/health" | jq -e '.status == "ok" and .db == "ok" and .cache == "ok"'; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "production readiness check failed; initiate rollback"
+          exit 1
+      - name: Capture deployment evidence
+        run: >-
+          railway deployment list
+          --project "$RAILWAY_PROJECT_ID"
+          --environment production
+          --service "$RAILWAY_SERVICE_ID"
+          --limit 5
+          --json > production-deployments.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-deployment-${{ env.RELEASE_SHA }}
+          path: production-deployments.json

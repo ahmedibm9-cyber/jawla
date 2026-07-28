@@ -7,6 +7,14 @@
 **Revision inspected:** `7b1dd3a` on `master`, plus the working-tree changes listed under “Scope and state”
 **Status:** **Complete exploration; downstream implementation is safe to plan, but the application is not ready for a real-data production launch.**
 
+> **Post-exploration implementation addendum (2026-07-29):** The offline-sale
+> payload mismatch, active-company stock/policy defects, object-storage image
+> sanitization, and PHPStan runtime-symbol defects identified by this dossier
+> were remediated after the exploration snapshot. Release/promotion controls
+> were also implemented. The original evidence below remains the baseline that
+> motivated those changes; current status is tracked in
+> `docs/PRODUCTION_READINESS_IMPLEMENTATION.md`.
+
 ## Executive summary
 
 Jawla (جولة) is a bilingual Arabic/English field-sales CRM/ERP for Egyptian distribution teams. Reps use a Livewire PWA at `/app` to run routes, visit customers with GPS, sell from van stock, collect payments, record returns and expenses, and reconcile cash. Back-office roles use a Filament panel at `/admin`. The deployment unit is one Laravel 13 monolith backed by PostgreSQL; application-level `company_id` scoping supports a user switching among assigned companies.

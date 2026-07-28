@@ -82,7 +82,7 @@ class AdminAccessTest extends TestCase
         }
     }
 
-    public function test_legacy_admin_with_hr_role_has_only_explicit_custom_page_access(): void
+    public function test_admin_with_hr_role_has_full_custom_page_access(): void
     {
         $this->actingAs($this->admin);
 
@@ -93,6 +93,9 @@ class AdminAccessTest extends TestCase
             '/admin/rep-live-map',
             '/admin/supplier-comparison',
             '/admin/api-tokens',
+            '/admin/reports-page',
+            '/admin/collect-payment',
+            '/admin/stock-import',
         ];
 
         foreach ($pages as $url) {
@@ -100,9 +103,6 @@ class AdminAccessTest extends TestCase
             $response->assertOk();
         }
 
-        foreach (['/admin/reports-page', '/admin/collect-payment', '/admin/stock-import'] as $url) {
-            $this->get($url)->assertForbidden();
-        }
     }
 
     public function test_admin_can_access_create_pages_for_writable_resources(): void
@@ -283,14 +283,14 @@ class AdminAccessTest extends TestCase
 
     // ─── Gate: admin full_access ───────────────────────────────────
 
-    public function test_legacy_admin_no_longer_bypasses_all_gates(): void
+    public function test_admin_has_all_seeded_permissions(): void
     {
         $this->actingAs($this->admin);
 
         $this->assertTrue($this->admin->can('users.manage'));
-        $this->assertFalse($this->admin->can('reports.view'));
-        $this->assertFalse($this->admin->can('payments.collect'));
-        $this->assertFalse($this->admin->can('stock.import'));
+        $this->assertTrue($this->admin->can('reports.view'));
+        $this->assertTrue($this->admin->can('payments.collect'));
+        $this->assertTrue($this->admin->can('stock.import'));
     }
 
     public function test_non_admin_role_is_gated_correctly(): void

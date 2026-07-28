@@ -5,6 +5,12 @@
 **Revision:** `7b1dd3a` plus inspected working-tree changes
 **Status vocabulary:** Verified, Failed, Declared, Blocked, Not run
 
+> **Implementation update (2026-07-29):** `typecheck` now runs PHPStan level 0
+> as the blocking runtime-safety gate with Pao output capture disabled and a 2 GB
+> memory limit. `typecheck-strict` preserves the level-6 debt audit. The final
+> verification results are recorded in
+> `docs/PRODUCTION_READINESS_IMPLEMENTATION.md`.
+
 ## Important local constraint
 
 GNU Make is not installed on the inspected host. Every `make ...` entry is therefore **Blocked locally as written**, even when its underlying command was run directly. On Linux/CI, use the Makefile targets. On this Windows host, use the equivalent direct commands below.

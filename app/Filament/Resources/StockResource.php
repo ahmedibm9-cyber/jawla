@@ -13,6 +13,8 @@ use Filament\Resources\Resource;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
 
 class StockResource extends Resource
 {
@@ -39,6 +41,20 @@ class StockResource extends Resource
     public static function getPluralLabel(): string
     {
         return app()->getLocale() === 'ar' ? 'أرصدة المخزون' : 'Stock Balances';
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $companyId = auth()->user()?->activeCompanyId();
+
+        if ($companyId === null) {
+            return parent::getEloquentQuery()->whereRaw('1 = 0');
+        }
+
+        return parent::getEloquentQuery()
+            ->whereHas('warehouse', fn (Builder $query) => $query->where('company_id', $companyId))
+            ->whereHas('product', fn (Builder $query) => $query->where('company_id', $companyId))
+            ->with(['warehouse', 'product', 'batch']);
     }
 
     public static function table(Table $table): Table
@@ -82,7 +98,7 @@ class StockResource extends Resource
                     ->label(l('تسوية', 'Adjust'))
                     ->icon('heroicon-o-adjustments-horizontal')
                     ->color('warning')
-                    ->visible(fn () => auth()->user()->can('stock.adjust'))
+                    ->visible(fn (Stock $record) => auth()->user()->can('adjust', $record))
                     ->requiresConfirmation()
                     ->modalDescription(fn () => app()->getLocale() === 'ar'
                         ? 'سيقوم هذا بإنشاء حركة مخزون مطابقة. لا يمكن التراجع.'
@@ -99,6 +115,8 @@ class StockResource extends Resource
                             ->maxLength(500),
                     ])
                     ->action(function (Stock $record, array $data) {
+                        Gate::authorize('adjust', $record);
+
                         app(StockServiceContract::class)->reconcile(
                             $record->warehouse_id,
                             $record->product_id,

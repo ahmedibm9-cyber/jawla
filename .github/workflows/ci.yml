@@ -5,6 +5,13 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PAO_DISABLE: "1"
 
 jobs:
   lint:
@@ -16,8 +23,66 @@ jobs:
           php-version: "8.3"
           extensions: mbstring, xml, ctype, json, bcmath, pgsql
           tools: composer:v2
-      - run: composer install --no-progress --prefer-dist
+          coverage: none
+      - run: composer install --no-interaction --no-progress --prefer-dist
       - run: ./vendor/bin/pint --test
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, xml, ctype, json, bcmath, pgsql, gd, intl, zip
+          tools: composer:v2
+          coverage: none
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - name: PHPStan runtime-safety gate
+        run: ./vendor/bin/phpstan analyse --level=0 --memory-limit=2G --no-progress
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run audit:pwa-assets
+
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          tools: composer:v2
+          coverage: none
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: npm ci
+      - run: composer audit
+      - run: npm audit --audit-level=high
+
+  secret-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Scan Git history and working tree
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   test:
     runs-on: ubuntu-latest
@@ -36,6 +101,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
+      APP_ENV: testing
       DB_CONNECTION: pgsql
       DB_HOST: 127.0.0.1
       DB_PORT: 5432
@@ -50,13 +116,14 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
-          extensions: mbstring, xml, ctype, json, bcmath, pgsql
+          extensions: mbstring, xml, ctype, json, bcmath, pgsql, gd, intl, zip
           tools: composer:v2
-      - run: composer install --no-progress --prefer-dist
-      - run: cp .env.example .env || true
+          coverage: none
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: cp .env.example .env
       - run: php artisan key:generate --force
       - run: php artisan migrate --force
-      - run: php artisan test --compact
+      - run: php -d memory_limit=2G artisan test --testsuite=Unit,Feature --compact
 
   browser-test:
     runs-on: ubuntu-latest
@@ -75,6 +142,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
+      APP_ENV: testing
       DB_CONNECTION: pgsql
       DB_HOST: 127.0.0.1
       DB_PORT: 5432
@@ -89,16 +157,18 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
-          extensions: mbstring, xml, ctype, json, bcmath, pgsql, sockets
+          extensions: mbstring, xml, ctype, json, bcmath, pgsql, sockets, gd, intl, zip
           tools: composer:v2
+          coverage: none
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: "npm"
-      - run: composer install --no-progress --prefer-dist
+          cache: npm
+      - run: composer install --no-interaction --no-progress --prefer-dist
       - run: npm ci
+      - run: npm run build
       - run: npx playwright install --with-deps chromium
-      - run: cp .env.example .env || true
+      - run: cp .env.example .env
       - run: php artisan key:generate --force
       - run: php artisan migrate --force
       - run: php artisan test tests/Browser --compact

@@ -43,10 +43,14 @@ This must be executed against a **scratch** database — never production.
 2. Restore the latest encrypted dump with the fail-closed helper:
    ```bash
    BACKUP_FILE=jawla_YYYYMMDD.dump.age \
+   SOURCE_DATABASE_URL=postgres://.../jawla_source \
    TARGET_DATABASE_URL=postgres://.../jawla_restore_test \
    BACKUP_AGE_IDENTITY_FILE=/secure/path/restore-key.txt \
+   RESTORE_EVIDENCE_FILE=/secure/path/jawla-restore-evidence.txt \
    ALLOW_SCRATCH_RESTORE=1 bash scripts/restore-backup.sh
    ```
+   The helper compares critical source/restored table counts and writes a
+   mode-0600 evidence file. Any mismatch exits non-zero.
 3. Point a local app copy at `jawla_restore_test` (`.env` `DB_*`), then:
    ```bash
    php artisan migrate:status   # schema matches code

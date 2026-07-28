@@ -56,6 +56,25 @@ class PhotoDiskConfigTest extends TestCase
         Storage::disk('s3')->assertExists($photo->path);
     }
 
+    public function test_metadata_is_removed_before_uploading_to_object_storage(): void
+    {
+        config(['filesystems.photo_disk' => 's3']);
+        Storage::fake('s3');
+
+        $upload = UploadedFile::fake()->image('gps.jpg', 20, 20);
+        $jpeg = file_get_contents($upload->getRealPath());
+        $metadata = "Exif\0\0GPSLatitude=30.0444;GPSLongitude=31.2357";
+        $segment = "\xFF\xE1".pack('n', strlen($metadata) + 2).$metadata;
+        file_put_contents($upload->getRealPath(), substr($jpeg, 0, 2).$segment.substr($jpeg, 2));
+
+        $photo = app(PhotoService::class)->store($upload, $this->rep);
+        $stored = Storage::disk('s3')->get($photo->path);
+
+        $this->assertStringNotContainsString("Exif\0\0", $stored);
+        $this->assertStringNotContainsString('GPSLatitude', $stored);
+        $this->assertNotFalse(imagecreatefromstring($stored));
+    }
+
     public function test_delete_resolves_the_rows_own_disk(): void
     {
         config(['filesystems.photo_disk' => 's3']);

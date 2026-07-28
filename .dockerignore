@@ -1,13 +1,9 @@
 .git
 node_modules
 vendor
-storage/logs/*
-storage/framework/cache/data/*
-storage/framework/sessions/*
-storage/framework/views/*
+storage/*
 bootstrap/cache/*
-.env
-.env.local
+.env*
 .phpunit.result.cache
 docker-compose.yml
 docker-compose.yaml

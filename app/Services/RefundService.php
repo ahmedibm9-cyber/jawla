@@ -191,7 +191,7 @@ class RefundService
     private function assertManager(int $managerId, int $companyId): void
     {
         $manager = User::withoutGlobalScopes()->whereKey($managerId)->lockForUpdate()->firstOrFail();
-        if (! $manager->hasCompanyAccess($companyId) || ! $manager->can('update:invoice')) {
+        if (! $manager->hasCompanyAccess($companyId) || ! $manager->can('refunds.approve')) {
             throw new DomainException('A same-company sales manager must approve the refund.');
         }
     }

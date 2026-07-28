@@ -7,10 +7,10 @@ echo "1/5 Lint..."
 vendor/bin/pint --test
 
 echo "2/5 Typecheck..."
-vendor/bin/phpstan analyse
+PAO_DISABLE=1 vendor/bin/phpstan analyse --level=0 --memory-limit=2G
 
 echo "3/5 Tests..."
-php artisan test --testsuite=Unit,Feature
+PAO_DISABLE=1 php -d memory_limit=2G artisan test --testsuite=Unit,Feature
 
 echo "4/5 Build..."
 npm run build

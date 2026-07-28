@@ -2,23 +2,15 @@
 
 namespace App\Filament\Forms\Components;
 
-use Filament\Forms\Components\Concerns\CanBeHidden;
 use Filament\Forms\Components\Concerns\CanBeReadOnly;
-use Filament\Forms\Components\Concerns\CanBeRequired;
-use Filament\Forms\Components\Concerns\HasExtraAlpineAttributes;
-use Filament\Forms\Components\Concerns\HasExtraAttributes;
-use Filament\Forms\Components\Concerns\HasLabel;
 use Filament\Forms\Components\Concerns\HasPlaceholder;
 use Filament\Forms\Components\Field;
+use Filament\Support\Concerns\HasExtraAlpineAttributes;
 
 class LeafletMapPicker extends Field
 {
-    use CanBeHidden;
     use CanBeReadOnly;
-    use CanBeRequired;
     use HasExtraAlpineAttributes;
-    use HasExtraAttributes;
-    use HasLabel;
     use HasPlaceholder;
 
     protected string $view = 'filament.forms.components.leaflet-map-picker';

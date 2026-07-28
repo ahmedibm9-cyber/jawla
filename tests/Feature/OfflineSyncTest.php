@@ -158,7 +158,9 @@ class OfflineSyncTest extends TestCase
         ]);
 
         $this->assertSame('failed', $results[0]['status']);
-        $this->assertStringContainsString('exploded', $results[0]['error']);
+        $this->assertSame('sync_processing_failed', $results[0]['error_code']);
+        $this->assertSame(__('app.sync_processing_failed'), $results[0]['error']);
+        $this->assertStringNotContainsString('exploded', $results[0]['error']);
         $this->assertDatabaseMissing('sync_receipts', ['idempotency_key' => 'f1']);
     }
 

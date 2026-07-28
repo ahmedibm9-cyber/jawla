@@ -29,8 +29,8 @@ use App\Services\Sync\SyncHandlerRegistry;
 use App\Services\VanTransferService;
 use App\Support\ActiveCompanyContext;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse;
-use Filament\Events\Auth\Login as FilamentLogin;
 use Filament\Facades\Filament;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -139,8 +139,12 @@ class AppServiceProvider extends ServiceProvider
             ->name('app.')
             ->group(base_path('routes/rep-sync.php'));
 
-        Event::listen(FilamentLogin::class, function (FilamentLogin $event): void {
-            Activity::log('login', $event->user, "Admin login: {$event->user->email}");
+        Event::listen(Login::class, function (Login $event): void {
+            if (! $event->user instanceof User) {
+                return;
+            }
+
+            Activity::log('login', $event->user, "Login: {$event->user->email}");
         });
 
         // Per-user admin sidebar section order (set on the "Customize interface"
@@ -158,12 +162,20 @@ class AppServiceProvider extends ServiceProvider
             }
         });
 
-        // Fail-fast: validate critical env vars in production
-        if (env('APP_ENV') === 'production') {
-            $required = ['APP_KEY', 'DB_HOST', 'DB_DATABASE', 'DB_USERNAME'];
-            foreach ($required as $var) {
-                if (empty(env($var))) {
-                    throw new \RuntimeException("Missing required environment variable: {$var}");
+        // Fail fast against cached configuration in production. Reading env()
+        // here would stop working after `php artisan config:cache`.
+        if (app()->isProduction()) {
+            $connection = (string) config('database.default');
+            $required = [
+                'APP_KEY' => config('app.key'),
+                'DB_HOST' => config("database.connections.{$connection}.host"),
+                'DB_DATABASE' => config("database.connections.{$connection}.database"),
+                'DB_USERNAME' => config("database.connections.{$connection}.username"),
+            ];
+
+            foreach ($required as $name => $value) {
+                if (blank($value)) {
+                    throw new \RuntimeException("Missing required environment variable: {$name}");
                 }
             }
         }

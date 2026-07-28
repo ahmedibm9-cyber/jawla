@@ -24,6 +24,10 @@ Access is enforced by Filament policies (admin) and route middleware (rep PWA).
 
 ## Permission matrix
 
+Refund separation of duties: `refunds.request` is assigned to field/sales
+roles; `refunds.approve` is assigned only to `sales_manager`, `admin`, and
+`super_admin`.
+
 | Ability                                          | super_admin | admin | sales_manager |   accounts   | purchasing | warehouse_keeper | executive | sales_rep  | hr_admin | system_viewer |
 | ------------------------------------------------ | :---------: | :---: | :-----------: | :----------: | :--------: | :--------------: | :-------: | :--------: | :------: | :-----------: |
 | **Resources**                                    |             |       |               |              |            |                  |           |            |          |               |

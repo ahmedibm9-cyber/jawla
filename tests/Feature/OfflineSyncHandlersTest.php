@@ -117,6 +117,29 @@ class OfflineSyncHandlersTest extends TestCase
         $this->assertSame($first['result']['invoice_number'], $second['result']['invoice_number']);
     }
 
+    public function test_sale_accepts_the_price_less_payload_queued_by_the_offline_ui(): void
+    {
+        $before = $this->vanStock();
+
+        $result = $this->process('sale-browser-contract-1', 'sale', [
+            'customer_id' => $this->customer->id,
+            'visit_id' => null,
+            'items' => [[
+                'product_id' => $this->product->id,
+                'quantity' => 2,
+            ]],
+        ]);
+
+        $this->assertSame('applied', $result['status']);
+        $this->assertArrayHasKey('invoice_id', $result['result']);
+        $this->assertSame($before - 2, $this->vanStock());
+        $this->assertDatabaseHas('invoice_items', [
+            'invoice_id' => $result['result']['invoice_id'],
+            'product_id' => $this->product->id,
+            'unit_price' => $this->product->price,
+        ]);
+    }
+
     public function test_payment_applies_and_credits_cash_box(): void
     {
         $invoice = app(InvoiceService::class)->create([

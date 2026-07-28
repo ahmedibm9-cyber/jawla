@@ -1,65 +1,89 @@
-# Deployment (Laravel Forge on Hetzner / DigitalOcean)
+# Jawla deployment
 
-## Server baseline
+## Release path
 
-- Ubuntu 24.04 LTS · PHP 8.3 · Nginx · PostgreSQL 16 · Supervisor.
-- Cloudflare in front (proxy on, TLS full-strict).
+Production promotion is defined in `.github/workflows/deploy.yml`:
 
-## Environment
+1. The blocking `CI` workflow must complete successfully on `master`.
+2. The exact 40-character commit SHA is checked out and deployed to Railway
+   `staging` with the pinned Railway CLI.
+3. `GET /health` must report healthy database and cache dependencies.
+4. OWASP ZAP runs against staging. Scanner/runtime failures block promotion;
+   passive warnings remain evidence for review.
+5. The GitHub `production` environment requires a human approval.
+6. The same commit SHA is deployed to Railway `production`, followed by the
+   same dependency-aware readiness check.
+7. Deployment-history JSON and ZAP reports are retained as workflow artifacts.
 
-- `APP_ENV=production`, `APP_DEBUG=false`.
-- `.env` values set in Forge; never in git.
+Do not enable Railway GitHub auto-deploy for the production service alongside
+this workflow. It would bypass the staging and approval gates.
 
-## Deploy on push (main branch)
+## Required GitHub environment configuration
 
-See `scripts/deploy.sh`. Steps: pull → `composer install --no-dev` →
-`npm ci && npm run build` → `php artisan migrate --force` →
-config/route/view caches → `queue:restart` → health check `/up` →
-rollback on failure.
+Configure both `staging` and `production` environments:
 
-## Post-deploy checks
+| Setting | Scope | Purpose |
+| --- | --- | --- |
+| `RAILWAY_TOKEN` | secret | Environment-scoped Railway project token |
+| `RAILWAY_PROJECT_ID` | variable | Target project |
+| `RAILWAY_SERVICE_ID` | variable | Web service |
+| `STAGING_URL` | staging variable | Public staging base URL |
+| `PRODUCTION_URL` | production variable | Public production base URL |
 
-- Health endpoint returns 200.
-- Sentry receives a test event.
-- Nightly backup ran within the last 24 h.
+Configure required reviewers on the `production` GitHub environment. Repository
+configuration alone cannot prove that this external protection is enabled.
 
-## Railway production notes
+The manual rollback workflow additionally requires an account-scoped
+`RAILWAY_API_TOKEN` in the production environment.
 
-- Health check path: `/up`
-- Keep cache / sessions / queue on Redis in Railway production:
-  - `SESSION_DRIVER=redis`
-  - `SESSION_CONNECTION=default`
-  - `SESSION_STORE=redis`
-  - `CACHE_STORE=redis`
-  - `QUEUE_CONNECTION=redis`
-  - `REDIS_URL=${{Redis.REDIS_URL}}`
-- Current source-controlled Railway scaling defaults:
-  - `numReplicas = 2`
-  - `PHP_CLI_SERVER_WORKERS = 4`
-- `route:cache` is intentionally disabled until closure routes are removed from `routes/web.php`.
+## Railway config-as-code
 
-## Queue worker (Railway)
+`railway.toml` enforces:
 
-The app uses `QUEUE_CONNECTION=redis` in production. A queue worker is needed
-for background jobs (PDF generation, notification dispatch, offline sync
-replays). To set up on Railway:
+- production PHP-FPM/Nginx start command;
+- pre-deploy forward migrations and Laravel caches;
+- two replicas;
+- `/health` readiness with a five-minute timeout;
+- restart-on-failure with ten retries;
+- Redis-backed sessions, cache, and queue;
+- private S3-compatible photo storage.
 
-1. Railway dashboard → New → Worker (from the same GitHub repo)
-2. Start command: `php artisan queue:work redis --tries=3 --timeout=60`
-3. Add the same `DB_*`, `REDIS_*`, `APP_*` env vars as the web service
-4. Set `QUEUE_CONNECTION=redis`
+`/up` remains Laravel's lightweight liveness endpoint. Promotion and platform
+traffic switching use `/health`, which checks PostgreSQL and the configured
+cache store and returns 503 when either dependency is unavailable.
 
-The worker auto-restarts on deploy via `php artisan queue:restart` in the
-deploy script.
+## Container build
 
-## Resource limits
+The Dockerfile builds frontend assets from `package-lock.json` in a pinned
+Node 22 stage, installs production Composer dependencies, enables GD WebP, and
+runs PHP-FPM behind Nginx. `.dockerignore` excludes all `.env*` and `storage/*`
+runtime material so local credentials and generated demo credentials cannot
+enter the image.
 
-| Service       | CPU       | Memory | Replicas |
-| ------------- | --------- | ------ | -------- |
-| Web (PHP-FPM) | 0.5 vCPU  | 512MB  | 2        |
-| Queue worker  | 0.25 vCPU | 256MB  | 1        |
-| PostgreSQL    | 0.5 vCPU  | 1GB    | 1        |
-| Redis         | 0.25 vCPU | 256MB  | 1        |
+## Legacy host deploy
 
-These are Railway defaults. Monitor with `railway metrics` and scale up if
-response times exceed 2s or queue depth grows.
+For a non-Railway host, `scripts/deploy.sh` requires an immutable `RELEASE_REF`;
+it refuses tracked working-tree changes, checks out the exact commit/tag, runs
+the build and forward migrations, and checks `/health`. A failed deploy restores
+the previous application release. Database migrations are not automatically
+reversed and must remain expand/contract compatible.
+
+```bash
+RELEASE_REF=<full-commit-sha-or-signed-tag> \
+APP_DIR=/var/www/jawla \
+bash scripts/deploy.sh
+```
+
+## Release prerequisites
+
+Before promotion:
+
+- `make verify` or `scripts/verify` is green;
+- the strict PHPStan level-6 debt report has been reviewed;
+- Composer and npm high-severity audits are clean;
+- an encrypted pre-deploy backup exists;
+- the scratch restore/reconciliation drill is current;
+- ETA, privacy/legal, incident ownership, device/offline UAT, accessibility,
+  performance, and business sign-off gates have evidence.
+
+Passing CI is necessary but is not authority to process real company data.

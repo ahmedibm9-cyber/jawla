@@ -130,7 +130,7 @@ class DemoSeeder extends Seeder
 
             // ─── Users ─────────────────────────────────────────────────────
             $demoCredentials = [];
-            $demoPassword = '123456789';
+            $demoPassword = Str::password(24);
             $createDemoUser = function (array $attributes, array $roles) use ($company, &$demoCredentials, $demoPassword): User {
                 $password = $demoPassword;
                 $email = strtolower((string) $attributes['email']);
@@ -148,10 +148,10 @@ class DemoSeeder extends Seeder
             $superAdmin = $createDemoUser(['name' => 'Setup Administrator', 'email' => 'superadmin@jawla.test', 'employee_code' => 'EMP-000'], ['super_admin', 'hr_admin']);
             $admin = $createDemoUser(['name' => 'عمرو حكيم', 'email' => 'admin@jawla.test', 'employee_code' => 'EMP-001'], ['admin', 'hr_admin']);
             $manager = $createDemoUser(['name' => 'مدير المبيعات', 'email' => 'manager@jawla.test', 'employee_code' => 'EMP-002'], ['sales_manager']);
-            $createDemoUser(['name' => 'مالية', 'email' => 'accounts@jawla.test', 'employee_code' => 'EMP-003'], ['accounts', 'system_viewer']);
+            $createDemoUser(['name' => 'مالية', 'email' => 'accounts@jawla.test', 'employee_code' => 'EMP-003'], ['accounts']);
             $createDemoUser(['name' => 'مشتريات', 'email' => 'purchasing@jawla.test', 'employee_code' => 'EMP-004'], ['purchasing']);
             $warehouseKeeper = $createDemoUser(['name' => 'أمين المستودع', 'email' => 'warehouse@jawla.test', 'employee_code' => 'EMP-005'], ['warehouse_keeper']);
-            $createDemoUser(['name' => 'محمد طه', 'email' => 'executive@jawla.test', 'employee_code' => 'EMP-006'], ['executive', 'system_viewer']);
+            $createDemoUser(['name' => 'محمد طه', 'email' => 'executive@jawla.test', 'employee_code' => 'EMP-006'], ['executive']);
             $rep1 = $createDemoUser(['name' => 'أحمد سعيد', 'email' => 'rep@jawla.test', 'employee_code' => 'EMP-007'], ['rep', 'sales_rep']);
             $rep2 = $createDemoUser(['name' => 'محمد علي', 'email' => 'rep2@jawla.test', 'employee_code' => 'EMP-008'], ['rep', 'sales_rep']);
 

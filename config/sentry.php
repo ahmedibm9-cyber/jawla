@@ -65,8 +65,9 @@ return [
 
     // @see: https://docs.sentry.io/platforms/php/guides/laravel/configuration/options/#ignore_transactions
     'ignore_transactions' => [
-        // Ignore Laravel's default health URL
+        // Ignore liveness/readiness probes.
         '/up',
+        '/health',
     ],
 
     // Breadcrumb specific configuration

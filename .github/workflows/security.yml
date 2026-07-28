@@ -23,12 +23,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # NOTE: CodeQL was removed — it does not support PHP (the analysis fails with
-  # "Did not recognize the following languages: php"), so it could never run for
-  # this Laravel app and permanently blocked the check suite (and every deploy).
-  # PHP static analysis belongs in a PHP-native tool (e.g. Larastan/PHPStan);
-  # dependency vulnerability scanning is covered by the job below.
-
   dependency-audit:
     runs-on: ubuntu-latest
     steps:
@@ -36,22 +30,20 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
+          coverage: none
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
+          cache: npm
       - run: composer install --no-interaction --prefer-dist --no-progress
       - run: npm ci
       - run: composer audit
       - run: npm audit --audit-level=high
 
-  # OWASP ZAP DAST — boots the app in CI and runs the ZAP baseline (passive)
-  # scan against it. Advisory only: continue-on-error, so ZAP alerts are visible
-  # (and uploaded as a report artifact) but never block the check suite Railway
-  # gates on. Runs on push to master / schedule / manual, not on every PR.
+  # Passive warnings remain report-only (`-I`). Scanner/runtime failures block.
   dast-zap:
     if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
-    continue-on-error: true
     services:
       postgres:
         image: postgres:16
@@ -65,13 +57,13 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
+      APP_ENV: local
       DB_CONNECTION: pgsql
       DB_HOST: 127.0.0.1
       DB_PORT: 5432
       DB_DATABASE: jawla_test
       DB_USERNAME: postgres
       DB_PASSWORD: postgres
-      APP_ENV: local
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -82,9 +74,10 @@ jobs:
       - run: composer install --no-interaction --prefer-dist --no-progress
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
-      - run: npm ci && npm run build
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - run: npm run build
       - name: Prepare app
         run: |
           cp .env.example .env
@@ -92,18 +85,20 @@ jobs:
           php artisan migrate --force
       - name: Serve app
         run: PHP_CLI_SERVER_WORKERS=4 php artisan serve --host=127.0.0.1 --port=8080 &
-      - name: Wait for app
+      - name: Wait for readiness
         run: |
           for i in $(seq 1 30); do
-            curl -sf http://127.0.0.1:8080/up && exit 0
+            curl -sf http://127.0.0.1:8080/health | jq -e '.status == "ok"' && exit 0
             sleep 2
           done
-          echo "app did not come up"; exit 1
+          echo "app did not become ready"
+          exit 1
       - name: OWASP ZAP baseline scan
         run: |
           docker run --network=host -v "$(pwd):/zap/wrk:rw" \
             ghcr.io/zaproxy/zaproxy:stable zap-baseline.py \
-            -t http://127.0.0.1:8080 -I -m 3 -r zap-report.html -w zap-report.md || true
+            -t http://127.0.0.1:8080 -I -m 3 \
+            -r zap-report.html -w zap-report.md
       - name: Upload ZAP report
         if: always()
         uses: actions/upload-artifact@v4

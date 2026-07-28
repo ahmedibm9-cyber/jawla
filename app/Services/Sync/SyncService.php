@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Support\ActiveCompanyContext;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Applies a batch of offline-queued operations with exactly-once semantics.
@@ -28,7 +30,7 @@ class SyncService
 
     /**
      * @param  array<int, array{key?: string, idempotency_key?: string, type?: string, payload?: array, payload_hash?: string, device_id?: string}>  $operations
-     * @return array<int, array{key: ?string, status: string, result?: array, error?: string}>
+     * @return array<int, array{key: ?string, status: string, result?: array, error?: string, error_code?: string}>
      */
     public function process(User $rep, array $operations, int $protocolVersion = 1): array
     {
@@ -45,7 +47,7 @@ class SyncService
 
     /**
      * @param  array{key?: string, idempotency_key?: string, type?: string, payload?: array, payload_hash?: string, device_id?: string}  $op
-     * @return array{key: ?string, status: string, result?: array, error?: string}
+     * @return array{key: ?string, status: string, result?: array, error?: string, error_code?: string}
      */
     private function processOne(User $rep, array $op, int $protocolVersion): array
     {
@@ -101,6 +103,14 @@ class SyncService
 
                 return ['key' => $key, 'status' => 'applied', 'result' => $result];
             }, attempts: 3);
+        } catch (ValidationException) {
+            return $this->failure(
+                $rep,
+                $key,
+                $type,
+                'sync_validation_failed',
+                __('app.sync_validation_failed'),
+            );
         } catch (QueryException $e) {
             // A concurrent request can pass the initial lookup, then lose the
             // database's unique (company_id, idempotency_key) race. Re-read the
@@ -122,10 +132,57 @@ class SyncService
                 ];
             }
 
-            return ['key' => $key, 'status' => 'failed', 'error' => $e->getMessage()];
+            return $this->failure(
+                $rep,
+                $key,
+                $type,
+                'sync_storage_failed',
+                __('app.sync_storage_failed'),
+                $e,
+            );
         } catch (\Throwable $e) {
-            return ['key' => $key, 'status' => 'failed', 'error' => $e->getMessage()];
+            return $this->failure(
+                $rep,
+                $key,
+                $type,
+                'sync_processing_failed',
+                __('app.sync_processing_failed'),
+                $e,
+            );
         }
+    }
+
+    /**
+     * Return a stable client-safe failure while retaining diagnostic context in
+     * server logs. Payloads and exception messages never cross the API boundary.
+     *
+     * @return array{key: string, status: string, error_code: string, error: string}
+     */
+    private function failure(
+        User $rep,
+        string $key,
+        string $type,
+        string $code,
+        string $message,
+        ?\Throwable $exception = null,
+    ): array {
+        if ($exception !== null) {
+            Log::error('Offline sync operation failed.', [
+                'company_id' => $rep->activeCompanyId(),
+                'user_id' => $rep->id,
+                'operation_type' => $type,
+                'idempotency_key' => $key,
+                'error_code' => $code,
+                'exception' => $exception,
+            ]);
+        }
+
+        return [
+            'key' => $key,
+            'status' => 'failed',
+            'error_code' => $code,
+            'error' => $message,
+        ];
     }
 
     private function findReceipt(User $rep, string $key, bool $lock = false): ?SyncReceipt

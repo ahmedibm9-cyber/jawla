@@ -28,7 +28,10 @@ class SaleSyncHandler extends AbstractRepWriteHandler
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'integer'],
             'items.*.quantity' => ['required', 'numeric', 'min:0.001'],
-            'items.*.unit_price' => ['required', 'numeric', 'min:0'],
+            // Older clients queued their quoted price; current clients omit it.
+            // InvoiceService always resolves the authoritative price server-side
+            // and only uses a supplied price to detect a stale quotation.
+            'items.*.unit_price' => ['sometimes', 'numeric', 'min:0'],
         ]);
 
         $this->assertCustomerInCompany($rep, (int) $data['customer_id']);
@@ -37,11 +40,18 @@ class SaleSyncHandler extends AbstractRepWriteHandler
             'company_id' => $rep->activeCompanyId(),
             'customer_id' => (int) $data['customer_id'],
             'visit_id' => $data['visit_id'] ?? null,
-            'items' => array_map(fn ($i) => [
-                'product_id' => (int) $i['product_id'],
-                'quantity' => (float) $i['quantity'],
-                'unit_price' => (float) $i['unit_price'],
-            ], $data['items']),
+            'items' => array_map(function (array $item): array {
+                $normalized = [
+                    'product_id' => (int) $item['product_id'],
+                    'quantity' => (float) $item['quantity'],
+                ];
+
+                if (array_key_exists('unit_price', $item)) {
+                    $normalized['unit_price'] = (float) $item['unit_price'];
+                }
+
+                return $normalized;
+            }, $data['items']),
         ]);
 
         return ['invoice_id' => $invoice->id, 'invoice_number' => $invoice->invoice_number];

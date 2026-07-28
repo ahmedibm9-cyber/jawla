@@ -102,8 +102,15 @@ Evidence: `routes/web.php:32-103`, `routes/rep-sync.php:6-13`, `routes/api.php:1
 ### Build and deployment
 
 - Vite inputs: `resources/css/app.css`, `resources/js/app.js` (`vite.config.js:6-29`).
-- Container entry: `/app/docker/start-container.sh` (`Dockerfile:56-58`).
-- Railway predeploy: migrate + config/route/view caches (`railway.toml:1-5`).
+- Container: pinned Node asset-build stage, then PHP-FPM/Nginx entry through
+  `/app/docker/start-container.sh` (`Dockerfile`).
+- Railway predeploy: forward migrations + config/route/view caches; `/health`
+  dependency readiness; restart-on-failure (`railway.toml`).
+- Promotion: blocking CI -> exact-SHA staging -> readiness/ZAP -> protected
+  production environment -> same-SHA production (`.github/workflows/deploy.yml`).
+- Rollback: named Railway deployment, explicit confirmation, protected
+  production environment, terminal-state and readiness verification
+  (`.github/workflows/rollback.yml`).
 
 ## Component relationships
 

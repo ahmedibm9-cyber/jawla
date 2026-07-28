@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 
 /**
  * Stores rep-captured photos (visit reports, complaints, returns) and links them
@@ -26,48 +27,97 @@ class PhotoService
      */
     private function disk(): string
     {
-        return (string) config('filesystems.photo_disk', 'public');
+        $disk = (string) config('filesystems.photo_disk', 'public');
+
+        if (app()->isProduction() && $disk === 'public') {
+            throw new RuntimeException('PHOTO_DISK must use private durable storage in production.');
+        }
+
+        return $disk;
     }
 
     public function store(UploadedFile $file, User $rep, ?Model $photable = null): Photo
     {
         $disk = $this->disk();
-        $path = $file->store(self::DIRECTORY, $disk);
+        $sanitized = $this->sanitize($file);
+        $path = null;
 
-        $this->stripExif($path, $disk);
+        try {
+            $path = $sanitized->store(self::DIRECTORY, $disk);
 
-        return Photo::create([
-            'company_id' => $rep->activeCompanyId(),
-            'user_id' => $rep->id,
-            'photable_type' => $photable?->getMorphClass(),
-            'photable_id' => $photable?->getKey(),
-            'disk' => $disk,
-            'path' => $path,
-            'original_name' => $file->getClientOriginalName(),
-            'size' => Storage::disk($disk)->size($path),
-        ]);
+            if (! is_string($path) || $path === '') {
+                throw new RuntimeException('The photo could not be written to storage.');
+            }
+
+            return Photo::create([
+                'company_id' => $rep->activeCompanyId(),
+                'user_id' => $rep->id,
+                'photable_type' => $photable?->getMorphClass(),
+                'photable_id' => $photable?->getKey(),
+                'disk' => $disk,
+                'path' => $path,
+                'original_name' => $file->getClientOriginalName(),
+                'size' => Storage::disk($disk)->size($path),
+            ]);
+        } catch (\Throwable $exception) {
+            if (is_string($path) && $path !== '') {
+                Storage::disk($disk)->delete($path);
+            }
+
+            throw $exception;
+        } finally {
+            @unlink($sanitized->getRealPath());
+        }
     }
 
     /**
-     * Strip EXIF metadata from JPEG images to prevent GPS/camera leakage.
-     * Other formats are stored as-is.
+     * Re-encode supported images before upload. This strips EXIF and ancillary
+     * metadata while the file is still local, so the same privacy guarantee
+     * works for S3/object storage as it does for local disks.
      */
-    private function stripExif(string $path, string $disk): void
+    private function sanitize(UploadedFile $file): UploadedFile
     {
-        $full = Storage::disk($disk)->path($path);
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $source = $file->getRealPath();
+        $contents = is_string($source) ? file_get_contents($source) : false;
+        $image = is_string($contents) ? @imagecreatefromstring($contents) : false;
 
-        if ($finfo->file($full) !== 'image/jpeg') {
-            return;
+        if ($image === false) {
+            throw new RuntimeException('The uploaded photo could not be decoded safely.');
         }
 
-        $img = @imagecreatefromjpeg($full);
-        if (! $img) {
-            return;
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($contents);
+        $temporaryPath = tempnam(sys_get_temp_dir(), 'jawla-photo-');
+
+        if ($temporaryPath === false) {
+            imagedestroy($image);
+
+            throw new RuntimeException('A temporary photo file could not be created.');
         }
 
-        imagejpeg($img, $full, 90);
-        imagedestroy($img);
+        try {
+            $encoded = match ($mime) {
+                'image/jpeg' => imagejpeg($image, $temporaryPath, 90),
+                'image/png' => imagepng($image, $temporaryPath, 6),
+                'image/webp' => function_exists('imagewebp') && imagewebp($image, $temporaryPath, 90),
+                default => false,
+            };
+        } finally {
+            imagedestroy($image);
+        }
+
+        if (! $encoded) {
+            @unlink($temporaryPath);
+
+            throw new RuntimeException('The uploaded photo format is not supported safely.');
+        }
+
+        return new UploadedFile(
+            $temporaryPath,
+            $file->getClientOriginalName(),
+            is_string($mime) ? $mime : null,
+            null,
+            true,
+        );
     }
 
     /** Link an already-stored photo to its owning record (e.g. after the parent is saved). */

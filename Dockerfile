@@ -1,3 +1,12 @@
+FROM node:22-alpine AS frontend
+
+WORKDIR /app
+
+COPY . /app
+
+RUN npm ci \
+    && npm run build
+
 FROM php:8.3-fpm-alpine
 
 WORKDIR /app
@@ -7,6 +16,7 @@ RUN apk add --no-cache \
     nginx \
     libpng-dev \
     libjpeg-turbo-dev \
+    libwebp-dev \
     freetype-dev \
     libzip-dev \
     icu-dev \
@@ -18,7 +28,7 @@ RUN apk add --no-cache \
     gettext \
     bash \
     fcgi \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
     && docker-php-ext-install -j$(nproc) pdo_pgsql gd mbstring zip bcmath intl opcache \
     && pecl install redis \
     && docker-php-ext-enable redis
@@ -26,9 +36,10 @@ RUN apk add --no-cache \
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 COPY . /app
+COPY --from=frontend /app/public/build /app/public/build
 
-RUN composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress \
-    && mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache /run/nginx /etc/nginx/templates \
+RUN mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache /run/nginx /etc/nginx/templates \
+    && composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress \
     && cp docker/nginx/default.conf.template /etc/nginx/templates/default.conf.template \
     && chmod +x docker/start-container.sh \
     && chown -R www-data:www-data /app/storage /app/bootstrap/cache

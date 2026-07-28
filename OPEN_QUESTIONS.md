@@ -7,7 +7,19 @@
 
 ## Blocking downstream field use
 
+### Resolved after the exploration snapshot: offline sale pricing
+
+The server-authoritative contract was selected and implemented. The browser may
+omit `unit_price`; `SaleSyncHandler` passes product and quantity to
+`InvoiceService`, while a supplied quoted price remains optional input that the
+service validates against current authoritative pricing. A regression test now
+replays the exact price-less payload and verifies invoice creation, stored
+server price, and stock decrement.
+
 ### Q1. What is the authoritative offline sale pricing contract?
+
+**Status:** Resolved during the 2026-07-29 production-readiness implementation;
+retained below as historical exploration evidence.
 
 **Question:** Should the offline client store the quoted `unit_price`, or should `SaleSyncHandler` accept product/quantity only and let `InvoiceService` derive the server-authoritative price?
 
@@ -47,6 +59,10 @@
 
 ### Q3. Why does PHPStan exit 1 without diagnostics?
 
+**Status:** Resolved. Laravel Pao was capturing the agent-run output and the
+config contained an unsupported `memoryLimit` key. `PAO_DISABLE=1` plus the CLI
+memory flag now produces normal diagnostics; all level-0 findings are fixed.
+
 **Question:** Is this a Windows process/output issue, PHPStan/Larastan bootstrap failure, result-cache corruption, or analyzer memory/process failure?
 
 **Why it matters:** Static analysis is a required quality gate and currently supplies no actionable error.
@@ -67,6 +83,10 @@
 
 ### Q4. How should policies authorize a user in a secondary active company?
 
+**Status:** Resolved in code. Ownership checks now use `activeCompanyId()` and
+stock requires active-company ownership of both product and warehouse. The
+external role/tenant approval remains a governance gate.
+
 **Question:** Should every record policy compare against `ActiveCompanyContext::id()` / `User::activeCompanyId()` instead of the user’s primary `company_id`?
 
 **Why it matters:** The app permits company switching for assigned users, but shared policy code checks only the primary company. This can deny legitimate secondary-company work. `StockPolicy` also applies the helper to `Stock`, which has no `company_id`.
@@ -84,6 +104,10 @@
 **Blocks:** Confident multi-company admin rollout; does not currently indicate a data leak because the mismatch is fail-closed.
 
 ### Q5. Does photo capture work with the real S3-compatible adapter?
+
+**Status:** Code path resolved and S3-configured storage fake covered. Uploaded
+bytes are sanitized before storage, so no object-storage local path is needed.
+Live production bucket configuration remains an external deployment check.
 
 **Question:** Can `PhotoService::stripExif()` operate after upload when the configured disk is an actual S3 adapter?
 
@@ -103,6 +127,9 @@
 
 ### Q6. What client-safe error contract should offline sync expose?
 
+**Status:** Resolved. Stable bilingual validation/storage/processing codes are
+returned to clients; detailed exceptions are logged server-side only.
+
 **Question:** Which stable error codes and bilingual messages should replace raw exception messages in sync results?
 
 **Why it matters:** `SyncService` returns `$e->getMessage()` for query and arbitrary failures, potentially exposing schema/query/internal details to authenticated clients.
@@ -116,6 +143,11 @@
 ## Production and operational unknowns
 
 ### Q7. Does Railway actually enforce staging-before-production deployment?
+
+**Status:** Repository workflow resolved. The exact CI commit now passes staging
+readiness and DAST before the protected production environment. Required
+reviewers, tokens, variables, and disabled platform auto-deploy must still be
+verified in GitHub/Railway.
 
 **Question:** Are staging/production services both auto-deploying from `master`, and do GitHub environment approvals meaningfully gate production?
 
@@ -184,6 +216,10 @@
 **Blocks:** Browser/E2E verification evidence, not server-side planning.
 
 ### Q11. What is the authoritative hosting/deployment document?
+
+**Status:** Resolved for the repository. `docs/DEPLOYMENT.md`,
+`docs/ROLLBACK.md`, the GitHub workflows, and `railway.toml` now agree on
+Railway promotion and dependency-aware `/health`.
 
 **Question:** Should stale Forge/Render text be retired in favor of Railway-only current architecture, or are multiple targets intentionally supported?
 

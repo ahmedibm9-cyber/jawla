@@ -2,10 +2,16 @@
 
 namespace Tests\Feature\Tenancy;
 
+use App\Filament\Resources\StockResource;
 use App\Models\Company;
 use App\Models\Customer;
+use App\Models\Product;
+use App\Models\ProductCategory;
+use App\Models\Stock;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Policies\CustomerPolicy;
+use App\Policies\StockPolicy;
 use App\Services\NumberSequenceService;
 use App\Support\ActiveCompanyContext;
 use App\Support\ApiAbilities;
@@ -218,5 +224,72 @@ class CompanyIsolationMatrixTest extends TestCase
         $policy = app(CustomerPolicy::class);
 
         $this->assertFalse($policy->delete($this->user, $foreign));
+    }
+
+    public function test_policies_follow_the_selected_secondary_company(): void
+    {
+        $this->user->companies()->attach($this->companyB->id);
+        $this->user->assignRole('admin');
+
+        $customerA = Customer::factory()->create(['company_id' => $this->companyA->id]);
+        $customerB = app(ActiveCompanyContext::class)->runWithCompany(
+            $this->companyB->id,
+            fn () => Customer::factory()->create([
+                'company_id' => $this->companyB->id,
+                'route_id' => null,
+            ]),
+        );
+
+        app(ActiveCompanyContext::class)->setCompanyId($this->companyB->id);
+
+        $policy = app(CustomerPolicy::class);
+        $this->assertTrue($policy->view($this->user, $customerB));
+        $this->assertFalse($policy->view($this->user, $customerA));
+    }
+
+    public function test_stock_policy_and_resource_require_active_company_ownership(): void
+    {
+        $this->user->companies()->attach($this->companyB->id);
+        $this->user->assignRole('admin');
+
+        $stockA = $this->makeStockForCompany($this->companyA, 'A-STOCK');
+        $stockB = $this->makeStockForCompany($this->companyB, 'B-STOCK');
+
+        app(ActiveCompanyContext::class)->setCompanyId($this->companyB->id);
+        $this->actingAs($this->user);
+
+        $policy = app(StockPolicy::class);
+        $this->assertTrue($policy->view($this->user, $stockB));
+        $this->assertTrue($policy->adjust($this->user, $stockB));
+        $this->assertFalse($policy->view($this->user, $stockA));
+        $this->assertFalse($policy->adjust($this->user, $stockA));
+
+        $this->assertSame(
+            [$stockB->id],
+            StockResource::getEloquentQuery()->orderBy('id')->pluck('id')->all(),
+        );
+    }
+
+    private function makeStockForCompany(Company $company, string $sku): Stock
+    {
+        return app(ActiveCompanyContext::class)->runWithCompany(
+            $company->id,
+            function () use ($company, $sku): Stock {
+                $category = ProductCategory::factory()->create(['company_id' => $company->id]);
+                $product = Product::factory()->create([
+                    'company_id' => $company->id,
+                    'category_id' => $category->id,
+                    'sku' => $sku,
+                ]);
+                $warehouse = Warehouse::factory()->create(['company_id' => $company->id]);
+
+                return Stock::create([
+                    'warehouse_id' => $warehouse->id,
+                    'product_id' => $product->id,
+                    'batch_id' => null,
+                    'quantity' => 10,
+                ]);
+            },
+        );
     }
 }

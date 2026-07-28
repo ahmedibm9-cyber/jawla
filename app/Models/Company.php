@@ -86,8 +86,8 @@ class Company extends Model
         return $this->hasMany(VanTransfer::class);
     }
 
-    public function auditLogs(): HasMany
+    public function activities(): HasMany
     {
-        return $this->hasMany(AuditLog::class);
+        return $this->hasMany(Activity::class);
     }
 }
