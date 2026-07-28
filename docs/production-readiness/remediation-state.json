@@ -4,8 +4,8 @@
   "branch": "remediation/production-readiness",
   "audit_commit": "ba768f7106b52fa8d2905daadc07cd6091ff0c26",
   "starting_commit": "d605f0d062fcad2be9d195a5aa4aa69b37819c3e",
-  "current_phase": 10,
-  "overall_status": "in_progress",
+  "current_phase": 7,
+  "overall_status": "completed",
   "started_at": "2026-07-26",
   "baseline": {
     "php": "8.3.32",
@@ -49,7 +49,7 @@
       "name": "Operations and release readiness",
       "status": "completed"
     },
-    { "phase": 7, "name": "Independent re-audit", "status": "pending" }
+    { "phase": 7, "name": "Independent re-audit", "status": "completed" }
   ],
   "findings": [
     {
@@ -290,7 +290,7 @@
       "original_severity": "critical",
       "phase": 3,
       "status": "resolved",
-      "decision": "No auto-resolve. Conflicts are quarantined in SyncReceipt with conflict_reason and conflict_detail. Manager reviews and manually resolves. No data is lost.",
+      "decision": "No auto-resolve. Conflicts are quarantined in SyncReceipt (response=null on create, status='conflict' on replay). Manager reviews and manually resolves. No data is lost.",
       "changed_files": [
         "app/Services/Sync/SyncService.php",
         "app/Models/SyncReceipt.php",
@@ -304,7 +304,7 @@
       ],
       "commands": [],
       "evidence": [
-        "SyncReceipt quarantines conflicts with conflict_reason and conflict_detail",
+        "SyncReceipt quarantines conflicts: null response on create, status='conflict' on replay; append-only via AppendOnly concern",
         "No auto-resolve — manager reviews quarantined receipts",
         "Idempotency keys prevent duplicate processing"
       ],
