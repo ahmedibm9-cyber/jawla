@@ -71,6 +71,6 @@ class SessionService
             return 'Safari';
         }
 
-        return substr($ua, 0, 40) . '...';
+        return substr($ua, 0, 40).'...';
     }
 }

@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\HandlesAuthorization;
 use App\Policies\Concerns\ChecksCompanyOwnership;
+use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Spatie\Permission\Models\Role;
 
 class RolePolicy
 {
-    use HandlesAuthorization;
     use ChecksCompanyOwnership;
+    use HandlesAuthorization;
 
     public function viewAny(AuthUser $authUser): bool
     {

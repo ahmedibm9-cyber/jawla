@@ -1,0 +1,179 @@
+{
+  "schema_version": "1.0",
+  "project": {
+    "name": "Jawla",
+    "name_arabic": "جولة",
+    "purpose": "Bilingual field-sales CRM/ERP for Egyptian market",
+    "owner": "Fulla Chemical Trading Co.",
+    "type": "monolithic Laravel application",
+    "primary_language": "PHP",
+    "secondary_languages": ["JavaScript", "Blade", "SQL"],
+    "frameworks": {
+      "backend": "Laravel 13.20.0",
+      "admin_panel": "Filament 4.0",
+      "pwa": "Livewire 3.0 + Tailwind CSS 4.0",
+      "build": "Vite 8.0",
+      "database": "PostgreSQL 16"
+    },
+    "runtime": {
+      "php": "8.3",
+      "node": "24.15.0"
+    },
+    "package_managers": ["composer", "npm"],
+    "scale": "6-20 daily sales reps",
+    "connectivity": "offline-first",
+    "languages_supported": ["arabic", "english"],
+    "currency": "EGP (single)"
+  },
+  "entry_points": {
+    "http": [
+      {"route": "GET /", "handler": "SystemPageController::root", "middleware": ["web"]},
+      {"route": "GET /login", "handler": "Filament Login", "middleware": ["web"]},
+      {"route": "GET /admin", "handler": "Filament AdminPanel", "middleware": ["web", "auth"]},
+      {"route": "GET /app", "handler": "Livewire Home", "middleware": ["web", "auth", "ensure.rep"]},
+      {"route": "POST /app/sync", "handler": "SyncController::store", "middleware": ["web", "auth", "ensure.rep", "throttle"]},
+      {"route": "GET /health", "handler": "SystemPageController::health", "middleware": ["web"]},
+      {"route": "GET /api/v1/*", "handler": "API controllers", "middleware": ["auth:sanctum"]}
+    ],
+    "cli": [
+      {"command": "app:purge-location-pings", "file": "app/Console/Commands/PurgeLocationPings.php"},
+      {"command": "app:bootstrap-production", "file": "app/Console/Commands/BootstrapProduction.php"}
+    ],
+    "scheduled": [
+      {"schedule": "daily", "command": "app:purge-location-pings"}
+    ]
+  },
+  "important_paths": {
+    "business_logic": "app/Services/ (36 services)",
+    "domain_models": "app/Models/ (65+ models)",
+    "admin_panel": "app/Filament/ (24 resources, 11 pages, 7 widgets)",
+    "rep_pwa": "app/Livewire/App/ (24 components)",
+    "offline_sync": ["resources/js/offline/outbox.js", "resources/js/offline/sync.js", "app/Services/Sync/"],
+    "security": ["app/Http/Middleware/SecurityHeaders.php", "app/Http/Middleware/SetActiveCompanyContext.php"],
+    "multi_tenancy": ["app/Support/ActiveCompanyContext.php", "app/Models/Concerns/BelongsToCompany.php"],
+    "financial_integrity": ["app/Models/Concerns/AppendOnly.php", "app/Services/InvoiceService.php"],
+    "config": ["config/jawla.php", "config/eta.php", "config/sanctum.php"],
+    "routes": ["routes/web.php", "routes/api.php", "routes/rep-sync.php"],
+    "migrations": "database/migrations/ (127 files)",
+    "tests": "tests/ (103 PHP test files)",
+    "ci": ".github/workflows/ (4 workflows)",
+    "deployment": ["railway.toml", "Dockerfile", "docker/"],
+    "docs": "docs/ (50+ files)"
+  },
+  "commands": {
+    "setup": {"command": "make setup", "status": "declared"},
+    "dev": {"command": "make dev", "status": "declared"},
+    "lint": {"command": "make lint", "status": "verified"},
+    "typecheck": {"command": "make typecheck", "status": "verified"},
+    "test": {"command": "make test", "status": "verified"},
+    "test_unit": {"command": "vendor/bin/pest tests/Unit", "status": "verified", "result": "142 tests, 386 assertions, all pass"},
+    "build": {"command": "make build", "status": "verified"},
+    "verify": {"command": "make verify", "status": "verified"},
+    "verify_full": {"command": "scripts/verify", "status": "declared", "note": "includes composer audit + npm audit, unlike make verify"},
+    "smoke": {"command": "make smoke", "status": "declared"},
+    "composer_audit": {"command": "composer audit", "status": "verified", "result": "clean"},
+    "npm_audit": {"command": "npm audit --audit-level=high", "status": "verified", "result": "0 vulnerabilities"}
+  },
+  "flows": [
+    {
+      "name": "Online Sale",
+      "trigger": "User creates invoice in SalesFlow Livewire component",
+      "path": ["SalesFlow", "PricingService", "InvoiceCalculationService", "InvoiceService::create()", "DB::transaction", "StockService::decrement()", "StockMovement::create()"],
+      "confidence": 95
+    },
+    {
+      "name": "Offline Sale → Sync",
+      "trigger": "Device comes online, sync.js flushes outbox",
+      "path": ["outbox.js:enqueue()", "IndexedDB", "sync.js:flush()", "POST /app/sync", "SyncController", "SyncService::process()", "SaleSyncHandler", "InvoiceService::create()"],
+      "confidence": 95
+    },
+    {
+      "name": "GPS Geofence Check",
+      "trigger": "Rep checks in at customer location",
+      "path": ["VisitFlow", "navigator.geolocation", "GpsCoordinate::distanceTo()", "server-side recomputation"],
+      "confidence": 90
+    },
+    {
+      "name": "Authentication",
+      "trigger": "User submits login form",
+      "path": ["Login page", "Timebox credential check", "attemptWhen (is_active)", "Session regeneration", "Role-based redirect (/app or /admin)"],
+      "confidence": 90
+    }
+  ],
+  "risks": [
+    {
+      "id": "R1",
+      "severity": "critical",
+      "description": "CI/Deploy branch mismatch — ci.yml triggers on 'main', deploy.yml on 'master'. Default branch is 'master'. CI never runs on deploy branch.",
+      "evidence": ["ci.yml:4-6", "deploy.yml:4-5", "git branch --show-current = master"],
+      "confidence": 95
+    },
+    {
+      "id": "R2",
+      "severity": "high",
+      "description": "No rate limiter tests despite stated security requirement (5/min login, 60/min POST).",
+      "evidence": ["SECURITY.md", "grep for 'rate' in tests/ returns 0"],
+      "confidence": 90
+    },
+    {
+      "id": "R3",
+      "severity": "high",
+      "description": "E2E and ZAP scans are advisory-only (continue-on-error). Never block deploys.",
+      "evidence": ["e2e.yml:7", "security.yml ZAP step"],
+      "confidence": 95
+    },
+    {
+      "id": "R4",
+      "severity": "medium",
+      "description": "route:cache disabled due to closure routes. Performance penalty.",
+      "evidence": ["docs/DEPLOYMENT.md:39"],
+      "confidence": 90
+    },
+    {
+      "id": "R5",
+      "severity": "medium",
+      "description": "make verify skips dependency audits (only scripts/verify includes them).",
+      "evidence": ["Makefile:47-54", "scripts/verify:18-22"],
+      "confidence": 90
+    },
+    {
+      "id": "R6",
+      "severity": "medium",
+      "description": "PR-022 CSP deferred — Alpine.js requires unsafe-eval.",
+      "evidence": ["remediation-state.json PR-022"],
+      "confidence": 95
+    }
+  ],
+  "unknowns": [
+    {
+      "question": "Is Railway the active deployment target?",
+      "impact": "Deploy configuration may be stale",
+      "resolution": "Check Railway dashboard or run railway status"
+    },
+    {
+      "question": "Has ETA e-invoicing ever been activated?",
+      "impact": "Egyptian compliance may be required before go-live",
+      "resolution": "Check config/eta.php values in production .env"
+    },
+    {
+      "question": "What closure routes prevent route:cache?",
+      "impact": "Performance optimization blocked",
+      "resolution": "Run route:list and identify closures"
+    }
+  ],
+  "confidence_table": {
+    "project_purpose": 95,
+    "tech_stack": 100,
+    "architecture": 95,
+    "offline_sync": 95,
+    "multi_tenancy": 100,
+    "test_results": 100,
+    "ci_branch_mismatch": 95,
+    "service_layer_pattern": 90,
+    "security_patterns": 85,
+    "deployment_status": 70
+  },
+  "generated_at": "2026-07-28",
+  "exploration_scope": "full repository",
+  "primary_branch": "master"
+}

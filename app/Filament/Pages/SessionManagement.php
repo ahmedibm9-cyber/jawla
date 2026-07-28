@@ -9,11 +9,17 @@ use Filament\Pages\Page;
 class SessionManagement extends Page
 {
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-clock';
-    protected static string|null $navigationLabel = 'Sessions';
+
+    protected static ?string $navigationLabel = 'Sessions';
+
     protected static string|\UnitEnum|null $navigationGroup = null;
+
     protected static ?string $title = 'Active Sessions';
+
     protected static ?int $navigationSort = 50;
+
     protected static ?string $slug = 'admin/sessions';
+
     protected string $view = 'filament.pages.session-management';
 
     public function getSessions(): array
