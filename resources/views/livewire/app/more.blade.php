@@ -11,7 +11,7 @@
                 <p class="profile-hero-detail">{{ $user->employee_code ?? $user->email }}</p>
             </div>
         </div>
-        <x-heroicon-o-chevron-right class="profile-hero-chevron opacity-70" />
+        <x-heroicon-o-chevron-right class="profile-hero-chevron opacity-70" aria-hidden="true" />
     </a>
 
     {{-- Quick Stats --}}

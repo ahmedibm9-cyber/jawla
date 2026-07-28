@@ -4,10 +4,8 @@ namespace Tests\Feature\Tenancy;
 
 use App\Models\Company;
 use App\Models\Customer;
-use App\Models\Invoice;
 use App\Models\User;
 use App\Policies\CustomerPolicy;
-use App\Policies\InvoicePolicy;
 use App\Services\NumberSequenceService;
 use App\Support\ActiveCompanyContext;
 use App\Support\ApiAbilities;

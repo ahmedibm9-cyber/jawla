@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\Contracts\InvoiceService;
 use App\Services\Contracts\StockService;
+use App\Services\InvoiceQrService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -173,7 +174,7 @@ class InvoiceSnapshotTest extends TestCase
             ],
         ]);
 
-        $qrService = app(\App\Services\InvoiceQrService::class);
+        $qrService = app(InvoiceQrService::class);
         $qrData = $qrService->generateForInvoice($invoice);
 
         // Egypt QR format: invoice_number|total

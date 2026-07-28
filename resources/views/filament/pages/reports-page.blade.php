@@ -48,7 +48,7 @@
         <x-filament::section>
             @if($tab === 'visit_reports')
                 <div class="overflow-x-auto">
-                    <table class="filament-table w-full text-sm">
+                    <table class="filament-table w-full text-sm" aria-label="{{ app()->getLocale() === 'ar' ? 'تقرير الزيارات' : 'Visit reports' }}">
                         <thead>
                             <tr>
                                 <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'المندوب' : 'Rep' }}</th>
@@ -79,7 +79,7 @@
 
             @elseif($tab === 'quotations')
                 <div class="overflow-x-auto">
-                    <table class="filament-table w-full text-sm">
+                    <table class="filament-table w-full text-sm" aria-label="{{ app()->getLocale() === 'ar' ? 'عروض الأسعار' : 'Quotations' }}">
                         <thead>
                             <tr>
                                 <th class="filament-table-header-cell">{{ __('app.customer') }}</th>
@@ -110,7 +110,7 @@
 
             @elseif($tab === 'proformas')
                 <div class="overflow-x-auto">
-                    <table class="filament-table w-full text-sm">
+                    <table class="filament-table w-full text-sm" aria-label="{{ app()->getLocale() === 'ar' ? 'الفاتورات المبدئية' : 'Proformas' }}">
                         <thead>
                             <tr>
                                 <th class="filament-table-header-cell">{{ __('app.number') }}</th>
@@ -139,7 +139,7 @@
 
             @elseif($tab === 'invoices')
                 <div class="overflow-x-auto">
-                    <table class="filament-table w-full text-sm">
+                    <table class="filament-table w-full text-sm" aria-label="{{ app()->getLocale() === 'ar' ? 'الفواتير' : 'Invoices' }}">
                         <thead>
                             <tr>
                                 <th class="filament-table-header-cell">{{ __('app.number') }}</th>

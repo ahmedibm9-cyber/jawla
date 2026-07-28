@@ -2,7 +2,7 @@
 <div {{ $attributes->merge(['class' => 'flex flex-col items-center justify-center py-12 text-center']) }}>
     @if($icon)
         <div class="mb-4 text-text-muted">
-            <x-dynamic-component :component="$icon" class="mx-auto h-16 w-16" />
+            <x-dynamic-component :component="$icon" class="mx-auto h-16 w-16" aria-hidden="true" />
         </div>
     @endif
     @if($message)

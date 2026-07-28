@@ -17,7 +17,7 @@
             x-data="repLiveMap({{ \Illuminate\Support\Js::from($this->points) }})"
             x-on:pings-updated.window="refresh($event.detail.points)"
         >
-            <div id="rep-live-map" style="width:100%;height:520px;border-radius:8px;border:1px solid #d1d5db;"></div>
+            <div id="rep-live-map" role="img" aria-label="{{ $ar ? 'خريطة مواقع المندوبين المباشرة' : 'Live rep locations map' }}" style="width:100%;height:520px;border-radius:8px;border:1px solid #d1d5db;"></div>
         </div>
 
         @if(count($this->points) === 0)

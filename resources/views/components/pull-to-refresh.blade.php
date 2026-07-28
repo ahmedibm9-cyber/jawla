@@ -42,6 +42,7 @@
   <div
     x-show="pullDistance > 0"
     x-transition
+    aria-live="polite"
     class="flex items-center justify-center py-2 text-gray-400 text-sm"
     :style="'height:' + pullDistance + 'px'"
   >

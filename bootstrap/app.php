@@ -36,6 +36,9 @@ return Application::configure(basePath: dirname(__DIR__))
             ThrottlePost::class,
         ]);
     })
+    ->withSchedule(function ($schedule): void {
+        $schedule->command('app:purge-location-pings')->daily();
+    })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*') || $request->is('app/sync'),

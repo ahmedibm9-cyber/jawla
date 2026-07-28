@@ -16,7 +16,7 @@
                 x-init="initMap()"
                 wire:ignore
             >
-                <div id="customer-map" style="width:100%;height:520px;border-radius:8px;border:1px solid #d1d5db;"></div>
+                <div id="customer-map" role="img" aria-label="{{ $ar ? 'خريطة مواقع العملاء' : 'Customer locations map' }}" style="width:100%;height:520px;border-radius:8px;border:1px solid #d1d5db;"></div>
             </div>
         </x-filament::section>
     @endif

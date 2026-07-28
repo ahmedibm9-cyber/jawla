@@ -3,7 +3,6 @@
 namespace Tests\Feature\Sync;
 
 use App\Models\CashBox;
-use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\Product;
@@ -25,6 +24,7 @@ class IntentIdPassthroughTest extends TestCase
     use RefreshDatabase;
 
     private User $rep;
+
     private Customer $customer;
 
     protected function setUp(): void
@@ -63,7 +63,7 @@ class IntentIdPassthroughTest extends TestCase
             'status' => 'issued',
         ]);
 
-        $outboxKey = 'offline-pay-' . uniqid();
+        $outboxKey = 'offline-pay-'.uniqid();
 
         $r = $this->process($outboxKey, 'payment', [
             'customer_id' => $this->customer->id,
@@ -111,7 +111,7 @@ class IntentIdPassthroughTest extends TestCase
         $product = Product::where('sku', 'VIR-PP-H030')->firstOrFail();
         $van = Warehouse::where('user_id', $this->rep->id)->where('type', 'van')->firstOrFail();
 
-        $outboxKey = 'offline-sale-' . uniqid();
+        $outboxKey = 'offline-sale-'.uniqid();
         $r = $this->process($outboxKey, 'sale', [
             'customer_id' => $this->customer->id,
             'items' => [['product_id' => $product->id, 'quantity' => 1, 'unit_price' => $product->price]],
@@ -122,7 +122,7 @@ class IntentIdPassthroughTest extends TestCase
 
     public function test_expense_handler_accepts_idempotency_key_without_error(): void
     {
-        $outboxKey = 'offline-expense-' . uniqid();
+        $outboxKey = 'offline-expense-'.uniqid();
         $r = $this->process($outboxKey, 'expense', [
             'category' => 'fuel',
             'amount' => 50,
@@ -135,7 +135,7 @@ class IntentIdPassthroughTest extends TestCase
     public function test_payment_failure_does_not_leak_intent_id(): void
     {
         // Payment for a nonexistent customer must fail at the service layer.
-        $outboxKey = 'offline-pay-fail-' . uniqid();
+        $outboxKey = 'offline-pay-fail-'.uniqid();
         $r = $this->process($outboxKey, 'payment', [
             'customer_id' => 999999,
             'amount' => 100,

@@ -132,7 +132,7 @@
             </div>
         @elseif($withinRange)
             <div class="card text-center p-6 bg-success/10 border-2 border-success">
-                <x-heroicon-o-check-circle class="size-12 text-success mx-auto mb-2" stroke-width="2.5" />
+                <x-heroicon-o-check-circle class="size-12 text-success mx-auto mb-2" stroke-width="2.5" aria-hidden="true" />
                 <p class="font-bold text-success my-2">{{ __('app.arrived_confirmed') }}</p>
             </div>
         @else
@@ -247,11 +247,11 @@
     @if($step === 'done')
         <div class="card text-center p-8 {{ $queuedOffline ? 'bg-warning/10' : 'bg-success/10' }}">
             @if($queuedOffline)
-                <x-heroicon-o-cloud-arrow-up class="size-16 text-warning mx-auto mb-2" stroke-width="2.5" />
+                <x-heroicon-o-cloud-arrow-up class="size-16 text-warning mx-auto mb-2" stroke-width="2.5" aria-hidden="true" />
                 <h2 class="text-warning my-3 mb-1" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ app()->getLocale() === 'ar' ? 'بانتظار المزامنة' : 'Queued to sync' }}</h2>
                 <p class="text-text-secondary m-0">{{ app()->getLocale() === 'ar' ? 'تم حفظ تقرير الزيارة دون اتصال وستتم مزامنته تلقائيًا عند عودة الاتصال.' : 'Visit report saved offline — it will sync automatically when you are back online.' }}</p>
             @else
-                <x-heroicon-o-check-circle class="size-16 text-success mx-auto mb-2" stroke-width="2.5" />
+                <x-heroicon-o-check-circle class="size-16 text-success mx-auto mb-2" stroke-width="2.5" aria-hidden="true" />
                 <h2 class="text-success my-3 mb-1" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ __('app.report_submitted') }}</h2>
                 <p class="text-text-secondary m-0">{{ __('app.visit_complete') }}</p>
             @endif

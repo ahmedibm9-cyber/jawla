@@ -6,17 +6,17 @@
     <div class="page-body">
         {{-- Type toggle --}}
         <div class="flex gap-2 mb-4" role="tablist" aria-label="{{ __('app.orders') }}">
-            <button type="button" role="tab" aria-selected="{{ $type === 'invoices' ? 'true' : 'false' }}"
+            <button type="button" role="tab" aria-selected="{{ $type === 'invoices' ? 'true' : 'false' }}" aria-controls="order-panel"
                 class="btn flex-1 {{ $type === 'invoices' ? 'btn-primary' : 'btn-outline' }}"
                 wire:click="setType('invoices')">
                 {{ __('app.invoices') }}
             </button>
-            <button type="button" role="tab" aria-selected="{{ $type === 'proformas' ? 'true' : 'false' }}"
+            <button type="button" role="tab" aria-selected="{{ $type === 'proformas' ? 'true' : 'false' }}" aria-controls="order-panel"
                 class="btn flex-1 {{ $type === 'proformas' ? 'btn-primary' : 'btn-outline' }}"
                 wire:click="setType('proformas')">
                 {{ __('app.proformas') }}
             </button>
-            <button type="button" role="tab" aria-selected="{{ $type === 'offers' ? 'true' : 'false' }}"
+            <button type="button" role="tab" aria-selected="{{ $type === 'offers' ? 'true' : 'false' }}" aria-controls="order-panel"
                 class="btn flex-1 {{ $type === 'offers' ? 'btn-primary' : 'btn-outline' }}"
                 wire:click="setType('offers')">
                 {{ __('app.offers') }}
@@ -28,6 +28,7 @@
             <x-ds.skeleton height="72px" />
         </div>
 
+        <div id="order-panel" role="tabpanel">
         @if($documents->isEmpty())
             @if($type === 'offers')
                 <x-ds.empty icon="heroicon-o-shopping-cart" :message="__('app.no_offers_yet')">
@@ -134,6 +135,7 @@
                 {{ $documents->links() }}
             </div>
         @endif
+        </div>
     </div>
 </div>
 

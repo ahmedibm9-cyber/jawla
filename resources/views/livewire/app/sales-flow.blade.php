@@ -214,7 +214,7 @@
         @if($step === 'queued')
             <div class="success-screen">
                 <div class="success-checkmark" style="background:var(--color-warning,#B45309)">
-                    <x-heroicon-o-cloud-arrow-up width="36" height="36" stroke-width="2.5" />
+                    <x-heroicon-o-cloud-arrow-up width="36" height="36" stroke-width="2.5" aria-hidden="true" />
                 </div>
                 <h3 class="success-title" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ app()->getLocale() === 'ar' ? 'بانتظار المزامنة' : 'Queued to sync' }}</h3>
                 <p class="success-message">{{ $successMessage }}</p>
@@ -228,7 +228,7 @@
         @if($step === 'done')
             <div class="success-screen">
                 <div class="success-checkmark">
-                    <x-heroicon-o-check width="36" height="36" stroke-width="2.5" />
+                    <x-heroicon-o-check width="36" height="36" stroke-width="2.5" aria-hidden="true" />
                 </div>
                 <h3 class="success-title" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ __('app.invoice_created') }}</h3>
                 <p class="success-message">{{ $successMessage }}</p>

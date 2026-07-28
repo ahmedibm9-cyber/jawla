@@ -58,7 +58,7 @@
                             @if($assignment->customer?->latitude && $assignment->customer?->longitude)
                                 <a href="https://www.google.com/maps/dir/?api=1&destination={{ $assignment->customer->latitude }},{{ $assignment->customer->longitude }}"
                                    target="_blank" rel="noopener" class="maps-link" onclick="event.stopPropagation()">
-                                    <x-heroicon-o-map width="14" height="14" />
+                                    <x-heroicon-o-map width="14" height="14" aria-hidden="true" />
                                     {{ __('app.directions') }}
                                 </a>
                             @endif

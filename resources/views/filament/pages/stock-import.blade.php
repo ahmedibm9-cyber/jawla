@@ -47,7 +47,7 @@
                 @endif
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
+                    <table class="w-full text-sm" aria-label="{{ $l('معاينة الاستيراد', 'Import preview') }}">
                         <thead>
                             <tr class="text-start border-b">
                                 <th class="p-2 text-start">SKU</th>
@@ -138,7 +138,7 @@
             <p class="text-sm text-gray-500">{{ $l('لا توجد عمليات استيراد بعد', 'No imports yet') }}</p>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-sm">
+                <table class="w-full text-sm" aria-label="{{ $l('سجل الاستيراد', 'Import history') }}">
                     <thead>
                         <tr class="border-b">
                             <th class="p-2 text-start">{{ $l('الملف', 'File') }}</th>

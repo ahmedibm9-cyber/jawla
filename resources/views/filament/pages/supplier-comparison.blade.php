@@ -12,7 +12,7 @@
                 </x-slot>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
+                    <table class="w-full text-sm" aria-label="{{ $ar ? 'مقارنة الموردين' : 'Supplier comparison' }}">
                         <thead>
                             <tr class="text-start text-gray-500">
                                 <th class="p-2 text-start">{{ $ar ? 'المورد' : 'Supplier' }}</th>
