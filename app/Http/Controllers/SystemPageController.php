@@ -35,9 +35,27 @@ class SystemPageController extends Controller
 
     public function health(): Response
     {
+        try {
+            \Illuminate\Support\Facades\DB::select('SELECT 1');
+        } catch (\Throwable) {
+            return response('degraded', 503)
+                ->header('Content-Type', 'text/plain; charset=UTF-8')
+                ->header('Cache-Control', 'no-store, private');
+        }
+
         return response('ok', 200)
             ->header('Content-Type', 'text/plain; charset=UTF-8')
             ->header('Cache-Control', 'no-store, private');
+    }
+
+    public function appLoginRedirect(): RedirectResponse
+    {
+        return redirect()->route('login');
+    }
+
+    public function salesFlowRedirect(): RedirectResponse
+    {
+        return redirect()->route('app.sell');
     }
 
     public function switchLocale(string $locale): RedirectResponse

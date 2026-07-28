@@ -26,19 +26,19 @@ Short version:
 
 ### Demo credentials (via DemoSeeder)
 
-> All demo accounts share the same password in this environment. **Do not use this pattern outside the demo seeder** — see `docs/SECURITY.md` and the credential-rotation runbook before any production change.
+> All demo accounts share the same password in this environment. **Do not use this pattern outside the demo seeder** — see `docs/SECURITY.md` and the credential-rotation runbook before any production change. Credentials are generated at seed time and written to `storage/app/private/demo-credentials.json` (gitignored).
 
-| Role           | Email                 | Password  | Panel  |
-| -------------- | --------------------- | --------- | ------ |
-| Super Admin    | superadmin@jawla.test | 123456789 | /admin |
-| Admin          | admin@jawla.test      | 123456789 | /admin |
-| Sales Manager  | manager@jawla.test    | 123456789 | /admin |
-| Finance        | accounts@jawla.test   | 123456789 | /admin |
-| Purchasing     | purchasing@jawla.test | 123456789 | /admin |
-| Warehouse      | warehouse@jawla.test  | 123456789 | /admin |
-| Executive      | executive@jawla.test  | 123456789 | /admin |
-| Rep #1 (Cairo) | rep@jawla.test        | 123456789 | /app   |
-| Rep #2 (Giza)  | rep2@jawla.test       | 123456789 | /app   |
+| Role           | Email                 | Panel  |
+| -------------- | --------------------- | ------ |
+| Super Admin    | superadmin@jawla.test | /admin |
+| Admin          | admin@jawla.test      | /admin |
+| Sales Manager  | manager@jawla.test    | /admin |
+| Finance        | accounts@jawla.test   | /admin |
+| Purchasing     | purchasing@jawla.test | /admin |
+| Warehouse      | warehouse@jawla.test  | /admin |
+| Executive      | executive@jawla.test  | /admin |
+| Rep #1 (Cairo) | rep@jawla.test        | /app   |
+| Rep #2 (Giza)  | rep2@jawla.test       | /app   |
 
 Generated values are also dumped to `storage/app/private/demo-credentials.json` on every seed run.
 

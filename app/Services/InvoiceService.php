@@ -103,13 +103,13 @@ class InvoiceService implements InvoiceContract
                 }
                 $items[$index]['unit_price'] = $effectivePrice;
                 $lineInputs[] = new LineItemInput(
-                    qty: (float) $item['quantity'],
-                    unitPrice: (float) $effectivePrice,
+                    qty: (string) $item['quantity'],
+                    unitPrice: (string) $effectivePrice,
                     vatApplicable: (bool) ($prod?->vat_applicable ?? true),
                 );
             }
 
-            $calculation = $this->calc->calculate($lineInputs, (float) $company->vat_percent);
+            $calculation = $this->calc->calculate($lineInputs, (string) $company->vat_percent);
 
             $invNumber = $this->numbers->generate('sales_invoice', $company->id);
 

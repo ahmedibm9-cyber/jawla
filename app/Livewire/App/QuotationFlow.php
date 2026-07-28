@@ -112,15 +112,15 @@ class QuotationFlow extends Component
 
         $company = $this->request->company;
         $product = $this->request->product;
-        $qty = (float) $this->request->quantity_requested;
-        $unitPrice = $this->negotiatedPrice;
+        $qty = (string) $this->request->quantity_requested;
+        $unitPrice = (string) $this->negotiatedPrice;
 
         $proformaNumber = $numbers->generate('proforma_invoice', $company->id);
         $bank = CompanyBankAccount::where('company_id', $company->id)->where('is_default', true)->first();
 
         $calculation = $calc->calculate(
             [new LineItemInput(qty: $qty, unitPrice: $unitPrice, vatApplicable: $product->vat_applicable)],
-            (float) $company->vat_percent,
+            (string) $company->vat_percent,
         );
 
         $proforma = DB::transaction(function () use ($company, $product, $qty, $unitPrice, $proformaNumber, $bank, $calculation): ProformaInvoice {

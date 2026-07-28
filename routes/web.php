@@ -61,10 +61,10 @@ Route::get('/admin/logout', [SystemPageController::class, 'adminLogout'])
     ->middleware('throttle:10,1');
 
 // Old rep login route — redirect to unified login
-Route::get('/app/login', fn () => redirect()->route('login'))->name('app.login');
+Route::get('/app/login', [SystemPageController::class, 'appLoginRedirect'])->name('app.login');
 
 // Old /app/sales-flow URL — redirect to /app/sell
-Route::get('/app/sales-flow', fn () => redirect()->route('app.sell'));
+Route::get('/app/sales-flow', [SystemPageController::class, 'salesFlowRedirect']);
 
 // Rep PWA route group (protected)
 Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->group(function () {

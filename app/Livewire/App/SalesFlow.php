@@ -179,13 +179,13 @@ class SalesFlow extends Component
         $inputs = [];
         foreach ($this->cart as $item) {
             $inputs[] = new LineItemInput(
-                qty: (float) ($item['quantity'] ?? 0),
-                unitPrice: (float) ($item['price'] ?? 0),
+                qty: (string) ($item['quantity'] ?? 0),
+                unitPrice: (string) ($item['price'] ?? 0),
                 vatApplicable: (bool) ($item['vat_applicable'] ?? false),
             );
         }
 
-        $calculation = app(InvoiceCalculationService::class)->calculate($inputs, $vatPercent);
+        $calculation = app(InvoiceCalculationService::class)->calculate($inputs, (string) $vatPercent);
 
         foreach ($this->cart as $i => &$item) {
             $item['line_total'] = $calculation->lines[$i]->lineTotal;

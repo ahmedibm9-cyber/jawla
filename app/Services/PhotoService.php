@@ -34,6 +34,8 @@ class PhotoService
         $disk = $this->disk();
         $path = $file->store(self::DIRECTORY, $disk);
 
+        $this->stripExif($path, $disk);
+
         return Photo::create([
             'company_id' => $rep->activeCompanyId(),
             'user_id' => $rep->id,
@@ -42,8 +44,30 @@ class PhotoService
             'disk' => $disk,
             'path' => $path,
             'original_name' => $file->getClientOriginalName(),
-            'size' => $file->getSize(),
+            'size' => Storage::disk($disk)->size($path),
         ]);
+    }
+
+    /**
+     * Strip EXIF metadata from JPEG images to prevent GPS/camera leakage.
+     * Other formats are stored as-is.
+     */
+    private function stripExif(string $path, string $disk): void
+    {
+        $full = Storage::disk($disk)->path($path);
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+
+        if ($finfo->file($full) !== 'image/jpeg') {
+            return;
+        }
+
+        $img = @imagecreatefromjpeg($full);
+        if (! $img) {
+            return;
+        }
+
+        imagejpeg($img, $full, 90);
+        imagedestroy($img);
     }
 
     /** Link an already-stored photo to its owning record (e.g. after the parent is saved). */

@@ -8,24 +8,25 @@ use App\Services\Contracts\LineItemResult;
 
 class InvoiceCalculationService implements Contract
 {
-    public function calculate(array $lines, float $vatPercent): InvoiceCalculation
+    public function calculate(array $lines, string $vatPercent): InvoiceCalculation
     {
         $results = [];
-        $subtotal = 0.0;
+        $subtotal = '0.00';
 
         foreach ($lines as $input) {
-            $lineTotal = round($input->qty * $input->unitPrice, 2);
-            $subtotal += $lineTotal;
+            $lineTotal = bcmul($input->qty, $input->unitPrice, 2);
+            $subtotal = bcadd($subtotal, $lineTotal, 2);
 
             if ($input->vatApplicable) {
-                $results[] = new LineItemResult($lineTotal, round($lineTotal * ($vatPercent / 100), 2), true);
+                $vatAmount = bcmul($lineTotal, bcdiv($vatPercent, '100', 4), 2);
+                $results[] = new LineItemResult($lineTotal, $vatAmount, true);
             } else {
-                $results[] = new LineItemResult($lineTotal, 0.0, false);
+                $results[] = new LineItemResult($lineTotal, '0.00', false);
             }
         }
 
-        $vatAmount = array_sum(array_map(fn ($r) => $r->vatAmount, $results));
-        $total = round($subtotal + $vatAmount, 2);
+        $vatAmount = array_reduce($results, fn ($sum, $r) => bcadd($sum, $r->vatAmount, 2), '0.00');
+        $total = bcadd($subtotal, $vatAmount, 2);
 
         return new InvoiceCalculation($subtotal, $vatAmount, $total, $results);
     }

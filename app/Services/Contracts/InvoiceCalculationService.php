@@ -5,8 +5,8 @@ namespace App\Services\Contracts;
 class LineItemInput
 {
     public function __construct(
-        public readonly float $qty,
-        public readonly float $unitPrice,
+        public readonly string $qty,
+        public readonly string $unitPrice,
         public readonly bool $vatApplicable,
     ) {}
 }
@@ -14,8 +14,8 @@ class LineItemInput
 class LineItemResult
 {
     public function __construct(
-        public readonly float $lineTotal,
-        public readonly float $vatAmount,
+        public readonly string $lineTotal,
+        public readonly string $vatAmount,
         public readonly bool $vatApplicable,
     ) {}
 }
@@ -23,14 +23,14 @@ class LineItemResult
 class InvoiceCalculation
 {
     public function __construct(
-        public readonly float $subtotal,
-        public readonly float $vatAmount,
-        public readonly float $total,
+        public readonly string $subtotal,
+        public readonly string $vatAmount,
+        public readonly string $total,
         public readonly array $lines,
     ) {}
 }
 
 interface InvoiceCalculationService
 {
-    public function calculate(array $lines, float $vatPercent): InvoiceCalculation;
+    public function calculate(array $lines, string $vatPercent): InvoiceCalculation;
 }

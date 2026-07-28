@@ -19,79 +19,79 @@ class InvoiceCalculationServiceTest extends TestCase
     public function test_single_line_vat_applicable(): void
     {
         $result = $this->service->calculate(
-            [new LineItemInput(2, 1000, true)],
-            14,
+            [new LineItemInput('2', '1000', true)],
+            '14',
         );
 
-        $this->assertSame(2000.0, $result->subtotal);
-        $this->assertSame(280.0, $result->vatAmount);
-        $this->assertSame(2280.0, $result->total);
+        $this->assertSame('2000.00', $result->subtotal);
+        $this->assertSame('280.00', $result->vatAmount);
+        $this->assertSame('2280.00', $result->total);
     }
 
     public function test_single_line_no_vat(): void
     {
         $result = $this->service->calculate(
-            [new LineItemInput(2, 1000, false)],
-            14,
+            [new LineItemInput('2', '1000', false)],
+            '14',
         );
 
-        $this->assertSame(2000.0, $result->subtotal);
-        $this->assertSame(0.0, $result->vatAmount);
-        $this->assertSame(2000.0, $result->total);
+        $this->assertSame('2000.00', $result->subtotal);
+        $this->assertSame('0.00', $result->vatAmount);
+        $this->assertSame('2000.00', $result->total);
     }
 
     public function test_multi_line_mixed_vat(): void
     {
         $result = $this->service->calculate(
             [
-                new LineItemInput(2, 1000, true),
-                new LineItemInput(3, 500, false),
+                new LineItemInput('2', '1000', true),
+                new LineItemInput('3', '500', false),
             ],
-            14,
+            '14',
         );
 
         // subtotal = 2000 + 1500 = 3500
-        $this->assertSame(3500.0, $result->subtotal);
+        $this->assertSame('3500.00', $result->subtotal);
         // VAT on vat-applicable subtotal (2000) only
-        $this->assertSame(280.0, $result->vatAmount);
-        $this->assertSame(3780.0, $result->total);
+        $this->assertSame('280.00', $result->vatAmount);
+        $this->assertSame('3780.00', $result->total);
     }
 
     public function test_zero_vat_percent(): void
     {
         $result = $this->service->calculate(
-            [new LineItemInput(2, 1000, true)],
-            0,
+            [new LineItemInput('2', '1000', true)],
+            '0',
         );
 
-        $this->assertSame(2000.0, $result->subtotal);
-        $this->assertSame(0.0, $result->vatAmount);
-        $this->assertSame(2000.0, $result->total);
+        $this->assertSame('2000.00', $result->subtotal);
+        $this->assertSame('0.00', $result->vatAmount);
+        $this->assertSame('2000.00', $result->total);
     }
 
     public function test_zero_qty(): void
     {
         $result = $this->service->calculate(
-            [new LineItemInput(0, 1000, true)],
-            14,
+            [new LineItemInput('0', '1000', true)],
+            '14',
         );
 
-        $this->assertSame(0.0, $result->subtotal);
-        $this->assertSame(0.0, $result->vatAmount);
-        $this->assertSame(0.0, $result->total);
+        $this->assertSame('0.00', $result->subtotal);
+        $this->assertSame('0.00', $result->vatAmount);
+        $this->assertSame('0.00', $result->total);
     }
 
     public function test_fractional_totals_are_consistent(): void
     {
         $result = $this->service->calculate(
             [
-                new LineItemInput(1, 1.33, true),
-                new LineItemInput(1, 1.33, true),
+                new LineItemInput('1', '1.33', true),
+                new LineItemInput('1', '1.33', true),
             ],
-            14,
+            '14',
         );
 
-        $perLineSum = array_sum(array_map(fn ($l) => $l->vatAmount, $result->lines));
+        $perLineSum = array_reduce($result->lines, fn ($sum, $l) => bcadd($sum, $l->vatAmount, 2), '0.00');
         $this->assertSame($result->vatAmount, $perLineSum);
     }
 
@@ -99,18 +99,18 @@ class InvoiceCalculationServiceTest extends TestCase
     {
         $result = $this->service->calculate(
             [
-                new LineItemInput(2, 1000, true),
-                new LineItemInput(1, 200, false),
+                new LineItemInput('2', '1000', true),
+                new LineItemInput('1', '200', false),
             ],
-            14,
+            '14',
         );
 
         $this->assertCount(2, $result->lines);
-        $this->assertSame(2000.0, $result->lines[0]->lineTotal);
-        $this->assertSame(280.0, $result->lines[0]->vatAmount);
+        $this->assertSame('2000.00', $result->lines[0]->lineTotal);
+        $this->assertSame('280.00', $result->lines[0]->vatAmount);
         $this->assertTrue($result->lines[0]->vatApplicable);
-        $this->assertSame(200.0, $result->lines[1]->lineTotal);
-        $this->assertSame(0.0, $result->lines[1]->vatAmount);
+        $this->assertSame('200.00', $result->lines[1]->lineTotal);
+        $this->assertSame('0.00', $result->lines[1]->vatAmount);
         $this->assertFalse($result->lines[1]->vatApplicable);
     }
 }
