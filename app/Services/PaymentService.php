@@ -190,6 +190,9 @@ class PaymentService implements PaymentServiceContract
             if ($payment->cancelled_at !== null) {
                 return $payment;
             }
+            if ($payment->collected_at && $payment->collected_at->diffInDays(now()) > 7) {
+                throw new DomainException('Payment reversals are only allowed within 7 days of collection.');
+            }
             $credit = CustomerCredit::where('payment_id', $payment->id)->lockForUpdate()->first();
             if ($credit && bccomp((string) $credit->remaining_amount, (string) $credit->amount, 2) !== 0) {
                 throw new DomainException('Payment credit has dependent usage and cannot be reversed.');

@@ -272,6 +272,9 @@ class ReturnService
             if ($return->status !== 'submitted') {
                 throw new DomainException('Only a committed return may be reversed.');
             }
+            if ($return->returned_at && $return->returned_at->diffInDays(now()) > 7) {
+                throw new DomainException('Return reversals are only allowed within 7 days of return.');
+            }
 
             $invoice = Invoice::whereKey($return->against_invoice_id)
                 ->where('company_id', $return->company_id)

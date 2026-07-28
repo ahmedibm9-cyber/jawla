@@ -353,6 +353,7 @@ return [
     'sync_conflict' => 'تعارض',
     'sync_retry' => 'إعادة',
     'sync_discard' => 'حذف',
+    'sync_discard_confirm' => 'حذف إجراء مالي يزيله نهائياً. هل أنت متأكد؟',
     'collect_another' => 'تحصيل آخر',
     'original_invoice' => 'الفاتورة الأصلية',
     'invoice_line' => 'بند الفاتورة',

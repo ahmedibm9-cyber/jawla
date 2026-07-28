@@ -55,7 +55,7 @@
                         {{ __('app.sync_retry') }}
                     </button>
                     <button type="button" class="btn btn-sm text-red-600"
-                        x-on:click="discardItem(item.id)" :disabled="busy">
+                        x-on:click="if(confirm('{{ __('app.sync_discard_confirm') }}')) discardItem(item.id)" :disabled="busy">
                         {{ __('app.sync_discard') }}
                     </button>
                 </div>

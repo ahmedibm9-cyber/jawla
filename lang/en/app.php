@@ -353,6 +353,7 @@ return [
     'sync_conflict' => 'Conflict',
     'sync_retry' => 'Retry',
     'sync_discard' => 'Discard',
+    'sync_discard_confirm' => 'Discarding a financial action permanently removes it. Are you sure?',
     'collect_another' => 'Collect Another Payment',
     'original_invoice' => 'Original Invoice',
     'invoice_line' => 'Invoice Line',
