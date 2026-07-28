@@ -1,3 +1,5 @@
+import { hasStaleRecords } from "./offline/outbox.js";
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
@@ -13,6 +15,14 @@ if ("serviceWorker" in navigator) {
           )
             return;
           if (await window.jawlaSync?.hasPending?.()) {
+            return;
+          }
+          if (await hasStaleRecords()) {
+            window.alert(
+              document.documentElement.lang === "ar"
+                ? "يرجى مزامنة بياناتك غير المتصلة قبل التحديث."
+                : "Please sync your offline data before updating."
+            );
             return;
           }
           updatePromptActive = true;

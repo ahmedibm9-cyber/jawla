@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class SystemPageController extends Controller
 {
@@ -33,18 +36,31 @@ class SystemPageController extends Controller
         return response()->view('vendor.laravel.offline');
     }
 
-    public function health(): Response
+    public function health(): JsonResponse
     {
+        $dbOk = true;
+        $cacheOk = true;
+
         try {
-            \Illuminate\Support\Facades\DB::select('SELECT 1');
+            DB::select('SELECT 1');
         } catch (\Throwable) {
-            return response('degraded', 503)
-                ->header('Content-Type', 'text/plain; charset=UTF-8')
-                ->header('Cache-Control', 'no-store, private');
+            $dbOk = false;
         }
 
-        return response('ok', 200)
-            ->header('Content-Type', 'text/plain; charset=UTF-8')
+        try {
+            Cache::store(config('cache.default'))->get('health-check');
+            Cache::store(config('cache.default'))->put('health-check', 1);
+        } catch (\Throwable) {
+            $cacheOk = false;
+        }
+
+        $status = ($dbOk && $cacheOk) ? 'ok' : 'degraded';
+
+        return response()->json([
+            'status' => $status,
+            'db' => $dbOk ? 'ok' : 'failed',
+            'cache' => $cacheOk ? 'ok' : 'failed',
+        ], $dbOk && $cacheOk ? 200 : 503)
             ->header('Cache-Control', 'no-store, private');
     }
 

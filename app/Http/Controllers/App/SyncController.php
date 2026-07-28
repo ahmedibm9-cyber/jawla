@@ -22,9 +22,21 @@ class SyncController
             'operations.*.key' => ['required', 'string', 'max:190'],
             'operations.*.type' => ['required', 'string', 'max:100'],
             'operations.*.payload' => ['nullable', 'array'],
+            'operations.*.payloadHash' => ['nullable', 'string', 'size:64'],
+            'operations.*.deviceId' => ['nullable', 'string', 'max:190'],
         ]);
 
-        $results = $sync->process(Auth::user(), $data['operations']);
+        $deviceId = $request->header('X-Device-Id');
+
+        $operations = array_map(fn ($op) => [
+            'key' => $op['key'],
+            'type' => $op['type'],
+            'payload' => $op['payload'] ?? [],
+            'payload_hash' => $op['payloadHash'] ?? null,
+            'device_id' => $op['deviceId'] ?? $deviceId,
+        ], $data['operations']);
+
+        $results = $sync->process(Auth::user(), $operations, (int) $request->header('X-Sync-Protocol-Version', 1));
 
         return response()->json(['results' => $results]);
     }

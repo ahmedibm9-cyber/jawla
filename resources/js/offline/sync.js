@@ -34,6 +34,28 @@ async function emitStatus() {
   );
 }
 
+function sortForFlush(items) {
+  const tempIds = new Set(items.map((i) => i.tempId).filter(Boolean));
+  const completed = new Set();
+  const sorted = [];
+  const rest = [...items];
+  let lastLen = -1;
+
+  while (rest.length > 0 && rest.length !== lastLen) {
+    lastLen = rest.length;
+    for (let i = 0; i < rest.length; i++) {
+      const item = rest[i];
+      if (!item.dependsOn || completed.has(item.dependsOn)) {
+        sorted.push(item);
+        if (item.tempId) completed.add(item.tempId);
+        rest.splice(i, 1);
+        i--;
+      }
+    }
+  }
+  return sorted;
+}
+
 async function flush() {
   if (flushing || !navigator.onLine) return;
   const items = await outbox.pending();
@@ -42,8 +64,15 @@ async function flush() {
     return;
   }
 
+  const ordered = sortForFlush(items);
+  if (!ordered.length) {
+    await emitStatus();
+    return;
+  }
+
   flushing = true;
   try {
+    const deviceId = outbox.getDeviceId();
     const res = await fetch("/app/sync", {
       method: "POST",
       headers: {
@@ -51,12 +80,16 @@ async function flush() {
         Accept: "application/json",
         "X-XSRF-TOKEN": xsrfToken(),
         "X-Requested-With": "XMLHttpRequest",
+        "X-Sync-Protocol-Version": "1",
+        "X-Device-Id": deviceId,
       },
       body: JSON.stringify({
-        operations: items.map((i) => ({
+        operations: ordered.map((i) => ({
           key: i.id,
           type: i.type,
           payload: i.payload,
+          payloadHash: i.payloadHash,
+          deviceId: i.deviceId,
         })),
       }),
     });
@@ -68,6 +101,8 @@ async function flush() {
     for (const result of data.results || []) {
       if (result.status === "applied" || result.status === "duplicate") {
         await outbox.remove(result.key);
+      } else if (result.status === "mismatch") {
+        await outbox.markFailed(result.key, result.error || "Payload mismatch");
       } else if (["failed", "invalid", "unsupported"].includes(result.status)) {
         await outbox.markFailed(result.key, result.error || result.status);
       } else if (result.status === "conflict") {
@@ -82,11 +117,12 @@ async function flush() {
   } finally {
     flushing = false;
     await emitStatus();
+    outbox.checkQuota();
   }
 }
 
-async function enqueue(type, payload) {
-  const record = await outbox.enqueue(type, payload);
+async function enqueue(type, payload, opts) {
+  const record = await outbox.enqueue(type, payload, opts);
   await emitStatus();
   if (navigator.onLine) flush();
   return record;
@@ -213,3 +249,5 @@ if (identity) {
     init();
   }
 }
+
+export { sortForFlush as _testSortForFlush };

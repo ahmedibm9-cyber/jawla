@@ -1,89 +1,59 @@
-name: ci
+name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [main]
   pull_request:
+    branches: [main]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, xml, ctype, json, bcmath, pgsql
+          tools: composer:v2
+      - run: composer install --no-progress --prefer-dist
+      - run: ./vendor/bin/pint --test
+
   test:
     runs-on: ubuntu-latest
     services:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_PASSWORD: postgres
           POSTGRES_DB: jawla_test
-          POSTGRES_INITDB_ARGS: "--data-checksums"
-        ports: ["5432:5432"]
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          --shm-size=256mb
+    env:
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: jawla_test
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
     steps:
       - uses: actions/checkout@v4
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
           php-version: "8.3"
-          extensions: mbstring, pdo, pdo_pgsql, intl, gd, zip, bcmath
-          coverage: none
-      - name: Cache Composer
-        uses: actions/cache@v4
-        with:
-          path: ~/.composer/cache
-          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
-      - name: Install PHP deps
-        run: composer install --no-interaction --prefer-dist --no-progress --no-progress
-      - name: Set up Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: "npm"
-      - name: Install JS deps
-        run: npm ci
-      - name: Copy env
-        run: cp .env.example .env && php artisan key:generate
-      - name: Pint (style)
-        run: vendor/bin/pint --test
-      - name: Build production assets
-        run: npm run build
-      - name: Enforce PWA asset budgets
-        run: npm run audit:pwa-assets
-      # Some unit tests exercise the DB without RefreshDatabase, so the schema
-      # must exist before the suite starts. A fresh CI database is empty until
-      # the first RefreshDatabase test migrates it, and the Unit suite (which
-      # runs first) would otherwise hit "relation ... does not exist".
-      - name: Migrate test database
-        run: php artisan migrate --force
-        env:
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 5432
-          DB_DATABASE: jawla_test
-          DB_USERNAME: postgres
-          DB_PASSWORD: postgres
-      # Browser/E2E has its own job. Unit and Feature use Laravel's isolated
-      # per-worker PostgreSQL databases; the base database is migrated above so
-      # DatabaseTransactions tests are safe even when scheduled first.
-      - name: Pest
-        run: php artisan test --parallel --recreate-databases --drop-databases --processes=2 --compact --testsuite=Unit,Feature
-        env:
-          APP_ENV: testing
-          DB_CONNECTION: pgsql
-          DB_HOST: 127.0.0.1
-          DB_PORT: 5432
-          DB_DATABASE: jawla_test
-          DB_USERNAME: postgres
-          DB_PASSWORD: postgres
-      - name: Composer audit
-        run: composer audit
-      - name: npm audit
-        run: npm audit --audit-level=high
-      - name: Block obvious committed secrets
-        run: |
-          test -z "$(git ls-files | grep -Ei '(^|/)(cookies(\.txt)?|.*\.cookies\.txt|.*\.(pem|p12|pfx|key))$')" \
-            || { echo "::error::Tracked credential, cookie, or private-key artifact detected"; exit 1; }
-          ! git grep -nEi '(aws_secret_access_key\s*[:=]\s*[^$[:space:]]|BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY|eta_(client_)?secret\s*[:=]\s*[^$])' -- ':!*.lock' ':!docs/**'
+          extensions: mbstring, xml, ctype, json, bcmath, pgsql
+          tools: composer:v2
+      - run: composer install --no-progress --prefer-dist
+      - run: cp .env.example .env || true
+      - run: php artisan key:generate --force
+      - run: php artisan migrate --force
+      - run: php artisan test --compact

@@ -20,12 +20,23 @@ class SyncReceipt extends Model
     use HasFactory;
 
     protected $fillable = [
-        'company_id', 'user_id', 'idempotency_key', 'operation_type', 'response',
+        'company_id', 'user_id', 'idempotency_key', 'operation_type', 'protocol_version', 'response', 'payload_hash', 'device_id',
     ];
 
     protected $casts = [
         'response' => 'array',
     ];
+
+    public static function boot(): void
+    {
+        parent::boot();
+
+        static::updating(function (SyncReceipt $receipt): void {
+            if ($receipt->isDirty('payload_hash') && $receipt->getOriginal('payload_hash') !== null) {
+                $receipt->payload_hash = $receipt->getOriginal('payload_hash');
+            }
+        });
+    }
 
     public function user(): BelongsTo
     {

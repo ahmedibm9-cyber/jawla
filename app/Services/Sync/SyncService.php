@@ -27,31 +27,33 @@ class SyncService
     public function __construct(private readonly SyncHandlerRegistry $registry) {}
 
     /**
-     * @param  array<int, array{key?: string, idempotency_key?: string, type?: string, payload?: array}>  $operations
+     * @param  array<int, array{key?: string, idempotency_key?: string, type?: string, payload?: array, payload_hash?: string, device_id?: string}>  $operations
      * @return array<int, array{key: ?string, status: string, result?: array, error?: string}>
      */
-    public function process(User $rep, array $operations): array
+    public function process(User $rep, array $operations, int $protocolVersion = 1): array
     {
         app(ActiveCompanyContext::class)->assertMatches($rep->activeCompanyId());
 
         $results = [];
 
         foreach ($operations as $op) {
-            $results[] = $this->processOne($rep, $op);
+            $results[] = $this->processOne($rep, $op, $protocolVersion);
         }
 
         return $results;
     }
 
     /**
-     * @param  array{key?: string, idempotency_key?: string, type?: string, payload?: array}  $op
+     * @param  array{key?: string, idempotency_key?: string, type?: string, payload?: array, payload_hash?: string, device_id?: string}  $op
      * @return array{key: ?string, status: string, result?: array, error?: string}
      */
-    private function processOne(User $rep, array $op): array
+    private function processOne(User $rep, array $op, int $protocolVersion): array
     {
         $key = $op['key'] ?? $op['idempotency_key'] ?? null;
         $type = $op['type'] ?? null;
         $payload = $op['payload'] ?? [];
+        $payloadHash = $op['payload_hash'] ?? null;
+        $deviceId = $op['device_id'] ?? null;
 
         if (! is_string($key) || $key === '' || ! is_string($type) || $type === '') {
             return ['key' => $key, 'status' => 'invalid', 'error' => 'Missing idempotency key or type.'];
@@ -62,7 +64,7 @@ class SyncService
         }
 
         try {
-            return DB::transaction(function () use ($rep, $key, $type, $payload): array {
+            return DB::transaction(function () use ($rep, $key, $type, $payload, $protocolVersion, $payloadHash, $deviceId): array {
                 // Both the receipt and domain write must commit or roll back
                 // together. A receipt with no response is a legacy ambiguous
                 // state and is deliberately quarantined rather than replayed.
@@ -76,6 +78,10 @@ class SyncService
                         ];
                     }
 
+                    if ($existing->payload_hash !== null && $payloadHash !== null && $existing->payload_hash !== $payloadHash) {
+                        return ['key' => $key, 'status' => 'mismatch', 'error' => 'Payload mismatch for same idempotency key'];
+                    }
+
                     return ['key' => $key, 'status' => 'duplicate', 'result' => $existing->response];
                 }
 
@@ -84,6 +90,9 @@ class SyncService
                     'user_id' => $rep->id,
                     'idempotency_key' => $key,
                     'operation_type' => $type,
+                    'protocol_version' => $protocolVersion,
+                    'payload_hash' => $payloadHash,
+                    'device_id' => $deviceId,
                     'response' => null,
                 ]);
 
@@ -98,6 +107,10 @@ class SyncService
             // durable receipt so the client receives its original outcome.
             $existing = $this->findReceipt($rep, $key);
             if ($existing?->response !== null) {
+                if ($existing->payload_hash !== null && $payloadHash !== null && $existing->payload_hash !== $payloadHash) {
+                    return ['key' => $key, 'status' => 'mismatch', 'error' => 'Payload mismatch for same idempotency key'];
+                }
+
                 return ['key' => $key, 'status' => 'duplicate', 'result' => $existing->response];
             }
 

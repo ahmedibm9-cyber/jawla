@@ -5,8 +5,18 @@
 
 const DB_PREFIX = "jawla-offline-";
 const STORE = "outbox";
-const VERSION = 1;
+export const OUTBOX_DB_VERSION = 2;
+const DEVICE_ID_KEY = "jawla-device-id";
 let identity = null;
+
+export function getDeviceId() {
+  let id = localStorage.getItem(DEVICE_ID_KEY);
+  if (!id) {
+    id = uuid();
+    localStorage.setItem(DEVICE_ID_KEY, id);
+  }
+  return id;
+}
 
 export function configureIdentity(value) {
   if (!value || typeof value !== "string") {
@@ -28,13 +38,23 @@ function dbName() {
 
 function openDb() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(dbName(), VERSION);
-    req.onupgradeneeded = () => {
+    const req = indexedDB.open(dbName(), OUTBOX_DB_VERSION);
+    req.onupgradeneeded = (event) => {
       const db = req.result;
+      const tx = req.transaction;
       if (!db.objectStoreNames.contains(STORE)) {
         const store = db.createObjectStore(STORE, { keyPath: "id" });
         store.createIndex("status", "status");
         store.createIndex("createdAt", "createdAt");
+      } else if (event.oldVersion < 2) {
+        const store = tx.objectStore(STORE);
+        store.openCursor().onsuccess = (e) => {
+          const cursor = e.target.result;
+          if (!cursor) return;
+          cursor.value.schemaVersion = 2;
+          cursor.update(cursor.value);
+          cursor.continue();
+        };
       }
     };
     req.onsuccess = () => resolve(req.result);
@@ -62,14 +82,32 @@ function run(store, mode, fn) {
   );
 }
 
-export async function enqueue(type, payload) {
+async function sha256Hex(str) {
+  const data = new TextEncoder().encode(str);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(hash)]
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+export async function enqueue(
+  type,
+  payload,
+  { dependsOn = null, tempId = null } = {}
+) {
+  const payloadHash = await sha256Hex(JSON.stringify({ type, payload }));
   const record = {
     id: uuid(),
     type,
     payload,
+    payloadHash,
+    deviceId: getDeviceId(),
     status: "pending",
     error: null,
     createdAt: Date.now(),
+    dependsOn,
+    tempId,
+    schemaVersion: OUTBOX_DB_VERSION,
   };
   await run(STORE, "readwrite", (s) => s.add(record));
   return record;
@@ -115,4 +153,41 @@ export function clear() {
   if (!identity || !window.indexedDB) return Promise.resolve();
 
   return run(STORE, "readwrite", (store) => store.clear());
+}
+
+export async function hasStaleRecords() {
+  if (!identity || !window.indexedDB) return false;
+  const records = await pending();
+  return records.some(
+    (r) => !r.schemaVersion || r.schemaVersion < OUTBOX_DB_VERSION
+  );
+}
+
+export async function oldestFailed() {
+  const items = await failed();
+  if (!items.length) return null;
+  return items.sort((a, b) => a.createdAt - b.createdAt)[0];
+}
+
+export async function checkQuota() {
+  if (!navigator.storage?.estimate) return null;
+
+  let { usage, quota } = await navigator.storage.estimate();
+  let used = usage || 0;
+  let total = quota || 0;
+  let percent = total ? (used / total) * 100 : 0;
+
+  if (percent > 80) {
+    let oldest = await oldestFailed();
+    while (oldest && percent > 80) {
+      await remove(oldest.id);
+      ({ usage, quota } = await navigator.storage.estimate());
+      used = usage || 0;
+      total = quota || 0;
+      percent = total ? (used / total) * 100 : 0;
+      oldest = await oldestFailed();
+    }
+  }
+
+  return { used, quota: total, percent };
 }
