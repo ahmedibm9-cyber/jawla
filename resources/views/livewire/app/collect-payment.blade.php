@@ -79,7 +79,7 @@
                                 if (navigator.onLine) {
                                     $wire.submit();
                                 } else {
-                                    window.jawlaSync.enqueue('payment', {
+                                    await window.jawlaSync.enqueue('payment', {
                                         customer_id: $wire.customer_id,
                                         invoice_id: $wire.invoice_id,
                                         amount: $wire.amount,

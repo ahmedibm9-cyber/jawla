@@ -197,10 +197,10 @@
                                     if (navigator.onLine) {
                                         $wire.submit();
                                     } else {
-                                        window.jawlaSync.enqueue('sale', {
+                                        await window.jawlaSync.enqueue('sale', {
                                             customer_id: $wire.customerId,
                                             visit_id: $wire.visitId,
-                                            items: ($wire.cart || []).map(i => ({ product_id: i.product_id, quantity: i.quantity, unit_price: i.price })),
+                                            items: ($wire.cart || []).map(i => ({ product_id: i.product_id, quantity: i.quantity })),
                                         });
                                         $wire.queueOffline();
                                     }

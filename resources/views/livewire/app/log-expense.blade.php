@@ -57,7 +57,7 @@
                                 if (navigator.onLine) {
                                     $wire.submit();
                                 } else {
-                                    window.jawlaSync.enqueue('expense', {
+                                    await window.jawlaSync.enqueue('expense', {
                                         category: $wire.category,
                                         amount: $wire.amount,
                                         note: $wire.note,
