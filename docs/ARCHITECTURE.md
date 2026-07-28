@@ -1,5 +1,8 @@
 # Architecture
 
+> **Superseded** by `ARCHITECTURE_CURRENT.md` (updated 2026-07-28). This
+> document is retained for historical reference only.
+
 ## Stack boundaries
 
 Monolithic Laravel 13 app serves both the admin panel (Filament, at `/admin`)
