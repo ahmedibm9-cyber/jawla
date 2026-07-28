@@ -14,7 +14,8 @@ class RoleSeeder extends Seeder
         $customPermissions = [
             // Sales Manager
             'visit_assignments.manage', 'customers.approve', 'customers.view_all',
-            'pricing.set_range', 'alarms.view_all', 'alarms.respond',
+            'pricing.set_range', 'pricing.set_override', 'alarms.view_all', 'alarms.respond',
+            'refunds.request', 'refunds.approve',
             'complaints.manage', 'reports.sales', 'reports.visits', 'reports.view',
             'invoices.view_all', 'invoices.approve', 'purchase_requests.veto',
             'van_transfers.approve',
@@ -121,6 +122,7 @@ class RoleSeeder extends Seeder
                 'view_any:proforma_invoice', 'view:proforma_invoice', 'create:proforma_invoice', 'update:proforma_invoice',
                 'view_any:return_record', 'view:return_record', 'create:return_record', 'update:return_record',
                 'view_any:payment', 'view:payment', 'create:payment', 'update:payment',
+                'view_any:product_price', 'view:product_price', 'create:product_price', 'update:product_price', 'delete:product_price',
                 'view_any:expense', 'view:expense', 'create:expense',
                 'view_any:cash_reconciliation', 'view:cash_reconciliation', 'update:cash_reconciliation',
                 'view_any:stock', 'view:stock', 'update:stock',
@@ -137,13 +139,14 @@ class RoleSeeder extends Seeder
                 'view_any:price_quotation_request', 'view:price_quotation_request', 'create:price_quotation_request', 'update:price_quotation_request',
                 'view_any:complaint', 'view:complaint', 'create:complaint', 'update:complaint',
                 // Pages
-                'view:reports_page', 'view:collect_payment',
+                'view:reports_page', 'view:collect_payment', 'view:customer_map',
                 // Widgets
                 'view:visits_today_widget', 'view:pending_quotations_widget', 'view:open_alarms_widget',
                 'view:sales_today_widget', 'view:outstanding_balance_widget', 'view:rep_performance_widget',
                 // Custom
                 'visit_assignments.manage', 'customers.approve', 'customers.view_all',
-                'pricing.set_range', 'alarms.view_all', 'alarms.respond',
+                'pricing.set_range', 'pricing.set_override', 'alarms.view_all', 'alarms.respond',
+                'refunds.request', 'refunds.approve',
                 'complaints.manage', 'reports.sales', 'reports.visits', 'reports.view',
                 'invoices.view_all', 'invoices.approve', 'purchase_requests.veto',
                 'van_transfers.approve',
@@ -225,6 +228,7 @@ class RoleSeeder extends Seeder
                 'invoices.view_own', 'payments.collect', 'returns.create',
                 'expenses.log', 'purchase_requests.submit', 'alarms.flag_out_of_stock',
                 'complaints.submit', 'cashbox.view', 'van_transfers.request',
+                'refunds.request',
                 // Shield resource permissions required by services that gate on
                 // can('create:...') / can('update:...') instead of custom names.
                 'create:invoice', 'create:return_record',
@@ -239,6 +243,7 @@ class RoleSeeder extends Seeder
                 'invoices.view_own', 'payments.collect', 'returns.create',
                 'expenses.log', 'purchase_requests.submit', 'alarms.flag_out_of_stock',
                 'complaints.submit', 'cashbox.view', 'van_transfers.request',
+                'refunds.request',
                 // Shield resource permissions required by services (see sales_rep).
                 'create:invoice', 'create:return_record',
             ],
