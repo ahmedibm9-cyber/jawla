@@ -1,179 +1,562 @@
 {
   "schema_version": "1.0",
+  "generated_at": "2026-07-29",
+  "exploration": {
+    "status": "complete",
+    "scope": "full repository with representative deep tracing of the rep, admin, sync, financial, tenancy, data, test, and deployment surfaces",
+    "repository": "C:/projects/jawla",
+    "revision": "7b1dd3a",
+    "branch": "master",
+    "read_only_exceptions": [
+      "PROJECT_EXPLORATION_REPORT.md",
+      "PROJECT_MAP.md",
+      "COMMANDS.md",
+      "OPEN_QUESTIONS.md",
+      "EXPLORATION_MANIFEST.json"
+    ],
+    "templates_available": false,
+    "manifest_schema_file_available": false
+  },
   "project": {
     "name": "Jawla",
     "name_arabic": "جولة",
-    "purpose": "Bilingual field-sales CRM/ERP for Egyptian market",
-    "owner": "Fulla Chemical Trading Co.",
-    "type": "monolithic Laravel application",
+    "purpose": "Bilingual Arabic/English field-sales CRM/ERP for Egyptian distribution teams",
+    "architecture": "single Laravel monolith with Filament admin, Livewire rep PWA, PostgreSQL, and device-local offline outbox",
     "primary_language": "PHP",
-    "secondary_languages": ["JavaScript", "Blade", "SQL"],
-    "frameworks": {
-      "backend": "Laravel 13.20.0",
-      "admin_panel": "Filament 4.0",
-      "pwa": "Livewire 3.0 + Tailwind CSS 4.0",
-      "build": "Vite 8.0",
-      "database": "PostgreSQL 16"
-    },
-    "runtime": {
-      "php": "8.3",
-      "node": "24.15.0"
-    },
-    "package_managers": ["composer", "npm"],
-    "scale": "6-20 daily sales reps",
-    "connectivity": "offline-first",
-    "languages_supported": ["arabic", "english"],
-    "currency": "EGP (single)"
+    "secondary_languages": [
+      "JavaScript",
+      "Blade",
+      "CSS",
+      "SQL",
+      "Shell"
+    ],
+    "supported_locales": [
+      "ar",
+      "en"
+    ],
+    "currency": "EGP",
+    "production_readiness": {
+      "decision": "no_go_for_real_data",
+      "reasons": [
+        "offline sale payload contract is broken",
+        "feature suite exhausts its memory limit",
+        "ETA signer and preproduction acceptance evidence remain incomplete",
+        "independent restore and rollback evidence remain incomplete",
+        "staging security, performance, accessibility, device, and business acceptance gates are not fully evidenced"
+      ]
+    }
+  },
+  "worktree_state": {
+    "concurrent_changes_detected": true,
+    "not_modified_by_exploration": [
+      ".github/workflows/ci.yml",
+      "AGENTS.md",
+      "Makefile",
+      "docs/TASK_CONTEXT_BROWSER_TEST_LIMITATION.md"
+    ],
+    "note": "The shared worktree changed during exploration. Repository evidence was re-grounded after revision 7b1dd3a became HEAD."
+  },
+  "stack": {
+    "php": "8.3.32",
+    "laravel": "13.20.0",
+    "filament": "4.12.1",
+    "livewire": "3.8.2",
+    "postgresql": "16 deployment and CI target",
+    "tailwindcss": "4.3.2",
+    "vite": "8.1.4",
+    "node": "24.15.0 local",
+    "npm": "11.12.1 local",
+    "playwright": "1.61.1",
+    "larastan": "3.10.0",
+    "phpstan": "2.2.6",
+    "pint": "1.29.3",
+    "leaflet": "1.9.4",
+    "sentry_browser": "10.67.0",
+    "package_managers": [
+      "Composer 2.10.2",
+      "npm 11.12.1"
+    ]
+  },
+  "inventory": {
+    "application_php_files": 333,
+    "models": 68,
+    "service_layer_php_files": 66,
+    "rep_livewire_components": 24,
+    "filament_files": 99,
+    "migrations": 127,
+    "schema_create_calls": 73,
+    "http_routes": 121,
+    "php_test_files": 113,
+    "browser_test_files": 7,
+    "documentation_files": 99
   },
   "entry_points": {
     "http": [
-      {"route": "GET /", "handler": "SystemPageController::root", "middleware": ["web"]},
-      {"route": "GET /login", "handler": "Filament Login", "middleware": ["web"]},
-      {"route": "GET /admin", "handler": "Filament AdminPanel", "middleware": ["web", "auth"]},
-      {"route": "GET /app", "handler": "Livewire Home", "middleware": ["web", "auth", "ensure.rep"]},
-      {"route": "POST /app/sync", "handler": "SyncController::store", "middleware": ["web", "auth", "ensure.rep", "throttle"]},
-      {"route": "GET /health", "handler": "SystemPageController::health", "middleware": ["web"]},
-      {"route": "GET /api/v1/*", "handler": "API controllers", "middleware": ["auth:sanctum"]}
+      {
+        "method": "GET",
+        "uri": "/",
+        "handler": "App/Http/Controllers/SystemPageController.php::root"
+      },
+      {
+        "method": "GET",
+        "uri": "/login",
+        "handler": "App/Filament/Auth/Pages/Login.php"
+      },
+      {
+        "method": "GET",
+        "uri": "/admin/*",
+        "handler": "Filament admin panel"
+      },
+      {
+        "method": "GET",
+        "uri": "/app/*",
+        "handler": "App/Livewire/App components"
+      },
+      {
+        "method": "POST",
+        "uri": "/app/sync",
+        "handler": "App/Http/Controllers/App/SyncController.php::store"
+      },
+      {
+        "method": "GET",
+        "uri": "/api/v1/*",
+        "handler": "App/Http/Controllers/Api/V1 controllers"
+      },
+      {
+        "method": "GET",
+        "uri": "/health",
+        "handler": "App/Http/Controllers/SystemPageController.php::health"
+      },
+      {
+        "method": "GET",
+        "uri": "/up",
+        "handler": "Laravel health route"
+      }
     ],
     "cli": [
-      {"command": "app:purge-location-pings", "file": "app/Console/Commands/PurgeLocationPings.php"},
-      {"command": "app:bootstrap-production", "file": "app/Console/Commands/BootstrapProduction.php"}
+      {
+        "command": "app:purge-location-pings",
+        "file": "app/Console/Commands/PurgeLocationPings.php"
+      },
+      {
+        "command": "app:bootstrap-production",
+        "file": "app/Console/Commands/BootstrapProduction.php"
+      },
+      {
+        "command": "app:seed-transactions",
+        "file": "app/Console/Commands/SeedTransactionsCommand.php"
+      }
     ],
     "scheduled": [
-      {"schedule": "daily", "command": "app:purge-location-pings"}
-    ]
+      {
+        "schedule": "daily at 00:00",
+        "command": "app:purge-location-pings"
+      }
+    ],
+    "build": [
+      "resources/css/app.css",
+      "resources/js/app.js"
+    ],
+    "container": "/app/docker/start-container.sh"
   },
   "important_paths": {
-    "business_logic": "app/Services/ (36 services)",
-    "domain_models": "app/Models/ (65+ models)",
-    "admin_panel": "app/Filament/ (24 resources, 11 pages, 7 widgets)",
-    "rep_pwa": "app/Livewire/App/ (24 components)",
-    "offline_sync": ["resources/js/offline/outbox.js", "resources/js/offline/sync.js", "app/Services/Sync/"],
-    "security": ["app/Http/Middleware/SecurityHeaders.php", "app/Http/Middleware/SetActiveCompanyContext.php"],
-    "multi_tenancy": ["app/Support/ActiveCompanyContext.php", "app/Models/Concerns/BelongsToCompany.php"],
-    "financial_integrity": ["app/Models/Concerns/AppendOnly.php", "app/Services/InvoiceService.php"],
-    "config": ["config/jawla.php", "config/eta.php", "config/sanctum.php"],
-    "routes": ["routes/web.php", "routes/api.php", "routes/rep-sync.php"],
-    "migrations": "database/migrations/ (127 files)",
-    "tests": "tests/ (103 PHP test files)",
-    "ci": ".github/workflows/ (4 workflows)",
-    "deployment": ["railway.toml", "Dockerfile", "docker/"],
-    "docs": "docs/ (50+ files)"
-  },
-  "commands": {
-    "setup": {"command": "make setup", "status": "declared"},
-    "dev": {"command": "make dev", "status": "declared"},
-    "lint": {"command": "make lint", "status": "verified"},
-    "typecheck": {"command": "make typecheck", "status": "verified"},
-    "test": {"command": "make test", "status": "verified"},
-    "test_unit": {"command": "vendor/bin/pest tests/Unit", "status": "verified", "result": "142 tests, 386 assertions, all pass"},
-    "build": {"command": "make build", "status": "verified"},
-    "verify": {"command": "make verify", "status": "verified"},
-    "verify_full": {"command": "scripts/verify", "status": "declared", "note": "includes composer audit + npm audit, unlike make verify"},
-    "smoke": {"command": "make smoke", "status": "declared"},
-    "composer_audit": {"command": "composer audit", "status": "verified", "result": "clean"},
-    "npm_audit": {"command": "npm audit --audit-level=high", "status": "verified", "result": "0 vulnerabilities"}
+    "instructions": [
+      "AGENTS.md",
+      "CLAUDE.md"
+    ],
+    "current_architecture": "docs/ARCHITECTURE_CURRENT.md",
+    "release_authority": "docs/GO_LIVE_READINESS.md",
+    "business_logic": "app/Services/",
+    "domain_models": "app/Models/",
+    "rep_pwa": "app/Livewire/App/",
+    "admin_panel": "app/Filament/",
+    "policies": "app/Policies/",
+    "active_company_context": "app/Support/ActiveCompanyContext.php",
+    "company_scope": "app/Models/Concerns/BelongsToCompany.php",
+    "policy_ownership": "app/Policies/Concerns/ChecksCompanyOwnership.php",
+    "offline_client": [
+      "resources/js/offline/outbox.js",
+      "resources/js/offline/sync.js"
+    ],
+    "offline_server": [
+      "app/Http/Controllers/App/SyncController.php",
+      "app/Services/Sync/SyncService.php",
+      "app/Services/Sync/Handlers/"
+    ],
+    "financial_core": [
+      "app/Services/InvoiceService.php",
+      "app/Services/PaymentService.php",
+      "app/Services/ReturnService.php",
+      "app/Services/ExpenseService.php",
+      "app/Services/CashReconciliationService.php"
+    ],
+    "stock_core": [
+      "app/Services/StockService.php",
+      "app/Models/Stock.php",
+      "app/Models/StockMovement.php"
+    ],
+    "database": "database/migrations/",
+    "routes": [
+      "routes/web.php",
+      "routes/rep-sync.php",
+      "routes/api.php",
+      "routes/console.php"
+    ],
+    "tests": "tests/",
+    "ci": ".github/workflows/",
+    "deployment": [
+      "railway.toml",
+      "Dockerfile",
+      "docker/",
+      "scripts/deploy.sh"
+    ],
+    "backup_restore": [
+      "scripts/backup.sh",
+      "scripts/restore-backup.sh",
+      "docs/BACKUP_RESTORE.md",
+      "docs/BACKUP_RESTORE_DRILL.md"
+    ],
+    "generated": [
+      "vendor/",
+      "node_modules/",
+      "public/build/",
+      "bootstrap/cache/",
+      "storage/"
+    ],
+    "protected": [
+      ".env",
+      "composer.lock",
+      "package-lock.json",
+      "database/database.sqlite",
+      "docs/BUSINESS_RULES.md",
+      "docs/SECURITY.md"
+    ]
   },
   "flows": [
     {
-      "name": "Online Sale",
-      "trigger": "User creates invoice in SalesFlow Livewire component",
-      "path": ["SalesFlow", "PricingService", "InvoiceCalculationService", "InvoiceService::create()", "DB::transaction", "StockService::decrement()", "StockMovement::create()"],
-      "confidence": 95
+      "id": "F1",
+      "name": "offline_sale_to_invoice",
+      "trigger": "rep confirms a sale while navigator.onLine is false",
+      "path": [
+        "resources/views/livewire/app/sales-flow.blade.php",
+        "resources/js/offline/outbox.js::enqueue",
+        "IndexedDB outbox",
+        "resources/js/offline/sync.js::flush",
+        "POST /app/sync",
+        "SyncController::store",
+        "SyncService::process",
+        "SaleSyncHandler::handle",
+        "InvoiceService::create",
+        "StockService::decrement",
+        "PostgreSQL"
+      ],
+      "authorization": [
+        "session authentication",
+        "rep role",
+        "active company context",
+        "seller create:invoice permission"
+      ],
+      "idempotency": "(company_id, idempotency_key) unique sync receipt with payload hash",
+      "failure_handling": [
+        "network/session failure remains pending",
+        "invalid/unsupported/failed becomes failed outbox record",
+        "payload mismatch becomes failed",
+        "ambiguous receipt becomes conflict",
+        "applied/duplicate is removed"
+      ],
+      "verified_defect": "UI items omit unit_price while handler requires items.*.unit_price",
+      "confidence": 98
     },
     {
-      "name": "Offline Sale → Sync",
-      "trigger": "Device comes online, sync.js flushes outbox",
-      "path": ["outbox.js:enqueue()", "IndexedDB", "sync.js:flush()", "POST /app/sync", "SyncController", "SyncService::process()", "SaleSyncHandler", "InvoiceService::create()"],
-      "confidence": 95
+      "id": "F2",
+      "name": "online_invoice",
+      "trigger": "SalesFlow::submit",
+      "path": [
+        "Livewire validation",
+        "InvoiceService::create",
+        "seller and company authorization",
+        "PricingService::effectivePrice",
+        "InvoiceCalculationService::calculate",
+        "NumberSequenceService::generate",
+        "Invoice and InvoiceItem create",
+        "StockService::decrement",
+        "StockMovement create",
+        "Customer balance increment"
+      ],
+      "transactional": true,
+      "confidence": 98
     },
     {
-      "name": "GPS Geofence Check",
-      "trigger": "Rep checks in at customer location",
-      "path": ["VisitFlow", "navigator.geolocation", "GpsCoordinate::distanceTo()", "server-side recomputation"],
-      "confidence": 90
+      "id": "F3",
+      "name": "active_company_scoping",
+      "trigger": "authenticated web or API request",
+      "path": [
+        "SetActiveCompanyContext middleware",
+        "User::hasCompanyAccess",
+        "ActiveCompanyContext::setFromUser",
+        "BelongsToCompany global scope",
+        "company-scoped query and write guards"
+      ],
+      "verified_gap": "record policy helper compares primary user.company_id rather than active company",
+      "confidence": 94
     },
     {
-      "name": "Authentication",
-      "trigger": "User submits login form",
-      "path": ["Login page", "Timebox credential check", "attemptWhen (is_active)", "Session regeneration", "Role-based redirect (/app or /admin)"],
+      "id": "F4",
+      "name": "eta_submission",
+      "trigger": "EtaService::submit for an enabled non-demo environment",
+      "path": [
+        "EtaDocumentBuilder",
+        "EtaSigner",
+        "OAuth client credentials token",
+        "POST /api/v1/documentsubmissions",
+        "EtaResult mapping",
+        "Invoice ETA status update",
+        "Activity log"
+      ],
+      "external_blockers": [
+        "real taxpayer signer",
+        "preproduction validation",
+        "credentials and certificate"
+      ],
       "confidence": 90
     }
   ],
+  "commands": {
+    "make_available": false,
+    "lint": {
+      "command": "php vendor/bin/pint --test",
+      "status": "verified_pass",
+      "result": "Pint passed"
+    },
+    "typecheck": {
+      "command": "php vendor/bin/phpstan analyse --no-progress",
+      "status": "failed",
+      "result": "exit 1 with no diagnostics"
+    },
+    "unit_tests": {
+      "command": "php artisan test --testsuite=Unit --compact",
+      "status": "verified_pass",
+      "result": "142 passed, 386 assertions, 75.8 seconds"
+    },
+    "focused_offline_tests": {
+      "command": "php artisan test tests/Feature/OfflineSyncTest.php tests/Feature/OfflineSyncHandlersTest.php tests/Feature/RepFlowOfflineUxTest.php --compact",
+      "status": "verified_pass",
+      "result": "28 passed, 85 assertions, 92.7 seconds; producer and consumer tested separately"
+    },
+    "feature_tests": {
+      "command": "php artisan test --testsuite=Feature --compact",
+      "status": "failed",
+      "result": "1 GB memory exhausted after approximately 12 minutes"
+    },
+    "aggregate_tests": {
+      "command": "php artisan test --testsuite=Unit,Feature --compact",
+      "status": "failed",
+      "result": "1 GB memory exhausted"
+    },
+    "browser_tests": {
+      "command": "php artisan test tests/Browser --compact",
+      "status": "not_run",
+      "result": "Windows plugin lifecycle limitation documented by concurrent task; Linux CI pending"
+    },
+    "build": {
+      "command": "npm.cmd run build",
+      "status": "verified_pass",
+      "result": "338 modules transformed; built in 13.78 seconds"
+    },
+    "route_cache": {
+      "command": "php artisan route:cache",
+      "status": "verified_pass",
+      "result": "cached successfully; cache cleared afterward"
+    },
+    "composer_audit": {
+      "command": "php <composer-script> audit --no-ansi --locked",
+      "status": "verified_pass",
+      "result": "no security vulnerability advisories"
+    },
+    "npm_audit": {
+      "command": "npm.cmd audit --audit-level=high",
+      "status": "verified_pass",
+      "result": "0 vulnerabilities"
+    },
+    "make_verify": {
+      "command": "make verify",
+      "status": "blocked_and_not_green",
+      "result": "GNU Make unavailable; direct typecheck and Feature checks fail"
+    }
+  },
   "risks": [
     {
       "id": "R1",
       "severity": "critical",
-      "description": "CI/Deploy branch mismatch — ci.yml triggers on 'main', deploy.yml on 'master'. Default branch is 'master'. CI never runs on deploy branch.",
-      "evidence": ["ci.yml:4-6", "deploy.yml:4-5", "git branch --show-current = master"],
-      "confidence": 95
+      "classification": "verified_fact",
+      "description": "Offline sale UI omits unit_price but SaleSyncHandler requires it, so real queued sales are rejected.",
+      "evidence": [
+        "resources/views/livewire/app/sales-flow.blade.php:193-205",
+        "app/Services/Sync/Handlers/SaleSyncHandler.php:23-32",
+        "resources/js/offline/sync.js:101-113"
+      ],
+      "confidence": 98
     },
     {
       "id": "R2",
       "severity": "high",
-      "description": "No rate limiter tests despite stated security requirement (5/min login, 60/min POST).",
-      "evidence": ["SECURITY.md", "grep for 'rate' in tests/ returns 0"],
-      "confidence": 90
+      "classification": "verified_runtime",
+      "description": "Feature and aggregate Unit+Feature suites exhaust the 1 GB test memory limit.",
+      "evidence": [
+        "2026-07-29 Feature command output",
+        "2026-07-29 aggregate command output",
+        "phpunit.xml:23-25"
+      ],
+      "confidence": 100
     },
     {
       "id": "R3",
       "severity": "high",
-      "description": "E2E and ZAP scans are advisory-only (continue-on-error). Never block deploys.",
-      "evidence": ["e2e.yml:7", "security.yml ZAP step"],
-      "confidence": 95
+      "classification": "verified_fact",
+      "description": "Multi-company policy ownership uses the user's primary company instead of active company; StockPolicy checks a model without company_id.",
+      "evidence": [
+        "app/Policies/Concerns/ChecksCompanyOwnership.php:8-13",
+        "app/Models/User.php:80-105",
+        "app/Models/Stock.php:9-29",
+        "app/Policies/StockPolicy.php:18-25"
+      ],
+      "confidence": 93
     },
     {
       "id": "R4",
-      "severity": "medium",
-      "description": "route:cache disabled due to closure routes. Performance penalty.",
-      "evidence": ["docs/DEPLOYMENT.md:39"],
-      "confidence": 90
+      "severity": "high",
+      "classification": "strong_inference",
+      "description": "PhotoService applies local finfo/GD EXIF processing to a path returned by an S3 disk; tests only use a local fake S3 disk.",
+      "evidence": [
+        "app/Services/PhotoService.php:32-71",
+        "tests/Feature/PhotoDiskConfigTest.php:48-56",
+        "config/filesystems.php:18-75"
+      ],
+      "confidence": 84
     },
     {
       "id": "R5",
       "severity": "medium",
-      "description": "make verify skips dependency audits (only scripts/verify includes them).",
-      "evidence": ["Makefile:47-54", "scripts/verify:18-22"],
-      "confidence": 90
+      "classification": "verified_fact",
+      "description": "Sync failure results expose raw exception messages to authenticated clients.",
+      "evidence": [
+        "app/Services/Sync/SyncService.php:104-127"
+      ],
+      "confidence": 95
     },
     {
       "id": "R6",
+      "severity": "high",
+      "classification": "repository_fact_external_unknown",
+      "description": "GitHub deploy workflow assumes Railway auto-deploy and does not itself prove staging-to-production promotion or rollback.",
+      "evidence": [
+        ".github/workflows/deploy.yml:11-40",
+        "railway.toml:1-20"
+      ],
+      "confidence": 78
+    },
+    {
+      "id": "R7",
       "severity": "medium",
-      "description": "PR-022 CSP deferred — Alpine.js requires unsafe-eval.",
-      "evidence": ["remediation-state.json PR-022"],
+      "classification": "verified_contradiction",
+      "description": "Repository documentation conflicts on Tailwind version, dependencies, hosting, branches, route caching, and test results.",
+      "evidence": [
+        "README.md:13-16",
+        "CONTRIBUTING.md:6-8",
+        "docs/DEPLOYMENT.md:1-39",
+        "railway.toml:1-20"
+      ],
+      "confidence": 98
+    },
+    {
+      "id": "R8",
+      "severity": "high",
+      "classification": "verified_documented_gate",
+      "description": "ETA signer/preproduction acceptance and independent restore drill evidence are incomplete; current release authority is NO-GO.",
+      "evidence": [
+        "docs/GO_LIVE_READINESS.md:8-14",
+        "docs/GO_LIVE_READINESS.md:42-58",
+        "docs/BACKUP_RESTORE.md:59-69"
+      ],
       "confidence": 95
     }
   ],
   "unknowns": [
     {
-      "question": "Is Railway the active deployment target?",
-      "impact": "Deploy configuration may be stale",
-      "resolution": "Check Railway dashboard or run railway status"
+      "id": "Q1",
+      "question": "Should offline sale payloads include the quoted unit price or rely entirely on server pricing at replay?",
+      "blocking": true,
+      "resolution": "decide contract and add an exact producer-to-handler contract test plus Linux browser flow"
     },
     {
-      "question": "Has ETA e-invoicing ever been activated?",
-      "impact": "Egyptian compliance may be required before go-live",
-      "resolution": "Check config/eta.php values in production .env"
+      "id": "Q2",
+      "question": "Which Feature test group retains enough state to exhaust 1 GB?",
+      "blocking": true,
+      "resolution": "bisect Feature files and record peak memory"
     },
     {
-      "question": "What closure routes prevent route:cache?",
-      "impact": "Performance optimization blocked",
-      "resolution": "Run route:list and identify closures"
+      "id": "Q3",
+      "question": "Why does PHPStan exit 1 without diagnostics?",
+      "blocking": true,
+      "resolution": "compare Linux CI and clean cache/dependency environment"
+    },
+    {
+      "id": "Q4",
+      "question": "How should policies authorize records in a secondary active company?",
+      "blocking": true,
+      "resolution": "add secondary-company policy tests and centralize active-company ownership"
+    },
+    {
+      "id": "Q5",
+      "question": "Does photo capture work with a real S3-compatible adapter?",
+      "blocking": true,
+      "resolution": "run adapter-level integration test and strip EXIF before upload"
+    },
+    {
+      "id": "Q6",
+      "question": "Do Railway external settings enforce staged deployment, approvals, worker configuration, and rollback?",
+      "blocking": true,
+      "resolution": "inspect Railway dashboard and retain deployment evidence"
+    },
+    {
+      "id": "Q7",
+      "question": "Are ETA signer/preproduction acceptance and independent backup/restore drill complete outside Git?",
+      "blocking": true,
+      "resolution": "authorized operator completes and records external gates without committing secrets"
+    },
+    {
+      "id": "Q8",
+      "question": "Does the concurrent Linux browser-test CI job pass after commit?",
+      "blocking": false,
+      "resolution": "review, commit, run PR CI, inspect browser-test result"
+    },
+    {
+      "id": "Q9",
+      "question": "What retention and archival policy preserves exactly-once guarantees for sync receipts?",
+      "blocking": false,
+      "resolution": "define maximum offline age, archival, and expired-operation protocol"
     }
   ],
-  "confidence_table": {
-    "project_purpose": 95,
-    "tech_stack": 100,
-    "architecture": 95,
-    "offline_sync": 95,
-    "multi_tenancy": 100,
-    "test_results": 100,
-    "ci_branch_mismatch": 95,
-    "service_layer_pattern": 90,
-    "security_patterns": 85,
-    "deployment_status": 70
+  "confidence": {
+    "project_purpose": 98,
+    "technology_stack": 100,
+    "architecture": 97,
+    "online_invoice_flow": 98,
+    "offline_sync_engine": 96,
+    "offline_sale_contract_defect": 98,
+    "tenant_scoping": 94,
+    "multi_company_policy_defect": 93,
+    "deployment_design": 82,
+    "production_no_go": 95,
+    "current_command_results": 100
   },
-  "generated_at": "2026-07-28",
-  "exploration_scope": "full repository",
-  "primary_branch": "master"
+  "recommended_next_actions": [
+    "fix and regression-test the offline sale producer/consumer contract",
+    "isolate Feature-suite memory growth and restore green aggregate verification",
+    "align record policies with ActiveCompanyContext and correct Stock ownership checks",
+    "validate and correct photo EXIF handling with a real S3 adapter",
+    "replace raw sync exception messages with stable client-safe errors and server-side correlation",
+    "complete ETA, restore, rollback, staging, device, security, accessibility, operations, and UAT evidence before real-data launch",
+    "review the concurrent browser-test CI task without overwriting it"
+  ]
 }

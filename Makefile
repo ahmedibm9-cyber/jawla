@@ -1,4 +1,4 @@
-.PHONY: setup dev lint typecheck test test-e2e verify build migrate seed smoke
+.PHONY: setup dev lint typecheck test test-e2e test-e2e-ci verify build migrate seed smoke
 
 setup:
 	composer install
@@ -26,6 +26,14 @@ test:
 	php artisan test --testsuite=Unit,Feature
 
 test-e2e:
+	@if php -r "exit(PHP_OS_FAMILY === 'Windows' ? 0 : 1);" 2>/dev/null; then \
+		echo "SKIP: Browser tests require pest-plugin-browser v4.4+ on Windows (upstream bug #1517)."; \
+		echo "       Run in CI (Linux) or use Laravel Dusk locally."; \
+	else \
+		php artisan test tests/Browser; \
+	fi
+
+test-e2e-ci:
 	php artisan test tests/Browser
 
 build:

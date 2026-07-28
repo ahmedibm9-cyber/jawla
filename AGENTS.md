@@ -30,7 +30,7 @@ tests/ Pest (Feature, Unit) + Playwright (Browser, e2e)
 | Lint (PHP)           | `make lint`      |
 | Typecheck            | `make typecheck` |
 | Unit + Feature tests | `make test`      |
-| E2E tests            | `make test-e2e`  |
+| E2E tests            | `make test-e2e`  | (CI only — see Browser test limitation)
 | Full verify          | `make verify`    |
 | Build assets         | `make build`     |
 | Database migrate     | `make migrate`   |
@@ -83,6 +83,26 @@ tests/ Pest (Feature, Unit) + Playwright (Browser, e2e)
 - Feature tests must include the failure path for every money/stock flow.
 - E2E: at minimum, rep day flow + admin master-data flow + RTL smoke.
 - Run `make verify` before reporting any task complete.
+
+### Browser (E2E) test limitation
+
+Browser tests (`tests/Browser/`) use `pestphp/pest-plugin-browser` v4.3.1
+with Playwright. There is a **known upstream bug** that prevents the
+Playwright child process from staying alive during Pest's test lifecycle:
+
+- **Affected:** Windows development machines (process lifecycle issue)
+- **Not affected:** Linux CI environments (GitHub Actions, Docker)
+- **Upstream issue:** https://github.com/pestphp/pest/issues/1517
+- **Symptom:** `AssertionError: WebSocket client is not connected.`
+
+Standalone PHP works correctly (server starts, WebSocket connects, Playwright
+initializes). The bug is in how Pest manages child processes on Windows.
+
+**Workarounds:**
+1. Browser tests run in CI (Linux) — trust CI results for E2E verification.
+2. For local E2E testing, use Laravel Dusk as an alternative.
+3. Wait for upstream fix in `pest-plugin-browser` v4.4+.
+4. Run Playwright server manually and connect via `AlreadyStartedPlaywrightServer`.
 
 ## Files agents must not modify
 
