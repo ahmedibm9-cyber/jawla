@@ -22,5 +22,5 @@ interface SyncHandler
      * @param  array<string, mixed>  $payload
      * @return array<string, mixed>
      */
-    public function handle(User $rep, array $payload): array;
+    public function handle(User $rep, array $payload, ?string $idempotencyKey = null): array;
 }

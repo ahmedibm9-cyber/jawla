@@ -20,7 +20,7 @@ class VisitReportSyncHandler extends AbstractRepWriteHandler
         return 'visit_report';
     }
 
-    public function handle(User $rep, array $payload): array
+    public function handle(User $rep, array $payload, ?string $idempotencyKey = null): array
     {
         $data = $this->validated($payload, [
             'visit_id' => ['required', 'integer'],

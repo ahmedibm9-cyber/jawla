@@ -96,7 +96,7 @@ class SyncService
                     'response' => null,
                 ]);
 
-                $result = $this->registry->get($type)->handle($rep, $payload);
+                $result = $this->registry->get($type)->handle($rep, $payload, $key);
                 $receipt->update(['response' => $result]);
 
                 return ['key' => $key, 'status' => 'applied', 'result' => $result];

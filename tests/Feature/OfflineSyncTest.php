@@ -56,7 +56,7 @@ class OfflineSyncTest extends TestCase
                 return 'test_photo';
             }
 
-            public function handle(User $rep, array $payload): array
+            public function handle(User $rep, array $payload, ?string $idempotencyKey = null): array
             {
                 $this->calls++;
                 $photo = Photo::factory()->create(['company_id' => $rep->company_id, 'user_id' => $rep->id]);
@@ -147,7 +147,7 @@ class OfflineSyncTest extends TestCase
                 return 'boom';
             }
 
-            public function handle(User $rep, array $payload): array
+            public function handle(User $rep, array $payload, ?string $idempotencyKey = null): array
             {
                 throw new \RuntimeException('handler exploded');
             }
@@ -171,7 +171,7 @@ class OfflineSyncTest extends TestCase
                 return 'broken_receipt';
             }
 
-            public function handle(User $rep, array $payload): array
+            public function handle(User $rep, array $payload, ?string $idempotencyKey = null): array
             {
                 Photo::factory()->create(['company_id' => $rep->company_id, 'user_id' => $rep->id]);
 

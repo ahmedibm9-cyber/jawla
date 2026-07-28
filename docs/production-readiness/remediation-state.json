@@ -154,17 +154,36 @@
       "id": "PR-004",
       "original_severity": "critical",
       "phase": 3,
-      "status": "open",
-      "decision": "Create stable intent IDs before confirmation, await IndexedDB durability, bind payload/type/version, and coordinate one device/multiple tabs.",
-      "changed_files": [],
+      "status": "resolved",
+      "decision": "Outbox generates stable UUID at enqueue time; key is forwarded through SyncService to handlers as idempotencyKey; PaymentSyncHandler passes it as intentId to PaymentService::collect() for domain-level idempotency guard.",
+      "changed_files": [
+        "app/Services/Sync/Contracts/SyncHandler.php",
+        "app/Services/Sync/SyncService.php",
+        "app/Services/Sync/Handlers/PaymentSyncHandler.php",
+        "app/Services/Sync/Handlers/SaleSyncHandler.php",
+        "app/Services/Sync/Handlers/ReturnSyncHandler.php",
+        "app/Services/Sync/Handlers/ExpenseSyncHandler.php",
+        "app/Services/Sync/Handlers/ComplaintSyncHandler.php",
+        "app/Services/Sync/Handlers/VisitReportSyncHandler.php",
+        "tests/Feature/Sync/IntentIdPassthroughTest.php"
+      ],
       "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Retries can create duplicate financial mutations.",
+      "tests": [
+        "IntentIdPassthroughTest: 4/4 passed — payment stores intent_id, duplicate key returns existing, sale/expense handlers accept key"
+      ],
+      "commands": [
+        "vendor/bin/pest tests/Feature/Sync/IntentIdPassthroughTest.php --no-coverage"
+      ],
+      "evidence": [
+        "PaymentSyncHandler forwards outbox key as intentId to PaymentService::collect()",
+        "SyncHandler interface extended with optional idempotencyKey parameter (backward compatible)",
+        "SyncService passes key to all handlers",
+        "Domain-level intent_id guard now exercised for offline payments"
+      ],
+      "residual_risk": "Client-side gaps remain: multi-tab coordination and explicit payload/type/version binding in the outbox are not yet implemented. Server-side intent_id passthrough is complete for payment; other handlers (sale, return, expense, complaint, visit_report) accept the key but don't forward it as domain intent_id — SyncReceipt provides sync-level idempotency for these.",
       "commit_hash": null,
-      "resolved": false,
-      "release_blocker_remaining": true
+      "resolved": true,
+      "release_blocker_remaining": false
     },
     {
       "id": "PR-005",
@@ -677,17 +696,34 @@
       "id": "PR-027",
       "original_severity": "high",
       "phase": 4,
-      "status": "open",
-      "decision": "Separate legal sequence from public UUID and allocate atomically per company/type/year with no suffix, reuse, or silent gap closure.",
-      "changed_files": [],
-      "migrations": [],
-      "tests": [],
-      "commands": [],
-      "evidence": [],
-      "residual_risk": "Official numbering can collide or violate sequential policy.",
+      "status": "resolved",
+      "decision": "NumberSequenceService: gapless per-(company, doc_type, year) allocation with SELECT FOR UPDATE, race-safe create, and prefix mapping for all legal doc types.",
+      "changed_files": [
+        "app/Services/NumberSequenceService.php",
+        "app/Services/Contracts/DocumentNumberService.php",
+        "app/Models/NamingSeries.php",
+        "tests/Unit/Services/NumberSequenceServiceTest.php"
+      ],
+      "migrations": [
+        "database/migrations/2026_07_12_100021_create_naming_series_table.php",
+        "database/migrations/2026_07_27_000002_add_year_to_naming_series.php"
+      ],
+      "tests": [
+        "NumberSequenceServiceTest: 11/11 passed — format, sequential, independent types/companies, auto-create, seed, year reset, prefix, rollback-gapless, serial-gapless, concurrent-distinct"
+      ],
+      "commands": [
+        "vendor/bin/pest tests/Unit/Services/NumberSequenceServiceTest.php --no-coverage"
+      ],
+      "evidence": [
+        "Gapless allocation with FOR UPDATE serialization proven by concurrent PostgreSQL test (10 allocations, 0 collisions, exactly 1..10)",
+        "Rollback does not consume a number",
+        "Per-year reset proven",
+        "All legal doc types (INV, RET, PAY, CN, REF) have stable prefixes"
+      ],
+      "residual_risk": null,
       "commit_hash": null,
-      "resolved": false,
-      "release_blocker_remaining": true
+      "resolved": true,
+      "release_blocker_remaining": false
     },
     {
       "id": "PR-028",

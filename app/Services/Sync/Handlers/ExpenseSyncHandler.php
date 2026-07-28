@@ -18,7 +18,7 @@ class ExpenseSyncHandler extends AbstractRepWriteHandler
         return 'expense';
     }
 
-    public function handle(User $rep, array $payload): array
+    public function handle(User $rep, array $payload, ?string $idempotencyKey = null): array
     {
         $data = $this->validated($payload, [
             'category' => ['required', 'string', 'in:fuel,maintenance,food,other'],

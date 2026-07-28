@@ -14,7 +14,7 @@ class ReturnSyncHandler extends AbstractRepWriteHandler
         return 'return';
     }
 
-    public function handle(User $rep, array $payload): array
+    public function handle(User $rep, array $payload, ?string $idempotencyKey = null): array
     {
         $data = $this->validated($payload, [
             'customer_id' => ['required', 'integer'],

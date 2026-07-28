@@ -18,7 +18,7 @@ class PaymentSyncHandler extends AbstractRepWriteHandler
         return 'payment';
     }
 
-    public function handle(User $rep, array $payload): array
+    public function handle(User $rep, array $payload, ?string $idempotencyKey = null): array
     {
         $data = $this->validated($payload, [
             'customer_id' => ['required', 'integer'],
@@ -40,6 +40,7 @@ class PaymentSyncHandler extends AbstractRepWriteHandler
             invoiceId: isset($data['invoice_id']) ? (int) $data['invoice_id'] : null,
             visitId: isset($data['visit_id']) ? (int) $data['visit_id'] : null,
             notes: $data['notes'] ?? null,
+            intentId: $idempotencyKey,
         );
 
         return ['payment_id' => $payment->id];
