@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Services;
 
+use App\Exceptions\Domain\DomainException;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\PriceList;
@@ -106,7 +107,7 @@ class PricingServiceTest extends TestCase
         $customer = Customer::factory()->create(['company_id' => $companyA->id]);
         $product = Product::factory()->create(['company_id' => $companyB->id, 'price' => 100]);
 
-        $this->expectException(\App\Exceptions\Domain\DomainException::class);
+        $this->expectException(DomainException::class);
         app(PricingService::class)->effectivePrice(
             $companyA->id,
             $customer->id,

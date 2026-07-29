@@ -8,6 +8,7 @@ use App\Models\Company;
 use App\Models\Customer;
 use App\Models\User;
 use App\Models\Visit;
+use App\Models\WorkSession;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -39,7 +40,7 @@ class VisitFlowTest extends TestCase
             'longitude' => 31.2357,
         ]);
 
-        $workSession = \App\Models\WorkSession::factory()->create([
+        $workSession = WorkSession::factory()->create([
             'user_id' => $rep->id,
             'company_id' => $company->id,
         ]);
@@ -69,7 +70,7 @@ class VisitFlowTest extends TestCase
         $company = Company::factory()->create();
         $rep = $this->rep($company);
         $customer = Customer::factory()->create(['company_id' => $company->id]);
-        $workSession = \App\Models\WorkSession::factory()->create([
+        $workSession = WorkSession::factory()->create([
             'user_id' => $rep->id,
             'company_id' => $company->id,
         ]);
@@ -103,7 +104,7 @@ class VisitFlowTest extends TestCase
         $company = Company::factory()->create();
         $rep = $this->rep($company);
         $customer = Customer::factory()->create(['company_id' => $company->id]);
-        $workSession = \App\Models\WorkSession::factory()->create([
+        $workSession = WorkSession::factory()->create([
             'user_id' => $rep->id,
             'company_id' => $company->id,
         ]);
@@ -126,7 +127,7 @@ class VisitFlowTest extends TestCase
         $company = Company::factory()->create();
         $rep = $this->rep($company);
         $customer = Customer::factory()->create(['company_id' => $company->id]);
-        $workSession = \App\Models\WorkSession::factory()->create([
+        $workSession = WorkSession::factory()->create([
             'user_id' => $rep->id,
             'company_id' => $company->id,
         ]);

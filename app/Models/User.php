@@ -44,7 +44,7 @@ class User extends Authenticatable implements FilamentUser
 
     protected $fillable = [
         'uuid', 'company_id', 'name', 'email', 'phone', 'password',
-        'employee_code', 'is_active', 'preferences',
+        'employee_code', 'is_active', 'onboarding_seen', 'preferences',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -54,6 +54,7 @@ class User extends Authenticatable implements FilamentUser
         return [
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'onboarding_seen' => 'boolean',
             'preferences' => 'array',
         ];
     }

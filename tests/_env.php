@@ -1,6 +1,7 @@
 <?php
 
 declare(strict_types=1);
+use Tests\Support\TestingDatabaseGuard;
 
 /**
  * Test environment pinning — loaded by tests/bootstrap.php BEFORE Laravel
@@ -17,10 +18,16 @@ declare(strict_types=1);
  *   the development database and the ActiveCompanyContext tenancy guard
  *   trips on the first service-level unit test.
  *
- * Keep this array in sync with phpunit.xml's <env> block. The shared
- * TestingDatabaseGuard enforces the dangerous subset (APP_ENV=testing,
- * DB_CONNECTION=pgsql, DB_DATABASE=jawla_test[_*]) at every boundary.
+ * Keep this array in sync with phpunit.xml's <env> block. Set
+ * JAWLA_TEST_DATABASE to a jawla_test_* name when concurrent local runners
+ * need separate databases. The shared TestingDatabaseGuard enforces the
+ * dangerous subset at every boundary.
  */
+$database = getenv('JAWLA_TEST_DATABASE');
+$database = is_string($database) && $database !== '' ? $database : 'jawla_test';
+
+TestingDatabaseGuard::assertSafe('testing', 'pgsql', $database);
+
 $pinned = [
     'APP_ENV' => 'testing',
     'JAWLA_MODE' => 'demo',
@@ -31,7 +38,7 @@ $pinned = [
     'DB_CONNECTION' => 'pgsql',
     'DB_HOST' => '127.0.0.1',
     'DB_PORT' => '5432',
-    'DB_DATABASE' => 'jawla_test',
+    'DB_DATABASE' => $database,
     'DB_USERNAME' => 'postgres',
     'DB_PASSWORD' => 'postgres',
     'MAIL_MAILER' => 'array',
@@ -48,4 +55,4 @@ foreach ($pinned as $key => $value) {
     $_SERVER[$key] = $value;
 }
 
-unset($key, $value, $pinned);
+unset($database, $key, $value, $pinned);

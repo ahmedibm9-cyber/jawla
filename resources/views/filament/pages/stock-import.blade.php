@@ -88,7 +88,7 @@
                         color="danger"
                         wire:click="confirmImport"
                         wire:loading.attr="disabled"
-                        @disabled($requiresApproval && !$approved)
+                        :disabled="$requiresApproval && ! $approved"
                         wire:confirm="{{ $l(
                             'سيتم تعديل أرصدة المخزون لتطابق العد المستورد وإنشاء حركات مخزون مطابقة. لا يمكن التراجع. متابعة؟',
                             'Stock balances will be adjusted to match the imported counts and matching stock movements will be created. This cannot be undone. Continue?',

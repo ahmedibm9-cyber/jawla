@@ -45,11 +45,11 @@ class ProductGatesTest extends TestCase
         $this->assertTrue(Gate::forUser($user)->allows('products.manage_prices'));
     }
 
-    public function test_sales_manager_can_manage_prices(): void
+    public function test_sales_manager_cannot_manage_prices(): void
     {
         $user = $this->makeUser('sales_manager');
 
-        $this->assertTrue(Gate::forUser($user)->allows('products.manage_prices'));
+        $this->assertFalse(Gate::forUser($user)->allows('products.manage_prices'));
     }
 
     public function test_rep_cannot_manage_prices(): void

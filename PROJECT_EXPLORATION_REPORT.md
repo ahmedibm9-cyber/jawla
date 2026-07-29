@@ -11,8 +11,10 @@
 > payload mismatch, active-company stock/policy defects, object-storage image
 > sanitization, and PHPStan runtime-symbol defects identified by this dossier
 > were remediated after the exploration snapshot. Release/promotion controls
-> were also implemented. The original evidence below remains the baseline that
-> motivated those changes; current status is tracked in
+> were also implemented. The final isolated Unit + Feature run passed 666 tests
+> / 1,878 assertions; Pint, PHPStan level 0, Laravel optimization, Vite build,
+> and PWA budgets also passed. The original evidence below remains the
+> historical baseline that motivated those changes; current status is tracked in
 > `docs/PRODUCTION_READINESS_IMPLEMENTATION.md`.
 
 ## Executive summary
@@ -21,9 +23,16 @@ Jawla (جولة) is a bilingual Arabic/English field-sales CRM/ERP for Egyptian 
 
 The strongest architectural pattern is the service layer: financial and stock-changing flows delegate to services, use database transactions, and route inventory changes through `StockService`. The most important runtime path is offline mutation replay: IndexedDB outbox → `POST /app/sync` → `SyncService` → a typed handler → the same domain service used online.
 
-The highest-priority verified defect is in that path. The offline sales UI queues each item without `unit_price`, while `SaleSyncHandler` requires `items.*.unit_price`; a real offline sale therefore reaches sync as an invalid payload and is marked failed. The test suite exercises the queue UI and the handler separately with synthetic payloads, so it does not close this contract gap.
+The highest-priority defect found in that path was remediated after exploration.
+Offline items may omit `unit_price`; the server derives authoritative pricing,
+while supplied stale/tampered prices remain subject to service validation.
 
-Current verification is mixed: Pint, the Unit suite, Vite build, Composer audit, and npm audit pass. PHPStan exits 1 without diagnostics on this host. The Feature suite, even when run alone, exhausts its configured 1 GB memory limit. Consequently `make verify` is not green and the repository’s own definition of done is unmet.
+Current code-level verification is green: 666 Unit + Feature tests / 1,878
+assertions, repository-wide Pint, PHPStan level 0, production asset build,
+Laravel optimization, and PWA budgets passed. Production remains NO-GO because
+Linux browser/CI/security evidence and the external tax, restore, rollback,
+performance, accessibility, device, incident, privacy, and UAT gates are not
+complete.
 
 ## Scope and state
 
@@ -248,12 +257,12 @@ Deployment evidence points primarily to Railway:
 
 | ID | Severity | Finding | Classification / confidence | Recommended next investigation |
 |---|---|---|---|---|
-| R1 | Critical | Offline sale producer omits required `unit_price`; sync deterministically rejects real queued sales | Verified fact, 98 | Add a producer/consumer contract test, choose server-only pricing or include the quoted price, then run an offline browser flow |
-| R2 | High | Feature suite exhausts 1 GB; repository verification cannot pass on current host | Verified runtime, 100 | Split Feature files to locate retained state/leak; make aggregate suite pass before relying on CI |
-| R3 | High | Multi-company policy checks compare `user.company_id`, not active company; `StockPolicy` checks a `Stock` model with no `company_id` | Verified code, 93 | Add secondary-company policy tests; make policy ownership resolve through active company/warehouse |
-| R4 | High | Production S3 photo path is passed to local `finfo`/GD EXIF code; current tests use `Storage::fake('s3')`, which is local | Strong inference, 84 | Test against an actual S3 adapter; strip metadata before upload or via stream/temp file |
-| R5 | Medium | Sync returns raw throwable/query exception messages to authenticated clients | Verified code, 95 | Return a stable bilingual error code/message; report full exception server-side only |
-| R6 | High | Deploy workflow assumes external Railway auto-deploy; repository code does not prove staging/production ordering or promotion gates | Verified repository / external status unknown, 78 | Inspect Railway service settings and environment approvals; record actual deployment and rollback evidence |
+| R1 | Resolved in code | Offline sale pricing mismatch | Exact price-less payload now has regression coverage; server pricing is authoritative | Retain Linux offline browser coverage |
+| R2 | Resolved as verification blocker | Aggregate suite previously exceeded 1 GB | 2 GB isolated run passed 666 tests / 1,878 assertions | Optimize suite memory as technical debt |
+| R3 | Resolved in code | Active-company and Stock policy mismatch | Secondary-company and Stock ownership matrix passes | Retain tenant matrix in blocking CI |
+| R4 | Resolved in code | Photo sanitizer assumed a local S3 path | Decode/re-encode occurs before upload; adapter-independent tests pass | Exercise a real disposable bucket in staging |
+| R5 | Resolved in code | Sync exposed raw exceptions | Stable bilingual codes go to clients; details remain server-side | Monitor Sentry/log correlation |
+| R6 | Repository control implemented | Staging/production promotion was not enforced by workflow | Exact-SHA promotion and protected production workflow implemented | Verify external GitHub/Railway settings and exercise it |
 | R7 | Medium | “Append-only” wording overstates immutability; only deletes are blocked while updates are common | Verified fact, 95 | Document delete-protected lifecycle ledgers precisely and test allowed/forbidden mutations |
 | R8 | Medium | Current documentation conflicts on Tailwind, hosting, branches, route caching, and test counts | Verified contradiction, 98 | Make `ARCHITECTURE_CURRENT.md` and this dossier authoritative; update stale README/CONTRIBUTING/DEPLOYMENT text in a separate task |
 | R9 | High | ETA signer/preprod evidence and independent restore drill remain missing; current release authority says NO-GO | Verified docs / external completion unknown, 95 | Complete named go-live gates and retain evidence before real data |
@@ -282,11 +291,11 @@ The committed readiness document claims durable S3 photo storage is complete (`d
 See `OPEN_QUESTIONS.md` for resolution steps. The decisions currently unsafe to assume are:
 
 - whether Railway auto-deploy/approvals actually enforce staged production promotion;
-- whether S3 photo capture succeeds through the real adapter;
-- which Feature test group causes aggregate memory growth;
-- whether secondary-company users can complete all policy-protected workflows;
 - whether ETA credentials/signer/preprod acceptance and restore/rollback drills exist outside the repository;
-- whether the new Linux browser-test job passes after the concurrent changes are committed.
+- whether the Linux browser-test, security, and promotion jobs pass for the
+  final commit;
+- whether staging S3, performance, accessibility, device, and incident drills
+  pass.
 
 ## Confidence table
 
@@ -297,29 +306,33 @@ See `OPEN_QUESTIONS.md` for resolution steps. The decisions currently unsafe to 
 | Monolith/service-layer architecture | 97 | Not every Filament action/service call was traced |
 | Online invoice transaction | 98 | Direct code plus tests inspected; no live UI execution |
 | Offline sync engine semantics | 96 | Direct code and server tests; no live browser replay |
-| Offline sale contract defect | 98 | Direct producer/consumer mismatch; no live end-to-end reproduction |
+| Offline sale contract remediation | 98 | Direct service and regression-test evidence; Linux browser flow remains |
 | Tenant scoping model | 94 | Core scope/context verified; not every model/policy exhaustively tested |
-| Multi-company policy defect | 93 | Direct code; exact affected UI actions were sampled, not exhaustively enumerated |
+| Multi-company policy remediation | 96 | Direct code plus active-secondary-company and Stock matrix tests |
 | Deployment design | 82 | Repository configuration is clear; external Railway settings are not visible |
 | Production readiness NO-GO | 95 | Current authoritative runbook says NO-GO; external evidence could have changed |
 | Current verification status | 100 | Commands run and results inspected on 2026-07-29 |
 
 ## Recommended next actions
 
-1. Fix and regression-test the offline sale payload contract before any field pilot.
-2. Isolate the Feature-suite memory growth and restore a green aggregate `make test`/`make verify`.
-3. Align multi-company policy ownership with `ActiveCompanyContext`, including `Stock`.
-4. Exercise photo capture against a real S3-compatible adapter and correct EXIF processing if needed.
-5. Replace raw sync exception messages with stable client-safe errors and server-side reporting.
-6. Complete external production gates: ETA signer/preprod, restore and rollback drills, staging security/performance/accessibility/device tests, named operations ownership, and UAT.
-7. Reconcile stale repository docs only after the concurrent browser-test task is reviewed.
+1. Run the final commit through blocking Linux CI, browser E2E, secret/security
+   scanning, staging readiness, and DAST.
+2. Exercise the protected same-SHA production promotion and rollback workflows
+   against Railway with named approvers.
+3. Complete ETA signer/preproduction and tax-owner approval.
+4. Complete encrypted backup/scratch restore and rollback drills with measured
+   RPO/RTO and reconciled evidence.
+5. Complete staging S3, performance, accessibility, physical-device offline,
+   incident, privacy/legal, and multi-role UAT gates.
 
 ## Readiness for downstream work
 
 - **Planning a code change:** Ready. Use `PROJECT_MAP.md`, the flow above, and the risk list.
-- **Implementing offline sales:** Ready only if R1 is the first invariant addressed.
+- **Implementing offline sales:** Code contract is ready; Linux browser and
+  physical offline/reconnect evidence remain required for field rollout.
 - **General feature development:** Ready, with tenant/service/transaction constraints preserved.
-- **Production launch or real customer data:** Not ready. R1/R2 plus the documented external go-live gates block a safe launch.
+- **Production launch or real customer data:** Not ready. The documented
+  external and final-commit CI/governance gates still block a safe launch.
 
 ## Evidence index
 

@@ -28,23 +28,36 @@ owners, and customer stakeholders can provide.
 
 ## Verification state
 
-Verified locally during implementation:
+Verified locally from the final working tree:
 
-- PHPStan level 0 passes after resolving all ten runtime-level findings.
-- Focused offline-sync tests: 22 tests / 67 assertions passed.
-- Focused tenancy/roles/deployment-safety tests: 39 / 110 passed.
-- Focused photo tests: 14 / 30 passed.
-- Pint passed on each changed PHP group.
-- Admin login and health endpoint tests passed after the Filament event fix.
+- Full Unit + Feature suite: **666 tests / 1,878 assertions passed** in
+  976.17 seconds against the isolated `jawla_test_readiness_final` PostgreSQL
+  database. This includes real multi-connection concurrency tests.
+- Repository-wide Pint: passed.
+- PHPStan blocking runtime-safety level 0: passed with no errors.
+- PHPStan level 6 debt audit: 686 findings. It remains non-blocking by design
+  and must be reduced incrementally without suppressions or a generated
+  baseline.
+- Laravel production optimization: configuration, events, routes, views,
+  Blade icons, and Filament caches compiled successfully.
+- Production Vite build: 338 modules transformed.
+- PWA compressed budgets: JS 51.4 KiB / 300 KiB, CSS 22.5 KiB / 100 KiB,
+  total 504.3 KiB / 1,536 KiB.
+- npm cache-only high-severity audit: zero vulnerabilities.
+- Composer audit passed earlier on 2026-07-29 with the same unchanged lockfile.
+  A final live refresh could not reach Packagist from the managed sandbox; the
+  elevated attempt was policy-blocked because it would transmit dependency
+  metadata externally.
 
 Still required before release:
 
-- clean full Unit + Feature suite;
-- clean production asset build and PWA asset audit from the final tree;
+- a fresh Composer audit in approved CI/network conditions;
 - Linux CI browser suite (the documented Windows Playwright/Pest lifecycle bug
   prevents authoritative local E2E);
 - blocking GitHub security and deployment workflow runs;
-- review and planned reduction of the existing PHPStan level-6 debt.
+- review and planned reduction of the existing PHPStan level-6 debt;
+- a successful container build/runtime check (the local Docker client is
+  installed, but the Docker daemon is not running).
 
 ## External mandatory gates
 

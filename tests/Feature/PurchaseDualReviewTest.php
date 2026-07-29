@@ -138,7 +138,7 @@ class PurchaseDualReviewTest extends TestCase
         $this->assertSame($this->supplier->id, $order->supplier_id);
         $this->assertSame($this->company->id, $order->company_id);
         $this->assertSame(2505.00, (float) $order->total);
-        $this->assertMatchesRegularExpression('/-00001-[A-F0-9]$/', $order->order_number);
+        $this->assertMatchesRegularExpression('/^PO-[A-Z0-9]+-'.now()->year.'-00001$/', $order->order_number);
 
         $item = $order->items()->first();
         $this->assertSame($this->product->id, $item->product_id);
@@ -149,7 +149,7 @@ class PurchaseDualReviewTest extends TestCase
         $second = $this->makeOffer();
         $this->service()->salesApprove($second, $this->salesManager->id);
         $secondOrder = $this->service()->purchasingApprove($second, $this->purchasing->id);
-        $this->assertMatchesRegularExpression('/-00002-[A-F0-9]$/', $secondOrder->order_number);
+        $this->assertMatchesRegularExpression('/^PO-[A-Z0-9]+-'.now()->year.'-00002$/', $secondOrder->order_number);
         $this->assertNotSame($order->order_number, $secondOrder->order_number);
 
         // The purchasing-approved notification carries the PO number (same-second

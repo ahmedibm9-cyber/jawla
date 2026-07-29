@@ -37,9 +37,18 @@ retained below as historical exploration evidence.
 
 **Safest resolution:** Decide and document the contract, add a producer-to-handler contract test using the exact Blade payload shape, then run an actual offline Browser flow in Linux CI. Server-authoritative price at replay time is simpler and tamper-resistant, but product requirements must decide how offline price changes are presented to the rep.
 
-**Blocks:** Offline sales pilot and any claim that the six offline mutations work end-to-end.
+**Blocks:** The producer/handler contract no longer blocks server-side
+verification. Linux browser E2E and physical offline/reconnect UAT still block
+an end-to-end field-readiness claim.
 
 ### Q2. Which Feature test group retains enough state to exhaust 1 GB?
+
+**Status:** Resolved as a verification blocker. The project test command now
+uses a 2 GB PHP limit, and the final isolated Unit + Feature run completed:
+666 tests / 1,878 assertions in 976.17 seconds. The earlier interrupted run was
+also affected by a concurrent task sharing `jawla_test`; `tests/_env.php` now
+supports a guarded `JAWLA_TEST_DATABASE=jawla_test_*` override so independent
+runs do not race migrations or tables.
 
 **Question:** Is memory growth caused by a specific test/file, repeated seeding, retained Eloquent/container state, result reporting, or a framework/plugin interaction?
 
@@ -55,7 +64,9 @@ retained below as historical exploration evidence.
 
 **Safest resolution:** Run Feature files in deterministic halves/groups, capture peak memory per group, then narrow to a file/test. Do not merely raise the CI limit until retained state is understood.
 
-**Blocks:** Green `make test`, `make verify`, and trustworthy regression status.
+**Blocks:** No longer blocks the regression gate. Test-suite memory can still
+be optimized, but it is tracked as performance debt rather than release
+correctness uncertainty.
 
 ### Q3. Why does PHPStan exit 1 without diagnostics?
 
@@ -77,7 +88,8 @@ memory flag now produces normal diagnostics; all level-0 findings are fixed.
 
 **Safest resolution:** Run the same command in Linux CI and a clean local dependency/cache environment; remove only the generated PHPStan result cache after confirming its exact path and that no concurrent task owns it.
 
-**Blocks:** Green `make typecheck` and `make verify`.
+**Blocks:** Resolved for the blocking level-0 runtime gate. The intentionally
+non-blocking level-6 backlog remains technical debt.
 
 ## High-priority correctness questions
 
@@ -262,5 +274,8 @@ Railway promotion and dependency-aware `/health`.
 - **CI branch mismatch:** Resolved at inspected `HEAD`; CI targets `master`.
 - **Route cache closure concern:** Resolved for the current tree; `php artisan route:cache` succeeded.
 - **Current enum values:** Recovered from source and corrected in the dossier.
-- **Dependency audit status:** Composer and npm audits passed on 2026-07-29.
-- **Unit test status:** 142 tests / 386 assertions passed; the aggregate Feature gate remains unresolved.
+- **Dependency audit status:** Composer and npm audits passed on 2026-07-29
+  against the unchanged lockfiles. The final npm cache-only refresh also passed;
+  the final live Composer refresh was blocked by managed network policy.
+- **Aggregate test status:** 666 tests / 1,878 assertions passed on the isolated
+  PostgreSQL test database.

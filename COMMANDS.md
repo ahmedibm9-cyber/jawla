@@ -29,21 +29,20 @@ Do not put credentials or `.env` values in command output or reports.
 | Check | Command run | Status | Result |
 |---|---|---|---|
 | PHP lint/style | `php vendor/bin/pint --test` | **Verified** | Passed; Pint JSON result `passed` |
-| Static analysis | `php vendor/bin/phpstan analyse --no-progress` | **Failed** | Exit 1 with no stdout/stderr; verbose, raw, direct PHAR, and no-configuration attempts also emitted no diagnostics |
-| Unit tests | `php artisan test --testsuite=Unit --compact` | **Verified** | 142 passed, 386 assertions, 75.8 s |
-| Focused offline tests | `php artisan test tests/Feature/OfflineSyncTest.php tests/Feature/OfflineSyncHandlersTest.php tests/Feature/RepFlowOfflineUxTest.php --compact` | **Verified** | 28 passed, 85 assertions, 92.7 s; producer and consumer remain tested separately |
-| Feature tests | `php artisan test --testsuite=Feature --compact` | **Failed** | Exhausted 1 GB after about 12 minutes in Eloquent attribute handling |
-| Unit+Feature aggregate | `php artisan test --testsuite=Unit,Feature --compact` | **Failed** | Exhausted 1 GB; not a green `make test` equivalent |
-| Production asset build | `npm.cmd run build` | **Verified** | Vite 8.1.4; 338 modules transformed; built in 13.78 s |
+| Static analysis | `PAO_DISABLE=1 php vendor/bin/phpstan analyse --level=0 --memory-limit=2G --no-progress` | **Verified** | No errors |
+| Unit+Feature aggregate | `JAWLA_TEST_DATABASE=jawla_test_readiness_final php -d memory_limit=2G artisan test --testsuite=Unit,Feature` | **Verified** | 666 passed, 1,878 assertions, 976.17 s |
+| Production asset build | `npm.cmd run build` | **Verified** | Vite 8.1.4; 338 modules transformed; built in 4.14 s |
+| PWA asset budget | `npm.cmd run audit:pwa-assets` | **Verified** | JS 51.4 KiB, CSS 22.5 KiB, total 504.3 KiB gzip; all within budget |
 | Route discovery | `php artisan route:list --json` | **Verified** | 121 routes |
-| Route cache | `php artisan route:cache` then `route:clear` | **Verified** | Cache succeeded and generated cache was cleared |
+| Laravel optimize | `php artisan optimize` | **Verified** | Config, events, routes, views, Blade icons, and Filament cached successfully |
 | Schedule discovery | `php artisan schedule:list` | **Verified** | Daily `app:purge-location-pings` |
-| Composer security audit | `php $composer audit --no-ansi --locked` | **Verified** | No vulnerability advisories |
-| npm security audit | `npm.cmd audit --audit-level=high` | **Verified** | 0 vulnerabilities |
-| Full Makefile verification | `make verify` | **Blocked / not green** | `make` unavailable; direct equivalents are not all green |
+| Composer security audit | `php $composer audit --locked --no-interaction` | **Prior pass; refresh blocked** | Same-day clean result exists for the unchanged lockfile; final refresh could not access Packagist under managed policy |
+| npm security audit | `npm.cmd audit --offline --audit-level=high` | **Verified** | 0 vulnerabilities |
+| Full Makefile verification | `make verify` | **Blocked as written** | GNU Make unavailable; direct lint, typecheck, Unit+Feature, and build equivalents pass |
 | Browser E2E | `make test-e2e` / `php artisan test tests/Browser` | **Not run** | Concurrent guidance documents a pest-plugin-browser Windows process-lifecycle limitation; Linux CI result remains pending |
 
-The audits initially failed in the restricted sandbox because registry access/cache directories were unavailable. They were rerun with approved network access and passed.
+The final Composer refresh was not bypassed: external transmission of the
+lockfile dependency graph requires an approved CI/network context.
 
 ## Setup
 
@@ -74,20 +73,20 @@ The audits initially failed in the restricted sandbox because registry access/ca
 |---|---|---|
 | `make lint` | Blocked locally | GNU Make unavailable |
 | `php vendor/bin/pint --test` | Verified pass | Dry-run; no formatting writes |
-| `php vendor/bin/pint` | Not run | **Writes formatting changes**; do not use for exploration |
+| `php vendor/bin/pint` | Verified on affected files | Applied mechanical formatting; repository-wide dry-run then passed |
 | `make typecheck` | Blocked locally | GNU Make unavailable |
-| `php vendor/bin/phpstan analyse --no-progress` | Failed | Exit 1 with no diagnostic output on this host |
+| `PAO_DISABLE=1 php vendor/bin/phpstan analyse --level=0 --memory-limit=2G --no-progress` | Verified pass | Blocking runtime-safety gate; no errors |
 
-PHPStan configuration is level 6 over `app/`, uses `storage/app/phpstan-tmp`, and sets a 512 MB analyzer limit (`phpstan.neon`). The failure needs diagnosis before static analysis can be called green.
+`make typecheck-strict` preserves level 6 as a visible, non-blocking debt audit.
+The 2026-07-29 measurement reported 686 findings, dominated by missing iterable
+types and Eloquent relationship/property inference.
 
 ## Tests
 
 | Command | Status | Side effects / notes |
 |---|---|---|
-| `make test` | Blocked locally; direct equivalent failed | Intended Unit+Feature aggregate |
-| `php artisan test --testsuite=Unit --compact` | Verified pass | Uses guarded PostgreSQL test database |
-| `php artisan test --testsuite=Feature --compact` | Failed | 1 GB memory exhaustion; no complete result |
-| `php artisan test --testsuite=Unit,Feature --compact` | Failed | 1 GB memory exhaustion |
+| `make test` | Blocked locally; direct equivalent passed | Intended Unit+Feature aggregate |
+| `JAWLA_TEST_DATABASE=jawla_test_readiness_final php -d memory_limit=2G artisan test --testsuite=Unit,Feature` | Verified pass | 666 tests / 1,878 assertions |
 | `make test-e2e` | Not run | Current uncommitted Makefile change skips on Windows |
 | `make test-e2e-ci` | Declared in uncommitted change | Unconditional Linux/CI Browser suite |
 | `php artisan test tests/Browser --compact` | Not run | Playwright/Chromium; current guidance says Windows process lifecycle is broken |
@@ -101,11 +100,16 @@ Tests set:
 - `DB_CONNECTION=pgsql`
 - `DB_DATABASE=jawla_test`
 
-`tests/Support/TestingDatabaseGuard.php` rejects non-testing environments, non-PostgreSQL connections, and database names outside `jawla_test` / `jawla_test_*`. `tests/bootstrap.php` can create the dedicated test database and migrate it if absent.
+`tests/Support/TestingDatabaseGuard.php` rejects non-testing environments,
+non-PostgreSQL connections, and database names outside `jawla_test` /
+`jawla_test_*`. `tests/_env.php` accepts `JAWLA_TEST_DATABASE` before Laravel
+boots, allowing concurrent tasks to use separate guarded databases.
 
 ### Current test limitation
 
-The Unit suite is green, but Feature is not. Because the Feature process alone reaches the 1 GB limit, splitting only Unit from Feature is insufficient. A safe next diagnostic is to run Feature directories/files in bounded groups, identify retained global/static/container state, and add a regression for aggregate memory.
+The aggregate suite passes with the repository's 2 GB test limit. Browser E2E
+remains authoritative only on Linux CI because of the documented Windows
+Pest/Playwright lifecycle defect.
 
 ## Build and PWA
 
@@ -113,20 +117,20 @@ The Unit suite is green, but Feature is not. Because the Feature process alone r
 |---|---|---|
 | `make build` | Blocked locally | GNU Make unavailable |
 | `npm.cmd run build` | Verified pass | Regenerates `public/build/`; generated output must not be hand-edited |
-| `npm.cmd run audit:pwa-assets` | Declared | Runs `scripts/verify-pwa-assets.mjs`; not run |
+| `npm.cmd run audit:pwa-assets` | Verified pass | All compressed JS, CSS, and total budgets passed |
 | `php artisan route:list --json` | Verified | Read-only route inventory |
-| `php artisan route:cache` | Verified | Writes generated route cache; it was cleared immediately with `route:clear` |
-| `php artisan config:cache` | Not run | Writes generated cached configuration |
-| `php artisan view:cache` | Not run | Writes compiled views |
+| `php artisan optimize` | Verified | Config, events, routes, views, Blade icons, and Filament cached |
 
 ## Full verification
 
 | Command | Status | Contents |
 |---|---|---|
-| `make verify` | Blocked locally / would fail | Pint + PHPStan + Unit/Feature + build |
+| `make verify` | Blocked locally; direct components pass | Pint + PHPStan + Unit/Feature + build |
 | `scripts/verify` | Declared / not run | Pint + PHPStan + Unit/Feature + build + Composer audit + npm audit |
 
-`scripts/verify` is Bash-only. It includes the dependency audits required by `AGENTS.md`; `make verify` does not. Neither can be considered green from the component results because PHPStan and Feature fail.
+`scripts/verify` is Bash-only. It includes the dependency audits required by
+`AGENTS.md`; `make verify` does not. Run it in Linux CI to refresh Composer
+advisories and preserve one authoritative verification artifact.
 
 ## Database operations
 

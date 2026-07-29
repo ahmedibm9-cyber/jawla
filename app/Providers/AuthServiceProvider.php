@@ -10,8 +10,8 @@ class AuthServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-        Gate::define('products.manage_prices', fn (User $user) => $user->can('products.manage_prices'));
+        Gate::define('products.manage_prices', fn (User $user) => $user->hasPermissionTo('products.manage_prices'));
 
-        Gate::define('products.view_cost', fn (User $user) => $user->can('products.view_cost'));
+        Gate::define('products.view_cost', fn (User $user) => $user->hasPermissionTo('products.view_cost'));
     }
 }

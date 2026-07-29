@@ -167,22 +167,27 @@ sequenceDiagram
     participant DB as PostgreSQL
 
     Rep->>IDB: enqueue sale + UUID + hash + device ID
-    Note over Rep,IDB: Current UI omits unit_price
+    Note over Rep,IDB: unit_price is optional; server pricing is authoritative
     Client->>IDB: read pending, dependency-sort
     Client->>Endpoint: POST /app/sync
     Endpoint->>Engine: validated operations
     Engine->>DB: begin transaction, lock/find receipt
     Engine->>Handler: handle(rep, payload, key)
-    Handler-->>Engine: validation fails: unit_price required
-    Engine-->>Client: status=failed
-    Client->>IDB: mark failed for user review
+    Handler->>Invoice: create with product and quantity
+    Invoice->>Invoice: derive and validate effective price
+    Invoice->>Stock: decrement locked van stock
+    Stock->>DB: stock + matching movement
+    Invoice->>DB: invoice + items + balance
+    Engine-->>Client: status=applied or duplicate
+    Client->>IDB: remove completed operation
 ```
 
 Producer/consumer evidence:
 
 - Producer: `resources/views/livewire/app/sales-flow.blade.php:193-205`.
-- Required field: `app/Services/Sync/Handlers/SaleSyncHandler.php:23-32`.
-- Failure reconciliation: `resources/js/offline/sync.js:101-113`.
+- Server contract: `app/Services/Sync/Handlers/SaleSyncHandler.php`.
+- Authoritative price validation: `app/Services/InvoiceService.php`.
+- Reconciliation: `resources/js/offline/sync.js`.
 
 ### Online invoice
 

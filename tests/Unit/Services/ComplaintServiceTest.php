@@ -5,6 +5,8 @@ namespace Tests\Unit\Services;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\User;
+use App\Models\Visit;
+use App\Models\WorkSession;
 use App\Services\ComplaintService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -77,11 +79,11 @@ class ComplaintServiceTest extends TestCase
         $company = Company::factory()->create();
         $rep = $this->rep($company);
         $customer = Customer::factory()->create(['company_id' => $company->id]);
-        $workSession = \App\Models\WorkSession::factory()->create([
+        $workSession = WorkSession::factory()->create([
             'user_id' => $rep->id,
             'company_id' => $company->id,
         ]);
-        $visit = \App\Models\Visit::factory()->create([
+        $visit = Visit::factory()->create([
             'user_id' => $rep->id,
             'customer_id' => $customer->id,
             'work_session_id' => $workSession->id,

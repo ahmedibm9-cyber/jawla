@@ -141,7 +141,7 @@ class RoleSeeder extends Seeder
                 'view_any:price_quotation_request', 'view:price_quotation_request', 'create:price_quotation_request', 'update:price_quotation_request',
                 'view_any:complaint', 'view:complaint', 'create:complaint', 'update:complaint',
                 // Pages
-                'view:reports_page', 'view:collect_payment', 'view:customer_map',
+                'view:reports_page', 'view:collect_payment', 'view:rep_live_map', 'view:customer_map',
                 // Widgets
                 'view:visits_today_widget', 'view:pending_quotations_widget', 'view:open_alarms_widget',
                 'view:sales_today_widget', 'view:outstanding_balance_widget', 'view:rep_performance_widget',
@@ -281,7 +281,7 @@ class RoleSeeder extends Seeder
                 'customers.view_all', 'stock.view', 'invoices.view_all',
                 'payments.view_all', 'reports.view', 'reports.sales',
                 'reports.visits', 'reports.financial', 'reports.stock',
-                'reports.purchasing', 'alarms.view',
+                'reports.purchasing', 'alarms.view', 'products.view_cost',
             ],
         ];
 

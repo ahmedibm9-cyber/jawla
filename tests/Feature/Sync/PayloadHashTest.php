@@ -45,7 +45,7 @@ class PayloadHashTest extends TestCase
                 return 'noop';
             }
 
-            public function handle(User $rep, array $payload): array
+            public function handle(User $rep, array $payload, ?string $idempotencyKey = null): array
             {
                 return ['ok' => true];
             }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Livewire;
 
+use App\Enums\StockReason;
 use App\Livewire\App\SalesFlow;
 use App\Models\Company;
 use App\Models\Customer;
@@ -9,7 +10,6 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\Contracts\StockService;
-use App\Enums\StockReason;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;

@@ -19,7 +19,7 @@ class StockCountService
     public function open(Warehouse $warehouse, User $keeper, array $productIds): StockCountSession
     {
         app(ActiveCompanyContext::class)->assertMatches((int) $warehouse->company_id);
-        if (! $keeper->can('update:stock') || ! $keeper->hasCompanyAccess((int) $warehouse->company_id)) {
+        if (! $keeper->can('stock.adjust') || ! $keeper->hasCompanyAccess((int) $warehouse->company_id)) {
             throw new DomainException('Only an assigned warehouse keeper may open a stock count.');
         }
         $ids = array_values(array_unique(array_map('intval', $productIds)));

@@ -46,18 +46,21 @@ class ResourcePolicyTest extends TestCase
         }
     }
 
-    public function test_invoice_create_allows_admin_sales_manager(): void
+    public function test_invoice_create_allows_admin_and_denies_back_office_roles(): void
     {
         $this->assertTrue($this->makeUser('admin')->can('create', Invoice::class));
-        $this->assertTrue($this->makeUser('sales_manager')->can('create', Invoice::class));
+        $this->assertFalse($this->makeUser('sales_manager')->can('create', Invoice::class));
         $this->assertFalse($this->makeUser('accounts')->can('create', Invoice::class));
     }
 
     public function test_invoice_delete_admin_only(): void
     {
-        $this->assertTrue($this->makeUser('admin')->can('delete', Invoice::class));
+        $admin = $this->makeUser('admin');
+        $this->assertTrue($admin->can('delete', new Invoice(['company_id' => $admin->company_id])));
+
         foreach (['sales_manager', 'accounts', 'purchasing', 'warehouse_keeper', 'executive', 'rep'] as $role) {
-            $this->assertFalse($this->makeUser($role)->can('delete', Invoice::class));
+            $user = $this->makeUser($role);
+            $this->assertFalse($user->can('delete', new Invoice(['company_id' => $user->company_id])));
         }
     }
 
@@ -107,8 +110,9 @@ class ResourcePolicyTest extends TestCase
     public function test_complaint_allows_admin_sales_manager(): void
     {
         foreach (['admin', 'sales_manager'] as $role) {
-            $this->assertTrue($this->makeUser($role)->can('viewAny', Complaint::class));
-            $this->assertTrue($this->makeUser($role)->can('update', Complaint::class));
+            $user = $this->makeUser($role);
+            $this->assertTrue($user->can('viewAny', Complaint::class));
+            $this->assertTrue($user->can('update', new Complaint(['company_id' => $user->company_id])));
         }
     }
 
@@ -119,16 +123,16 @@ class ResourcePolicyTest extends TestCase
         }
     }
 
-    public function test_alarm_allows_admin_sales_manager_executive(): void
+    public function test_alarm_allows_admin_sales_manager_accounts_executive(): void
     {
-        foreach (['admin', 'sales_manager', 'executive'] as $role) {
+        foreach (['admin', 'sales_manager', 'accounts', 'executive'] as $role) {
             $this->assertTrue($this->makeUser($role)->can('viewAny', Alarm::class));
         }
     }
 
     public function test_alarm_denies_others(): void
     {
-        foreach (['accounts', 'purchasing', 'warehouse_keeper', 'rep'] as $role) {
+        foreach (['purchasing', 'warehouse_keeper', 'rep'] as $role) {
             $this->assertFalse($this->makeUser($role)->can('viewAny', Alarm::class));
         }
     }

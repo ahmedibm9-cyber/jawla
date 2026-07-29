@@ -8,6 +8,7 @@ use App\Exceptions\Domain\DomainException;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Product;
+use App\Models\Stock;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\Contracts\StockService;
@@ -81,7 +82,7 @@ class InvoiceServiceTest extends TestCase
             'unit_price' => 50,
         ]);
 
-        $stock = \App\Models\Stock::where('warehouse_id', $van->id)->where('product_id', $product->id)->first();
+        $stock = Stock::where('warehouse_id', $van->id)->where('product_id', $product->id)->first();
         $this->assertSame(7.0, (float) $stock->quantity);
     }
 
@@ -171,7 +172,7 @@ class InvoiceServiceTest extends TestCase
         $this->assertSame(InvoiceStatus::Voided, $result->status);
         $this->assertNotNull($result->cancelled_at);
 
-        $stock = \App\Models\Stock::where('warehouse_id', $van->id)->where('product_id', $product->id)->first();
+        $stock = Stock::where('warehouse_id', $van->id)->where('product_id', $product->id)->first();
         $this->assertSame(10.0, (float) $stock->quantity);
     }
 
