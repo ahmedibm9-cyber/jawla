@@ -9,7 +9,21 @@
 
 ## Uptime Monitoring
 
-Configure an external monitor (UptimeRobot, BetterStack, or healthchecks.io) to poll `/health` every 60 seconds.
+`.github/workflows/production-health.yml` provides a repository-owned baseline:
+
+- runs every five minutes and on manual dispatch;
+- retries `/health` three times;
+- requires `status`, `db`, and `cache` to equal `ok`;
+- opens or updates a labeled P1 GitHub issue on failure;
+- closes the open incident issue after recovery.
+
+This monitor becomes operational only after the workflow is pushed, its
+`PRODUCTION_HEALTH_URL` repository variable points to the production `/health`
+URL, GitHub Actions is enabled, and a named owner subscribes to P1 issues.
+
+For a 60-second independent signal, configure an external monitor
+(UptimeRobot, BetterStack, or healthchecks.io) in addition to the GitHub
+baseline.
 
 ### Recommended setup (UptimeRobot)
 

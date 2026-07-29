@@ -37,7 +37,10 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withSchedule(function ($schedule): void {
-        $schedule->command('app:purge-location-pings')->daily();
+        $schedule->command('app:purge-location-pings')
+            ->daily()
+            ->onOneServer()
+            ->withoutOverlapping();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

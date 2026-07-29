@@ -163,31 +163,25 @@ export async function hasStaleRecords() {
   );
 }
 
-export async function oldestFailed() {
-  const items = await failed();
-  if (!items.length) return null;
-  return items.sort((a, b) => a.createdAt - b.createdAt)[0];
-}
+export async function checkQuota(estimator = null) {
+  const estimate =
+    estimator ||
+    (typeof navigator !== "undefined" && navigator.storage?.estimate
+      ? () => navigator.storage.estimate()
+      : null);
+  if (!estimate) return null;
 
-export async function checkQuota() {
-  if (!navigator.storage?.estimate) return null;
+  const { usage, quota } = await estimate();
+  const used = usage || 0;
+  const total = quota || 0;
+  const percent = total ? (used / total) * 100 : 0;
 
-  let { usage, quota } = await navigator.storage.estimate();
-  let used = usage || 0;
-  let total = quota || 0;
-  let percent = total ? (used / total) * 100 : 0;
-
-  if (percent > 80) {
-    let oldest = await oldestFailed();
-    while (oldest && percent > 80) {
-      await remove(oldest.id);
-      ({ usage, quota } = await navigator.storage.estimate());
-      used = usage || 0;
-      total = quota || 0;
-      percent = total ? (used / total) * 100 : 0;
-      oldest = await oldestFailed();
-    }
-  }
-
-  return { used, quota: total, percent };
+  // Never delete queued business operations automatically. Storage pressure is
+  // surfaced to the rep so they can sync or resolve the queue safely.
+  return {
+    used,
+    quota: total,
+    percent,
+    pressure: percent > 80 ? "high" : percent > 60 ? "medium" : "normal",
+  };
 }

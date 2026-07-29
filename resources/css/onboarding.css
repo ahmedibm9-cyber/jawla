@@ -1,8 +1,22 @@
-/* Shepherd.js overrides for JAWLA onboarding tour */
+/* Dependency-free JAWLA onboarding tour */
 /* Matches JAWLA design system: #3d7a18 green, IBM Plex Sans Arabic, RTL-aware */
 
+.jawla-tour-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(15, 23, 42, 0.48);
+}
+
+.shepherd-target {
+  z-index: 9999 !important;
+  isolation: isolate;
+}
+
 .shepherd-element {
+  position: fixed;
   max-width: 340px;
+  width: min(340px, calc(100vw - 32px));
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
   font-family: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
@@ -17,6 +31,9 @@
 }
 
 .shepherd-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   background: #3d7a18;
   color: #fff;
   border-radius: 12px 12px 0 0;
@@ -29,6 +46,7 @@
   color: #fff;
   margin: 0;
   line-height: 1.3;
+  flex: 1;
 }
 
 .shepherd-text {
@@ -91,6 +109,12 @@
   cursor: not-allowed;
 }
 
+.shepherd-button:focus-visible,
+.shepherd-cancel-icon:focus-visible {
+  outline: 3px solid #facc15;
+  outline-offset: 2px;
+}
+
 .shepherd-cancel-icon {
   display: none;
 }
@@ -114,7 +138,7 @@
 .shepherd-step-counter {
   font-size: 0.6875rem;
   color: rgba(255, 255, 255, 0.75);
-  margin-top: 2px;
+  white-space: nowrap;
 }
 
 /* Arrow */
@@ -124,11 +148,6 @@
 
 .shepherd-element.shepherd-element-attached-bottom .shepherd-arrow:before {
   background: #fff;
-}
-
-/* Spotlight overlay */
-.shepherd-modal-overlay-container {
-  opacity: 0.4;
 }
 
 /* Highlight pulse for interactive elements */
@@ -158,8 +177,14 @@
 /* Mobile adjustments */
 @media (max-width: 480px) {
   .shepherd-element {
-    max-width: calc(100vw - 32px);
-    margin: 0 16px;
+    max-width: calc(100vw - 24px);
+    width: calc(100vw - 24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shepherd-highlight-pulse {
+    animation: none;
   }
 }
 

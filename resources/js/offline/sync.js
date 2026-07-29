@@ -34,6 +34,17 @@ async function emitStatus() {
   );
 }
 
+async function emitStoragePressure() {
+  const estimate = await outbox.checkQuota();
+  if (!estimate) return null;
+
+  window.dispatchEvent(
+    new CustomEvent("jawla-storage-pressure", { detail: estimate })
+  );
+
+  return estimate;
+}
+
 function sortForFlush(items) {
   const tempIds = new Set(items.map((i) => i.tempId).filter(Boolean));
   const completed = new Set();
@@ -117,7 +128,7 @@ async function flush() {
   } finally {
     flushing = false;
     await emitStatus();
-    outbox.checkQuota();
+    await emitStoragePressure();
   }
 }
 
@@ -135,6 +146,8 @@ async function retry(id) {
 }
 
 async function hasPending() {
+  if (!window.indexedDB) return false;
+
   return (await outbox.all()).some((item) =>
     ["pending", "failed", "conflict"].includes(item.status)
   );
@@ -218,6 +231,7 @@ function init() {
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) flush();
   });
+  emitStoragePressure();
   flush();
 }
 
@@ -232,6 +246,7 @@ if (identity) {
     pending: outbox.pending,
     failed: outbox.failed,
     hasPending,
+    storageEstimate: emitStoragePressure,
   };
   window.jawlaSyncQueue = syncQueueController;
   window.jawlaOffline = {

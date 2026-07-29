@@ -18,7 +18,11 @@ function makeRepWithStock(): User
 {
     test()->seed(RoleSeeder::class);
     $company = Company::factory()->create(['name_ar' => 'شركة المبيعات']);
-    $rep = User::factory()->create(['company_id' => $company->id, 'name' => 'مندوب المبيعات']);
+    $rep = User::factory()->create([
+        'company_id' => $company->id,
+        'name' => 'مندوب المبيعات',
+        'onboarding_seen' => true,
+    ]);
     $rep->assignRole('rep');
 
     $van = Warehouse::factory()->create([

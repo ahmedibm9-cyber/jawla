@@ -1,8 +1,11 @@
-@import "tailwindcss";
+@import "tailwindcss" source(none);
 @import "leaflet/dist/leaflet.css";
 
+@source '../views';
+@source '../js';
+@source '../../app';
+@source '../../public/js';
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
 
 @theme {
   /* ---- Type ---- */
@@ -2131,6 +2134,11 @@ dialog[open] {
 }
 .offline-indicator[hidden] {
   display: none;
+}
+.storage-pressure-indicator {
+  top: calc(env(safe-area-inset-top, 0px) + 104px);
+  background: var(--color-danger, #b91c1c);
+  text-decoration: none;
 }
 
 .action-toast {

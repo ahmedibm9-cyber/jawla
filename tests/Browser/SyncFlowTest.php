@@ -8,7 +8,11 @@ function makeRepForSync(): User
 {
     test()->seed(RoleSeeder::class);
     $company = Company::factory()->create(['name_ar' => 'شركة زوار']);
-    $rep = User::factory()->create(['company_id' => $company->id, 'name' => 'مندوب زوار']);
+    $rep = User::factory()->create([
+        'company_id' => $company->id,
+        'name' => 'مندوب زوار',
+        'onboarding_seen' => true,
+    ]);
     $rep->assignRole('rep');
 
     return $rep;

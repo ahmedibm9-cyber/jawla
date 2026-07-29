@@ -1,6 +1,6 @@
 /**
- * JAWLA Onboarding Tour — Shepherd.js definitions
- * Rep PWA + Admin Panel, bilingual AR/EN, RTL-aware.
+ * JAWLA Onboarding Tour
+ * Dependency-free, bilingual AR/EN, RTL-aware, and keyboard accessible.
  */
 
 (function () {
@@ -10,22 +10,229 @@
   const lang = document.documentElement.lang || "en";
   const t = (key) => window.__onboarding?.[key] || key;
 
-  const COMMON = {
-    shepherdId: "jawla-onboarding",
-    useModalOverlay: true,
-    confirmCancel: false,
-    keyboardNavigation: true,
-    exitOnEsc: true,
-    defaultStepOptions: {
-      scrollTo: { behavior: "smooth", block: "center" },
-      cancelIcon: { enabled: true },
-      floatingUIOptions: {
-        middleware: [
-          { name: "offset", options: { mainAxis: 12, crossAxis: 0 } },
-        ],
-      },
-    },
-  };
+  class JawlaTour {
+    constructor(steps) {
+      this.steps = steps;
+      this.currentStep = null;
+      this.currentIndex = -1;
+      this.listeners = new Map();
+      this.keyHandler = (event) => {
+        if (event.key === "Tab") {
+          this.trapFocus(event);
+          return;
+        }
+
+        if (event.key === "Escape") {
+          event.preventDefault();
+          this.cancel();
+        }
+        if (event.key === "ArrowRight") {
+          event.preventDefault();
+          isRTL ? this.back() : this.next();
+        }
+        if (event.key === "ArrowLeft") {
+          event.preventDefault();
+          isRTL ? this.next() : this.back();
+        }
+      };
+      this.resizeHandler = () => this.position();
+    }
+
+    on(event, callback) {
+      const callbacks = this.listeners.get(event) || [];
+      callbacks.push(callback);
+      this.listeners.set(event, callbacks);
+    }
+
+    emit(event) {
+      (this.listeners.get(event) || []).forEach((callback) => callback());
+    }
+
+    start() {
+      if (this.steps.length === 0) return;
+      this.currentIndex = 0;
+      this.previouslyFocused = document.activeElement;
+      document.addEventListener("keydown", this.keyHandler);
+      window.addEventListener("resize", this.resizeHandler);
+      window.addEventListener("scroll", this.resizeHandler, true);
+      this.show();
+    }
+
+    next() {
+      if (this.currentIndex >= this.steps.length - 1) {
+        this.finish("complete");
+        return;
+      }
+
+      this.hideCurrent();
+      this.currentIndex += 1;
+      this.show();
+    }
+
+    back() {
+      if (this.currentIndex <= 0) return;
+
+      this.hideCurrent();
+      this.currentIndex -= 1;
+      this.show();
+    }
+
+    cancel() {
+      this.finish("cancel");
+    }
+
+    finish(event) {
+      this.hideCurrent();
+      document.removeEventListener("keydown", this.keyHandler);
+      window.removeEventListener("resize", this.resizeHandler);
+      window.removeEventListener("scroll", this.resizeHandler, true);
+      this.previouslyFocused?.focus?.();
+      this.emit(event);
+    }
+
+    hideCurrent() {
+      this.currentStep?.when?.hide?.();
+      this.target?.classList.remove("shepherd-target");
+      this.overlay?.remove();
+      this.dialog?.remove();
+      this.target = null;
+      this.overlay = null;
+      this.dialog = null;
+    }
+
+    show() {
+      const step = this.steps[this.currentIndex];
+      this.currentStep = step;
+      this.target = step.attachTo?.element
+        ? document.querySelector(step.attachTo.element)
+        : null;
+
+      this.target?.classList.add("shepherd-target");
+      this.target?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+      this.overlay = document.createElement("div");
+      this.overlay.className = "jawla-tour-overlay";
+      this.overlay.addEventListener("click", () => this.cancel());
+
+      this.dialog = document.createElement("section");
+      this.dialog.className =
+        `shepherd-element shepherd-has-cancel-icon ${step.classes || ""}`.trim();
+      this.dialog.setAttribute("role", "dialog");
+      this.dialog.setAttribute("aria-modal", "true");
+
+      const titleId = `jawla-tour-title-${step.id}`;
+      const textId = `jawla-tour-text-${step.id}`;
+      this.dialog.setAttribute("aria-labelledby", titleId);
+      this.dialog.setAttribute("aria-describedby", textId);
+
+      const header = document.createElement("header");
+      header.className = "shepherd-header";
+
+      const heading = document.createElement("h2");
+      heading.className = "shepherd-title";
+      heading.id = titleId;
+      heading.textContent = step.title;
+
+      const counter = document.createElement("span");
+      counter.className = "shepherd-step-counter";
+      counter.textContent = `${this.currentIndex + 1} / ${this.steps.length}`;
+
+      const close = document.createElement("button");
+      close.className = "shepherd-cancel-icon";
+      close.type = "button";
+      close.setAttribute("aria-label", lang === "ar" ? "إغلاق" : "Close");
+      close.textContent = "×";
+      close.addEventListener("click", () => this.cancel());
+
+      const text = document.createElement("div");
+      text.className = "shepherd-text";
+      text.id = textId;
+      text.textContent = step.text;
+
+      const footer = document.createElement("footer");
+      footer.className = "shepherd-footer";
+
+      step.buttons.forEach((button) => {
+        const element = document.createElement("button");
+        element.type = "button";
+        element.className = `shepherd-button ${button.classes || ""}`.trim();
+        element.textContent = button.text;
+        element.addEventListener("click", () => {
+          if (button.action === "back") this.back();
+          else this.next();
+        });
+        footer.appendChild(element);
+      });
+
+      header.append(heading, counter, close);
+      this.dialog.append(header, text, footer);
+      document.body.append(this.overlay, this.dialog);
+      step.when?.show?.();
+      this.position();
+      this.dialog.querySelector("button")?.focus();
+    }
+
+    trapFocus(event) {
+      const focusable = this.dialog?.querySelectorAll(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+
+      if (!focusable?.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+
+    position() {
+      if (!this.dialog) return;
+
+      const margin = 16;
+      const gap = 12;
+      const dialogRect = this.dialog.getBoundingClientRect();
+
+      if (!this.target) {
+        this.dialog.style.left = `${Math.max(margin, (window.innerWidth - dialogRect.width) / 2)}px`;
+        this.dialog.style.top = `${Math.max(margin, (window.innerHeight - dialogRect.height) / 2)}px`;
+        return;
+      }
+
+      const targetRect = this.target.getBoundingClientRect();
+      const placement = this.currentStep.attachTo?.on || "bottom";
+      let left = targetRect.left + (targetRect.width - dialogRect.width) / 2;
+      let top = targetRect.bottom + gap;
+
+      if (placement === "top") top = targetRect.top - dialogRect.height - gap;
+      if (placement === "start") {
+        left = isRTL
+          ? targetRect.right + gap
+          : targetRect.left - dialogRect.width - gap;
+        top = targetRect.top + (targetRect.height - dialogRect.height) / 2;
+      }
+      if (placement === "end") {
+        left = isRTL
+          ? targetRect.left - dialogRect.width - gap
+          : targetRect.right + gap;
+        top = targetRect.top + (targetRect.height - dialogRect.height) / 2;
+      }
+
+      this.dialog.style.left = `${Math.min(
+        Math.max(margin, left),
+        window.innerWidth - dialogRect.width - margin,
+      )}px`;
+      this.dialog.style.top = `${Math.min(
+        Math.max(margin, top),
+        window.innerHeight - dialogRect.height - margin,
+      )}px`;
+    }
+  }
 
   /* ------------------------------------------------------------------ */
   /*  Rep PWA steps                                                     */
@@ -243,17 +450,7 @@
   /* ------------------------------------------------------------------ */
   function createTour(role) {
     const steps = role === "admin" ? ADMIN_STEPS : REP_STEPS;
-
-    const tour = new Shepherd.Tour({
-      ...COMMON,
-      steps: steps.map((step) => ({
-        ...step,
-        text: `<p>${step.text}</p><div class="shepherd-step-counter">${
-          steps.indexOf(step) + 1
-        } / ${steps.length}</div>`,
-        when: step.when || {},
-      })),
-    });
+    const tour = new JawlaTour(steps);
 
     tour.on("complete", markComplete);
     tour.on("cancel", () => {

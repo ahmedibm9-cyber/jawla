@@ -13,11 +13,15 @@ needed and the (small) work that follows once it's provided.
 > checklist have evidence or a formally approved, time-bounded risk acceptance.
 > A passing repository test suite is necessary but not sufficient.
 >
-> **Implementation update â€” 2026-07-29.** The offline-sale contract,
+> **Implementation update — 2026-07-29.** The offline-sale contract,
 > active-company/stock authorization, photo sanitization, runtime PHPStan
 > defects, blocking CI, staged promotion, dependency readiness, and rollback
-> controls have been remediated in the working release. The verdict remains
-> **NO-GO** because final full-suite/CI evidence and the external ETA,
+> controls have been remediated in the working release. The exact local tree
+> now passes 813 Unit/Feature tests, 2,271 assertions, five offline safety tests,
+> four standalone Chromium PWA checks, production asset build, and
+> production-container health against disposable PostgreSQL and Redis. The
+> verdict remains **NO-GO** because immutable-commit CI/staging evidence and the
+> external ETA,
 > backup/restore, operations, legal/privacy, accessibility, performance, and
 > signed UAT gates are still outstanding. See
 > `docs/PRODUCTION_READINESS_IMPLEMENTATION.md`.

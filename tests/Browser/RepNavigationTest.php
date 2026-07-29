@@ -13,11 +13,25 @@ function makeRepForNav(): User
 {
     test()->seed(RoleSeeder::class);
     $company = Company::factory()->create(['name_ar' => 'شركة التنقل']);
-    $rep = User::factory()->create(['company_id' => $company->id, 'name' => 'مندوب التنقل']);
+    $rep = User::factory()->create([
+        'company_id' => $company->id,
+        'name' => 'مندوب التنقل',
+        'onboarding_seen' => true,
+    ]);
     $rep->assignRole('rep');
 
     return $rep;
 }
+
+it('starts the first-party onboarding tour for a new rep', function () {
+    $rep = makeRepForNav();
+    $rep->update(['onboarding_seen' => false]);
+
+    $this->actingAs($rep)->visit('/app')
+        ->assertNoJavascriptErrors()
+        ->assertPresent('.jawla-tour-overlay')
+        ->assertPresent('.shepherd-element[role="dialog"]');
+});
 
 it('loads the add customer page without JavaScript errors', function () {
     $rep = makeRepForNav();

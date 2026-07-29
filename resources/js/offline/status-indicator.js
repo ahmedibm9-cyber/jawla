@@ -6,15 +6,29 @@
 // element leaves the accessibility tree entirely when online.
 function setup() {
   const el = document.getElementById("offline-indicator");
-  if (!el) return;
+  const storageEl = document.getElementById("storage-pressure-indicator");
 
   const apply = () => {
-    el.hidden = navigator.onLine;
+    if (el) {
+      el.hidden = navigator.onLine;
+    }
+  };
+
+  const applyStoragePressure = (estimate) => {
+    if (!storageEl) return;
+
+    const high = estimate?.pressure === "high";
+    storageEl.hidden = !high;
+    storageEl.dataset.percent = String(Math.round(estimate?.percent || 0));
   };
 
   window.addEventListener("online", apply);
   window.addEventListener("offline", apply);
+  window.addEventListener("jawla-storage-pressure", (event) =>
+    applyStoragePressure(event.detail)
+  );
   apply();
+  window.jawlaSync?.storageEstimate?.().then(applyStoragePressure);
 }
 
 if (document.readyState === "loading") {

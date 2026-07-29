@@ -167,6 +167,26 @@ class OnboardingTourTest extends TestCase
         }
     }
 
+    public function test_tour_assets_are_first_party_and_do_not_depend_on_a_runtime_cdn(): void
+    {
+        $script = file_get_contents(public_path('js/onboarding.js'));
+        $repHead = file_get_contents(resource_path('views/components/onboarding-trigger.blade.php'));
+        $adminHead = file_get_contents(resource_path('views/filament/onboarding-head.blade.php'));
+        $pwaHead = file_get_contents(resource_path('views/filament/pwa-head.blade.php'));
+
+        $this->assertIsString($script);
+        $this->assertIsString($repHead);
+        $this->assertIsString($adminHead);
+        $this->assertIsString($pwaHead);
+        $this->assertStringContainsString('class JawlaTour', $script);
+        $this->assertStringNotContainsString('Shepherd.', $script);
+        $this->assertStringNotContainsString('cdn.jsdelivr.net', $repHead);
+        $this->assertStringNotContainsString('cdn.jsdelivr.net', $adminHead);
+        $this->assertStringContainsString('rel="manifest"', $pwaHead);
+        $this->assertStringContainsString('pwa-login-register.js', $pwaHead);
+        $this->assertFileExists(public_path('js/pwa-login-register.js'));
+    }
+
     // ─── Migration integrity ─────────────────────────────────────
 
     public function test_migration_added_boolean_column_with_default(): void

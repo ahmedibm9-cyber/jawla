@@ -6,7 +6,9 @@
     "audit:pwa-assets": "node scripts/verify-pwa-assets.mjs",
     "build": "vite build",
     "dev": "vite",
-    "prepare": "husky"
+    "prepare": "husky",
+    "test:offline": "node --test tests/JavaScript/offline-safety.test.js",
+    "test:pwa-browser": "playwright test tests/JavaScript/pwa-readiness.spec.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.61.1",

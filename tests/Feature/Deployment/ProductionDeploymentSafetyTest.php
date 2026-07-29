@@ -28,6 +28,54 @@ class ProductionDeploymentSafetyTest extends TestCase
         $this->assertStringNotContainsString('bootstrap-production', $railway);
     }
 
+    public function test_production_container_supervises_the_single_server_scheduler(): void
+    {
+        $bootstrap = file_get_contents(base_path('bootstrap/app.php'));
+        $dockerfile = file_get_contents(base_path('Dockerfile'));
+        $startScript = file_get_contents(base_path('docker/start-container.sh'));
+        $ci = file_get_contents(base_path('.github/workflows/ci.yml'));
+        $appCss = file_get_contents(resource_path('css/app.css'));
+        $railway = file_get_contents(base_path('railway.toml'));
+
+        $this->assertIsString($bootstrap);
+        $this->assertIsString($dockerfile);
+        $this->assertIsString($startScript);
+        $this->assertIsString($ci);
+        $this->assertIsString($appCss);
+        $this->assertIsString($railway);
+        $this->assertStringContainsString("command('app:purge-location-pings')", $bootstrap);
+        $this->assertStringContainsString('->onOneServer()', $bootstrap);
+        $this->assertStringContainsString('->withoutOverlapping()', $bootstrap);
+        $this->assertStringContainsString('artisan schedule:work --no-interaction', $startScript);
+        $this->assertStringContainsString('kill -0 "$scheduler_pid"', $startScript);
+        $this->assertStringContainsString('artisan config:cache', $startScript);
+        $this->assertStringContainsString('artisan route:cache', $startScript);
+        $this->assertStringContainsString('artisan view:cache', $startScript);
+        $this->assertStringContainsString('preDeployCommand = "php artisan migrate --force"', $railway);
+        $this->assertStringNotContainsString('preDeployCommand = "php artisan migrate --force &&', $railway);
+        $this->assertStringContainsString('ARG PHPREDIS_VERSION=', $dockerfile);
+        $this->assertStringContainsString('ARG PHPREDIS_SHA256=', $dockerfile);
+        $this->assertStringContainsString('sha256sum -c', $dockerfile);
+        $this->assertStringNotContainsString('pecl install redis', $dockerfile);
+        $this->assertStringContainsString('storage/framework/cache', $dockerfile);
+        $this->assertStringContainsString('storage/framework/sessions', $dockerfile);
+        $this->assertStringContainsString('storage/framework/views', $dockerfile);
+        $this->assertStringNotContainsString('storage/framework/{cache,sessions,views}', $dockerfile);
+        $this->assertStringContainsString('FROM php-extensions AS php-dependencies', $dockerfile);
+        $this->assertStringContainsString('COPY --from=php-dependencies /app/vendor /app/vendor', $dockerfile);
+        $this->assertStringContainsString('COPY package.json package-lock.json vite.config.js /app/', $dockerfile);
+        $this->assertStringContainsString('COPY resources /app/resources', $dockerfile);
+        $this->assertStringContainsString('composer dump-autoload --no-dev --optimize', $dockerfile);
+        $this->assertStringContainsString('container-build:', $ci);
+        $this->assertStringContainsString('docker build --tag jawla:ci .', $ci);
+        $this->assertStringContainsString('composer install --no-dev --no-scripts', $ci);
+        $this->assertStringContainsString('composer validate --strict --no-check-publish', $ci);
+        $this->assertStringContainsString('@import "tailwindcss" source(none)', $appCss);
+        $this->assertStringContainsString("@source '../views'", $appCss);
+        $this->assertStringContainsString("@source '../../app'", $appCss);
+        $this->assertStringNotContainsString('storage/framework/views', $appCss);
+    }
+
     public function test_demo_seeder_refuses_to_run_outside_explicit_demo_mode(): void
     {
         config()->set('jawla.mode', 'production');

@@ -26,6 +26,7 @@ function makeRepWithAssignments(): User
     $rep = User::factory()->create([
         'company_id' => $company->id,
         'name' => 'مندوب جولة',
+        'onboarding_seen' => true,
     ]);
     $rep->assignRole('rep');
 

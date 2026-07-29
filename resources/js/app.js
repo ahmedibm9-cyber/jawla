@@ -1,8 +1,9 @@
 import * as Sentry from "@sentry/browser";
 import "./maps/popup-content.js";
-import "./offline/sync.js";
 import "./offline/status-indicator.js";
+import "./offline/sync.js";
 import "./pwa-register.js";
+import { logoutMessage, prepareSafeLogout } from "./offline/logout-guard.js";
 
 // Polyfill: Filament v4 table select-all checkbox functions
 // These are normally scoped inside x-data="filamentTable(...)" but
@@ -408,6 +409,22 @@ document.addEventListener("submit", async (event) => {
 
   event.preventDefault();
   form.dataset.purgingOffline = "true";
-  await window.jawlaOffline?.clear?.();
+
+  const result = await prepareSafeLogout({
+    sync: window.jawlaSync,
+    offline: window.jawlaOffline,
+  });
+
+  if (!result.allowed) {
+    delete form.dataset.purgingOffline;
+    window.alert(logoutMessage(document.documentElement.lang, result.reason));
+
+    if (result.reason === "pending") {
+      window.location.assign("/app/sync-queue");
+    }
+
+    return;
+  }
+
   form.requestSubmit();
 });

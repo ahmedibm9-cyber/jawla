@@ -137,6 +137,17 @@
       </svg>
       <span>{{ app()->getLocale() === 'ar' ? 'غير متصل — يُحفظ عملك على الجهاز ويُزامَن تلقائيًا' : 'Offline — saved on your device, syncs automatically' }}</span>
     </div>
+    <a id="storage-pressure-indicator"
+       class="offline-indicator storage-pressure-indicator"
+       href="/app/sync-queue"
+       role="alert"
+       aria-live="assertive"
+       hidden>
+      <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 9v4m0 4h.01M10.3 3.8L1.8 18.5A2 2 0 003.5 21h17a2 2 0 001.7-2.5L13.7 3.8a2 2 0 00-3.4 0z"/>
+      </svg>
+      <span>{{ app()->getLocale() === 'ar' ? 'مساحة الجهاز منخفضة — افتح قائمة المزامنة لحفظ عملياتك بأمان' : 'Device storage is low — open the sync queue to protect your work' }}</span>
+    </a>
   @endauth
 </body>
 </html>

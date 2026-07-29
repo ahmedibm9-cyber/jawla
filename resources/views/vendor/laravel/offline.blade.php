@@ -19,7 +19,7 @@ p{color:#475569;margin:0 0 16px;font-size:.875rem;line-height:1.5}
     <img src="/images/logo-app-icon.webp" alt="Jawla">
     <h1>{{ app()->getLocale() === 'ar' ? 'لا يوجد اتصال بالإنترنت' : 'No Internet Connection' }}</h1>
     <p>{{ app()->getLocale() === 'ar' ? 'يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى' : 'Please check your connection and try again' }}</p>
-    <a class="btn" href="javascript:location.reload()">{{ app()->getLocale() === 'ar' ? 'إعادة المحاولة' : 'Retry' }}</a>
+    <a class="btn" href="/app">{{ app()->getLocale() === 'ar' ? 'إعادة المحاولة' : 'Retry' }}</a>
 </div>
 </body>
 </html>

@@ -18,7 +18,11 @@ function makeRep(): User
 {
     test()->seed(RoleSeeder::class);
     $company = Company::factory()->create(['name_ar' => 'شركة تجريبية']);
-    $rep = User::factory()->create(['company_id' => $company->id, 'name' => 'مندوب تجريبي']);
+    $rep = User::factory()->create([
+        'company_id' => $company->id,
+        'name' => 'مندوب تجريبي',
+        'onboarding_seen' => true,
+    ]);
     $rep->assignRole('rep');
 
     return $rep;

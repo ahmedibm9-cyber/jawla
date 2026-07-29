@@ -6,6 +6,7 @@ use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PriceQuotationRequest extends Model
 {
@@ -14,7 +15,7 @@ class PriceQuotationRequest extends Model
 
     protected $fillable = [
         'company_id', 'customer_id', 'user_id', 'visit_id', 'product_id',
-        'quantity_requested', 'status', 'requested_at',
+        'quantity_requested', 'status', 'requested_at', 'negotiated_price',
     ];
 
     protected $casts = [
@@ -47,8 +48,8 @@ class PriceQuotationRequest extends Model
         return $this->belongsTo(Visit::class);
     }
 
-    public function quotation(): BelongsTo
+    public function quotation(): HasOne
     {
-        return $this->belongsTo(PriceQuotation::class, 'price_quotation_request_id');
+        return $this->hasOne(PriceQuotation::class);
     }
 }

@@ -1,4 +1,4 @@
-.PHONY: setup dev lint typecheck typecheck-strict test test-e2e test-e2e-ci verify build migrate seed smoke
+.PHONY: setup dev lint typecheck typecheck-strict test test-offline test-e2e test-e2e-ci verify build migrate seed smoke
 
 setup:
 	composer install
@@ -30,6 +30,9 @@ typecheck-strict:
 test:
 	PAO_DISABLE=1 php -d memory_limit=2G artisan test --testsuite=Unit,Feature
 
+test-offline:
+	npm run test:offline
+
 test-e2e:
 	@if php -r "exit(PHP_OS_FAMILY === 'Windows' ? 0 : 1);" 2>/dev/null; then \
 		echo "SKIP: Browser tests require pest-plugin-browser v4.4+ on Windows (upstream bug #1517)."; \
@@ -57,5 +60,5 @@ smoke:
 	php artisan view:cache > /dev/null
 	@echo "Smoke tests passed."
 
-verify: lint typecheck test build
+verify: lint typecheck test test-offline build
 	@echo "All checks passed."
