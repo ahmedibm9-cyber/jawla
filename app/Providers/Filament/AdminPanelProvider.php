@@ -47,6 +47,7 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::hex('#6DB83B'),
             ])
             ->font('IBM Plex Sans Arabic')
+            ->viteTheme('resources/css/app.css')
             ->brandName('Jawla')
             ->brandLogo(secure_asset('images/black-j.webp'))
             ->darkModeBrandLogo(secure_asset('images/white-j.webp'))

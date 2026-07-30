@@ -2,17 +2,26 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Resources\AlarmResource;
+use App\Filament\Resources\DailyVisitAssignmentResource;
+use App\Filament\Resources\InvoiceResource;
+use App\Filament\Resources\PriceQuotationRequestResource;
+use App\Filament\Resources\StockResource;
+use App\Filament\Resources\UserResource;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Dashboard as BaseDashboard;
+use Filament\Widgets\WidgetConfiguration;
 use Illuminate\Support\Str;
 
 class Dashboard extends BaseDashboard
 {
     protected static string $routePath = '/dashboard';
+
+    protected string $view = 'filament.pages.dashboard';
 
     public function getColumns(): int|array
     {
@@ -37,6 +46,66 @@ class Dashboard extends BaseDashboard
             $widgets,
             fn (mixed $widget): bool => ! in_array($this->widgetKey($widget), $hidden, true),
         ));
+    }
+
+    /**
+     * Widget data for the draggable dashboard grid.
+     *
+     * Keeping the configuration normalization here lets the Blade view render
+     * both class-string widgets and Filament WidgetConfiguration instances.
+     *
+     * @return list<array{key: string, label: string, class: class-string, properties: array<string, mixed>, url: ?string}>
+     */
+    public function getDashboardWidgetEntries(): array
+    {
+        return collect($this->getWidgets())
+            ->map(function (mixed $widget): array {
+                $class = $this->widgetClass($widget);
+
+                return [
+                    'key' => $this->widgetKey($widget),
+                    'label' => $this->widgetLabel($this->widgetKey($widget)),
+                    'class' => $class,
+                    'properties' => $widget instanceof WidgetConfiguration
+                        ? [...$class::getDefaultProperties(), ...$widget->getProperties()]
+                        : $class::getDefaultProperties(),
+                    'url' => $this->widgetDestination($this->widgetKey($widget)),
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Persist a drag-and-drop order only when it contains precisely the
+     * currently visible widgets. This prevents a crafted Livewire request from
+     * hiding widgets or injecting an arbitrary widget class.
+     *
+     * @param  list<string>  $widgetKeys
+     */
+    public function reorderDashboardWidgets(array $widgetKeys): void
+    {
+        $visible = collect($this->getWidgets())
+            ->map(fn (mixed $widget): string => $this->widgetKey($widget))
+            ->values()
+            ->all();
+
+        $isValidOrder = count($widgetKeys) === count($visible)
+            && count(array_unique($widgetKeys)) === count($visible)
+            && empty(array_diff($widgetKeys, $visible))
+            && empty(array_diff($visible, $widgetKeys));
+
+        if (! $isValidOrder) {
+            return;
+        }
+
+        $remaining = collect($this->orderedWidgets($this->availableWidgets()))
+            ->map(fn (mixed $widget): string => $this->widgetKey($widget))
+            ->reject(fn (string $key): bool => in_array($key, $widgetKeys, true))
+            ->values()
+            ->all();
+
+        auth()->user()->setPreference('dashboard_widgets', [...$widgetKeys, ...$remaining]);
     }
 
     /** @return array<int, mixed> */
@@ -167,6 +236,40 @@ class Dashboard extends BaseDashboard
         }
 
         return (string) $widget;
+    }
+
+    /** @return class-string */
+    protected function widgetClass(mixed $widget): string
+    {
+        if ($widget instanceof WidgetConfiguration) {
+            return $widget->widget;
+        }
+
+        return $widget;
+    }
+
+    /**
+     * A concise drill-through destination for each operational metric. The
+     * link is not rendered when the current user lacks the underlying
+     * resource's view permission.
+     */
+    protected function widgetDestination(string $key): ?string
+    {
+        $resource = match (class_basename($key)) {
+            'VisitsTodayWidget' => DailyVisitAssignmentResource::class,
+            'PendingQuotationsWidget' => PriceQuotationRequestResource::class,
+            'OpenAlarmsWidget' => AlarmResource::class,
+            'SalesTodayWidget', 'OutstandingBalanceWidget' => InvoiceResource::class,
+            'LowStockAlertWidget' => StockResource::class,
+            'RepPerformanceWidget' => UserResource::class,
+            default => null,
+        };
+
+        if ($resource === null || ! $resource::canViewAny()) {
+            return null;
+        }
+
+        return $resource::getUrl('index');
     }
 
     /**

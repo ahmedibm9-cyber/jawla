@@ -39,6 +39,8 @@ jobs:
           tools: composer:v2
           coverage: none
       - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: cp .env.example .env
+      - run: php artisan key:generate --force
       - name: PHPStan runtime-safety gate
         run: ./vendor/bin/phpstan analyse --level=0 --memory-limit=2G --no-progress
 

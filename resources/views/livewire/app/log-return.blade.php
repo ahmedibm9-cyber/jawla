@@ -14,7 +14,7 @@
             </div>
         @else
             @if ($errorMessage)
-                <div class="alert alert-danger" role="alert">{{ $errorMessage }}</div>
+                <x-ds.toast type="error" :message="$errorMessage" />
             @endif
 
             <form wire:submit="submit">
@@ -26,7 +26,7 @@
                             <option value="{{ $customer->id }}">{{ $customer->name_ar }}</option>
                         @endforeach
                     </x-ds.autocomplete>
-                    @error('customer_id') <small class="form-error">{{ $message }}</small> @enderror
+                    @error('customer_id') <small id="customer_id-error" class="form-error">{{ $message }}</small> @enderror
                 </div>
 
                 <div class="form-group">
@@ -37,7 +37,7 @@
                             <option value="{{ $invoice->id }}">{{ $invoice->invoice_number }} — {{ $invoice->issued_at?->format('Y-m-d') }}</option>
                         @endforeach
                     </select>
-                    @error('against_invoice_id') <small class="form-error">{{ $message }}</small> @enderror
+                    @error('against_invoice_id') <small id="against_invoice_id-error" class="form-error">{{ $message }}</small> @enderror
                 </div>
 
                 <div class="form-group">

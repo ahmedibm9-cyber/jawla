@@ -17,7 +17,7 @@ class ProductPolicy
 
     public function view(User $u, Product $model): bool
     {
-        return $this->matchesCompany($u, $model);
+        return $u->can('view:product') && $this->matchesCompany($u, $model);
     }
 
     public function create(User $u): bool

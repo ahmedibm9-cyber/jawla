@@ -55,7 +55,7 @@
                     };
                     $offerNotes = $offer->status === 'rejected_by_sales' ? $offer->sales_review_notes : ($offer->status === 'rejected_by_purchasing' ? $offer->purchasing_review_notes : null);
                 @endphp
-                <div class="card mb-2">
+                <div wire:key="{{ $offer->id }}" class="card mb-2">
                     <div class="flex justify-between items-start gap-2">
                         <div class="min-w-0">
                             <strong class="block truncate">{{ $offer->product?->name_ar }}</strong>
@@ -103,7 +103,7 @@
                     $pdfUrl = $isInvoice ? route('app.pdf.invoice', $doc) : route('app.pdf.proforma', $doc);
                     $shareText = ($isInvoice ? __('app.invoices') : __('app.proforma_msg')).' #'.$number.' - '.number_format((float) $doc->total, 2).' EGP';
                 @endphp
-                <div class="card mb-2">
+                <div wire:key="{{ $doc->id }}" class="card mb-2">
                     <div class="flex justify-between items-start gap-2">
                         <div class="min-w-0">
                             <strong class="block">#{{ $number }}</strong>

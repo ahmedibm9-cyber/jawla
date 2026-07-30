@@ -25,7 +25,7 @@
     $pageKey = \Illuminate\Support\Str::after(request()->route()?->getName() ?? '', 'app.');
   @endphp
   <title>{{ isset($pageKeyMap[$pageKey]) ? __('app.'.$pageKeyMap[$pageKey]).' | Jawla' : 'Jawla' }}</title>
-  <meta name="description" content="{{ app()->getLocale() === 'ar' ? 'تطبيق إدارة المبيعات الميدانية - Jawla' : 'Field Sales Management PWA - Jawla' }}">
+  <meta name="description" content="{{ l('تطبيق إدارة المبيعات الميدانية - Jawla', 'Field Sales Management PWA - Jawla') }}">
   @if(config('sentry.dsn'))
   <meta name="sentry-dsn" content="{{ config('sentry.dsn') }}">
   <meta name="sentry-environment" content="{{ config('sentry.environment', config('app.env', 'production')) }}">
@@ -78,7 +78,7 @@
     <header class="notification-header">
       <x-_active-company panel="rep" />
       {{-- CG2 offline sync-status badge: pending/failed count from the outbox --}}
-      <a href="/app/sync-queue" aria-label="{{ app()->getLocale() === 'ar' ? 'قائمة المزامنة' : 'Sync queue' }}"
+      <a href="/app/sync-queue" aria-label="{{ l('قائمة المزامنة', 'Sync queue') }}"
          class="notification-fab"
          x-data="{ pending: 0, failed: 0, conflicts: 0 }"
          x-init="window.addEventListener('jawla-sync-status', e => { pending = e.detail.pending; failed = e.detail.failed; conflicts = e.detail.conflicts; })"
@@ -115,7 +115,7 @@
           const banner = document.createElement('div');
           banner.id = 'pwa-install-banner';
           banner.className = 'pwa-install-banner';
-          banner.innerHTML = '<span class="pwa-install-banner-text">{{ app()->getLocale() === "ar" ? "ثبّت التطبيق" : "Install App" }}</span><div><button id="pwa-install-btn" class="pwa-install-btn">{{ app()->getLocale() === "ar" ? "تثبيت" : "Install" }}</button><button id="pwa-dismiss-btn" class="pwa-dismiss-btn">{{ app()->getLocale() === "ar" ? "لاحقاً" : "Later" }}</button></div>';
+          banner.innerHTML = '<span class="pwa-install-banner-text">{{ l("ثبّت التطبيق", "Install App") }}</span><div><button id="pwa-install-btn" class="pwa-install-btn">{{ l("تثبيت", "Install") }}</button><button id="pwa-dismiss-btn" class="pwa-dismiss-btn">{{ l("لاحقاً", "Later") }}</button></div>';
           document.body.appendChild(banner);
           document.getElementById('pwa-install-btn').addEventListener('click', () => { deferredPrompt.prompt(); deferredPrompt = null; banner.remove(); });
           document.getElementById('pwa-dismiss-btn').addEventListener('click', () => { deferredPrompt = null; banner.remove(); });
@@ -135,7 +135,7 @@
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M1 1l22 22"/><path d="M16.72 11.06A10.94 10.94 0 0119 12.55"/><path d="M5 12.55a10.94 10.94 0 015.17-2.39"/><path d="M10.71 5.05A16 16 0 0122.58 9"/><path d="M1.42 9a15.91 15.91 0 014.7-2.88"/><path d="M8.53 16.11a6 6 0 016.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/>
       </svg>
-      <span>{{ app()->getLocale() === 'ar' ? 'غير متصل — يُحفظ عملك على الجهاز ويُزامَن تلقائيًا' : 'Offline — saved on your device, syncs automatically' }}</span>
+      <span>{{ l('غير متصل — يُحفظ عملك على الجهاز ويُزامَن تلقائيًا', 'Offline — saved on your device, syncs automatically') }}</span>
     </div>
     <a id="storage-pressure-indicator"
        class="offline-indicator storage-pressure-indicator"
@@ -146,7 +146,7 @@
       <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M12 9v4m0 4h.01M10.3 3.8L1.8 18.5A2 2 0 003.5 21h17a2 2 0 001.7-2.5L13.7 3.8a2 2 0 00-3.4 0z"/>
       </svg>
-      <span>{{ app()->getLocale() === 'ar' ? 'مساحة الجهاز منخفضة — افتح قائمة المزامنة لحفظ عملياتك بأمان' : 'Device storage is low — open the sync queue to protect your work' }}</span>
+      <span>{{ l('مساحة الجهاز منخفضة — افتح قائمة المزامنة لحفظ عملياتك بأمان', 'Device storage is low — open the sync queue to protect your work') }}</span>
     </a>
   @endauth
 </body>

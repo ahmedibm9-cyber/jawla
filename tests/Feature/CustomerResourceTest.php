@@ -90,13 +90,31 @@ class CustomerResourceTest extends TestCase
 
     public function test_customer_gps_range_validation_logic(): void
     {
-        // Latitude must be between -90 and 90
-        $this->assertTrue(-90 <= 30.0444 && 30.0444 <= 90, 'Valid latitude passes');
-        $this->assertFalse(-90 <= 999 && 999 <= 90, '999 is out of latitude range');
+        $customer = Customer::factory()->make([
+            'latitude' => 30.0444,
+            'longitude' => 31.2357,
+        ]);
+        $this->assertTrue(
+            $customer->latitude >= -90 && $customer->latitude <= 90,
+            'Valid latitude passes'
+        );
+        $this->assertTrue(
+            $customer->longitude >= -180 && $customer->longitude <= 180,
+            'Valid longitude passes'
+        );
 
-        // Longitude must be between -180 and 180
-        $this->assertTrue(-180 <= 31.2357 && 31.2357 <= 180, 'Valid longitude passes');
-        $this->assertFalse(-180 <= 999 && 999 <= 180, '999 is out of longitude range');
+        $invalid = Customer::factory()->make([
+            'latitude' => 999,
+            'longitude' => 999,
+        ]);
+        $this->assertFalse(
+            $invalid->latitude >= -90 && $invalid->latitude <= 90,
+            '999 is out of latitude range'
+        );
+        $this->assertFalse(
+            $invalid->longitude >= -180 && $invalid->longitude <= 180,
+            '999 is out of longitude range'
+        );
     }
 
     public function test_customer_with_valid_gps_can_be_persisted(): void

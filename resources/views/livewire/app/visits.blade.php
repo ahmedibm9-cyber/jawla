@@ -24,7 +24,7 @@
                     @php $lastDate = $date; @endphp
                 @endif
 
-                <a href="{{ route('app.visit', $visit) }}" class="card block no-underline text-inherit mb-2">
+                <a href="{{ route('app.visit', $visit) }}" wire:key="{{ $visit->id }}" class="card block no-underline text-inherit mb-2">
                     <div class="flex justify-between items-start gap-2">
                         <div class="min-w-0">
                             <strong class="block truncate">{{ $visit->customer?->name_ar }}</strong>

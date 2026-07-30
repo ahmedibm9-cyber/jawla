@@ -17,7 +17,7 @@ class CustomerPolicy
 
     public function view(User $u, Customer $model): bool
     {
-        return $this->matchesCompany($u, $model);
+        return $u->can('view:customer') && $this->matchesCompany($u, $model);
     }
 
     public function create(User $u): bool

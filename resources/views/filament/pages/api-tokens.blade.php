@@ -65,7 +65,7 @@
 
             <div class="overflow-x-auto"
                 x-data="{ confirming: false, revokeId: null, revokeName: '' }">
-                <table class="w-full text-sm" aria-label="{{ app()->getLocale() === 'ar' ? 'رموز API النشطة' : 'Active API tokens' }}">
+                <table class="w-full text-sm" aria-label="{{ l('رموز API النشطة', 'Active API tokens') }}">
                     <thead>
                         <tr class="text-start text-gray-500">
                             <th class="p-2 text-start">{{ $ar ? 'الاسم' : 'Name' }}</th>

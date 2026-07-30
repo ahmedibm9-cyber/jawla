@@ -20,14 +20,14 @@
                         <strong class="block">{{ __('app.from') }}: {{ $t->fromUser?->name ?? '—' }}</strong>
                         <small class="text-text-muted">{{ $t->created_at->format('Y-m-d H:i') }}</small>
                     </div>
-                    <span class="badge {{ $t->status->value === 'shipped' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' }}">
+                    <span class="badge {{ $t->status->value === 'shipped' ? 'badge-info' : 'badge-warning' }}">
                         {{ __('app.transfer_status_'.$t->status->value) }}
                     </span>
                 </div>
                 <ul class="mt-2 text-sm text-text-secondary">
                     @foreach($t->items as $item)
                         <li class="flex justify-between">
-                            <span>{{ app()->getLocale() === 'ar' ? $item->product?->name_ar : ($item->product?->name_en ?? $item->product?->name_ar) }}</span>
+                            <span>{{ l($item->product?->name_ar, $item->product?->name_en ?? $item->product?->name_ar) }}</span>
                             <span dir="ltr">× {{ rtrim(rtrim(number_format((float) $item->quantity, 3), '0'), '.') }}</span>
                         </li>
                     @endforeach
@@ -60,7 +60,7 @@
                             <strong class="block">{{ __('app.to') }}: {{ $t->toUser?->name ?? '—' }}</strong>
                             <small class="text-text-muted">{{ $t->created_at->format('Y-m-d H:i') }}</small>
                         </div>
-                        <span class="badge bg-gray-100 text-gray-700 dark:bg-slate-700 dark:text-slate-300">{{ __('app.transfer_status_'.$t->status->value) }}</span>
+                        <span class="badge badge-neutral">{{ __('app.transfer_status_'.$t->status->value) }}</span>
                     </div>
                 </div>
             @endforeach

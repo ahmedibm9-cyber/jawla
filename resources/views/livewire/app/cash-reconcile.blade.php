@@ -45,7 +45,7 @@
             <div class="mt-6">
                 <h3 class="text-sm font-semibold mb-2">{{ __('app.recon_history') }}</h3>
                 @foreach($history as $r)
-                    <div class="card mb-2">
+                    <div wire:key="{{ $r->id }}" class="card mb-2">
                         <div class="flex justify-between items-start gap-2">
                             <div>
                                 <small class="text-text-muted block">{{ $r->created_at->format('Y-m-d H:i') }}</small>

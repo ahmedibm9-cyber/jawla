@@ -17,7 +17,7 @@ class TaskPolicy
 
     public function view(User $u, Task $model): bool
     {
-        return $this->matchesCompany($u, $model);
+        return $u->can('view:task') && $this->matchesCompany($u, $model);
     }
 
     public function create(User $u): bool

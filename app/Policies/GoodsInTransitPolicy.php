@@ -17,7 +17,7 @@ class GoodsInTransitPolicy
 
     public function view(User $u, GoodsInTransit $model): bool
     {
-        return $this->matchesCompany($u, $model);
+        return $u->can('view:goods_in_transit') && $this->matchesCompany($u, $model);
     }
 
     public function create(User $u): bool

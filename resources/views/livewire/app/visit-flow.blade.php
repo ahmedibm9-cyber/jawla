@@ -24,7 +24,7 @@
                     if (err.code === 1) {
                         $wire.markGpsDenied();
                     } else {
-                        $wire.set('errorMessage', 'GPS {{ app()->getLocale() === "ar" ? "غير متوفر" : "unavailable" }}');
+                        $wire.set('errorMessage', 'GPS {{ l("غير متوفر", "unavailable") }}');
                     }
                 },
                 { enableHighAccuracy: true, timeout: 15000 }
@@ -70,11 +70,11 @@
     <div class="page-body" x-effect="step = $wire.step; window.scrollTo(0,0)">
     <div x-show="!online" x-cloak class="card bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400 mb-3 flex items-center gap-2">
         <x-heroicon-o-signal-slash width="18" height="18" aria-hidden="true" />
-        <span>{{ app()->getLocale() === 'ar' ? 'غير متصل — سيتم حفظ المسودة' : 'Offline — draft will be saved' }}</span>
+        <span>{{ l('غير متصل — سيتم حفظ المسودة', 'Offline — draft will be saved') }}</span>
     </div>
 
     {{-- Stepper --}}
-    <div class="stepper" role="list" aria-label="{{ app()->getLocale() === 'ar' ? 'خطوات' : 'Steps' }}">
+    <div class="stepper" role="list" aria-label="{{ l('خطوات', 'Steps') }}">
         <div class="step done">
             <div class="step-dot">&#10003;</div>
             <small>{{ __('app.scheduled') }}</small>
@@ -172,14 +172,14 @@
 
         {{-- Photos (online only — capture uploads immediately) --}}
         <div class="card">
-            <label class="font-semibold block mb-1">{{ app()->getLocale() === 'ar' ? 'صور' : 'Photos' }}</label>
+            <label class="font-semibold block mb-1">{{ l('صور', 'Photos') }}</label>
             <livewire:app.photo-capture />
         </div>
 
         {{-- Signature --}}
         <div class="card">
             <label class="font-semibold block mb-1">{{ __('app.signature') }}</label>
-            <p class="m-0 mb-2 text-xs text-text-muted">{{ app()->getLocale() === 'ar' ? 'التوقيع اختياري — إذا تعذر التوقيع باللمس، دوّن اسم العميل في ملخص الزيارة.' : 'Signature is optional — if touch signing is not possible, note the customer name in the visit summary.' }}</p>
+            <p class="m-0 mb-2 text-xs text-text-muted">{{ l('التوقيع اختياري — إذا تعذر التوقيع باللمس، دوّن اسم العميل في ملخص الزيارة.', 'Signature is optional — if touch signing is not possible, note the customer name in the visit summary.') }}</p>
             {{-- bg-white is intentional in both themes: the signature area is "paper"
                  so the dark ink stays visible while drawing on dark mode. The stored
                  PNG (toDataURL) is transparent+ink and renders fine on the white PDF. --}}
@@ -225,7 +225,7 @@
                         if (navigator.onLine) {
                             $wire.submitReport();
                         } else if (($wire.summary || '').trim().length < 5) {
-                            alert(@js(app()->getLocale() === 'ar' ? 'يرجى كتابة ملخص الزيارة (5 أحرف على الأقل).' : 'Please write a visit summary (at least 5 characters).'));
+                            alert(@js(l('يرجى كتابة ملخص الزيارة (5 أحرف على الأقل).', 'Please write a visit summary (at least 5 characters).')));
                         } else {
                             window.jawlaSync.enqueue('visit_report', {
                                 visit_id: {{ $visit->id }},
@@ -248,8 +248,8 @@
         <div class="card text-center p-8 {{ $queuedOffline ? 'bg-warning/10' : 'bg-success/10' }}">
             @if($queuedOffline)
                 <x-heroicon-o-cloud-arrow-up class="size-16 text-warning mx-auto mb-2" stroke-width="2.5" aria-hidden="true" />
-                <h2 class="text-warning my-3 mb-1" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ app()->getLocale() === 'ar' ? 'بانتظار المزامنة' : 'Queued to sync' }}</h2>
-                <p class="text-text-secondary m-0">{{ app()->getLocale() === 'ar' ? 'تم حفظ تقرير الزيارة دون اتصال وستتم مزامنته تلقائيًا عند عودة الاتصال.' : 'Visit report saved offline — it will sync automatically when you are back online.' }}</p>
+                <h2 class="text-warning my-3 mb-1" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ l('بانتظار المزامنة', 'Queued to sync') }}</h2>
+                <p class="text-text-secondary m-0">{{ l('تم حفظ تقرير الزيارة دون اتصال وستتم مزامنته تلقائيًا عند عودة الاتصال.', 'Visit report saved offline — it will sync automatically when you are back online.') }}</p>
             @else
                 <x-heroicon-o-check-circle class="size-16 text-success mx-auto mb-2" stroke-width="2.5" aria-hidden="true" />
                 <h2 class="text-success my-3 mb-1" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ __('app.report_submitted') }}</h2>

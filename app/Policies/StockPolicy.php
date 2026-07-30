@@ -32,6 +32,7 @@ class StockPolicy
         return $u->can('stock.import');
     }
 
+    // ponytail: Stock has no company_id; matches via warehouse+product ownership
     private function belongsToActiveCompany(User $user, Stock $stock): bool
     {
         $companyId = $user->activeCompanyId();

@@ -6,7 +6,7 @@
 
     <div class="page-body">
         <div class="form-group">
-            <input type="text" wire:model.live.debounce.300ms="search" aria-label="{{ app()->getLocale() === 'ar' ? 'بحث' : 'Search' }}" autocomplete="off" class="form-input"
+            <input type="text" wire:model.live.debounce.300ms="search" aria-label="{{ l('بحث', 'Search') }}" autocomplete="off" class="form-input"
                 placeholder="{{ __('app.search_product_ph') }}">
         </div>
 
@@ -28,7 +28,7 @@
             <x-ds.empty icon="heroicon-o-cube-transparent" :message="__('app.no_results')" />
         @else
             @foreach($results as $product)
-                <div class="card">
+                <div wire:key="{{ $product->id }}" class="card">
                     <div class="flex justify-between items-start">
                         <div>
                             <strong class="block">{{ $product->name_ar }}</strong>
@@ -46,7 +46,7 @@
                             @endforeach
                         </div>
                     @else
-                        <p class="mt-2 text-sm text-danger">{{ app()->getLocale() === 'ar' ? 'غير متوفر' : 'Out of stock' }}</p>
+                        <p class="mt-2 text-sm text-danger">{{ l('غير متوفر', 'Out of stock') }}</p>
                     @endif
 
                     @can('alarms.flag_out_of_stock')

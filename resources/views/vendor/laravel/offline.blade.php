@@ -17,9 +17,9 @@ p{color:#475569;margin:0 0 16px;font-size:.875rem;line-height:1.5}
 <body>
 <div class="card">
     <img src="/images/logo-app-icon.webp" alt="Jawla">
-    <h1>{{ app()->getLocale() === 'ar' ? 'لا يوجد اتصال بالإنترنت' : 'No Internet Connection' }}</h1>
-    <p>{{ app()->getLocale() === 'ar' ? 'يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى' : 'Please check your connection and try again' }}</p>
-    <a class="btn" href="/app">{{ app()->getLocale() === 'ar' ? 'إعادة المحاولة' : 'Retry' }}</a>
+    <h1>{{ l('لا يوجد اتصال بالإنترنت', 'No Internet Connection') }}</h1>
+    <p>{{ l('يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى', 'Please check your connection and try again') }}</p>
+    <a class="btn" href="/app">{{ l('إعادة المحاولة', 'Retry') }}</a>
 </div>
 </body>
 </html>

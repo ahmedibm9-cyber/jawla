@@ -45,7 +45,7 @@
                 </x-ds.empty>
             @else
                 @foreach($todayVisits as $assignment)
-                    <button type="button" class="visit-card clickable-card w-full text-start border-0" wire:click="goToVisit({{ $assignment->id }})">
+                    <button type="button" wire:key="{{ $assignment->id }}" class="visit-card clickable-card w-full text-start border-0" wire:click="goToVisit({{ $assignment->id }})">
                         <div class="visit-card-status visit-status-{{ $assignment->status }}"></div>
                         <div class="visit-card-body">
                             <div class="visit-card-top">

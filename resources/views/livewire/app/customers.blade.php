@@ -37,13 +37,13 @@
                         default => 'badge-info',
                     };
                     $statusLabel = match($customer->status ?? 'approved') {
-                        'approved' => app()->getLocale() === 'ar' ? 'موافق' : 'Approved',
-                        'pending' => app()->getLocale() === 'ar' ? 'قيد المراجعة' : 'Pending',
-                        'rejected' => app()->getLocale() === 'ar' ? 'مرفوض' : 'Rejected',
+                        'approved' => l('موافق', 'Approved'),
+                        'pending' => l('قيد المراجعة', 'Pending'),
+                        'rejected' => l('مرفوض', 'Rejected'),
                         default => $customer->status,
                     };
                 @endphp
-                <div class="customer-card card min-w-0">
+                <div wire:key="{{ $customer->id }}" class="customer-card card min-w-0">
                     {{-- Main customer info (always visible, clickable) --}}
                     <button type="button"
                             wire:click="toggleCustomerActions({{ $customer->id }})"
@@ -92,7 +92,7 @@
                                    class="customer-action-btn customer-action-primary no-underline"
                                    onclick="event.stopPropagation()">
                                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                                    <span>{{ app()->getLocale() === 'ar' ? 'فاتورة جديدة' : 'Create Invoice' }}</span>
+                                    <span>{{ l('فاتورة جديدة', 'Create Invoice') }}</span>
                                 </a>
 
                                 {{-- Log Visit --}}
@@ -100,7 +100,7 @@
                                    class="customer-action-btn customer-action-secondary no-underline"
                                    onclick="event.stopPropagation()">
                                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                    <span>{{ app()->getLocale() === 'ar' ? 'تسجيل زيارة' : 'Log Visit' }}</span>
+                                    <span>{{ l('تسجيل زيارة', 'Log Visit') }}</span>
                                 </a>
 
                                 {{-- View Invoices --}}
@@ -108,7 +108,7 @@
                                    class="customer-action-btn customer-action-secondary no-underline"
                                    onclick="event.stopPropagation()">
                                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                                    <span>{{ app()->getLocale() === 'ar' ? 'الفواتير' : 'Invoices' }}</span>
+                                    <span>{{ l('الفواتير', 'Invoices') }}</span>
                                 </a>
 
                                 {{-- View History --}}
@@ -116,7 +116,7 @@
                                    class="customer-action-btn customer-action-ghost no-underline"
                                    onclick="event.stopPropagation()">
                                     <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    <span>{{ app()->getLocale() === 'ar' ? 'السجل' : 'History' }}</span>
+                                    <span>{{ l('السجل', 'History') }}</span>
                                 </a>
 
                                 {{-- Directions --}}
@@ -134,7 +134,7 @@
                             {{-- Customer balance info --}}
                             @if($customer->balance != 0)
                                 <div class="customer-balance {{ $customer->balance < 0 ? 'text-danger' : 'text-success' }}">
-                                    <span class="text-xs text-text-secondary">{{ app()->getLocale() === 'ar' ? 'الرصيد' : 'Balance' }}</span>
+                                    <span class="text-xs text-text-secondary">{{ l('الرصيد', 'Balance') }}</span>
                                     <span class="font-semibold">{{ number_format(abs($customer->balance), 2) }}</span>
                                 </div>
                             @endif

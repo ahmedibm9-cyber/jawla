@@ -6,7 +6,7 @@
 
     <div class="page-body" x-effect="step = $wire.step; window.scrollTo(0,0)">
         {{-- Stepper --}}
-        <div class="stepper" role="list" aria-label="{{ app()->getLocale() === 'ar' ? 'خطوات' : 'Steps' }}">
+        <div class="stepper" role="list" aria-label="{{ l('خطوات', 'Steps') }}">
             <div class="step {{ $step === 'cart' ? 'active' : 'done' }}">
                 <div class="step-dot">{{ $step === 'cart' ? '1' : '&#10003;' }}</div>
                 <small>{{ __('app.cart') }}</small>
@@ -216,7 +216,7 @@
                 <div class="success-checkmark" style="background:var(--color-warning,#B45309)">
                     <x-heroicon-o-cloud-arrow-up width="36" height="36" stroke-width="2.5" aria-hidden="true" />
                 </div>
-                <h3 class="success-title" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ app()->getLocale() === 'ar' ? 'بانتظار المزامنة' : 'Queued to sync' }}</h3>
+                <h3 class="success-title" tabindex="-1" x-data x-init="$nextTick(() => $el.focus())">{{ l('بانتظار المزامنة', 'Queued to sync') }}</h3>
                 <p class="success-message">{{ $successMessage }}</p>
                 <div class="success-actions">
                     <a href="/app/sell" class="btn btn-primary w-full no-underline text-center">{{ __('app.new_invoice') }}</a>

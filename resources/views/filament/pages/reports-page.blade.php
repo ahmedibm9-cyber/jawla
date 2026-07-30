@@ -6,12 +6,12 @@
                 <x-filament::input
                     wire:model.live="fromDate"
                     type="date"
-                    :label="app()->getLocale() === 'ar' ? 'من' : 'From'"
+                    :label="l('من', 'From')"
                 />
                 <x-filament::input
                     wire:model.live="toDate"
                     type="date"
-                    :label="app()->getLocale() === 'ar' ? 'إلى' : 'To'"
+                    :label="l('إلى', 'To')"
                 />
             </div>
         </x-filament::section>
@@ -22,25 +22,25 @@
                 wire:click="$set('tab', 'visit_reports')"
                 :active="$tab === 'visit_reports'"
             >
-                {{ app()->getLocale() === 'ar' ? 'زيارات' : 'Visits' }}
+                {{ l('زيارات', 'Visits') }}
             </x-filament::tabs.item>
             <x-filament::tabs.item
                 wire:click="$set('tab', 'quotations')"
                 :active="$tab === 'quotations'"
             >
-                {{ app()->getLocale() === 'ar' ? 'عروض أسعار' : 'Quotations' }}
+                {{ l('عروض أسعار', 'Quotations') }}
             </x-filament::tabs.item>
             <x-filament::tabs.item
                 wire:click="$set('tab', 'proformas')"
                 :active="$tab === 'proformas'"
             >
-                {{ app()->getLocale() === 'ar' ? 'فواتير مبدئية' : 'Proformas' }}
+                {{ l('فواتير مبدئية', 'Proformas') }}
             </x-filament::tabs.item>
             <x-filament::tabs.item
                 wire:click="$set('tab', 'invoices')"
                 :active="$tab === 'invoices'"
             >
-                {{ app()->getLocale() === 'ar' ? 'فواتير' : 'Invoices' }}
+                {{ l('فواتير', 'Invoices') }}
             </x-filament::tabs.item>
         </x-filament::tabs>
 
@@ -48,13 +48,13 @@
         <x-filament::section>
             @if($tab === 'visit_reports')
                 <div class="overflow-x-auto">
-                    <table class="filament-table w-full text-sm" aria-label="{{ app()->getLocale() === 'ar' ? 'تقرير الزيارات' : 'Visit reports' }}">
+                    <table class="filament-table w-full text-sm" aria-label="{{ l('تقرير الزيارات', 'Visit reports') }}">
                         <thead>
                             <tr>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'المندوب' : 'Rep' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'العميل' : 'Customer' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'التاريخ' : 'Date' }}</th>
-                                <th class="filament-table-header-cell">{{ app()->getLocale() === 'ar' ? 'الملخص' : 'Summary' }}</th>
+                                <th class="filament-table-header-cell">{{ l('المندوب', 'Rep') }}</th>
+                                <th class="filament-table-header-cell">{{ l('العميل', 'Customer') }}</th>
+                                <th class="filament-table-header-cell">{{ l('التاريخ', 'Date') }}</th>
+                                <th class="filament-table-header-cell">{{ l('الملخص', 'Summary') }}</th>
                             </tr>
                         </thead>
                         <tbody class="filament-table-body divide-y">
@@ -79,7 +79,7 @@
 
             @elseif($tab === 'quotations')
                 <div class="overflow-x-auto">
-                    <table class="filament-table w-full text-sm" aria-label="{{ app()->getLocale() === 'ar' ? 'عروض الأسعار' : 'Quotations' }}">
+                    <table class="filament-table w-full text-sm" aria-label="{{ l('عروض الأسعار', 'Quotations') }}">
                         <thead>
                             <tr>
                                 <th class="filament-table-header-cell">{{ __('app.customer') }}</th>
@@ -110,7 +110,7 @@
 
             @elseif($tab === 'proformas')
                 <div class="overflow-x-auto">
-                    <table class="filament-table w-full text-sm" aria-label="{{ app()->getLocale() === 'ar' ? 'الفاتورات المبدئية' : 'Proformas' }}">
+                    <table class="filament-table w-full text-sm" aria-label="{{ l('الفاتورات المبدئية', 'Proformas') }}">
                         <thead>
                             <tr>
                                 <th class="filament-table-header-cell">{{ __('app.number') }}</th>
@@ -139,7 +139,7 @@
 
             @elseif($tab === 'invoices')
                 <div class="overflow-x-auto">
-                    <table class="filament-table w-full text-sm" aria-label="{{ app()->getLocale() === 'ar' ? 'الفواتير' : 'Invoices' }}">
+                    <table class="filament-table w-full text-sm" aria-label="{{ l('الفواتير', 'Invoices') }}">
                         <thead>
                             <tr>
                                 <th class="filament-table-header-cell">{{ __('app.number') }}</th>
