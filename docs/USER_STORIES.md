@@ -818,6 +818,12 @@ Amended (cancel + create new Draft)
 | OpenAlarms         | Unread alarms + critical count               |
 | PendingQuotations  | Awaiting pricing + awaiting rep confirmation |
 
+**Personalization acceptance criteria:**
+
+- An authorized admin can reorder dashboard widgets and hide or re-enable any widget from the dashboard customization utility.
+- Preferences apply only to the signed-in user; existing and newly released widgets remain visible by default.
+- Saved widget identifiers are limited to the dashboard's registered widget list.
+
 ### US-18.2 — View Reports Page
 
 **As an** admin/manager

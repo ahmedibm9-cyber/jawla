@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Pages\Dashboard;
 use App\Filament\Widgets\LowStockAlertWidget;
 use App\Filament\Widgets\OpenAlarmsWidget;
 use App\Filament\Widgets\OutstandingBalanceWidget;
@@ -86,5 +87,51 @@ class DashboardWidgetTest extends TestCase
 
         Livewire::test(PendingQuotationsWidget::class)
             ->assertSuccessful();
+    }
+
+    public function test_admin_can_reorder_and_hide_dashboard_widgets_from_the_customization_utility(): void
+    {
+        $admin = User::where('email', 'admin@jawla.test')->firstOrFail();
+        $this->actingAs($admin);
+
+        Livewire::test(Dashboard::class)
+            ->assertActionExists('customizeDashboard')
+            ->callAction('customizeDashboard', [
+                'widgets' => [
+                    ['key' => SalesTodayWidget::class, 'visible' => true],
+                    ['key' => VisitsTodayWidget::class, 'visible' => false],
+                ],
+            ])
+            ->assertHasNoActionErrors();
+
+        $admin->refresh();
+
+        $this->assertSame(SalesTodayWidget::class, $admin->preference('dashboard_widgets')[0]);
+        $this->assertContains(VisitsTodayWidget::class, $admin->preference('dashboard_hidden_widgets'));
+
+        $rendered = Livewire::test(Dashboard::class)->instance()->getWidgets();
+        $renderedKeys = array_map(static fn (mixed $widget): string => is_string($widget) ? $widget : $widget->widget, $rendered);
+
+        $this->assertSame(SalesTodayWidget::class, $renderedKeys[0]);
+        $this->assertNotContains(VisitsTodayWidget::class, $renderedKeys);
+    }
+
+    public function test_dashboard_customization_ignores_unknown_widget_keys(): void
+    {
+        $admin = User::where('email', 'admin@jawla.test')->firstOrFail();
+        $this->actingAs($admin);
+
+        Livewire::test(Dashboard::class)
+            ->callAction('customizeDashboard', [
+                'widgets' => [
+                    ['key' => 'App\\Filament\\Widgets\\UntrustedWidget', 'visible' => false],
+                ],
+            ])
+            ->assertHasNoActionErrors();
+
+        $admin->refresh();
+
+        $this->assertNotContains('App\\Filament\\Widgets\\UntrustedWidget', $admin->preference('dashboard_widgets'));
+        $this->assertNotContains('App\\Filament\\Widgets\\UntrustedWidget', $admin->preference('dashboard_hidden_widgets'));
     }
 }
