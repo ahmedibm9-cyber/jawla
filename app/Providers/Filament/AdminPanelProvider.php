@@ -47,7 +47,6 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::hex('#6DB83B'),
             ])
             ->font('IBM Plex Sans Arabic')
-            ->viteTheme('resources/css/app.css')
             ->brandName('Jawla')
             ->brandLogo(secure_asset('images/black-j.webp'))
             ->darkModeBrandLogo(secure_asset('images/white-j.webp'))
@@ -110,7 +109,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook('panels::topbar.end', fn (): string => view('components._active-company', ['panel' => 'admin'])->render())
             ->renderHook('panels::head.start', fn (): string => '<link rel="preload" href="'.secure_asset('images/black-j.webp').'" as="image" fetchpriority="high">')
-            ->renderHook('panels::head.end', fn (): string => view('filament.onboarding-head')->render())
+            ->renderHook('panels::head.end', fn (): string => view('filament.admin-dashboard-theme')->render().view('filament.onboarding-head')->render())
             ->renderHook('panels::body.end', fn (): string => '<script>window.areRecordsPartiallySelected??=()=>!1;window.getRecordsOnPage??=()=>[];window.areRecordsSelected??=()=>!1;window.areRecordsToggleable??=()=>!0;</script>'.view('filament.onboarding-body')->render());
     }
 }
