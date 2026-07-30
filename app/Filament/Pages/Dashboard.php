@@ -66,9 +66,7 @@ class Dashboard extends BaseDashboard
                     'key' => $this->widgetKey($widget),
                     'label' => $this->widgetLabel($this->widgetKey($widget)),
                     'class' => $class,
-                    'properties' => $widget instanceof WidgetConfiguration
-                        ? [...$class::getDefaultProperties(), ...$widget->getProperties()]
-                        : $class::getDefaultProperties(),
+                    'properties' => $this->widgetProperties($widget),
                     'url' => $this->widgetDestination($this->widgetKey($widget)),
                 ];
             })
@@ -246,6 +244,22 @@ class Dashboard extends BaseDashboard
         }
 
         return $widget;
+    }
+
+    /** @return array<string, mixed> */
+    protected function widgetProperties(mixed $widget): array
+    {
+        $class = $this->widgetClass($widget);
+        $properties = $widget instanceof WidgetConfiguration
+            ? [...$class::getDefaultProperties(), ...$widget->getProperties()]
+            : $class::getDefaultProperties();
+
+        // The custom dashboard mounts each widget directly. Filament's lazy
+        // placeholder relies on its schema grid lifecycle, so retaining this
+        // property here leaves widgets permanently in their loading state.
+        unset($properties['lazy']);
+
+        return $properties;
     }
 
     /**

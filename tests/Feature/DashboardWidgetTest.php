@@ -189,6 +189,7 @@ class DashboardWidgetTest extends TestCase
         $entries = collect($dashboard->instance()->getDashboardWidgetEntries())
             ->keyBy('key');
 
+        $this->assertArrayNotHasKey('lazy', $entries[SalesTodayWidget::class]['properties']);
         $this->assertSame(DailyVisitAssignmentResource::getUrl('index'), $entries[VisitsTodayWidget::class]['url']);
         $this->assertSame(PriceQuotationRequestResource::getUrl('index'), $entries[PendingQuotationsWidget::class]['url']);
         $this->assertSame(AlarmResource::getUrl('index'), $entries[OpenAlarmsWidget::class]['url']);
