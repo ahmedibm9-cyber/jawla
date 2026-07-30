@@ -55,7 +55,7 @@ it('loads the sell page without JavaScript errors', function () {
     $page = $this->actingAs($rep)->visit('/app/sell');
 
     $page->assertNoJavascriptErrors()
-        ->assertSee(__('app.sell'));
+        ->assertSee(__('app.create_invoice'));
 });
 
 it('loads the sell page for a specific customer without JavaScript errors', function () {
@@ -70,7 +70,7 @@ it('loads the sell page for a specific customer without JavaScript errors', func
     $page = $this->actingAs($rep)->visit("/app/sell/{$customer->id}");
 
     $page->assertNoJavascriptErrors()
-        ->assertSee('عميل محدد');
+        ->assertSee(__('app.create_invoice'));
 });
 
 it('loads the collect payment page with autocomplete structure', function () {
@@ -89,7 +89,7 @@ it('loads the returns page without JavaScript errors', function () {
     $page = $this->actingAs($rep)->visit('/app/returns');
 
     $page->assertNoJavascriptErrors()
-        ->assertSee(__('app.returns'));
+        ->assertSee(__('app.log_return'));
 });
 
 it('loads the expenses page without JavaScript errors', function () {
@@ -98,7 +98,7 @@ it('loads the expenses page without JavaScript errors', function () {
     $page = $this->actingAs($rep)->visit('/app/expenses');
 
     $page->assertNoJavascriptErrors()
-        ->assertSee(__('app.expenses'));
+        ->assertSee(__('app.log_expense'));
 });
 
 it('loads the cash reconcile page without JavaScript errors', function () {
@@ -107,7 +107,7 @@ it('loads the cash reconcile page without JavaScript errors', function () {
     $page = $this->actingAs($rep)->visit('/app/reconcile');
 
     $page->assertNoJavascriptErrors()
-        ->assertSee(__('app.reconcile'));
+        ->assertSee(__('app.cash_reconciliation'));
 });
 
 it('loads the quotations page without JavaScript errors', function () {
@@ -125,5 +125,5 @@ it('loads the van transfers page without JavaScript errors', function () {
     $page = $this->actingAs($rep)->visit('/app/transfers');
 
     $page->assertNoJavascriptErrors()
-        ->assertSee(__('app.transfers'));
+        ->assertSee(__('app.van_transfers'));
 });

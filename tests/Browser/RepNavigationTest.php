@@ -59,7 +59,7 @@ it('loads the complaints page without JavaScript errors', function () {
     $page = $this->actingAs($rep)->visit('/app/complaints');
 
     $page->assertNoJavascriptErrors()
-        ->assertSee(__('app.complaints'));
+        ->assertSee(__('app.log_complaint'));
 });
 
 it('loads the profile page without JavaScript errors', function () {
@@ -102,7 +102,7 @@ it('renders the home page with tab bar navigation', function () {
     $page = $this->actingAs($rep)->visit('/app');
 
     $page->assertNoJavascriptErrors()
-        ->assertPresent('[role="navigation"]');
+        ->assertPresent('nav.tab-bar');
 });
 
 it('admin login page loads and shows login form', function () {
