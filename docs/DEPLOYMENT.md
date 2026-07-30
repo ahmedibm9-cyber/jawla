@@ -1,5 +1,12 @@
 # Jawla deployment
 
+## Environments
+
+| Environment    | URL                                            | Railway                 | Notes                  |
+| -------------- | ---------------------------------------------- | ----------------------- | ---------------------- |
+| **Production** | `https://jawla-production.up.railway.app`      | service `jawla`         | 2 replicas, SFO region |
+| **Staging**    | `https://jawla-staging-staging.up.railway.app` | service `jawla-staging` | 2 replicas, SFO region |
+
 ## Release path
 
 Production promotion is defined in `.github/workflows/deploy.yml`:
@@ -22,13 +29,13 @@ this workflow. It would bypass the staging and approval gates.
 
 Configure both `staging` and `production` environments:
 
-| Setting | Scope | Purpose |
-| --- | --- | --- |
-| `RAILWAY_TOKEN` | secret | Environment-scoped Railway project token |
-| `RAILWAY_PROJECT_ID` | variable | Target project |
-| `RAILWAY_SERVICE_ID` | variable | Web service |
-| `STAGING_URL` | staging variable | Public staging base URL |
-| `PRODUCTION_URL` | production variable | Public production base URL |
+| Setting              | Scope               | Purpose                                  |
+| -------------------- | ------------------- | ---------------------------------------- |
+| `RAILWAY_TOKEN`      | secret              | Environment-scoped Railway project token |
+| `RAILWAY_PROJECT_ID` | variable            | Target project                           |
+| `RAILWAY_SERVICE_ID` | variable            | Web service                              |
+| `STAGING_URL`        | staging variable    | Public staging base URL                  |
+| `PRODUCTION_URL`     | production variable | Public production base URL               |
 
 Configure required reviewers on the `production` GitHub environment. Repository
 configuration alone cannot prove that this external protection is enabled.
@@ -44,9 +51,11 @@ The manual rollback workflow additionally requires an account-scoped
 - pre-deploy forward migrations and Laravel caches;
 - two replicas;
 - `/health` readiness with a five-minute timeout;
-- restart-on-failure with ten retries;
-- Redis-backed sessions, cache, and queue;
-- private S3-compatible photo storage.
+- restart-on-failure with ten retries.
+
+Environment-specific config (Redis vs database drivers, S3 vs local storage) is
+managed in Railway service variables, not `railway.toml` — the TOML file is
+shared across environments.
 
 `/up` remains Laravel's lightweight liveness endpoint. Promotion and platform
 traffic switching use `/health`, which checks PostgreSQL and the configured
