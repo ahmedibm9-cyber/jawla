@@ -18,6 +18,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/).
 - Deploy workflow with staging/production environments
 - Security issue template
 - database/README.md with migration rules
+- Dashboard widget drag-drop reorder with persisted user preference
+- Company scoping for Visit model with migration
+
+### Fixed
+
+- Dark mode: replaced `prefers-color-scheme` media query with `.dark` class selector
+- Permission checks added to Customer, Product, GoodsInTransit, and Task policies
+- RolePolicy: removed deprecated `HandlesAuthorization` trait, fixed type hints
+- 56 inline translation ternaries replaced with `l()` helper across 11 Blade views
+- `wire:key` added to 7 `@foreach` loops to prevent DOM diffing issues
+- Badge styling in van-transfers now uses design-system classes
+- `log-return` alert replaced with `<x-ds.toast>` for consistency
+- Deleted dead `autocomplete` Blade component
+- CI pipeline: added `.env` setup before PHPStan analysis
 
 ## [0.1.0] - 2026-07-27
 
