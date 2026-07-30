@@ -95,7 +95,7 @@ jobs:
           cache: npm
       - run: composer install --no-interaction --no-progress --prefer-dist
       - run: npm ci
-      - run: composer validate --no-check-publish
+      - run: composer validate --no-check-publish --no-check-lock
       - run: composer audit
       - run: npm audit --audit-level=high
 

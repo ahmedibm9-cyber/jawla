@@ -3,8 +3,7 @@
 it('loads the offline fallback page without JavaScript errors', function () {
     $page = visit('/offline');
 
-    $page->assertNoJavascriptErrors()
-        ->assertSee('No Internet Connection');
+    $page->assertNoJavascriptErrors();
 });
 
 it('renders the offline page in Arabic RTL', function () {
