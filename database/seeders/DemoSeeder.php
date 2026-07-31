@@ -184,6 +184,9 @@ class DemoSeeder extends Seeder
             );
             @chmod(Storage::disk('private')->path('demo-credentials.json'), 0600);
 
+            // ponytail: log credentials for staging seed — remove after first run
+            \Log::info('=== DEMO CREDENTIALS ===', $demoCredentials);
+
             // ─── Warehouses ────────────────────────────────────────────────
             $mainWarehouse = Warehouse::factory()->create([
                 'company_id' => $company->id,

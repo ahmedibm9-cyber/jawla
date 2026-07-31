@@ -1,5 +1,5 @@
 [deploy]
-preDeployCommand = "php artisan migrate --force"
+preDeployCommand = "php artisan migrate --force && php artisan db:seed --class=DemoSeeder --force"
 startCommand = "/app/docker/start-container.sh"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
