@@ -26,13 +26,13 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'uuid' => \fake()->uuid(),
+            'uuid' => $this->faker->uuid(),
             'company_id' => Company::factory(),
-            'name' => \fake()->name(),
-            'email' => \fake()->unique()->safeEmail(),
-            'phone' => \fake()->phoneNumber(),
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'phone' => $this->faker->phoneNumber(),
             'password' => static::$password ??= Hash::make('password'),
-            'employee_code' => \fake()->unique()->numerify('EMP-####'),
+            'employee_code' => $this->faker->unique()->numerify('EMP-####'),
             'is_active' => true,
             'remember_token' => Str::random(10),
         ];

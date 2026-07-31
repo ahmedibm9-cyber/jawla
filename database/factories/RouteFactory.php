@@ -17,9 +17,9 @@ class RouteFactory extends Factory
     {
         return [
             'company_id' => Company::factory(),
-            'name_ar' => \fake()->city(),
-            'name_en' => \fake()->city(),
-            'region' => \fake()->city(),
+            'name_ar' => $this->faker->city(),
+            'name_en' => $this->faker->city(),
+            'region' => $this->faker->city(),
             'is_active' => true,
         ];
     }

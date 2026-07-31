@@ -15,14 +15,14 @@ class InvoiceFactory extends Factory
 
     public function definition(): array
     {
-        $subtotal = \fake()->randomFloat(2, 100, 10000);
-        $vat = \fake()->randomFloat(2, 10, 1000);
+        $subtotal = $this->faker->randomFloat(2, 100, 10000);
+        $vat = $this->faker->randomFloat(2, 10, 1000);
 
         return [
             'company_id' => Company::factory(),
             'customer_id' => Customer::factory(),
             'user_id' => User::factory(),
-            'invoice_number' => \fake()->unique()->numerify('INV-#####'),
+            'invoice_number' => $this->faker->unique()->numerify('INV-#####'),
             'status' => InvoiceStatus::Submitted,
             'subtotal' => $subtotal,
             'vat_amount' => $vat,
