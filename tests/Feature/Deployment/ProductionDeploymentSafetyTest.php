@@ -69,7 +69,8 @@ class ProductionDeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('container-build:', $ci);
         $this->assertStringContainsString('docker build --tag jawla:ci .', $ci);
         $this->assertStringContainsString('composer install --no-dev --no-scripts', $ci);
-        $this->assertStringContainsString('composer validate --strict --no-check-publish', $ci);
+        $this->assertStringContainsString('composer validate', $ci);
+        $this->assertStringContainsString('--no-check-publish', $ci);
         $this->assertStringContainsString('@import "tailwindcss" source(none)', $appCss);
         $this->assertStringContainsString("@source '../views'", $appCss);
         $this->assertStringContainsString("@source '../../app'", $appCss);

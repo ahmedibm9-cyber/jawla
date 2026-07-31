@@ -26,6 +26,7 @@ class PwaShellIntegrationTest extends TestCase
         $this->seed(DemoSeeder::class);
         $rep = User::where('email', 'rep@jawla.test')->firstOrFail();
 
+        $this->session(['locale' => 'en']);
         $this->actingAs($rep)->get('/app')
             ->assertOk()
             ->assertSee('id="storage-pressure-indicator"', false)
@@ -40,7 +41,8 @@ class PwaShellIntegrationTest extends TestCase
         $this->seed(DemoSeeder::class);
         $rep = User::where('email', 'rep@jawla.test')->firstOrFail();
 
-        $this->withSession(['locale' => 'ar'])->actingAs($rep)->get('/app')
+        $this->session(['locale' => 'ar']);
+        $this->actingAs($rep)->get('/app')
             ->assertOk()
             ->assertSee('dir="rtl"', false)
             ->assertSee('مساحة الجهاز منخفضة', false);
@@ -48,6 +50,7 @@ class PwaShellIntegrationTest extends TestCase
 
     public function test_offline_fallback_uses_a_safe_retry_link(): void
     {
+        $this->session(['locale' => 'en']);
         $this->get('/offline')
             ->assertOk()
             ->assertSee('class="btn" href="/app"', false)

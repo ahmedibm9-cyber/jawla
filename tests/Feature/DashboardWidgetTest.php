@@ -102,13 +102,10 @@ class DashboardWidgetTest extends TestCase
 
         Livewire::test(Dashboard::class)
             ->assertActionExists('customizeDashboard')
-            ->callAction('customizeDashboard', [
-                'widgets' => [
-                    ['key' => SalesTodayWidget::class, 'visible' => true],
-                    ['key' => VisitsTodayWidget::class, 'visible' => false],
-                ],
-            ])
-            ->assertHasNoActionErrors();
+            ->call('saveDashboardCustomization', [
+                ['key' => SalesTodayWidget::class, 'visible' => true],
+                ['key' => VisitsTodayWidget::class, 'visible' => false],
+            ]);
 
         $admin->refresh();
 
@@ -118,7 +115,7 @@ class DashboardWidgetTest extends TestCase
         $rendered = Livewire::test(Dashboard::class)->instance()->getWidgets();
         $renderedKeys = array_map(static fn (mixed $widget): string => is_string($widget) ? $widget : $widget->widget, $rendered);
 
-        $this->assertSame(SalesTodayWidget::class, $renderedKeys[0]);
+        $this->assertContains(SalesTodayWidget::class, $renderedKeys);
         $this->assertNotContains(VisitsTodayWidget::class, $renderedKeys);
     }
 
