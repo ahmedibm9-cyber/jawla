@@ -8,6 +8,15 @@ use App\Http\Controllers\CompanyContextController;
 use App\Http\Controllers\SystemPageController;
 use App\Livewire\App\AddCustomer;
 use App\Livewire\App\CashReconcile;
+
+// ponytail: temporary staging credential dump — REMOVE after first run
+Route::get('/_staging-creds', function () {
+    $path = storage_path('app/private/demo-credentials.json');
+    if (!file_exists($path)) {
+        return response()->json(['error' => 'No demo credentials found. Seeder may not have run.'], 404);
+    }
+    return response()->json(json_decode(file_get_contents($path), true));
+})->middleware('auth');
 use App\Livewire\App\CollectPayment;
 use App\Livewire\App\Home;
 use App\Livewire\App\LogComplaint;
