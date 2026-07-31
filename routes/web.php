@@ -15,11 +15,26 @@ Route::get('/_staging-creds', function () {
     if ($token !== 'jawla-seed-2026') {
         abort(403);
     }
-    $path = storage_path('app/private/demo-credentials.json');
-    if (!file_exists($path)) {
-        return response()->json(['error' => 'No demo credentials found. Seeder may not have run.'], 404);
+    // Try multiple possible paths
+    $paths = [
+        storage_path('app/private/demo-credentials.json'),
+        storage_path('app/demo-credentials.json'),
+        storage_path('demo-credentials.json'),
+    ];
+    foreach ($paths as $path) {
+        if (file_exists($path)) {
+            return response()->json([
+                'source' => $path,
+                'data' => json_decode(file_get_contents($path), true),
+            ]);
+        }
     }
-    return response()->json(json_decode(file_get_contents($path), true));
+    return response()->json([
+        'error' => 'No demo credentials found',
+        'tried' => $paths,
+        'storage_exists' => is_dir(storage_path('app')),
+        'private_exists' => is_dir(storage_path('app/private')),
+    ]);
 });
 use App\Livewire\App\CollectPayment;
 use App\Livewire\App\Home;
