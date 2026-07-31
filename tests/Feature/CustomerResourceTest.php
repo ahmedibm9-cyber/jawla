@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Customer;
 use App\Models\User;
+use App\Support\ActiveCompanyContext;
 use Database\Seeders\DemoSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -106,7 +107,7 @@ class CustomerResourceTest extends TestCase
     {
         $admin = User::where('email', 'admin@jawla.test')->first();
         $this->actingAs($admin);
-        app(\App\Support\ActiveCompanyContext::class)->setFromUser($admin);
+        app(ActiveCompanyContext::class)->setFromUser($admin);
 
         $customer = Customer::where('company_id', $admin->company_id)->first();
         $customer->update([
@@ -125,7 +126,7 @@ class CustomerResourceTest extends TestCase
     {
         $admin = User::where('email', 'admin@jawla.test')->first();
         $this->actingAs($admin);
-        app(\App\Support\ActiveCompanyContext::class)->setFromUser($admin);
+        app(ActiveCompanyContext::class)->setFromUser($admin);
 
         $customer = Customer::where('company_id', $admin->company_id)->first();
         $customer->update(['latitude' => null, 'longitude' => null]);
