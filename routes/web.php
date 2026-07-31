@@ -29,6 +29,7 @@ Route::get('/_staging-creds', function () {
             ]);
         }
     }
+
     return response()->json([
         'error' => 'No demo credentials found',
         'tried' => $paths,

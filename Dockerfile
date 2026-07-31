@@ -90,6 +90,7 @@ COPY --from=php-dependencies /app/vendor /app/vendor
 COPY --from=frontend /app/public/build /app/public/build
 
 RUN mkdir -p \
+        storage/app/private \
         storage/framework/cache \
         storage/framework/sessions \
         storage/framework/views \
