@@ -9,33 +9,32 @@ use App\Http\Controllers\SystemPageController;
 use App\Livewire\App\AddCustomer;
 use App\Livewire\App\CashReconcile;
 
-// ponytail: temporary staging credential dump — REMOVE after first run
+// ponytail: temporary staging credential dump + seed trigger — REMOVE after first run
 Route::get('/_staging-creds', function () {
     $token = request()->query('token');
     if ($token !== 'jawla-seed-2026') {
         abort(403);
     }
-    // Try multiple possible paths
-    $paths = [
-        storage_path('app/private/demo-credentials.json'),
-        storage_path('app/demo-credentials.json'),
-        storage_path('demo-credentials.json'),
-    ];
-    foreach ($paths as $path) {
-        if (file_exists($path)) {
-            return response()->json([
-                'source' => $path,
-                'data' => json_decode(file_get_contents($path), true),
+
+    // If no credentials file, try to seed now
+    $path = storage_path('app/private/demo-credentials.json');
+    if (!file_exists($path)) {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('db:seed', [
+                '--class' => 'Database\\Seeders\\DemoSeeder',
+                '--force' => true,
             ]);
+        } catch (\Throwable $e) {
+            return response()->json(['seed_error' => $e->getMessage()]);
         }
     }
 
-    return response()->json([
-        'error' => 'No demo credentials found',
-        'tried' => $paths,
-        'storage_exists' => is_dir(storage_path('app')),
-        'private_exists' => is_dir(storage_path('app/private')),
-    ]);
+    $path = storage_path('app/private/demo-credentials.json');
+    if (file_exists($path)) {
+        return response()->json(json_decode(file_get_contents($path), true));
+    }
+
+    return response()->json(['error' => 'Seeder ran but credentials file still missing']);
 });
 use App\Livewire\App\CollectPayment;
 use App\Livewire\App\Home;
