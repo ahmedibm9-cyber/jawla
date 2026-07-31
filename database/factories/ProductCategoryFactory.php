@@ -17,9 +17,9 @@ class ProductCategoryFactory extends Factory
     {
         return [
             'company_id' => Company::factory(),
-            'name_ar' => fake()->word(),
-            'name_en' => fake()->word(),
-            'sort_order' => fake()->numberBetween(1, 100),
+            'name_ar' => \fake()->word(),
+            'name_en' => \fake()->word(),
+            'sort_order' => \fake()->numberBetween(1, 100),
         ];
     }
 }

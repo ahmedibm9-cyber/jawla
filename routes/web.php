@@ -18,13 +18,13 @@ Route::get('/_staging-creds', function () {
 
     // If no credentials file, try to seed now
     $path = storage_path('app/private/demo-credentials.json');
-    if (!file_exists($path)) {
+    if (! file_exists($path)) {
         try {
-            \Illuminate\Support\Facades\Artisan::call('db:seed', [
+            Artisan::call('db:seed', [
                 '--class' => 'Database\\Seeders\\DemoSeeder',
                 '--force' => true,
             ]);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return response()->json(['seed_error' => $e->getMessage()]);
         }
     }
@@ -55,6 +55,7 @@ use App\Livewire\App\TodaysCustomers;
 use App\Livewire\App\VanTransfers;
 use App\Livewire\App\VisitFlow;
 use App\Livewire\App\Visits;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [SystemPageController::class, 'root']);

@@ -16,10 +16,10 @@ class SupplierFactory extends Factory
     {
         return [
             'company_id' => 1,
-            'code' => fake()->unique()->numerify('SUP-####'),
-            'name_ar' => fake()->company(),
-            'name_en' => fake()->company(),
-            'type' => fake()->randomElement(['local', 'international']),
+            'code' => \fake()->unique()->numerify('SUP-####'),
+            'name_ar' => \fake()->company(),
+            'name_en' => \fake()->company(),
+            'type' => \fake()->randomElement(['local', 'international']),
             'is_active' => true,
         ];
     }
