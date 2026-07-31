@@ -16,7 +16,7 @@ class SalesTargetFactory extends Factory
             'period_start' => now()->startOfMonth()->toDateString(),
             'period_end' => now()->endOfMonth()->toDateString(),
             'metric' => 'sales_amount',
-            'target_amount' => $this->faker->randomFloat(2, 10000, 100000),
+            'target_amount' => \Faker\Factory::create()->randomFloat(2, 10000, 100000),
             'created_by' => null,
         ];
     }

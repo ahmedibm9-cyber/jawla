@@ -17,8 +17,8 @@ class WarehouseFactory extends Factory
     {
         return [
             'company_id' => Company::factory(),
-            'name_ar' => $this->faker->word(),
-            'name_en' => $this->faker->word(),
+            'name_ar' => \Faker\Factory::create()->word(),
+            'name_en' => \Faker\Factory::create()->word(),
             'type' => 'main',
             'user_id' => null,
             'is_active' => true,

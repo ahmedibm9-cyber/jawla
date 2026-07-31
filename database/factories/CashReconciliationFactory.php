@@ -10,7 +10,7 @@ class CashReconciliationFactory extends Factory
 {
     public function definition(): array
     {
-        $expected = $this->faker->randomFloat(2, 100, 5000);
+        $expected = \Faker\Factory::create()->randomFloat(2, 100, 5000);
         $counted = $expected;
 
         return [

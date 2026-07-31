@@ -19,9 +19,9 @@ class InvoiceItemFactory extends Factory
         return [
             'invoice_id' => Invoice::factory(),
             'product_id' => Product::factory(),
-            'quantity' => $this->faker->randomFloat(3, 1, 100),
-            'unit_price' => $this->faker->randomFloat(2, 10, 5000),
-            'line_total' => $this->faker->randomFloat(2, 100, 500000),
+            'quantity' => \Faker\Factory::create()->randomFloat(3, 1, 100),
+            'unit_price' => \Faker\Factory::create()->randomFloat(2, 10, 5000),
+            'line_total' => \Faker\Factory::create()->randomFloat(2, 100, 500000),
         ];
     }
 }

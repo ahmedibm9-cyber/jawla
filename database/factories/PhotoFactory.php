@@ -16,9 +16,9 @@ class PhotoFactory extends Factory
     {
         return [
             'disk' => 'public',
-            'path' => 'photos/'.$this->faker->uuid().'.jpg',
+            'path' => 'photos/'.\Faker\Factory::create()->uuid().'.jpg',
             'original_name' => 'photo.jpg',
-            'size' => $this->faker->numberBetween(1000, 500000),
+            'size' => \Faker\Factory::create()->numberBetween(1000, 500000),
         ];
     }
 }

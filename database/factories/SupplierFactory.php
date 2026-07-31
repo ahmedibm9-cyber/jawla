@@ -16,10 +16,10 @@ class SupplierFactory extends Factory
     {
         return [
             'company_id' => 1,
-            'code' => $this->faker->unique()->numerify('SUP-####'),
-            'name_ar' => $this->faker->company(),
-            'name_en' => $this->faker->company(),
-            'type' => $this->faker->randomElement(['local', 'international']),
+            'code' => \Faker\Factory::create()->unique()->numerify('SUP-####'),
+            'name_ar' => \Faker\Factory::create()->company(),
+            'name_en' => \Faker\Factory::create()->company(),
+            'type' => \Faker\Factory::create()->randomElement(['local', 'international']),
             'is_active' => true,
         ];
     }
