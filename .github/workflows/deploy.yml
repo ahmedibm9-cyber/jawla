@@ -48,7 +48,7 @@ jobs:
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       RAILWAY_PROJECT_ID: ${{ vars.RAILWAY_PROJECT_ID }}
-      RAILWAY_SERVICE_ID: ${{ vars.RAILWAY_SERVICE_ID }}
+      STAGING_SERVICE_ID: ${{ vars.STAGING_SERVICE_ID }}
       STAGING_URL: ${{ vars.STAGING_URL }}
       RELEASE_SHA: ${{ needs.prepare.outputs.release_sha }}
     steps:
@@ -65,7 +65,7 @@ jobs:
           railway up --ci
           --project "$RAILWAY_PROJECT_ID"
           --environment staging
-          --service "$RAILWAY_SERVICE_ID"
+          --service "$STAGING_SERVICE_ID"
           --message "Jawla staging $RELEASE_SHA"
       - name: Verify staging readiness
         run: |
@@ -83,7 +83,7 @@ jobs:
           railway deployment list
           --project "$RAILWAY_PROJECT_ID"
           --environment staging
-          --service "$RAILWAY_SERVICE_ID"
+          --service "$STAGING_SERVICE_ID"
           --limit 5
           --json > staging-deployments.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -127,7 +127,7 @@ jobs:
     env:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
       RAILWAY_PROJECT_ID: ${{ vars.RAILWAY_PROJECT_ID }}
-      RAILWAY_SERVICE_ID: ${{ vars.RAILWAY_SERVICE_ID }}
+      PRODUCTION_SERVICE_ID: ${{ vars.PRODUCTION_SERVICE_ID }}
       PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
       RELEASE_SHA: ${{ needs.prepare.outputs.release_sha }}
     steps:
@@ -144,7 +144,7 @@ jobs:
           railway up --ci
           --project "$RAILWAY_PROJECT_ID"
           --environment production
-          --service "$RAILWAY_SERVICE_ID"
+          --service "$PRODUCTION_SERVICE_ID"
           --message "Jawla production $RELEASE_SHA"
       - name: Verify production readiness
         run: |
@@ -162,7 +162,7 @@ jobs:
           railway deployment list
           --project "$RAILWAY_PROJECT_ID"
           --environment production
-          --service "$RAILWAY_SERVICE_ID"
+          --service "$PRODUCTION_SERVICE_ID"
           --limit 5
           --json > production-deployments.json
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
