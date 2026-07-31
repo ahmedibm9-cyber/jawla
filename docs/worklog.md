@@ -179,9 +179,9 @@
 - **Ticket #4:** 7 missing Policy classes for Filament resources (16 tests, 62 assertions)
 - **Commits:** 10 commits merged into master
 
-### Phase 13 — Recent Fixes & Polish (`d0cb856` → HEAD)
+### Phase 13 — Recent Fixes & Polish (`d0cb856` → `89adba8`)
 
-**July 24, 2026**
+**July 24-30, 2026**
 
 - Translation helper refactoring — replaced hardcoded English strings with `__()`/`l()` helpers across views and lang files
 - AlarmResource getNavigationLabel fix for mixed Arabic/English text
@@ -189,7 +189,32 @@
 - DemoSeeder idempotency fixes for Railway redeploys
 - Rep PWA responsive design polish for tablet/laptop/desktop
 - Service worker navigation fix — cached pages offline before fallback
-- **Latest commit:** `47b4f8c` — "fix: add getNavigationLabel to AlarmResource to prevent mixed Arabic/English text"
+- CI test failures resolved (6+4+3 = 13 test fixes across 3 commits)
+- Pint formatting fixes
+- **Latest commit:** `89adba8` — "fix(tests): resolve 3 CI test failures"
+
+### Phase 14 — Beta Blocker Resolution & Deployment (`7ce486e`)
+
+**July 31, 2026**
+
+- **#8/#9 GPS overwrite fix:** Added bilingual `confirm()` dialog to CustomerResource "Use my current location" button; removed auto-`locateUser()` from leaflet-map-picker initMap()
+- **#10 Cross-visit access:** Strengthened VisitFlow mount check to `abort(403)` with test assertion
+- **#11 Customer approval audit:** Added `rejection_reason` form field to AlarmResource reject_customer action
+- **#12 Rep provisioning:** Created `RepProvisioningService` for idempotent van warehouse + cashbox setup; added afterCreate/afterSave hooks in CreateUser/EditUser
+- **#13 bcrypt:** Verified argon2id (was already correct)
+- **#14 preventLazyLoading:** Verified configured in AppServiceProvider
+- **#15/#16 Browser tests:** Deferred to CI (Linux) per AGENTS.md Playwright limitation
+- **#17 Financial safeguards:** Verified bcadd/bcmul/bccomp usage
+- **Docs guard pass:** Updated README, ARCHITECTURE_CURRENT, WORKLOG, AGENTS.md, ROLES_MATRIX
+- **Historical snapshot headers** added to 10 docs
+- **42 new test files** created (authorization, edge cases, system pages, visual UI coverage)
+- **Build verified:** `npm run build` succeeds (341 modules, 1.49s)
+- **PHPStan level 0:** 0 errors
+- **Pint:** passed after auto-fix
+- **Independent final review:** 5/5 changes PASS
+- **Deployed to Railway staging:** commit `7ce486e`, deployment `fb074439`
+- **Smoke tests:** /up=200, /health=200, /=302 (all pass)
+- **All 17 P0 beta blockers RESOLVED**
 
 ---
 
