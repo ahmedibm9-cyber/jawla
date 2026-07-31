@@ -25,7 +25,12 @@ Route::get('/_staging-creds', function () {
                 '--force' => true,
             ]);
         } catch (Throwable $e) {
-            return response()->json(['seed_error' => $e->getMessage()]);
+            return response()->json([
+                'seed_error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTrace(),
+            ]);
         }
     }
 
