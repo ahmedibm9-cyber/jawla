@@ -52,13 +52,15 @@ class ReleasePipelineTest extends TestCase
         $railway = file_get_contents(base_path('railway.toml'));
         $dockerfile = file_get_contents(base_path('Dockerfile'));
         $dockerignore = file_get_contents(base_path('.dockerignore'));
+        $filesystems = file_get_contents(config_path('filesystems.php'));
 
         $this->assertIsString($railway);
         $this->assertIsString($dockerfile);
         $this->assertIsString($dockerignore);
+        $this->assertIsString($filesystems);
         $this->assertStringContainsString('healthcheckPath = "/health"', $railway);
         $this->assertStringContainsString('restartPolicyType = "ON_FAILURE"', $railway);
-        $this->assertStringContainsString('PHOTO_DISK = "s3"', $railway);
+        $this->assertStringContainsString("env('APP_ENV') === 'production' ? 's3' : 'public'", $filesystems);
         $this->assertStringContainsString('FROM node:22-alpine@sha256:', $dockerfile);
         $this->assertStringContainsString('npm ci', $dockerfile);
         $this->assertStringContainsString('.env*', $dockerignore);

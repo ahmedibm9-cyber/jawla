@@ -106,6 +106,41 @@ class Dashboard extends BaseDashboard
         auth()->user()->setPreference('dashboard_widgets', [...$widgetKeys, ...$remaining]);
     }
 
+    /**
+     * Persist the customization modal state after validating every widget key
+     * against the server-owned dashboard inventory.
+     *
+     * @param  list<array{key?: mixed, visible?: mixed}>  $widgets
+     */
+    public function saveDashboardCustomization(array $widgets): void
+    {
+        $available = collect($this->availableWidgets())
+            ->map(fn (mixed $widget): string => $this->widgetKey($widget))
+            ->all();
+        $configured = collect($widgets)
+            ->filter(fn (mixed $widget): bool => is_array($widget)
+                && isset($widget['key'])
+                && is_string($widget['key'])
+                && in_array($widget['key'], $available, true))
+            ->unique('key')
+            ->values();
+        $order = $configured->pluck('key')->all();
+
+        foreach ($available as $key) {
+            if (! in_array($key, $order, true)) {
+                $order[] = $key;
+            }
+        }
+
+        $hidden = $configured
+            ->filter(fn (array $widget): bool => ! ($widget['visible'] ?? true))
+            ->pluck('key')
+            ->all();
+
+        auth()->user()->setPreference('dashboard_widgets', $order);
+        auth()->user()->setPreference('dashboard_hidden_widgets', $hidden);
+    }
+
     /** @return array<int, mixed> */
     protected function availableWidgets(): array
     {
@@ -185,31 +220,7 @@ class Dashboard extends BaseDashboard
                         ]),
                 ])
                 ->action(function (array $data): void {
-                    $available = collect($this->availableWidgets())
-                        ->map(fn (mixed $widget): string => $this->widgetKey($widget))
-                        ->all();
-                    $configured = collect($data['widgets'] ?? [])
-                        ->filter(fn (mixed $widget): bool => is_array($widget)
-                            && isset($widget['key'])
-                            && is_string($widget['key'])
-                            && in_array($widget['key'], $available, true))
-                        ->unique('key')
-                        ->values();
-                    $order = $configured->pluck('key')->all();
-
-                    foreach ($available as $key) {
-                        if (! in_array($key, $order, true)) {
-                            $order[] = $key;
-                        }
-                    }
-
-                    $hidden = $configured
-                        ->filter(fn (array $widget): bool => ! ($widget['visible'] ?? true))
-                        ->pluck('key')
-                        ->all();
-
-                    auth()->user()->setPreference('dashboard_widgets', $order);
-                    auth()->user()->setPreference('dashboard_hidden_widgets', $hidden);
+                    $this->saveDashboardCustomization($data['widgets'] ?? []);
 
                     Notification::make()
                         ->title(l('تم حفظ تخصيص اللوحة', 'Dashboard customization saved'))

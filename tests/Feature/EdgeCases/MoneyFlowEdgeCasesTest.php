@@ -12,6 +12,8 @@ use App\Models\CustomerCredit;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Product;
+use App\Models\ProductCategory;
+use App\Models\Route;
 use App\Models\Stock;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -121,25 +123,28 @@ class MoneyFlowEdgeCasesTest extends TestCase
     #[Test]
     public function test_invoice_rejects_cross_company_customer(): void
     {
-        // ponytail: Use raw DB inserts to bypass BelongsToCompany model events.
-        $otherCompanyId = DB::table('companies')->insertGetId([
-            'name_ar' => 'شركة أخرى', 'name_en' => 'Other Co',
-            'tax_number' => 'TAX-'.uniqid(), 'currency' => 'EGP',
-            'vat_percent' => 0, 'is_active' => true,
-            'created_at' => now(), 'updated_at' => now(),
-        ]);
-        $otherCustomerId = DB::table('customers')->insertGetId([
-            'company_id' => $otherCompanyId, 'code' => 'CROSS-'.uniqid(),
-            'name_ar' => 'عميل', 'name_en' => 'Cross Co Customer',
-            'status' => 'approved', 'created_at' => now(), 'updated_at' => now(),
-        ]);
+        // ponytail: Company has no BelongsToCompany — create it outside context.
+        // Customer + Route do — use runWithCompany to create them in B's context.
+        $otherCompany = Company::factory()->create(['vat_percent' => 0]);
+        $ctx = app(ActiveCompanyContext::class);
+        $otherCustomer = $ctx->runWithCompany(
+            $otherCompany->id,
+            function () use ($otherCompany) {
+                $route = Route::factory()->create(['company_id' => $otherCompany->id]);
+
+                return Customer::factory()->create([
+                    'company_id' => $otherCompany->id,
+                    'route_id' => $route->id,
+                ]);
+            },
+        );
 
         $this->actingAs($this->rep);
 
         $this->expectException(\Throwable::class);
         app(InvoiceService::class)->create([
             'company_id' => $this->company->id,
-            'customer_id' => $otherCustomerId,
+            'customer_id' => $otherCustomer->id,
             'product_id' => $this->product->id,
             'quantity' => 1,
             'unit_price' => 100.00,
@@ -457,55 +462,18 @@ class MoneyFlowEdgeCasesTest extends TestCase
     #[Test]
     public function test_rep_cannot_access_other_company_invoice(): void
     {
-        // ponytail: Raw DB inserts to bypass BelongsToCompany model events entirely.
-        $otherCompanyId = DB::table('companies')->insertGetId([
-            'name_ar' => 'شركة ب', 'name_en' => 'Company B',
-            'tax_number' => 'TAX-'.uniqid(), 'currency' => 'EGP',
-            'vat_percent' => 0, 'is_active' => true,
-            'created_at' => now(), 'updated_at' => now(),
-        ]);
-        $otherRepId = DB::table('users')->insertGetId([
-            'name' => 'Other Rep', 'email' => 'other-rep-'.uniqid().'@test.com',
-            'password' => bcrypt('password'), 'company_id' => $otherCompanyId,
-            'employee_code' => 'EMP-'.uniqid(), 'is_active' => true,
-            'created_at' => now(), 'updated_at' => now(),
-        ]);
-        DB::table('customers')->insert([
-            'company_id' => $otherCompanyId, 'code' => 'CUST-'.uniqid(),
-            'name_ar' => 'عميل', 'name_en' => 'Other Customer',
-            'status' => 'approved', 'created_at' => now(), 'updated_at' => now(),
-        ]);
-        $otherCustomerId = DB::table('customers')->where('company_id', $otherCompanyId)->first()->id;
-        DB::table('products')->insert([
-            'company_id' => $otherCompanyId, 'name_ar' => 'منتج', 'name_en' => 'Product B',
-            'sku' => 'SKU-'.uniqid(), 'price' => 50.00, 'vat_applicable' => true,
-            'created_at' => now(), 'updated_at' => now(),
-        ]);
-        $otherProductId = DB::table('products')->where('company_id', $otherCompanyId)->first()->id;
-        DB::table('warehouses')->insert([
-            'company_id' => $otherCompanyId, 'user_id' => $otherRepId,
-            'name_ar' => 'شاحنة', 'name_en' => 'Van B', 'type' => 'van', 'is_active' => true,
-            'created_at' => now(), 'updated_at' => now(),
-        ]);
-        $otherVanId = DB::table('warehouses')->where('user_id', $otherRepId)->first()->id;
-        DB::table('stocks')->insert([
-            'warehouse_id' => $otherVanId, 'product_id' => $otherProductId,
-            'quantity' => 100,
-        ]);
-
-        // Create invoice in other company context
         $ctx = app(ActiveCompanyContext::class);
-        $otherInvoice = $ctx->runWithCompany($otherCompanyId, function () use ($otherCompanyId, $otherCustomerId, $otherProductId) {
-            return app(InvoiceService::class)->create([
-                'company_id' => $otherCompanyId,
-                'customer_id' => $otherCustomerId,
-                'product_id' => $otherProductId,
-                'quantity' => 1,
-                'unit_price' => 50.00,
-            ]);
-        });
 
-        // Context restored to company A
+        // Company has no BelongsToCompany — create it outside context.
+        $otherCompany = Company::factory()->create(['vat_percent' => 0]);
+
+        // Create all other-company data inside its context.
+        $otherInvoice = $ctx->runWithCompany(
+            $otherCompany->id,
+            fn () => $this->createOtherCompanyInvoice($otherCompany),
+        );
+
+        // Context restored to company A — try to pay company B's invoice.
         $this->actingAs($this->rep);
 
         $this->expectException(\Throwable::class);
@@ -517,6 +485,38 @@ class MoneyFlowEdgeCasesTest extends TestCase
             method: 'cash',
             invoiceId: $otherInvoice->id,
         );
+    }
+
+    private function createOtherCompanyInvoice(Company $company): Invoice
+    {
+        $rep = User::factory()->create(['company_id' => $company->id]);
+        $rep->assignRole('sales_rep');
+        $route = Route::factory()->create(['company_id' => $company->id]);
+        $customer = Customer::factory()->create([
+            'company_id' => $company->id,
+            'route_id' => $route->id,
+        ]);
+        $category = ProductCategory::factory()->create(['company_id' => $company->id]);
+        $product = Product::factory()->create([
+            'company_id' => $company->id,
+            'category_id' => $category->id,
+            'price' => 50.00,
+        ]);
+        $van = Warehouse::factory()->create([
+            'company_id' => $company->id,
+            'user_id' => $rep->id,
+            'type' => 'van',
+        ]);
+        Stock::create(['warehouse_id' => $van->id, 'product_id' => $product->id, 'quantity' => 100]);
+
+        return app(InvoiceService::class)->create([
+            'company_id' => $company->id,
+            'customer_id' => $customer->id,
+            'product_id' => $product->id,
+            'user_id' => $rep->id,
+            'quantity' => 1,
+            'unit_price' => 50.00,
+        ]);
     }
 
     /** Non-rep user cannot create an invoice. */
