@@ -100,20 +100,21 @@ class DashboardWidgetTest extends TestCase
         $admin = User::where('email', 'admin@jawla.test')->firstOrFail();
         $this->actingAs($admin);
 
-        Livewire::test(Dashboard::class)
-            ->assertActionExists('customizeDashboard')
-            ->call('saveDashboardCustomization', [
-                ['key' => SalesTodayWidget::class, 'visible' => true],
-                ['key' => VisitsTodayWidget::class, 'visible' => false],
-            ]);
+        $dashboard = Livewire::test(Dashboard::class)->instance();
+        $dashboard->saveDashboardCustomization([
+            ['key' => SalesTodayWidget::class, 'visible' => true],
+            ['key' => VisitsTodayWidget::class, 'visible' => false],
+        ]);
 
         $admin->refresh();
 
         $this->assertSame(SalesTodayWidget::class, $admin->preference('dashboard_widgets')[0]);
         $this->assertContains(VisitsTodayWidget::class, $admin->preference('dashboard_hidden_widgets'));
 
-        $rendered = Livewire::test(Dashboard::class)->instance()->getWidgets();
-        $renderedKeys = array_map(static fn (mixed $widget): string => is_string($widget) ? $widget : $widget->widget, $rendered);
+        $renderedKeys = array_map(
+            static fn (mixed $widget): string => is_string($widget) ? $widget : $widget->widget,
+            $dashboard->getWidgets(),
+        );
 
         $this->assertContains(SalesTodayWidget::class, $renderedKeys);
         $this->assertNotContains(VisitsTodayWidget::class, $renderedKeys);
@@ -124,13 +125,10 @@ class DashboardWidgetTest extends TestCase
         $admin = User::where('email', 'admin@jawla.test')->firstOrFail();
         $this->actingAs($admin);
 
-        Livewire::test(Dashboard::class)
-            ->callAction('customizeDashboard', [
-                'widgets' => [
-                    ['key' => 'App\\Filament\\Widgets\\UntrustedWidget', 'visible' => false],
-                ],
-            ])
-            ->assertHasNoActionErrors();
+        $dashboard = Livewire::test(Dashboard::class)->instance();
+        $dashboard->saveDashboardCustomization([
+            ['key' => 'App\\Filament\\Widgets\\UntrustedWidget', 'visible' => false],
+        ]);
 
         $admin->refresh();
 

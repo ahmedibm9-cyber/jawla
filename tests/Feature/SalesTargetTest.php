@@ -75,7 +75,7 @@ class SalesTargetTest extends TestCase
         $this->invoiceFor($this->rep, 2000, now()->endOfMonth()->subDay()->toDateString());
         // excluded: cancelled, out-of-period, other rep
         $this->invoiceFor($this->rep, 9999, now()->toDateString(), InvoiceStatus::Cancelled);
-        $this->invoiceFor($this->rep, 5000, now()->subMonth()->toDateString());
+        $this->invoiceFor($this->rep, 5000, now()->subMonthsNoOverflow(2)->toDateString());
         $this->invoiceFor($this->manager, 4000, now()->toDateString());
 
         $a = app(AttainmentService::class)->attainment($target);

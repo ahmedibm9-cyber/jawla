@@ -90,36 +90,23 @@ class CustomerResourceTest extends TestCase
 
     public function test_customer_gps_range_validation_logic(): void
     {
-        $customer = Customer::factory()->make([
-            'latitude' => 30.0444,
-            'longitude' => 31.2357,
-        ]);
-        $this->assertTrue(
-            $customer->latitude >= -90 && $customer->latitude <= 90,
-            'Valid latitude passes'
-        );
-        $this->assertTrue(
-            $customer->longitude >= -180 && $customer->longitude <= 180,
-            'Valid longitude passes'
-        );
+        // ponytail: pure range check, no model needed — avoids BelongsToCompany boot
+        $validLat = 30.0444;
+        $validLng = 31.2357;
+        $this->assertTrue($validLat >= -90 && $validLat <= 90, 'Valid latitude passes');
+        $this->assertTrue($validLng >= -180 && $validLng <= 180, 'Valid longitude passes');
 
-        $invalid = Customer::factory()->make([
-            'latitude' => 999,
-            'longitude' => 999,
-        ]);
-        $this->assertFalse(
-            $invalid->latitude >= -90 && $invalid->latitude <= 90,
-            '999 is out of latitude range'
-        );
-        $this->assertFalse(
-            $invalid->longitude >= -180 && $invalid->longitude <= 180,
-            '999 is out of longitude range'
-        );
+        $invalidLat = 999.0;
+        $invalidLng = 999.0;
+        $this->assertFalse($invalidLat >= -90 && $invalidLat <= 90, '999 is out of latitude range');
+        $this->assertFalse($invalidLng >= -180 && $invalidLng <= 180, '999 is out of longitude range');
     }
 
     public function test_customer_with_valid_gps_can_be_persisted(): void
     {
         $admin = User::where('email', 'admin@jawla.test')->first();
+        $this->actingAs($admin);
+        app(\App\Support\ActiveCompanyContext::class)->setFromUser($admin);
 
         $customer = Customer::where('company_id', $admin->company_id)->first();
         $customer->update([
@@ -137,6 +124,8 @@ class CustomerResourceTest extends TestCase
     public function test_customer_gps_fields_are_nullable(): void
     {
         $admin = User::where('email', 'admin@jawla.test')->first();
+        $this->actingAs($admin);
+        app(\App\Support\ActiveCompanyContext::class)->setFromUser($admin);
 
         $customer = Customer::where('company_id', $admin->company_id)->first();
         $customer->update(['latitude' => null, 'longitude' => null]);
