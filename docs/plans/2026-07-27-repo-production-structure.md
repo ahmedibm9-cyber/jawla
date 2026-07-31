@@ -1,5 +1,9 @@
 # Repo Production Structure — Implementation Plan
 
+> **⚠ HISTORICAL SNAPSHOT** — Generated 2026-07-27. Role counts and structure
+> reflect the codebase at that date. The system now has 11 roles, 69 models,
+> and 975 tests. For current state, see `README.md`.
+
 > **For Claude:** Use `@skills/writing-plans/SKILL.md` to implement this plan task-by-task.
 
 **Goal:** Add the missing repository structure files from the production-grade research report — AGENTS.md, Makefile, specs template, runbooks, security enhancements, CI/CD hardening, and database docs — so agents and humans can understand, reproduce, verify, and deploy the project safely.

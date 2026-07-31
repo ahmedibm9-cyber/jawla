@@ -99,18 +99,24 @@
 
 ## Roles & Access
 
-| Role      | Panel               | Capabilities                                   |
-| --------- | ------------------- | ---------------------------------------------- |
-| Admin     | `/admin` (Filament) | Full access, company settings, user management |
-| Manager   | `/admin` (Filament) | Team oversight, approvals, reports             |
-| Rep       | `/app` (Livewire)   | Visit, sell, collect, return, expense, offline |
-| Warehouse | `/admin` (Filament) | Stock management, transfers                    |
-| Finance   | `/admin` (Filament) | Reports, reconciliation, payments              |
+| Role               | Panel               | Capabilities                                   |
+| ------------------ | ------------------- | ---------------------------------------------- |
+| `super_admin`      | `/admin` (Filament) | Full access, bypasses all gates                |
+| `admin`            | `/admin` (Filament) | Full access, company settings, user management |
+| `sales_manager`    | `/admin` (Filament) | Team oversight, approvals, reports             |
+| `accounts`         | `/admin` (Filament) | Financial operations, price management         |
+| `purchasing`       | `/admin` (Filament) | Purchase requests, orders, supplier management |
+| `warehouse_keeper` | `/admin` (Filament) | Stock management, transfers                    |
+| `executive`        | `/admin` (Filament) | Read-only dashboard, alarms, tasks             |
+| `sales_rep`        | `/app` (Livewire)   | Visit, sell, collect, return, expense, offline |
+| `rep`              | `/app` (Livewire)   | Minimal PWA access (mirrors sales_rep)         |
+| `hr_admin`         | `/admin` (Filament) | User management, role assignment               |
+| `system_viewer`    | `/admin` (Filament) | Read-only access to most resources             |
 
 ## Security
 
 - Multi-tenancy: `company_id` on all models, enforced via global scopes + service context
-- RBAC: Spatie permission with 5 canonical roles, no super-admin bypass
+- RBAC: Spatie permission with 11 roles (super_admin bypasses all gates)
 - Sessions: Database driver, httpOnly + secure, regenerated on login
 - Passwords: Argon2id
 - Financial: All mutations in `DB::transaction`, append-only ledgers

@@ -11,6 +11,7 @@ use App\Notifications\CustomerApprovalOutcome;
 use App\Services\Contracts\AlarmService as AlarmServiceContract;
 use App\Services\Contracts\OutOfStockService;
 use Filament\Actions\Action;
+use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -158,7 +159,13 @@ class AlarmResource extends Resource
                         'سيتم رفض العميل الجديد وتعطيل حسابه',
                         'The new customer will be rejected and deactivated',
                     ))
-                    ->action(function (Alarm $a): void {
+                    ->form([
+                        Forms\Components\Textarea::make('rejection_reason')
+                            ->label(l('سبب الرفض', 'Rejection Reason'))
+                            ->required()
+                            ->maxLength(500),
+                    ])
+                    ->action(function (Alarm $a, array $data): void {
                         abort_unless(static::canRespond(), 403);
 
                         if ($a->reference_type === Customer::class) {
@@ -172,10 +179,11 @@ class AlarmResource extends Resource
                                     'is_active' => false,
                                     'rejected_by' => auth()->id(),
                                     'rejected_at' => now(),
+                                    'rejection_reason' => $data['rejection_reason'],
                                 ]);
 
                                 User::find($customer->added_by)
-                                    ?->notify(new CustomerApprovalOutcome($customer, 'rejected'));
+                                    ?->notify(new CustomerApprovalOutcome($customer, 'rejected', $data['rejection_reason']));
                             }
                         }
 

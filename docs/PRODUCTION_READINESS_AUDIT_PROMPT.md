@@ -1,5 +1,9 @@
 # Production Readiness Verification Prompt
 
+> **⚠ HISTORICAL SNAPSHOT** — Generated 2026-07-27. Role count (5) and audit
+> scope reflect the codebase at that date. The system now has 11 roles and
+> 975 tests. For current state, see `README.md`.
+
 **Jawla (جولة) — Bilingual Field-Sales CRM/ERP for Fulla Chemical Trading Co.**
 
 ---

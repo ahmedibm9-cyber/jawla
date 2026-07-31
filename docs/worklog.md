@@ -13,20 +13,20 @@
 
 | Metric                  | Value                                                                          |
 | ----------------------- | ------------------------------------------------------------------------------ |
-| **Total commits**       | 268                                                                            |
+| **Total commits**       | 321                                                                            |
 | **Contributors**        | ahmedibm9-cyber, dependabot[bot], v0, Railway Agent                            |
-| **Time span**           | 2026-07-12 → 2026-07-24 (13 days)                                              |
+| **Time span**           | 2026-07-12 → 2026-07-31 (19 days)                                              |
 | **Branches (local)**    | master, feat/unified-login, recovery/beta-checkpoint-pre-r1                    |
 | **Branches (remote)**   | 13 total incl. dependabot + feature branches                                   |
 | **Tags**                | (none)                                                                         |
 | **Files tracked**       | ~986                                                                           |
-| **Test files**          | 79                                                                             |
-| **Models**              | 59                                                                             |
-| **Migrations**          | 106                                                                            |
-| **Services**            | 52 (incl. contracts, ETA, Sync subdirectories)                                 |
-| **Filament Resources**  | 23 (with page classes)                                                         |
-| **Livewire components** | 25                                                                             |
-| **Policies**            | 23                                                                             |
+| **Test files**          | 181                                                                            |
+| **Models**              | 69                                                                             |
+| **Migrations**          | 130                                                                            |
+| **Services**            | 66 (incl. contracts, ETA, Sync subdirectories)                                 |
+| **Filament Resources**  | 24 (with page classes)                                                         |
+| **Livewire components** | 24                                                                             |
+| **Policies**            | 25                                                                             |
 | **Commit types**        | fix: 120, feat: 83, docs: 16, build: 9, test: 8, perf: 7, chore: 6, others: 19 |
 
 ---
@@ -199,12 +199,12 @@
 
 | Layer                   | Count | Details                                                                   |
 | ----------------------- | ----- | ------------------------------------------------------------------------- |
-| **Models**              | 59    | Eloquent models with BelongsToCompany trait, Fillable/casts/relationships |
-| **Services**            | 52    | Including 11 contracts, ETA submodule (6), Sync submodule (9)             |
-| **Filament Resources**  | 23    | Admin CRUD resources with page classes                                    |
-| **Livewire Components** | 25    | Rep PWA interactive components                                            |
-| **Policies**            | 23    | Authorization policies for Filament resources                             |
-| **Migrations**          | 106   | Schema migrations including guide columns                                 |
+| **Models**              | 69    | Eloquent models with BelongsToCompany trait, Fillable/casts/relationships |
+| **Services**            | 66    | Including 11 contracts, ETA submodule (6), Sync submodule (9)             |
+| **Filament Resources**  | 24    | Admin CRUD resources with page classes                                    |
+| **Livewire Components** | 24    | Rep PWA interactive components                                            |
+| **Policies**            | 25    | Authorization policies for Filament resources                             |
+| **Migrations**          | 130   | Schema migrations including guide columns                                 |
 | **Value Objects**       | 4     | Money, GpsCoordinate, PriceRange, Bilingual                               |
 | **Domain Exceptions**   | 10    | Domain-specific exception classes                                         |
 
@@ -259,17 +259,17 @@
 
 ## Test Coverage
 
-| Test Suite                    | Count  |
-| ----------------------------- | ------ |
-| Auth (Admin/Rep/Login/Locale) | 14     |
-| Roles                         | 3      |
-| Tenancy                       | 2      |
-| StockService                  | 5+     |
-| InvoiceFlow                   | 4      |
-| AlarmBroadcast                | 3      |
-| AM1→AM9 E2E                   | 1      |
-| NumberSequenceService         | 6      |
-| InvoiceCalculationService     | 7      |
-| Policies (7 resources)        | 16     |
-| Additional feature tests      | ~18    |
-| **Total test files**          | **79** |
+| Test Suite                    | Count   |
+| ----------------------------- | ------- |
+| Auth (Admin/Rep/Login/Locale) | 14      |
+| Roles                         | 3       |
+| Tenancy                       | 2       |
+| StockService                  | 5+      |
+| InvoiceFlow                   | 4       |
+| AlarmBroadcast                | 3       |
+| AM1→AM9 E2E                   | 1       |
+| NumberSequenceService         | 6       |
+| InvoiceCalculationService     | 7       |
+| Policies (7 resources)        | 16      |
+| Additional feature tests      | ~18     |
+| **Total test files**          | **181** |

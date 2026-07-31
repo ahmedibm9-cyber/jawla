@@ -1,5 +1,9 @@
 # Production readiness implementation
 
+> **⚠ HISTORICAL SNAPSHOT** — Generated 2026-07-29. Test counts (813) and
+> readiness scores reflect the codebase at that date. For current numbers,
+> see `README.md` or run `php artisan test`.
+
 **Implementation date:** 2026-07-29  
 **Release verdict:** **NO-GO for real company data**
 

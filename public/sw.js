@@ -1,4 +1,5 @@
-const CACHE = "jawla-public-v6";
+const CACHE = "jawla-public-v7";
+const SNAPSHOT_CACHE = "jawla-snapshot-v1";
 const PUBLIC_SHELL = ["/offline", "/manifest.json"];
 
 function isCacheablePublicAsset(request) {
@@ -27,7 +28,10 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key.startsWith("jawla-") && key !== CACHE)
+            .filter(
+              (key) =>
+                (key.startsWith("jawla-") && key !== CACHE && key !== SNAPSHOT_CACHE)
+            )
             .map((key) => caches.delete(key))
         )
       )
@@ -55,6 +59,52 @@ self.addEventListener("message", (event) => {
   }
 });
 
+// Background Sync — when connectivity returns, notify all clients to flush.
+self.addEventListener("sync", (event) => {
+  if (event.tag === "jawla-sync") {
+    event.waitUntil(
+      self.clients.matchAll().then((clients) => {
+        for (const client of clients) {
+          client.postMessage({ type: "BACKGROUND_SYNC" });
+        }
+      })
+    );
+  }
+});
+
+// Push Notifications
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+  let data;
+  try { data = event.data.json(); } catch { return; }
+
+  const title = data.title || "Jawla";
+  const options = {
+    body: data.body || "",
+    icon: "/icons/icon-192.png",
+    badge: "/icons/icon-192.png",
+    tag: data.tag || "jawla-push",
+    data: data.url || "/app",
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data || "/app";
+  event.waitUntil(
+    self.clients.matchAll({ type: "window" }).then((clients) => {
+      for (const client of clients) {
+        if (client.url.includes("/app") && "focus" in client) {
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});
+
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
 
@@ -73,6 +123,32 @@ self.addEventListener("fetch", (event) => {
           { headers: { "Content-Type": "text/html" } }
         );
       })
+    );
+    return;
+  }
+
+  // Offline snapshot — cache-first. The client also stores this in IndexedDB,
+  // but the SW cache gives instant responses and avoids a network round-trip.
+  const url = new URL(event.request.url);
+  if (
+    url.origin === self.location.origin &&
+    url.pathname === "/app/offline-snapshot"
+  ) {
+    event.respondWith(
+      caches.match(event.request).then(
+        (cached) =>
+          cached ||
+          fetch(event.request).then((response) => {
+            if (!response.ok) return response;
+            const copy = response.clone();
+            event.waitUntil(
+              caches
+                .open(SNAPSHOT_CACHE)
+                .then((cache) => cache.put(event.request, copy))
+            );
+            return response;
+          })
+      )
     );
     return;
   }

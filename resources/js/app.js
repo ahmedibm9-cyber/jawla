@@ -4,6 +4,8 @@ import "./offline/status-indicator.js";
 import "./offline/sync.js";
 import "./pwa-register.js";
 import { logoutMessage, prepareSafeLogout } from "./offline/logout-guard.js";
+import * as offlineCache from "./offline/cache.js";
+import * as offlinePush from "./offline/push.js";
 
 // Polyfill: Filament v4 table select-all checkbox functions
 // These are normally scoped inside x-data="filamentTable(...)" but
@@ -29,6 +31,25 @@ if (sentryDsn) {
     replaysSessionSampleRate: 0,
     replaysOnErrorSampleRate: 0.5,
     integrations: [Sentry.browserTracingIntegration()],
+  });
+}
+
+// Offline data cache — auto-refresh in background, expose for Livewire pages
+window.jawlaCache = offlineCache;
+
+// Push notifications — expose for settings UI
+window.jawlaPush = offlinePush;
+
+if (document.querySelector('meta[name="jawla-offline-identity"]')) {
+  // Initial fetch (non-blocking)
+  offlineCache.refresh();
+
+  // Refresh when connection returns or tab becomes visible (if stale)
+  window.addEventListener("online", () => offlineCache.refresh());
+  document.addEventListener("visibilitychange", async () => {
+    if (!document.hidden && (await offlineCache.isStale())) {
+      offlineCache.refresh();
+    }
   });
 }
 

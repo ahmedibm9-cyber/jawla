@@ -1,5 +1,9 @@
 # Jawla V1 — Go-Live Readiness Runbook
 
+> **⚠ HISTORICAL SNAPSHOT** — Generated 2026-07-21. Test counts (303/332) and
+> readiness assessments reflect the codebase at that date. For current numbers,
+> see `README.md` or run `php artisan test`.
+
 **Date:** 2026-07-21
 **Purpose:** the single decision surface for shipping V1. Everything buildable is
 done and verified green; each remaining gate is reduced to the _exact_ input

@@ -2,15 +2,43 @@
   "name": "Jawla",
   "short_name": "Jawla",
   "description": "Field sales management PWA — visit customers, sell from van stock, collect payments",
+  "id": "/",
   "start_url": "/app?source=pwa",
   "scope": "/",
   "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
   "orientation": "portrait-primary",
   "background_color": "#0F172A",
   "theme_color": "#0F172A",
   "lang": "ar",
   "dir": "rtl",
   "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Sell",
+      "short_name": "Sell",
+      "url": "/app/sell?source=shortcut",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Today's Visits",
+      "short_name": "Visits",
+      "url": "/app?source=shortcut",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Van Stock",
+      "short_name": "Stock",
+      "url": "/app/stock?source=shortcut",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Sync Queue",
+      "short_name": "Sync",
+      "url": "/app/sync-queue?source=shortcut",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
   "icons": [
     {
       "src": "/images/logo-app-icon.webp",

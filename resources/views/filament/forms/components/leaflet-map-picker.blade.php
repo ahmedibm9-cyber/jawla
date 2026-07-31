@@ -104,8 +104,6 @@
                 window.addEventListener('online', () => this.online = true);
                 window.addEventListener('offline', () => this.online = false);
 
-                // Locate user on init
-                this.locateUser();
                 }, 100);
                 };
                 tryInit();

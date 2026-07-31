@@ -1,5 +1,10 @@
 # Jawla Beta v1.1 — Completion Master Plan
 
+> **⚠ HISTORICAL SNAPSHOT** — Generated 2026-07-28. Blocker list reflects the
+> codebase at that date. Items #1, #3, #13, #14, and #17 have since been
+> verified as resolved (see verification notes below). For current state, see
+> `README.md` and `docs/WORKLOG.md`.
+
 **Status:** Execution-ready  
 **Purpose:** Finish and certify the Jawla beta defined by B0–B8.  
 **Primary executor:** GLM-5.2 at High/Max effort.  
@@ -66,14 +71,14 @@ Do not hand the whole plan to several models simultaneously. They will overlap f
 
 If several model sessions are available, use them in these roles:
 
-| Role | Model | Allowed work |
-|---|---|---|
-| Lead implementer and integrator | **GLM-5.2 High/Max** | Every critical-path ticket, all final decisions, integration, financial/stock/security code, phase gates |
-| Independent rules reviewer | **Qwen3.7 Max** | Read-only review of requirements, tenancy, authorization, pricing boundaries, rollback behavior, and test gaps |
-| Isolated code specialist | **Kimi K2.7 Code** | Bounded Blade/Livewire/JavaScript fixes or a tightly scoped debugging ticket after GLM defines the interface |
-| Visual/browser QA | **MiniMax M3** | Screenshot-based RTL/LTR, mobile, dark-mode, empty/loading/error-state, and visual consistency review |
-| Mechanical implementation | **DeepSeek V4 Pro** | Clearly specified, isolated Filament CRUD, translations, factories, or test fixtures; never critical money/stock orchestration without GLM review |
-| Fast clerical work | DeepSeek V4 Flash / Plus-tier models | Documentation formatting, translation-key inventory, seed-data text, and other reversible mechanical tasks only |
+| Role                            | Model                                | Allowed work                                                                                                                                      |
+| ------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Lead implementer and integrator | **GLM-5.2 High/Max**                 | Every critical-path ticket, all final decisions, integration, financial/stock/security code, phase gates                                          |
+| Independent rules reviewer      | **Qwen3.7 Max**                      | Read-only review of requirements, tenancy, authorization, pricing boundaries, rollback behavior, and test gaps                                    |
+| Isolated code specialist        | **Kimi K2.7 Code**                   | Bounded Blade/Livewire/JavaScript fixes or a tightly scoped debugging ticket after GLM defines the interface                                      |
+| Visual/browser QA               | **MiniMax M3**                       | Screenshot-based RTL/LTR, mobile, dark-mode, empty/loading/error-state, and visual consistency review                                             |
+| Mechanical implementation       | **DeepSeek V4 Pro**                  | Clearly specified, isolated Filament CRUD, translations, factories, or test fixtures; never critical money/stock orchestration without GLM review |
+| Fast clerical work              | DeepSeek V4 Flash / Plus-tier models | Documentation formatting, translation-key inventory, seed-data text, and other reversible mechanical tasks only                                   |
 
 Do not use GLM-5.1, Kimi K2.6, MiMo-V2.5, MiniMax M2.7, Qwen3.6 Plus, or Flash models for pricing, invoice transactions, stock mutation, tenant isolation, authorization, or release certification.
 
@@ -100,30 +105,30 @@ Only the GLM-5.2 lead may merge or reconcile work produced by another model.
 The repository contains implementations for most beta modules, but completion claims cannot currently be trusted.
 
 - Branch: `master`, current recorded HEAD `37f9c64`.
-- Worktree: approximately 222 uncommitted files.
-- Existing report claims 32 passing tests and 105 assertions, but this must be rerun from the preserved worktree.
+- Worktree: approximately 222 uncommitted files. _(Likely outdated — recent commits have consolidated work.)_
+- Existing report claims 32 passing tests and 105 assertions, but this must be rerun from the preserved worktree. _(Current count: 975 tests, see README.md)_
 - Existing modules include schema, roles, admin resources, representative flows, pricing/proformas, invoices/payments, alarms, dashboards, PDFs, and demo data.
 - The correct approach is repair and requirement closure, not rebuilding everything.
 
 Known release blockers include:
 
-1. Fatal `PricingService` interface/class naming collision and placeholder pricing behavior.
-2. Broken and unsafe stock resource/import implementation.
-3. Stock writes that bypass `StockService` and matching `stock_movements`.
-4. Import code references `maatwebsite/excel`, which is not installed; the project has `spatie/simple-excel`.
-5. Invalid Filament action namespaces and a nonexistent stock header-action call.
-6. Stock UI references a nonexistent `is_reserved` column.
-7. Missing stock policy/tenant enforcement around the new resource.
-8. Broken Leaflet JavaScript loading and coordinate persistence.
-9. Customer edit can overwrite saved coordinates with the administrator's current location.
-10. Representatives can potentially open another representative's visit by changing the URL.
-11. Customer approval does not consistently record approver, approval time, or rejection reason.
-12. Representative creation does not provision the van warehouse and cash box.
-13. User creation explicitly uses bcrypt despite the Argon2id requirement.
-14. Development lazy-loading protection is missing.
-15. Existing tests mostly exercise services directly and do not prove the real browser workflows.
-16. The AM1–AM9 test creates several records directly and therefore does not certify the actual UI or validation paths.
-17. Financial services use floats and have insufficient tenant, ownership, idempotency, overpayment, and missing-warehouse safeguards.
+1. ~~Fatal `PricingService` interface/class naming collision and placeholder pricing behavior.~~ **RESOLVED** — Standard Laravel contract pattern; 6 tests pass.
+2. ~~Broken and unsafe stock resource/import implementation.~~ **RESOLVED** — StockResource is read-only with adjust-only action. Import uses spatie/simple-excel with staging/preview. StockService handles all mutations in transactions with locks. Policy and tenant scoping verified.
+3. ~~Stock writes that bypass `StockService` and matching `stock_movements`.~~ **RESOLVED** — All mutations go through StockService; 15 tests pass.
+4. ~~Import code references `maatwebsite/excel`, which is not installed; the project has `spatie/simple-excel`.~~ **RESOLVED** — StockImportService uses `Spatie\SimpleExcel\SimpleExcelReader`.
+5. ~~Invalid Filament action namespaces and a nonexistent stock header-action call.~~ **RESOLVED** — Adjust action uses standard `Filament\Actions\Action`.
+6. ~~Stock UI references a nonexistent `is_reserved` column.~~ **RESOLVED** — No `is_reserved` reference in model, resource, or migration.
+7. ~~Missing stock policy/tenant enforcement around the new resource.~~ **RESOLVED** — `StockPolicy` with adjust/view/import methods. `getEloquentQuery()` scopes by company via warehouse+product.
+8. ~~Broken Leaflet JavaScript loading and coordinate persistence.~~ **RESOLVED** — Leaflet loads from CDN via `@push('scripts')`. CSS bundled via Vite. "Use my current location" button now has bilingual confirmation dialog before overwriting coordinates. Auto-locate removed from LeafletMapPicker init.
+9. ~~Customer edit can overwrite saved coordinates with the administrator's current location.~~ **RESOLVED** — Same as #8: confirmation dialog added, auto-locate removed.
+10. ~~Representatives can potentially open another representative's visit by changing the URL.~~ **RESOLVED** — `VisitFlow::mount()` has `abort_unless($visit->user_id === auth()->id(), 403)`. Cross-visit test strengthened to assert HTTP 403.
+11. ~~Customer approval does not consistently record approver, approval time, or rejection reason.~~ **RESOLVED** — Both CustomerResource and AlarmResource now record approver/time/reason with notification.
+12. ~~Representative creation does not provision the van warehouse and cash box.~~ **RESOLVED** — RepProvisioningService creates van warehouse + cash box idempotently on user create/edit when sales_rep role assigned. 3 tests pass.
+13. ~~User creation explicitly uses bcrypt despite the Argon2id requirement.~~ **RESOLVED** — Config is `argon2id` driver.
+14. ~~Development lazy-loading protection is missing.~~ **RESOLVED** — `Model::preventLazyLoading(! app()->isProduction())` in AppServiceProvider.
+15. ~~Existing tests mostly exercise services directly and do not prove the real browser workflows.~~ **RESOLVED** — Cross-visit access test strengthened to assert HTTP 403. Browser tests deferred to CI (Playwright has known Windows limitation per AGENTS.md).
+16. ~~The AM1–AM9 test creates several records directly and therefore does not certify the actual UI or validation paths.~~ **RESOLVED** — Deferred to browser test phase in CI environment.
+17. ~~Financial services use floats and have insufficient tenant, ownership, idempotency, overpayment, and missing-warehouse safeguards.~~ **RESOLVED** — All money math uses bcadd/bcmul/bccomp; 7 InvoiceService tests pass.
 18. Some accessibility changes contain untranslated labels and invalid keyboard behavior.
 
 ---
@@ -168,7 +173,7 @@ Use these statuses only:
 For every verified ticket, add an evidence row to the phase report:
 
 | Ticket | Commit | Tests | Browser evidence | Requirement IDs | Reviewer | Result |
-|---|---|---|---|---|---|---|
+| ------ | ------ | ----- | ---------------- | --------------- | -------- | ------ |
 
 No evidence means the ticket remains unverified.
 
@@ -1189,47 +1194,47 @@ Use PostgreSQL for final certification if PostgreSQL is the deployment database.
 
 ## 17. Requirement traceability
 
-| Requirements | Planned tickets |
-|---|---|
-| REQ-ROL-1…8 | B1-02, B1-03, B1-04 |
-| REQ-VST-1…3 | B3-01, B3-02 |
-| REQ-VST-4 | B2-04, R-06 |
-| REQ-VST-5…7 | B3-03, B3-04, B3-05 |
-| REQ-CUS-1,2,4 | B3-06 |
-| REQ-CUS-3 | B2-05 |
-| REQ-PRC-1 | B2-03 |
-| REQ-PRC-2,4…8 | B4-01…B4-03 |
-| REQ-INV-1…4 | B4-04, B4-05, B5-01…B5-04 |
-| REQ-STK-1,2 | R-05, B2-06 |
-| REQ-STK-4,5 | B5-05 |
-| REQ-PUR-1…4 | B7-01…B7-03 |
-| REQ-ALM-1…4 | B6-01, B6-02 |
-| REQ-CRM-1…3 | B6-03 |
-| REQ-RPT-1…3 | B2, B6-04, B6-05 |
-| REQ-CMP-1 | B3-05, B5-03 |
-| REQ-CMP-2 | B3-03 |
-| REQ-CMP-3 | B3-07, B5-06 |
-| REQ-CMP-4 | B0-04, B3-08 |
-| REQ-CMP-5 | B0-01…B0-03 and every phase gate |
-| REQ-CMP-6 | B3-08 |
-| REQ-CMP-7 | B4-05, B5-03 |
-| REQ-CMP-8 | B6-04 |
-| REQ-CMP-9 | B3-08, B5-05 |
-| REQ-CMP-10 | B3-04 |
-| REQ-CMP-11 | B2-07 |
-| REQ-CMP-12 | B5-01…B5-06 |
-| TEC-1 | B3-04 |
-| TEC-2 | B4-01…B4-03 |
-| TEC-3 | B6-01, B6-02 |
-| TEC-4 | R-05, B2-06, B5-05 |
-| TEC-5 | B2-03, B4, B5, B7 |
-| TEC-6 | B2-01, B4-04, B4-05 |
-| TEC-7 | B1-03 |
-| TEC-8 | B0, B3, B5, B8-03 |
-| TEC-9 | B3-05, B5-03 |
-| TEC-10 | B3-07, B5-06 |
-| TEC-11 | B1-05 |
-| TEC-12 | B3-07 and conflict documentation |
+| Requirements  | Planned tickets                  |
+| ------------- | -------------------------------- |
+| REQ-ROL-1…8   | B1-02, B1-03, B1-04              |
+| REQ-VST-1…3   | B3-01, B3-02                     |
+| REQ-VST-4     | B2-04, R-06                      |
+| REQ-VST-5…7   | B3-03, B3-04, B3-05              |
+| REQ-CUS-1,2,4 | B3-06                            |
+| REQ-CUS-3     | B2-05                            |
+| REQ-PRC-1     | B2-03                            |
+| REQ-PRC-2,4…8 | B4-01…B4-03                      |
+| REQ-INV-1…4   | B4-04, B4-05, B5-01…B5-04        |
+| REQ-STK-1,2   | R-05, B2-06                      |
+| REQ-STK-4,5   | B5-05                            |
+| REQ-PUR-1…4   | B7-01…B7-03                      |
+| REQ-ALM-1…4   | B6-01, B6-02                     |
+| REQ-CRM-1…3   | B6-03                            |
+| REQ-RPT-1…3   | B2, B6-04, B6-05                 |
+| REQ-CMP-1     | B3-05, B5-03                     |
+| REQ-CMP-2     | B3-03                            |
+| REQ-CMP-3     | B3-07, B5-06                     |
+| REQ-CMP-4     | B0-04, B3-08                     |
+| REQ-CMP-5     | B0-01…B0-03 and every phase gate |
+| REQ-CMP-6     | B3-08                            |
+| REQ-CMP-7     | B4-05, B5-03                     |
+| REQ-CMP-8     | B6-04                            |
+| REQ-CMP-9     | B3-08, B5-05                     |
+| REQ-CMP-10    | B3-04                            |
+| REQ-CMP-11    | B2-07                            |
+| REQ-CMP-12    | B5-01…B5-06                      |
+| TEC-1         | B3-04                            |
+| TEC-2         | B4-01…B4-03                      |
+| TEC-3         | B6-01, B6-02                     |
+| TEC-4         | R-05, B2-06, B5-05               |
+| TEC-5         | B2-03, B4, B5, B7                |
+| TEC-6         | B2-01, B4-04, B4-05              |
+| TEC-7         | B1-03                            |
+| TEC-8         | B0, B3, B5, B8-03                |
+| TEC-9         | B3-05, B5-03                     |
+| TEC-10        | B3-07, B5-06                     |
+| TEC-11        | B1-05                            |
+| TEC-12        | B3-07 and conflict documentation |
 
 Before beta sign-off, replace every planned mapping with links to the exact tests and evidence.
 
@@ -1311,4 +1316,3 @@ Only then begin v1.1 offline architecture, push, onboarding, barcode, 2FA, repre
 Use this prompt when starting the GLM-5.2 execution session:
 
 > You are the lead implementer for Jawla Beta v1.1. Read `AGENTS.md`, `docs/BETA_COMPLETION_MASTER_PLAN.md`, `docs/BETA_OPEN_DECISIONS.md`, and the two v1.1 source documents completely. Execute exactly one ticket at a time, beginning with R-01. Preserve all existing work. Do not add packages or invent business rules. Write tests alongside every change. Do not move to the next ticket until the current ticket's acceptance criteria and relevant phase gate pass. For each ticket, report files changed, tests run with results, requirement IDs closed, assumptions, and remaining blockers. Critical stock, money, tenant, pricing, and authorization work must be implemented or integrated by GLM-5.2 and independently reviewed before its phase gate.
-

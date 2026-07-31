@@ -13,7 +13,7 @@ cash, record returns. Admins manage master data and see everything live.
 - Laravel 13 (PHP 8.3) monolith · Filament 4 (admin) · Livewire 3 + Tailwind 3 (rep PWA)
 - PostgreSQL 16 · spatie/laravel-permission · spatie/laravel-activitylog
 - Leaflet + OpenStreetMap · mpdf · simple-qrcode · Pest · Playwright
-- Hosted on a single VPS via Laravel Forge · Cloudflare in front
+- Railway (Docker, php-fpm + nginx, 2 replicas) · Cloudflare in front
 
 ## Quick start
 
@@ -63,7 +63,7 @@ The seed data reproduces the client's voice-message narrative:
 
 ### Tests
 
-`php artisan test` — 32 tests, 105 assertions covering:
+`php artisan test` — 975 tests covering:
 
 - Auth + roles (admin/rep login, rate limit, locale switch)
 - Stock service increment/decrement/transfer + insufficient stock rollback
@@ -72,51 +72,24 @@ The seed data reproduces the client's voice-message narrative:
 - Invoice flow (atomic create, oversell rollback, payment closes invoice, cancel reverses)
 - AM1 → AM9 end-to-end narrative (26 assertions, single test case)
 
-## Deploy to Render (free)
+## Deploy
 
-A free-tier deployment for client demos. Uses Docker + Render Blueprint.
+Production runs on Railway. See `docs/DEPLOYMENT.md` for the full workflow.
 
-### Prerequisites
-
-- GitHub repo with this code pushed
-- Render account (https://render.com)
-
-### Steps
-
-1. Push code to GitHub (include `Dockerfile`, `render.yaml`, `scripts/render-start.sh`).
-2. Go to https://dashboard.render.com → New → Blueprint.
-3. Select your GitHub repo. Render reads `render.yaml` and provisions:
-   - **Web service** (free plan, Docker runtime)
-   - **PostgreSQL** (free plan, 90-day limit)
-4. Set `APP_KEY` in the Render dashboard → Environment (generate with `php artisan key:generate` locally, paste the base64 key).
-5. Set `APP_URL` to your Render URL (`https://jawla.onrender.com`).
-6. Deploy. The `render-start.sh` entrypoint auto-runs:
-   - `php artisan migrate --force`
-   - `php artisan db:seed --class=DemoSeeder --force`
-   - `php artisan config:cache && route:cache && view:cache`
-7. After deploy, visit `https://<your-app>.onrender.com/` — redirects to `/app` (rep login).
-
-### Demo URLs
-
-- Rep app: `https://<your-app>.onrender.com/app`
-- Admin panel: `https://<your-app>.onrender.com/admin`
-
-### Free-tier limitations
-
-- **Cold start:** service sleeps after 15 min idle → ~30s wake on first request.
-- **PostgreSQL:** free for 90 days, then must upgrade or data is deleted.
-- **File storage:** ephemeral — generated PDFs/signatures are lost on redeploy. Acceptable for demo; switch to S3/R2 for persistence.
+- Docker + php-fpm + nginx
+- PostgreSQL 16 (Railway managed)
+- 2 replicas for availability
 
 ## Docs index
 
 - `docs/ARCHITECTURE.md` — stack + boundaries.
 - `docs/BUSINESS_RULES.md` — non-negotiables (stock, atomic sales, VAT).
-- `docs/ROLES_MATRIX.md` — five roles × permissions.
+- `docs/ROLES_MATRIX.md` — 11 roles × permissions.
 - `docs/DESIGN_SYSTEM.md` — 60/30/10, typography, component states.
 - `docs/SECURITY.md` — auth, sessions, headers, secrets policy.
 - `docs/ZATCA_NOTES.md` — Saudi Phase 1 QR TLV encoding.
 - `docs/TESTING.md` — Pest + Playwright strategy.
-- `docs/DEPLOYMENT.md` — Forge, deploy script, rollback.
+- `docs/DEPLOYMENT.md` — Railway deployment, rollback.
 - `docs/BACKUP_RESTORE.md` — nightly backup + restore drill.
 
 ## Licence

@@ -1,5 +1,9 @@
 # Jawla BETA - Complete Changes Report
 
+> **⚠ HISTORICAL SNAPSHOT** — Generated 2026-07-16. Test counts (32) and
+> statistics reflect the codebase at that date. For current numbers, see
+> `README.md` or run `php artisan test`.
+
 ## Summary
 
 **Project:** Jawla (جولة) - Bilingual Field-Sales CRM/ERP  

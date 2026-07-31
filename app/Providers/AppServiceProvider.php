@@ -146,6 +146,12 @@ class AppServiceProvider extends ServiceProvider
             ->name('app.')
             ->group(base_path('routes/rep-sync.php'));
 
+        // Rep offline-snapshot endpoint — returns cached read data for IndexedDB.
+        Route::middleware(['web', 'auth', 'ensure.rep'])
+            ->prefix('app')
+            ->name('app.')
+            ->group(base_path('routes/rep-offline.php'));
+
         Event::listen(Login::class, function (Login $event): void {
             if (! $event->user instanceof User) {
                 return;

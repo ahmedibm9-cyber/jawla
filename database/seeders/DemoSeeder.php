@@ -49,6 +49,12 @@ class DemoSeeder extends Seeder
             throw new \LogicException('DemoSeeder may run only when JAWLA_MODE=demo.');
         }
 
+        // Production/demo environments always receive the complete showcase.
+        // Most feature tests only need the canonical fixtures, so they can avoid
+        // rebuilding hundreds of historical rows for every RefreshDatabase case.
+        $showcaseDataset = ! app()->environment('testing')
+            || (bool) config('app.demo_seed_showcase', false);
+
         echo "\n=== DEMO SEEDER RUNNING ===\n";
         $this->call(RoleSeeder::class);
 
@@ -154,6 +160,23 @@ class DemoSeeder extends Seeder
             $createDemoUser(['name' => 'محمد طه', 'email' => 'executive@jawla.test', 'employee_code' => 'EMP-006'], ['executive']);
             $rep1 = $createDemoUser(['name' => 'أحمد سعيد', 'email' => 'rep@jawla.test', 'employee_code' => 'EMP-007'], ['rep', 'sales_rep']);
             $rep2 = $createDemoUser(['name' => 'محمد علي', 'email' => 'rep2@jawla.test', 'employee_code' => 'EMP-008'], ['rep', 'sales_rep']);
+            $createDemoUser(['name' => 'إدارة الموارد البشرية', 'email' => 'hr@jawla.test', 'employee_code' => 'EMP-009'], ['hr_admin']);
+            $createDemoUser(['name' => 'مراجع النظام', 'email' => 'viewer@jawla.test', 'employee_code' => 'EMP-010'], ['system_viewer']);
+            $createDemoUser([
+                'name' => 'مستخدم موقوف',
+                'email' => 'disabled@jawla.test',
+                'employee_code' => 'EMP-011',
+                'is_active' => false,
+            ], ['sales_rep']);
+
+            $secondaryCompany = Company::factory()->create([
+                'name_ar' => 'شركة جولة للتوزيع',
+                'name_en' => 'Jawla Distribution Company',
+                'abbr' => 'JDC',
+                'currency' => 'EGP',
+                'vat_percent' => 14.00,
+            ]);
+            $admin->companies()->syncWithoutDetaching([$company->id, $secondaryCompany->id]);
 
             Storage::disk('private')->put(
                 'demo-credentials.json',
@@ -317,6 +340,39 @@ class DemoSeeder extends Seeder
                 'unit' => 'kg', 'packaging_type' => 'other', 'price' => 58.00, 'cost' => 42.00,
             ]);
 
+            // Additional deterministic catalogue depth for realistic search,
+            // filtering, pagination, and scale demonstrations.
+            $showcaseFamilies = [
+                ['EVA', 'إيثيلين فينيل أسيتات', 'Ethylene Vinyl Acetate', $catVirgin],
+                ['ABS', 'أكريلونتريل بوتادين ستايرين', 'ABS Resin', $catVirgin],
+                ['SAN', 'ستايرين أكريلونتريل', 'SAN Resin', $catVirgin],
+                ['PA6', 'نايلون 6', 'Nylon 6', $catVirgin],
+                ['PA66', 'نايلون 66', 'Nylon 66', $catVirgin],
+                ['POM', 'بولي أوكسي ميثيلين', 'Polyoxymethylene', $catVirgin],
+                ['PMMA', 'أكريليك شفاف', 'PMMA Acrylic', $catVirgin],
+                ['MB-W', 'ماستر باتش أبيض', 'White Masterbatch', $catChemicals],
+                ['MB-B', 'ماستر باتش أسود', 'Black Masterbatch', $catChemicals],
+            ];
+            $grades = ['A', 'B', 'C'];
+
+            foreach ($showcaseDataset ? $showcaseFamilies : [] as $familyIndex => [$code, $nameAr, $nameEn, $category]) {
+                foreach ($grades as $gradeIndex => $grade) {
+                    $sequence = ($familyIndex * count($grades)) + $gradeIndex + 1;
+                    $price = 18000 + ($sequence * 1250);
+                    $products[] = Product::factory()->create([
+                        'company_id' => $company->id,
+                        'category_id' => $category->id,
+                        'sku' => sprintf('MAT-%s-%s', $code, $grade),
+                        'name_ar' => "{$nameAr} - درجة {$grade}",
+                        'name_en' => "{$nameEn} - Grade {$grade}",
+                        'unit' => $familyIndex >= 7 ? 'kg' : 'ton',
+                        'packaging_type' => $familyIndex >= 7 ? 'bag' : 'jumbo_bag',
+                        'price' => $price,
+                        'cost' => round($price * 0.82, 2),
+                    ]);
+                }
+            }
+
             // ─── Routes ────────────────────────────────────────────────────
             $routeCairo = Route::factory()->create([
                 'company_id' => $company->id,
@@ -395,6 +451,33 @@ class DemoSeeder extends Seeder
                     'code' => $c['code'], 'name_ar' => $c['name_ar'], 'name_en' => $c['name_en'],
                     'phone' => $c['phone'], 'latitude' => $c['lat'], 'longitude' => $c['lng'],
                     'customer_group_id' => $c['group']->id, 'credit_limit' => $c['credit'],
+                    'status' => 'approved',
+                ]);
+            }
+
+            // Expand the showcase register to exercise pagination, map density,
+            // route filters, bilingual search, and realistic dashboard totals.
+            $showcaseRoutes = [
+                [$routeCairo, $grpIndustrial, 30.0890, 31.3378, 'القاهرة', 'Cairo'],
+                [$routeGiza, $grpCommercial, 30.0131, 31.2089, 'الجيزة', 'Giza'],
+                [$routeAlex, $grpPackaging, 31.2001, 29.9187, 'الإسكندرية', 'Alexandria'],
+            ];
+
+            for ($index = 13; $index <= ($showcaseDataset ? 50 : 12); $index++) {
+                [$route, $group, $baseLat, $baseLng, $cityAr, $cityEn] = $showcaseRoutes[($index - 13) % count($showcaseRoutes)];
+                $offset = (($index % 7) - 3) * 0.004;
+
+                $customers[] = Customer::factory()->create([
+                    'company_id' => $company->id,
+                    'route_id' => $route->id,
+                    'customer_group_id' => $group->id,
+                    'code' => sprintf('C-%03d', $index),
+                    'name_ar' => "مصنع {$cityAr} للبلاستيك رقم {$index}",
+                    'name_en' => "{$cityEn} Plastics Factory {$index}",
+                    'phone' => '015'.str_pad((string) $index, 8, '0', STR_PAD_LEFT),
+                    'latitude' => $baseLat + $offset,
+                    'longitude' => $baseLng - $offset,
+                    'credit_limit' => 150000 + (($index % 8) * 50000),
                     'status' => 'approved',
                 ]);
             }
@@ -501,7 +584,7 @@ class DemoSeeder extends Seeder
         DB::transaction(function () use (
             $company, $products, $customers, $stockService, $stockQties,
             $rep1, $rep2, $van1, $van2, $ws1, $ws2,
-            $routeCairo, $routeGiza,
+            $routeCairo, $routeGiza, $showcaseDataset,
         ) {
             // Skip if transactional data already exists
             if (Invoice::where('company_id', $company->id)->exists()) {
@@ -590,7 +673,7 @@ class DemoSeeder extends Seeder
 
             // ─── Invoices ─────────────────────────────────────────
             $invoices = [];
-            $invoiceCount = 40;
+            $invoiceCount = $showcaseDataset ? 100 : 12;
             $skus = array_keys($stockQties);
             for ($i = 0; $i < $invoiceCount; $i++) {
                 $rep = $i % 3 === 0 ? $rep2 : $rep1;
@@ -744,13 +827,11 @@ class DemoSeeder extends Seeder
             }
 
             // ─── Visits ───────────────────────────────────────────
-            foreach ($customers as $i => $cust) {
-                if ($i >= 15) {
-                    break;
-                }
+            for ($i = 0; $i < ($showcaseDataset ? 100 : 10); $i++) {
+                $cust = $customers[$i % count($customers)];
                 $rep = $cust->route_id === $routeCairo->id ? $rep1 : ($cust->route_id === $routeGiza->id ? $rep2 : $rep1);
                 $ws = $rep->id === $rep1->id ? $ws1 : $ws2;
-                $daysAgo = rand(0, 7);
+                $daysAgo = $i % 90;
                 $checkin = today()->subDays($daysAgo)->setTime(9 + rand(0, 5), rand(0, 59));
                 Visit::create([
                     'user_id' => $rep->id,

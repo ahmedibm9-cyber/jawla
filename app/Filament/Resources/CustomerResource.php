@@ -112,7 +112,7 @@ class CustomerResource extends Resource
                             }
                         }" x-init="init()">
                             <div data-leaflet style="width:100%;height:300px;border-radius:8px;border:1px solid #d1d5db"></div>
-                            <button type="button" @click="locate()" class="fi-btn fi-btn-sm fi-btn-outline mt-2">'
+                            <button type="button" @click="if(confirm(\''.l('سيتم استبدال الإحداثيات الحالية بموقعك الحالي. متابعة؟', 'Current coordinates will be replaced with your location. Continue?').'\')) locate()" class="fi-btn fi-btn-sm fi-btn-outline mt-2">'
                         .l('استخدم موقعي الحالي', 'Use my current location')
                         .'</button>
                         </div>'

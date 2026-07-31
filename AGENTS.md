@@ -30,7 +30,7 @@ tests/ Pest (Feature, Unit) + Playwright (Browser, e2e)
 | Lint (PHP)           | `make lint`      |
 | Typecheck            | `make typecheck` |
 | Unit + Feature tests | `make test`      |
-| E2E tests            | `make test-e2e`  | (CI only — see Browser test limitation)
+| E2E tests            | `make test-e2e`  |
 | Full verify          | `make verify`    |
 | Build assets         | `make build`     |
 | Database migrate     | `make migrate`   |
@@ -99,6 +99,7 @@ Standalone PHP works correctly (server starts, WebSocket connects, Playwright
 initializes). The bug is in how Pest manages child processes on Windows.
 
 **Workarounds:**
+
 1. Browser tests run in CI (Linux) — trust CI results for E2E verification.
 2. For local E2E testing, use Laravel Dusk as an alternative.
 3. Wait for upstream fix in `pest-plugin-browser` v4.4+.

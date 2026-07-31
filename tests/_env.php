@@ -26,6 +26,11 @@ use Tests\Support\TestingDatabaseGuard;
 $database = getenv('JAWLA_TEST_DATABASE');
 $database = is_string($database) && $database !== '' ? $database : 'jawla_test';
 
+$testToken = getenv('TEST_TOKEN');
+if ($database === 'jawla_test' && is_string($testToken) && $testToken !== '') {
+    $database .= '_'.$testToken;
+}
+
 TestingDatabaseGuard::assertSafe('testing', 'pgsql', $database);
 
 $pinned = [
@@ -55,4 +60,4 @@ foreach ($pinned as $key => $value) {
     $_SERVER[$key] = $value;
 }
 
-unset($database, $key, $value, $pinned);
+unset($database, $key, $testToken, $value, $pinned);

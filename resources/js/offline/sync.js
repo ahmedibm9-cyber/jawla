@@ -3,6 +3,7 @@
 // flows (enqueue) and the sync-status UI (counts, retry, discard).
 
 import * as outbox from "./outbox.js";
+import * as cache from "./cache.js";
 
 let flushing = false;
 const identity = document.querySelector(
@@ -136,6 +137,14 @@ async function enqueue(type, payload, opts) {
   const record = await outbox.enqueue(type, payload, opts);
   await emitStatus();
   if (navigator.onLine) flush();
+  // Request Background Sync so the SW flushes when connectivity returns,
+  // even if the app isn't open. Supported in Chrome/Edge; no-op elsewhere.
+  try {
+    const reg = await navigator.serviceWorker?.getRegistration();
+    if (reg?.sync) reg.sync.register("jawla-sync");
+  } catch {
+    /* sync not supported */
+  }
   return record;
 }
 
@@ -231,6 +240,10 @@ function init() {
   document.addEventListener("visibilitychange", () => {
     if (!document.hidden) flush();
   });
+  // Background Sync — SW tells us connectivity returned, flush now.
+  navigator.serviceWorker?.addEventListener("message", (event) => {
+    if (event.data?.type === "BACKGROUND_SYNC") flush();
+  });
   emitStoragePressure();
   flush();
 }
@@ -252,6 +265,7 @@ if (identity) {
   window.jawlaOffline = {
     clear: async () => {
       await outbox.clear();
+      await cache.clear();
       const registration = await navigator.serviceWorker?.getRegistration();
       registration?.active?.postMessage({ type: "PURGE_USER_DATA" });
       registration?.waiting?.postMessage({ type: "PURGE_USER_DATA" });

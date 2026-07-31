@@ -1,5 +1,9 @@
 # Jawla (جولة) — Production Readiness Audit
 
+> **⚠ HISTORICAL SNAPSHOT** — Generated 2026-07-27. Test counts (332) and
+> readiness scores reflect the codebase at that date. The system now has 975
+> tests. For current state, see `README.md`.
+
 **Auditor:** Mavis (independent re-audit)
 **Date:** 2026-07-27
 **Subject:** `C:\projects\jawla` — Laravel 13 / Filament 4 / Livewire 3 / PostgreSQL 16 field-sales CRM/ERP for Fulla Chemical Trading Co.

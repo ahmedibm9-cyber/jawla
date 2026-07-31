@@ -167,7 +167,7 @@ class VisitFlowTest extends TestCase
         $visit = $this->openVisit($company, $rep1);
         $this->actingAs($rep2);
 
-        $component = Livewire::test(VisitFlow::class, ['visit' => $visit]);
-        $this->assertNotEquals('checkin', $component->get('step'));
+        Livewire::test(VisitFlow::class, ['visit' => $visit])
+            ->assertStatus(403);
     }
 }
