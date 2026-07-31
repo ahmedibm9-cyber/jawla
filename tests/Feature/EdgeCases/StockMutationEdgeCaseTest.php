@@ -129,9 +129,9 @@ class StockMutationEdgeCaseTest extends TestCase
             ->sum('quantity'));
     }
 
-    /** Reconcile with expected qty mismatch throws DomainException. */
+    /** Reconcile rejects when stock changed since the expected-qty snapshot. */
     #[Test]
-    public function test_reconcile_mismatched_expected_throws(): void
+    public function test_reconcile_rejects_stale_snapshot(): void
     {
         $this->seedStock(10);
 
