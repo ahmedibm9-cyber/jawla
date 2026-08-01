@@ -28,7 +28,6 @@ use App\Livewire\App\VanTransfers;
 use App\Livewire\App\VisitFlow;
 use App\Livewire\App\Visits;
 use Illuminate\Support\Facades\Route;
-use Spatie\Permission\PermissionRegistrar;
 
 Route::get('/', [SystemPageController::class, 'root']);
 

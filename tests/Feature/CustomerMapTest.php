@@ -43,10 +43,10 @@ class CustomerMapTest extends TestCase
 
     public function test_only_geolocated_customers_of_the_company_are_plotted(): void
     {
-        Customer::factory()->create(['company_id' => $this->company->id, 'name_ar' => 'مع موقع', 'latitude' => 30.1, 'longitude' => 31.2]);
-        Customer::factory()->create(['company_id' => $this->company->id, 'name_ar' => 'بدون موقع', 'latitude' => null, 'longitude' => null]);
+        Customer::factory()->create(['company_id' => $this->company->id, 'name_ar' => 'مع موقع', 'latitude' => 30.1, 'longitude' => 31.2, 'phone' => '01000000001']);
+        Customer::factory()->create(['company_id' => $this->company->id, 'name_ar' => 'بدون موقع', 'latitude' => null, 'longitude' => null, 'phone' => '01000000002']);
         $other = Company::factory()->create();
-        Customer::factory()->create(['company_id' => $other->id, 'latitude' => 10, 'longitude' => 10]);
+        Customer::factory()->create(['company_id' => $other->id, 'latitude' => 10, 'longitude' => 10, 'phone' => '01000000003']);
 
         $this->actingAs($this->user('sales_manager'));
         $points = Livewire::test(CustomerMap::class)->assertOk()->instance()->points;
