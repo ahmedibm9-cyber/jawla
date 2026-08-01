@@ -23,7 +23,7 @@ class CustomerFactory extends Factory
             'code' => 'CUST-'.Str::random(4),
             'name_ar' => 'عميل اختبار',
             'name_en' => 'Test Customer',
-            'phone' => fake()->unique()->numerify('010000000##'),
+            'phone' => fake()->numerify('01000000###'),
             'address' => 'Test Address',
             'credit_limit' => 0,
             'balance' => 0,

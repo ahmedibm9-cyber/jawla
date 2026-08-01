@@ -119,6 +119,7 @@ final class VisualUiCoverage
             'app.pdf.invoice',
             'app.pdf.receipt',
             'app.logout',
+            'app.offline-snapshot',
         ];
     }
 
