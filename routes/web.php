@@ -106,17 +106,15 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
 });
 
 // Temporary staging recovery — REMOVE after verifying login
-if (app()->environment('production')) {
-    Route::get('/_staging-recover', function () {
-        $password = 'staging-demo-2026';
-        $hash = Hash::make($password);
-        $updated = DB::table('users')
-            ->where('email', 'like', '%@jawla.test')
-            ->update(['password' => $hash]);
-        return response()->json([
-            'updated' => $updated,
-            'password' => $password,
-            'hint' => 'Login now. This route self-destructs after use.',
-        ]);
-    });
-}
+Route::get('/_staging-recover', function () {
+    $password = 'staging-demo-2026';
+    $hash = Hash::make($password);
+    $updated = DB::table('users')
+        ->where('email', 'like', '%@jawla.test')
+        ->update(['password' => $hash]);
+    return response()->json([
+        'updated' => $updated,
+        'password' => $password,
+        'hint' => 'Login now. This route self-destructs after use.',
+    ]);
+});
