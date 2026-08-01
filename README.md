@@ -92,6 +92,10 @@ Production runs on Railway. See `docs/DEPLOYMENT.md` for the full workflow.
 - `docs/DEPLOYMENT.md` — Railway deployment, rollback.
 - `docs/BACKUP_RESTORE.md` — nightly backup + restore drill.
 
+## CI/CD
+
+GitHub Actions pipeline: CI (lint, tests, security, build) → staging → ZAP DAST → approval → production.
+
 ## Licence
 
 Proprietary — Fulla Chemical Trading Co. All rights reserved.
