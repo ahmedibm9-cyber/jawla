@@ -27,10 +27,8 @@ use App\Livewire\App\TodaysCustomers;
 use App\Livewire\App\VanTransfers;
 use App\Livewire\App\VisitFlow;
 use App\Livewire\App\Visits;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Str;
+use Spatie\Permission\PermissionRegistrar;
 
 Route::get('/', [SystemPageController::class, 'root']);
 
@@ -103,40 +101,4 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
         ->middleware('throttle:10,1')
         ->name('pdf.receipt');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
-});
-
-// Temporary staging recovery — REMOVE after verifying login
-Route::get('/_staging-recover', function () {
-    $password = 'staging-demo-2026';
-    $hash = Hash::make($password);
-    $updated = DB::table('users')
-        ->where('email', 'like', '%@jawla.test')
-        ->update(['password' => $hash]);
-
-    // Ensure the missing widget permission exists
-    DB::table('permissions')->insertOrIgnore([
-        ['name' => 'view:low_stock_alert_widget', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
-    ]);
-    $permId = DB::table('permissions')->where('name', 'view:low_stock_alert_widget')->value('id');
-    if ($permId) {
-        foreach (['super_admin', 'admin'] as $role) {
-            $roleId = DB::table('roles')->where('name', $role)->value('id');
-            if ($roleId) {
-                DB::table('role_has_permissions')->insertOrIgnore([
-                    'role_id' => $roleId,
-                    'permission_id' => $permId,
-                ]);
-            }
-        }
-    }
-
-    // Clear Spatie permission cache
-    app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
-
-    return response()->json([
-        'updated' => $updated,
-        'password' => $password,
-        'permission_granted' => (bool) $permId,
-        'hint' => 'Login now. This route self-destructs after use.',
-    ]);
 });
