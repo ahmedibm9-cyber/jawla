@@ -17,7 +17,7 @@ class CompanyFactory extends Factory
         return [
             'name_ar' => 'شركة اختبار',
             'name_en' => 'Test Company',
-            'tax_number' => 'TAX-00000001',
+            'tax_number' => fake()->unique()->numerify('TAX-########'),
             'address' => 'Test Address, Cairo',
             'phone' => '01000000000',
             'currency' => 'EGP',

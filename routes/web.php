@@ -27,7 +27,6 @@ use App\Livewire\App\TodaysCustomers;
 use App\Livewire\App\VanTransfers;
 use App\Livewire\App\VisitFlow;
 use App\Livewire\App\Visits;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [SystemPageController::class, 'root']);
