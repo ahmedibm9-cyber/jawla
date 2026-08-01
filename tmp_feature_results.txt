@@ -1,0 +1,5 @@
+PHPUnit 12.5.33 by Sebastian Bergmann and contributors.
+
+Runtime:       PHP 8.3.32
+Configuration: C:\projects\jawla\phpunit.xml
+

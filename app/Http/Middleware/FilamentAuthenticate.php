@@ -15,12 +15,8 @@ class FilamentAuthenticate extends Middleware
 
         $user = Filament::auth()->user();
 
-        if ($user instanceof FilamentUser && ! $user->canAccessPanel(Filament::getCurrentOrDefaultPanel())) {
-            if ($user->hasAnyRole(['sales_rep', 'rep'])) {
-                return redirect('/app');
-            }
-
-            return redirect()->route('login')->with('error', 'ليس لديك صلاحية الوصول إلى لوحة التحكم.');
+        if ($user && $user->hasAnyRole(['sales_rep', 'rep'])) {
+            return redirect('/app');
         }
 
         return $next($request);
