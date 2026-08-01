@@ -66,7 +66,6 @@ RUN npm run build
 
 FROM php:8.3-fpm-alpine@sha256:9fcec48321d890240d700ccdc2b475420c87d398826e68c3d8830b8fca663e5c
 
-ARG CACHE_BUST=2026-08-01
 WORKDIR /app
 
 RUN apk add --no-cache \
