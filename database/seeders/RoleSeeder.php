@@ -103,7 +103,8 @@ class RoleSeeder extends Seeder
         $widgetPermissions = [
             'view:visits_today_widget', 'view:pending_quotations_widget',
             'view:open_alarms_widget', 'view:sales_today_widget',
-            'view:outstanding_balance_widget', 'view:rep_performance_widget',
+            'view:outstanding_balance_widget', 'view:low_stock_alert_widget',
+            'view:rep_performance_widget',
         ];
 
         foreach ($widgetPermissions as $permission) {
