@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 return new class extends Migration
 {
@@ -25,6 +26,11 @@ return new class extends Migration
                 }
             }
         }
+
+        // Set a known staging password for all demo users (the seeder generates
+        // random passwords that we cannot recover from the CLI).
+        $hash = Hash::make('staging-demo-2026');
+        DB::table('users')->where('email', 'like', '%@jawla.test')->update(['password' => $hash]);
     }
 
     public function down(): void
