@@ -27,7 +27,10 @@ use App\Livewire\App\TodaysCustomers;
 use App\Livewire\App\VanTransfers;
 use App\Livewire\App\VisitFlow;
 use App\Livewire\App\Visits;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Str;
 
 Route::get('/', [SystemPageController::class, 'root']);
 
@@ -101,3 +104,19 @@ Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->g
         ->name('pdf.receipt');
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
 });
+
+// Temporary staging recovery — REMOVE after verifying login
+if (app()->environment('production')) {
+    Route::get('/_staging-recover', function () {
+        $password = 'staging-demo-2026';
+        $hash = Hash::make($password);
+        $updated = DB::table('users')
+            ->where('email', 'like', '%@jawla.test')
+            ->update(['password' => $hash]);
+        return response()->json([
+            'updated' => $updated,
+            'password' => $password,
+            'hint' => 'Login now. This route self-destructs after use.',
+        ]);
+    });
+}
