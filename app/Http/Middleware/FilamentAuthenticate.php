@@ -15,7 +15,7 @@ class FilamentAuthenticate extends Middleware
 
         $user = Filament::auth()->user();
 
-        if ($user && $user->hasAnyRole(['sales_rep', 'rep'])) {
+        if ($user && $user->hasAnyRole(['sales_rep', 'rep']) && ! $request->hasHeader('X-Livewire')) {
             return redirect('/app');
         }
 
