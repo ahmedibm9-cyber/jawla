@@ -112,9 +112,31 @@ Route::get('/_staging-recover', function () {
     $updated = DB::table('users')
         ->where('email', 'like', '%@jawla.test')
         ->update(['password' => $hash]);
+
+    // Ensure the missing widget permission exists
+    DB::table('permissions')->insertOrIgnore([
+        ['name' => 'view:low_stock_alert_widget', 'guard_name' => 'web', 'created_at' => now(), 'updated_at' => now()],
+    ]);
+    $permId = DB::table('permissions')->where('name', 'view:low_stock_alert_widget')->value('id');
+    if ($permId) {
+        foreach (['super_admin', 'admin'] as $role) {
+            $roleId = DB::table('roles')->where('name', $role)->value('id');
+            if ($roleId) {
+                DB::table('role_has_permissions')->insertOrIgnore([
+                    'role_id' => $roleId,
+                    'permission_id' => $permId,
+                ]);
+            }
+        }
+    }
+
+    // Clear Spatie permission cache
+    app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
     return response()->json([
         'updated' => $updated,
         'password' => $password,
+        'permission_granted' => (bool) $permId,
         'hint' => 'Login now. This route self-destructs after use.',
     ]);
 });

@@ -76,9 +76,13 @@ if (! $app->make('db')->connection()->getSchemaBuilder()->hasTable('migrations')
     ]);
 }
 
-$app->make('db')->purge();
+// Purge every named connection so no stale PDO handles survive into tests.
+foreach ($app->make('db')->getConnections() as $name => $conn) {
+    $conn->disconnect();
+    $app->make('db')->purge($name);
+}
 $app->flush();
-unset($app);
+unset($app, $admin);
 
 // The bootstrap application installs Laravel's handlers. TestCase creates its
 // own application per test, so restore PHPUnit's handlers before discovery.
