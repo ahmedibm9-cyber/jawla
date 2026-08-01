@@ -15,9 +15,9 @@ class LocationPingFactory extends Factory
     public function definition(): array
     {
         return [
-            'latitude' => \Faker\Factory::create()->randomFloat(7, 24.5, 25.0),
-            'longitude' => \Faker\Factory::create()->randomFloat(7, 46.5, 47.0),
-            'accuracy' => \Faker\Factory::create()->randomFloat(2, 3, 40),
+            'latitude' => 24.7136,
+            'longitude' => 46.6753,
+            'accuracy' => 10.00,
             'recorded_at' => now(),
         ];
     }

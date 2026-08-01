@@ -14,7 +14,7 @@ class VisitReportFactory extends Factory
     {
         return [
             'visit_id' => Visit::factory(),
-            'summary' => \Faker\Factory::create()->sentence(),
+            'summary' => 'Test visit summary',
             'submitted_at' => now(),
         ];
     }

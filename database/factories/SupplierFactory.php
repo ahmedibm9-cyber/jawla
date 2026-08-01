@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Supplier>
@@ -16,10 +17,10 @@ class SupplierFactory extends Factory
     {
         return [
             'company_id' => 1,
-            'code' => \Faker\Factory::create()->unique()->numerify('SUP-####'),
-            'name_ar' => \Faker\Factory::create()->company(),
-            'name_en' => \Faker\Factory::create()->company(),
-            'type' => \Faker\Factory::create()->randomElement(['local', 'international']),
+            'code' => 'SUP-'.Str::random(4),
+            'name_ar' => 'مورد اختبار',
+            'name_en' => 'Test Supplier',
+            'type' => 'local',
             'is_active' => true,
         ];
     }

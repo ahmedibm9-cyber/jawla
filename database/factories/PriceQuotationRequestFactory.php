@@ -20,7 +20,7 @@ class PriceQuotationRequestFactory extends Factory
             'customer_id' => Customer::factory(),
             'user_id' => User::factory(),
             'product_id' => Product::factory(),
-            'quantity_requested' => \Faker\Factory::create()->randomFloat(3, 1, 100),
+            'quantity_requested' => 10.000,
             'status' => 'requested',
             'requested_at' => now(),
         ];

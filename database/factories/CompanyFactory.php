@@ -15,11 +15,11 @@ class CompanyFactory extends Factory
     public function definition(): array
     {
         return [
-            'name_ar' => 'شركة '.\Faker\Factory::create()->company(),
-            'name_en' => \Faker\Factory::create()->company(),
-            'tax_number' => \Faker\Factory::create()->unique()->numerify('TAX-########'),
-            'address' => \Faker\Factory::create()->address(),
-            'phone' => \Faker\Factory::create()->phoneNumber(),
+            'name_ar' => 'شركة اختبار',
+            'name_en' => 'Test Company',
+            'tax_number' => 'TAX-00000001',
+            'address' => 'Test Address, Cairo',
+            'phone' => '01000000000',
             'currency' => 'EGP',
             'vat_percent' => 14.00,
             'is_active' => true,

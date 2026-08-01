@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Route;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Customer>
@@ -19,11 +20,11 @@ class CustomerFactory extends Factory
         return [
             'company_id' => Company::factory(),
             'route_id' => Route::factory(),
-            'code' => \Faker\Factory::create()->unique()->numerify('CUST-####'),
-            'name_ar' => \Faker\Factory::create()->company(),
-            'name_en' => \Faker\Factory::create()->company(),
-            'phone' => \Faker\Factory::create()->phoneNumber(),
-            'address' => \Faker\Factory::create()->address(),
+            'code' => 'CUST-'.Str::random(4),
+            'name_ar' => 'عميل اختبار',
+            'name_en' => 'Test Customer',
+            'phone' => '01000000000',
+            'address' => 'Test Address',
             'credit_limit' => 0,
             'balance' => 0,
             'is_active' => true,

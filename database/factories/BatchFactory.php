@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class BatchFactory extends Factory
 {
@@ -11,7 +12,7 @@ class BatchFactory extends Factory
     {
         return [
             'product_id' => Product::factory(),
-            'batch_number' => 'B-'.strtoupper(\Faker\Factory::create()->unique()->bothify('??##')),
+            'batch_number' => 'B-'.Str::random(4),
             'manufacture_date' => now()->subMonths(2),
             'expiry_date' => now()->addYear(),
             'coa_file_path' => null,

@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\Product;
 use App\Models\ProductCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends Factory<Product>
@@ -22,13 +23,13 @@ class ProductFactory extends Factory
         return [
             'company_id' => Company::factory(),
             'category_id' => ProductCategory::factory(),
-            'sku' => \Faker\Factory::create()->unique()->numerify('SKU-#####'),
-            'name_ar' => \Faker\Factory::create()->word(),
-            'name_en' => \Faker\Factory::create()->word(),
-            'packaging_type' => \Faker\Factory::create()->randomElement($packaging),
-            'unit' => \Faker\Factory::create()->randomElement($units),
-            'price' => \Faker\Factory::create()->randomFloat(2, 100, 5000),
-            'cost' => \Faker\Factory::create()->randomFloat(2, 50, 3000),
+            'sku' => 'SKU-'.Str::random(5),
+            'name_ar' => 'منتج اختبار',
+            'name_en' => 'Test Product',
+            'packaging_type' => $packaging[0],
+            'unit' => $units[0],
+            'price' => 500.00,
+            'cost' => 300.00,
             'vat_applicable' => true,
             'track_batch' => false,
             'track_expiry' => false,

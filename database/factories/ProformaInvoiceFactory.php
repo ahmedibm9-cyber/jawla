@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\ProformaInvoice;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class ProformaInvoiceFactory extends Factory
 {
@@ -14,14 +15,14 @@ class ProformaInvoiceFactory extends Factory
 
     public function definition(): array
     {
-        $subtotal = \Faker\Factory::create()->randomFloat(2, 100, 10000);
-        $vat = \Faker\Factory::create()->randomFloat(2, 10, 1000);
+        $subtotal = 1000.00;
+        $vat = 140.00;
 
         return [
             'company_id' => Company::factory(),
             'customer_id' => Customer::factory(),
             'user_id' => User::factory(),
-            'proforma_number' => \Faker\Factory::create()->unique()->numerify('PF-#####'),
+            'proforma_number' => 'PF-'.Str::random(5),
             'subtotal' => $subtotal,
             'vat_amount' => $vat,
             'total' => $subtotal + $vat,

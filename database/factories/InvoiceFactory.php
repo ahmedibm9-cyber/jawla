@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 class InvoiceFactory extends Factory
 {
@@ -15,14 +16,14 @@ class InvoiceFactory extends Factory
 
     public function definition(): array
     {
-        $subtotal = \Faker\Factory::create()->randomFloat(2, 100, 10000);
-        $vat = \Faker\Factory::create()->randomFloat(2, 10, 1000);
+        $subtotal = 1000.00;
+        $vat = 140.00;
 
         return [
             'company_id' => Company::factory(),
             'customer_id' => Customer::factory(),
             'user_id' => User::factory(),
-            'invoice_number' => \Faker\Factory::create()->unique()->numerify('INV-#####'),
+            'invoice_number' => 'INV-'.Str::random(5),
             'status' => InvoiceStatus::Submitted,
             'subtotal' => $subtotal,
             'vat_amount' => $vat,
