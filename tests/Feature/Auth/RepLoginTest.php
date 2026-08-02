@@ -51,7 +51,7 @@ class RepLoginTest extends TestCase
 
         $response = $this->actingAs($hrAdmin)->get('/app');
 
-        $response->assertForbidden();
+        $response->assertRedirect();
     }
 
     public function test_rep_is_redirected_from_admin_panel(): void

@@ -118,6 +118,8 @@ final class VisualUiCoverage
             'app.pdf.proforma',
             'app.pdf.invoice',
             'app.pdf.receipt',
+            'app.push-subscriptions.destroy',
+            'app.push-subscriptions.store',
             'app.logout',
             'app.offline-snapshot',
         ];

@@ -4,7 +4,6 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Filament\Facades\Filament;
-use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Auth\Middleware\Authenticate as Middleware;
 
 class FilamentAuthenticate extends Middleware
@@ -13,10 +12,17 @@ class FilamentAuthenticate extends Middleware
     {
         $this->authenticate($request, $guards);
 
-        $user = Filament::auth()->user();
+        $user = $request->user();
 
-        if ($user && $user->hasAnyRole(['sales_rep', 'rep']) && ! $request->hasHeader('X-Livewire')) {
-            return redirect('/app');
+        // Redirect pure reps to the PWA. Multi-role users (e.g. admin + rep)
+        // keep admin-panel access — canAccessPanel() already allows all roles.
+        if ($user && ! $request->hasHeader('X-Livewire')) {
+            $repRoles = ['sales_rep', 'rep'];
+            $hasOnlyRepRoles = $user->getRoleNames()->every(fn (string $r) => in_array($r, $repRoles, true));
+
+            if ($hasOnlyRepRoles) {
+                return redirect('/app');
+            }
         }
 
         return $next($request);

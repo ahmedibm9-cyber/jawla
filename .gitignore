@@ -45,6 +45,8 @@ Thumbs.db
 /research/
 /tasks/
 
+tmp_*.txt
+
 # Agent tool directories (local only, never commit)
 /.codex/
 /.windsurf/

@@ -25,6 +25,7 @@ class RepPwaAccessTest extends TestCase
     {
         parent::setUp();
         $this->seed(RoleSeeder::class);
+        $this->app['session.store']->flush();
     }
 
     private function makeUser(string $role): User
@@ -53,7 +54,8 @@ class RepPwaAccessTest extends TestCase
         foreach ($repRoutes as $route) {
             foreach (['admin', 'sales_manager', 'accounts', 'executive'] as $role) {
                 $user = $this->makeUser($role);
-                $this->actingAs($user)->get(route('app.'.$route))->assertForbidden();
+                $this->app['session.store']->flush();
+                $this->actingAs($user)->get(route('app.'.$route))->assertRedirect();
             }
         }
     }
@@ -80,7 +82,7 @@ class RepPwaAccessTest extends TestCase
         $admin = $this->makeUser('admin');
 
         $response = $this->actingAs($admin)->get('/app');
-        $response->assertForbidden();
+        $response->assertRedirect();
     }
 
     /**

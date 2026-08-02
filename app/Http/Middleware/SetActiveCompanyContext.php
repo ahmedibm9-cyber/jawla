@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Support\ActiveCompanyContext;
 use Closure;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -25,12 +26,25 @@ class SetActiveCompanyContext
                     $requested = $request->session()->get('active_company_id');
                 }
 
-                if ($requested !== null && filter_var($requested, FILTER_VALIDATE_INT) === false) {
+                if ($requested !== null && ! filter_var($requested, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]])) {
                     abort(400, 'Invalid company selector.');
                 }
 
                 $companyId = $requested === null ? (int) $user->company_id : (int) $requested;
-                $this->context->setFromUser($user, $companyId);
+
+                try {
+                    $this->context->setFromUser($user, $companyId);
+                } catch (AuthorizationException $e) {
+                    \Log::error('SetActiveCompanyContext: company access denied', [
+                        'user_id' => $user->id,
+                        'user_email' => $user->email,
+                        'user_company_id' => $user->company_id,
+                        'requested_company_id' => $companyId,
+                        'url' => $request->url(),
+                        'is_livewire' => $request->hasHeader('X-Livewire'),
+                    ]);
+                    throw $e;
+                }
 
                 if ($request->hasSession()) {
                     $request->session()->put('active_company_id', $companyId);
