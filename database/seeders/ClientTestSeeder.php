@@ -32,26 +32,26 @@ class ClientTestSeeder extends Seeder
 
         $accounts = [
             [
-                'name' => 'Client Admin',
-                'email' => 'client.admin@jawla.test',
+                'name' => 'Admin',
+                'email' => 'admin@jawla.test',
                 'employee_code' => 'UAT-001',
                 'roles' => ['admin', 'hr_admin'],
             ],
             [
-                'name' => 'Client Sales Manager',
-                'email' => 'client.manager@jawla.test',
+                'name' => 'Sales Manager',
+                'email' => 'sales@jawla.test',
                 'employee_code' => 'UAT-002',
                 'roles' => ['sales_manager'],
             ],
             [
-                'name' => 'Client Sales Rep',
-                'email' => 'client.rep@jawla.test',
+                'name' => 'Sales Rep',
+                'email' => 'rep@jawla.test',
                 'employee_code' => 'UAT-003',
                 'roles' => ['sales_rep', 'rep'],
             ],
             [
-                'name' => 'Client Warehouse',
-                'email' => 'client.warehouse@jawla.test',
+                'name' => 'Warehouse',
+                'email' => 'warehouse@jawla.test',
                 'employee_code' => 'UAT-004',
                 'roles' => ['warehouse_keeper'],
             ],
