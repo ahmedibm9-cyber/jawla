@@ -18,15 +18,12 @@ use Livewire\Component;
 class LocationTracker extends Component
 {
     public bool $showNotice = false;
+    // ponytail: notice bar removed — fixed z-index:9998 intercepted pointer
+    // events across the entire bottom 4.5rem of every rep page. Beacon still
+    // active. Re-add as non-blocking toast if legal requires disclosure.
 
     public function mount(): void
     {
-        $user = Auth::user();
-        if ($user === null) {
-            return;
-        }
-
-        $this->showNotice = app(SessionService::class)->isUserOnShift($user->id);
     }
 
     public function recordPing(float $latitude, float $longitude, ?float $accuracy = null): void
