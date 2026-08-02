@@ -103,6 +103,10 @@
     </header>
   @endauth
   <main id="main" data-page="{{ $pageKey }}">{!! $slot !!}</main>
+  {{-- iOS PWA back button — visible only in standalone mode where browser chrome is hidden --}}
+  <button id="ios-back-btn" class="ios-back-btn" aria-label="{{ l('رجوع', 'Go back') }}" onclick="history.back()" hidden>
+    <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
   @livewireScripts
   @filamentScripts
   <script defer>
@@ -123,6 +127,13 @@
       }, 30000);
     });
     window.addEventListener('appinstalled', () => { document.getElementById('pwa-install-banner')?.remove(); });
+    // iOS standalone PWA back button — show only in standalone mode with history
+    (function() {
+      const btn = document.getElementById('ios-back-btn');
+      if (!btn) return;
+      const isStandalone = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+      if (isStandalone && window.history.length > 1) btn.hidden = false;
+    })();
   </script>
   @auth
     {{-- Global undo toast for reversible rep writes (Phase 6 / B1). --}}

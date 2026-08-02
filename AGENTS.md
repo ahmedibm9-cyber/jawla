@@ -31,6 +31,7 @@ tests/ Pest (Feature, Unit) + Playwright (Browser, e2e)
 | Typecheck            | `make typecheck` |
 | Unit + Feature tests | `make test`      |
 | E2E tests            | `make test-e2e`  |
+| Performance tests    | `make test-perf` |
 | Full verify          | `make verify`    |
 | Build assets         | `make build`     |
 | Database migrate     | `make migrate`   |

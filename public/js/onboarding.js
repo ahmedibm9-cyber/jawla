@@ -453,13 +453,7 @@
     const tour = new JawlaTour(steps);
 
     tour.on("complete", markComplete);
-    tour.on("cancel", () => {
-      // Only mark complete if user finished all steps
-      if (tour.steps.length > 0 && tour.currentStep?.id !== steps[steps.length - 1].id) {
-        return;
-      }
-      markComplete();
-    });
+    tour.on("cancel", () => markComplete());
 
     return tour;
   }

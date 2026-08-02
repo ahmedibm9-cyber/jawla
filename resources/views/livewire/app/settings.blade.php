@@ -39,7 +39,7 @@
             </div>
             <div class="profile-field">
                 <span class="profile-field-label">{{ __('app.company') }}</span>
-                <span class="profile-field-value">{{ $user->company?->name ?? '—' }}</span>
+                <span class="profile-field-value">{{ app()->getLocale() === 'ar' ? ($user->company?->name_ar ?? '—') : ($user->company?->name_en ?? $user->company?->name_ar ?? '—') }}</span>
             </div>
             <div class="profile-field">
                 <span class="profile-field-label">{{ __('app.app_version') }}</span>
