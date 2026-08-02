@@ -45,7 +45,7 @@
 </div>
 
 @push('scripts')
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
 <script>
     window.leafletMapPicker = function(latitudeField, longitudeField, defaultLat, defaultLng, defaultZoom) {
         return {

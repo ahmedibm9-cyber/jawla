@@ -71,3 +71,34 @@ and stock reconciliation results.
 
 _(empty — no drill has been executed and recorded yet. Add one row per drill:
 `YYYY-MM-DD — operator — outcome`.)_
+
+### Restore drill checklist (for operator with Railway access)
+
+**Prerequisites:**
+
+- [ ] Railway CLI authenticated (`railway whoami`)
+- [ ] `age` installed (`age --version`)
+- [ ] `pg_dump`, `pg_restore`, `psql` available
+- [ ] `rclone` configured (if using off-host backup)
+
+**Steps:**
+
+1. [ ] Get production database URL: `railway variables --service jawla | grep DATABASE_URL`
+2. [ ] Create scratch database on Railway (or use local PostgreSQL)
+3. [ ] Run backup: `DATABASE_URL=<prod-url> BACKUP_STORAGE_URI=<remote> BACKUP_AGE_RECIPIENT=<pubkey> bash scripts/backup.sh`
+4. [ ] Run restore drill:
+   ```bash
+   BACKUP_FILE=jawla_YYYYMMDD.dump.age \
+   SOURCE_DATABASE_URL=<prod-url> \
+   TARGET_DATABASE_URL=<scratch-url> \
+   BACKUP_AGE_IDENTITY_FILE=/secure/path/key.txt \
+   RESTORE_EVIDENCE_FILE=restore-evidence-$(date +%Y%m%d).txt \
+   ALLOW_SCRATCH_RESTORE=1 bash scripts/restore-backup.sh
+   ```
+5. [ ] Verify: `php artisan migrate:status` against scratch DB
+6. [ ] Verify: latest invoice visible, seeded rep can log in
+7. [ ] Verify: `stocks.quantity` reconciles against `stock_movements`
+8. [ ] Record RPO/RTO: time from backup creation to successful restore
+9. [ ] Record outcome in restore log above
+
+**Expected duration:** ~15-30 min depending on database size

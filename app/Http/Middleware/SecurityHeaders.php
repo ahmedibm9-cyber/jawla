@@ -34,8 +34,13 @@ class SecurityHeaders
         $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
         $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
 
-        // CSP — Livewire needs unsafe-inline for inline styles, unsafe-eval for Alpine
-        // TODO: migrate to nonce-based CSP when Livewire supports it
+        // CSP — nonce-based migration blocked by Livewire/Alpine requiring unsafe-inline/unsafe-eval.
+        // When Livewire adds nonce support (v4 roadmap), switch to nonce-based CSP:
+        //   1. Generate per-request nonce: $nonce = base64_encode(random_bytes(16))
+        //   2. Pass to view: view()->share('cspNonce', $nonce)
+        //   3. Replace 'unsafe-inline' with nonce in script-src and style-src
+        //   4. Remove 'unsafe-eval' (Alpine v3.x still needs it — check Alpine v4 release)
+        // Sentry DSN: set SENTRY_DSN env var to enable error tracking; CSP connect-src already allows ingest endpoint
         $csp = implode('; ', [
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com",
