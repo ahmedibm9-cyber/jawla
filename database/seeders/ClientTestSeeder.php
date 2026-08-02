@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Hash;
  */
 class ClientTestSeeder extends Seeder
 {
-    private const PASSWORD = 'Jawla@Test2026!';
+    private const PASSWORD = '123456789';
 
     public function run(): void
     {
