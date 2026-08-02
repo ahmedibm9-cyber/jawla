@@ -59,14 +59,14 @@ class EtaDocumentBuilder
                 ],
             ],
             'receiver' => [
-                'type' => 'P', // Person (B2C); B2B receivers carry a tax id
+                'type' => 'P', // Default to Person; B2B with tax ID needs 'B' — add customer.tax_number column to enable
                 'id' => $customer?->code,
                 'name' => $customer?->name_en ?: $customer?->name_ar,
             ],
             'documentType' => 'I', // Invoice
             'documentTypeVersion' => (string) config('eta.document_type_version', '1.0'),
             'dateTimeIssued' => ($invoice->issued_at ?? $invoice->created_at)->toIso8601String(),
-            'taxpayerActivityCode' => '',
+            'taxpayerActivityCode' => $company->eta_taxpayer_activity_code ?? config('eta.taxpayer_activity_code', ''),
             'internalID' => $invoice->invoice_number,
             'invoiceLines' => $lines,
             'totalDiscountAmount' => 0.0,

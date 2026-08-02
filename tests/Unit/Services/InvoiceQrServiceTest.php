@@ -8,6 +8,7 @@ use App\Models\Invoice;
 use App\Models\ProformaInvoice;
 use App\Models\User;
 use App\Services\EgyptQrStrategy;
+use App\Services\EtaQrStrategy;
 use App\Services\InvoiceQrService;
 use App\Services\ZatcaPhase1Strategy;
 use App\Services\ZatcaPhase2Strategy;
@@ -172,5 +173,52 @@ class InvoiceQrServiceTest extends TestCase
 
         $this->assertIsString($qr);
         $this->assertNotEmpty($qr);
+    }
+
+    public function test_eta_enabled_uses_eta_strategy(): void
+    {
+        $company = Company::factory()->create([
+            'country' => 'EG',
+            'eta_enabled' => true,
+            'name_ar' => 'شركة مصرية',
+            'tax_number' => '200000000000002',
+        ]);
+
+        $service = app(InvoiceQrService::class);
+        $strategy = $service->resolveStrategy($company, 'invoice');
+
+        $this->assertInstanceOf(EtaQrStrategy::class, $strategy);
+    }
+
+    public function test_eta_disabled_falls_back_to_egypt(): void
+    {
+        $company = Company::factory()->create([
+            'country' => 'EG',
+            'eta_enabled' => false,
+            'name_ar' => 'شركة مصرية',
+            'tax_number' => '200000000000002',
+        ]);
+
+        $service = app(InvoiceQrService::class);
+        $strategy = $service->resolveStrategy($company, 'invoice');
+
+        $this->assertInstanceOf(EgyptQrStrategy::class, $strategy);
+    }
+
+    public function test_eta_takes_priority_over_zatca_for_egypt(): void
+    {
+        $company = Company::factory()->create([
+            'country' => 'EG',
+            'eta_enabled' => true,
+            'zatca_enabled' => true,
+            'zatca_csid' => 'test-csid',
+            'name_ar' => 'شركة مصرية',
+            'tax_number' => '200000000000002',
+        ]);
+
+        $service = app(InvoiceQrService::class);
+        $strategy = $service->resolveStrategy($company, 'invoice');
+
+        $this->assertInstanceOf(EtaQrStrategy::class, $strategy);
     }
 }

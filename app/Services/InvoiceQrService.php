@@ -27,6 +27,10 @@ class InvoiceQrService
     {
         $country = $company->country ?? 'EG';
 
+        if ($country === 'EG' && $company->eta_enabled) {
+            return app(EtaQrStrategy::class);
+        }
+
         if ($country === 'SA' && $company->zatca_enabled) {
             // ZATCA Phase 2 requires cryptographic stamp - check if CSID is available
             if (! empty($company->zatca_csid)) {

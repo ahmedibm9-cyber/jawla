@@ -139,4 +139,57 @@ class EtaEInvoicingTest extends TestCase
         $this->assertNull($result->eta_submission_uuid);
         $this->assertSame(['errors' => ['bad tax id']], $result->eta_response);
     }
+
+    public function test_resubmit_clears_previous_state_then_resubmits(): void
+    {
+        config([
+            'jawla.is_demo' => false,
+            'eta.enabled' => true,
+            'eta.taxpayer_rin' => '999888777',
+        ]);
+
+        $call = 0;
+        $this->app->bind(EtaClient::class, fn () => new class implements EtaClient
+        {
+            public function submit(array $document): EtaResult
+            {
+                // First call: rejected, second call: accepted
+                static $call = 0;
+                $call++;
+                if ($call === 1) {
+                    return EtaResult::rejected(['bad data']);
+                }
+
+                return EtaResult::accepted('new-uuid', 'new-long', ['ok' => true]);
+            }
+        });
+
+        $invoice = $this->makeInvoice();
+
+        // First submission — rejected
+        $result1 = app(EtaService::class)->submit($invoice);
+        $this->assertSame('rejected', $result1->eta_status);
+
+        // Resubmit — should clear old state and accept
+        $result2 = app(EtaService::class)->resubmit($invoice);
+        $this->assertSame('submitted', $result2->eta_status);
+        $this->assertSame('new-uuid', $result2->eta_submission_uuid);
+        $this->assertSame('new-long', $result2->eta_long_id);
+
+        // Verify DB state
+        $invoice->refresh();
+        $this->assertSame('submitted', $invoice->eta_status);
+        $this->assertSame('new-uuid', $invoice->eta_submission_uuid);
+    }
+
+    public function test_company_eta_fields_are_mass_assignable(): void
+    {
+        $company = Company::factory()->create([
+            'eta_enabled' => true,
+            'eta_taxpayer_activity_code' => '6010',
+        ]);
+
+        $this->assertTrue($company->eta_enabled);
+        $this->assertSame('6010', $company->eta_taxpayer_activity_code);
+    }
 }

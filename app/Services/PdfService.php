@@ -76,7 +76,8 @@ class PdfService
         $qrData = $this->qrService->generateForInvoice($invoice);
         $qr = $this->qrSvg($qrData);
 
-        $invoice->update(['zatca_qr' => $qrData]);
+        $qrField = ($invoice->company->eta_enabled ?? false) ? 'eta_qr' : 'zatca_qr';
+        $invoice->update([$qrField => $qrData]);
 
         $items = $hasSnapshot
             ? collect($invoice->snapshot_items)->map(fn ($s) => (object) [

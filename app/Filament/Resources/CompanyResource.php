@@ -117,6 +117,22 @@ class CompanyResource extends Resource
                 Forms\Components\Toggle::make('is_active')
                     ->label(app()->getLocale() === 'ar' ? 'نشط' : 'Active')
                     ->default(true),
+
+                Section::make(app()->getLocale() === 'ar' ? 'إعدادات الفوترة الإلكترونية (مصر)' : 'ETA E-Invoicing (Egypt)')
+                    ->schema([
+                        Forms\Components\Toggle::make('eta_enabled')
+                            ->label(app()->getLocale() === 'ar' ? 'تفعيل الفوترة الإلكترونية' : 'Enable ETA E-Invoicing')
+                            ->helperText(app()->getLocale() === 'ar'
+                                ? 'فعّل لإرسال الفواتير إلى هيئة الضرائب المصرية'
+                                : 'Enable to submit invoices to the Egyptian Tax Authority'),
+                        Forms\Components\TextInput::make('eta_taxpayer_activity_code')
+                            ->label(app()->getLocale() === 'ar' ? 'كود النشاط الضريبي' : 'Taxpayer Activity Code')
+                            ->maxLength(10)
+                            ->helperText(app()->getLocale() === 'ar'
+                                ? 'كود النشاط من هيئة الضرائب (مثال: 1011)'
+                                : 'Activity code from ETA (e.g., 1011)'),
+                    ])
+                    ->columns(2),
             ]);
     }
 

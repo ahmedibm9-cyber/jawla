@@ -28,4 +28,8 @@ return [
     // Document model version the builder targets. Validate the produced
     // document against the official ETA SDK schema before go-live.
     'document_type_version' => env('ETA_DOCUMENT_TYPE_VERSION', '1.0'),
+
+    // Taxpayer activity code — can also be set per-company via
+    // eta_taxpayer_activity_code on the companies table.
+    'taxpayer_activity_code' => env('ETA_TAXPAYER_ACTIVITY_CODE', ''),
 ];

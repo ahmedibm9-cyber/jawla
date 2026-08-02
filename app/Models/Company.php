@@ -17,6 +17,7 @@ class Company extends Model
         'bank_name', 'bank_account', 'bank_iban', 'rep_discount_percent', 'is_active',
         'geofence_radius_m',
         'country', 'zatca_enabled', 'zatca_csid', 'zatca_secret', 'zatca_environment',
+        'eta_enabled', 'eta_taxpayer_activity_code',
     ];
 
     protected $hidden = [
@@ -29,6 +30,7 @@ class Company extends Model
         'rep_discount_percent' => 'decimal:2',
         'is_active' => 'boolean',
         'zatca_enabled' => 'boolean',
+        'eta_enabled' => 'boolean',
     ];
 
     public function users(): HasMany

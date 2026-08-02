@@ -54,4 +54,18 @@ class EtaService
             return $invoice->fresh();
         });
     }
+
+    public function resubmit(Invoice $invoice): Invoice
+    {
+        throw_if(! $this->isEnabled(), EtaNotConfiguredException::make());
+
+        $invoice->update([
+            'eta_status' => 'pending',
+            'eta_submission_uuid' => null,
+            'eta_long_id' => null,
+            'eta_response' => null,
+        ]);
+
+        return $this->submit($invoice->fresh());
+    }
 }
