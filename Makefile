@@ -1,4 +1,4 @@
-.PHONY: setup dev lint typecheck typecheck-strict test test-offline test-e2e test-e2e-ci verify build migrate seed smoke
+.PHONY: setup dev lint typecheck typecheck-strict test test-offline test-perf test-e2e test-e2e-ci verify build migrate seed smoke
 
 setup:
 	composer install
@@ -32,6 +32,9 @@ test:
 
 test-offline:
 	npm run test:offline
+
+test-perf:
+	npx playwright test tests/JavaScript/performance.spec.js
 
 test-e2e:
 	@if php -r "exit(PHP_OS_FAMILY === 'Windows' ? 0 : 1);" 2>/dev/null; then \

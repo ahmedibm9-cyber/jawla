@@ -46,6 +46,8 @@ Thumbs.db
 /tasks/
 
 tmp_*.txt
+tests/JavaScript/performance-results.json
+tests/stress/*-results.json
 
 # Agent tool directories (local only, never commit)
 /.codex/
