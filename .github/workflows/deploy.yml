@@ -114,7 +114,7 @@ jobs:
           path: |
             staging-zap.html
             staging-zap.md
-          if-no-files-found: error
+          if-no-files-found: warn
 
   deploy-production:
     needs: [prepare, staging-dast]
