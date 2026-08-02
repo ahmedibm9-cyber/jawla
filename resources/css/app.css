@@ -2540,7 +2540,6 @@ a.fi-wi-stats-overview-stat:hover {
 
   /* List pages fill the width as a responsive card grid */
   [data-page="customers"] .page-body,
-  [data-page="orders"] .page-body,
   [data-page="stock"] .page-body,
   [data-page="visits"] .page-body,
   [data-page="quotations"] .page-body,
