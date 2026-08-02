@@ -125,7 +125,7 @@ jobs:
       name: production
       url: ${{ vars.PRODUCTION_URL }}
     env:
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      RAILWAY_TOKEN: ${{ secrets.PRODUCTION_RAILWAY_TOKEN }}
       RAILWAY_PROJECT_ID: ${{ vars.RAILWAY_PROJECT_ID }}
       PRODUCTION_SERVICE_ID: ${{ vars.PRODUCTION_SERVICE_ID }}
       PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
