@@ -33,7 +33,7 @@ const FLOWS = [
 
 const results = {};
 
-// ponytail: CDP session cache — one session per page, reused across throttling calls
+// ponytail: fresh CDP session per call — page context owns the connection
 async function getCDPSession(page) {
   const ctx = page.context();
   return ctx.newCDPSession(page);
