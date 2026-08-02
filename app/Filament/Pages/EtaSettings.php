@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 class EtaSettings extends Page
 {
-    protected string $view = 'filament.pages.eta-settings';
+    protected static string $view = 'filament.pages.eta-settings';
 
     protected static \BackedEnum|string|null $navigationIcon = 'heroicon-o-document-check';
 
