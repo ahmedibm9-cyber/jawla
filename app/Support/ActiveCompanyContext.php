@@ -101,4 +101,10 @@ final class ActiveCompanyContext
         $this->companyId = null;
         $this->allowUnscoped = app()->runningUnitTests();
     }
+
+    public function allowUnscoped(): void
+    {
+        $this->companyId = null;
+        $this->allowUnscoped = true;
+    }
 }
