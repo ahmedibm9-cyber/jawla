@@ -1,5 +1,5 @@
 [deploy]
-preDeployCommand = "php artisan config:clear && php artisan route:clear && php artisan migrate --force"
+preDeployCommand = "php artisan config:clear && php artisan route:clear && php artisan view:clear && php artisan migrate --force"
 startCommand = "/app/docker/start-container.sh"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
