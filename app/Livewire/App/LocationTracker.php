@@ -3,7 +3,6 @@
 namespace App\Livewire\App;
 
 use App\Services\LocationPingService;
-use App\Services\SessionService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Component;
@@ -22,9 +21,7 @@ class LocationTracker extends Component
     // events across the entire bottom 4.5rem of every rep page. Beacon still
     // active. Re-add as non-blocking toast if legal requires disclosure.
 
-    public function mount(): void
-    {
-    }
+    public function mount(): void {}
 
     public function recordPing(float $latitude, float $longitude, ?float $accuracy = null): void
     {

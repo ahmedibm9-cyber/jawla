@@ -42,15 +42,6 @@ Route::get('/offline', [SystemPageController::class, 'offline']);
 
 Route::get('/health', [SystemPageController::class, 'health']);
 
-// ponytail: temp seed route — remove after client UAT is seeded
-Route::get('/seed-test-accounts', function () {
-    if (request('key') !== config('app.key')) {
-        abort(403);
-    }
-    Artisan::call('db:seed', ['--class' => \Database\Seeders\ClientTestSeeder::class]);
-    return response()->json(['status' => 'ok', 'output' => Artisan::output()]);
-})->middleware('throttle:5,1');
-
 Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
     ->middleware('throttle:10,1')
     ->name('locale.switch');
