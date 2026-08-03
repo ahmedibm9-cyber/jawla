@@ -120,7 +120,7 @@ class AdminPanelProvider extends PanelProvider
                     .'<script>document.documentElement.dir="'.$dir.'";document.documentElement.lang="'.$lang.'";'
                     .'document.addEventListener("livewire:navigated",()=>{'
                     .'fetch("/locale/current",{headers:{"Accept":"application/json"}})'
-                    .'.then(r=>r.json()).then(d=>{document.documentElement.dir=d.dir;document.documentElement.lang=d.lang;})'
+                    .'.then(r=>r.json()).then(d=>{document.documentElement.dir=d.dir;document.documentElement.lang=d.locale;})'
                     .'.catch(()=>{});});</script>';
             })
             ->renderHook('panels::body.end', function (): string {
