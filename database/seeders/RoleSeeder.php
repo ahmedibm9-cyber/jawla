@@ -18,7 +18,7 @@ class RoleSeeder extends Seeder
             'refunds.request', 'refunds.approve',
             'complaints.manage', 'reports.sales', 'reports.visits', 'reports.view',
             'invoices.view_all', 'invoices.approve', 'purchase_requests.veto',
-            'van_transfers.approve',
+            'van_transfers.approve', 'tasks.approve', 'tasks.reject', 'tasks.reopen',
             // Accounts
             'products.manage_prices', 'products.view_cost', 'products.manage_cost',
             'goods_in_transit.manage_landed_cost',
@@ -42,6 +42,7 @@ class RoleSeeder extends Seeder
             'invoices.view_own', 'payments.collect', 'returns.create',
             'expenses.log', 'purchase_requests.submit', 'alarms.flag_out_of_stock',
             'complaints.submit', 'cashbox.view', 'van_transfers.request',
+            'tasks.accept', 'tasks.progress', 'tasks.submit',
             // HR administration
             'users.manage', 'roles.assign', 'routes.assign',
             // Restricted settings pages
@@ -153,6 +154,7 @@ class RoleSeeder extends Seeder
                 'complaints.manage', 'reports.sales', 'reports.visits', 'reports.view',
                 'invoices.view_all', 'invoices.approve', 'invoices.cancel', 'purchase_requests.veto',
                 'van_transfers.approve',
+                'tasks.approve', 'tasks.reject', 'tasks.reopen',
             ],
 
             'accounts' => [
@@ -235,6 +237,7 @@ class RoleSeeder extends Seeder
                 'expenses.log', 'purchase_requests.submit', 'alarms.flag_out_of_stock',
                 'complaints.submit', 'cashbox.view', 'van_transfers.request',
                 'refunds.request',
+                'tasks.accept', 'tasks.progress', 'tasks.submit',
                 // Shield resource permissions required by services that gate on
                 // can('create:...') / can('update:...') instead of custom names.
                 'create:invoice', 'create:return_record', 'update:invoice',
@@ -250,6 +253,7 @@ class RoleSeeder extends Seeder
                 'expenses.log', 'purchase_requests.submit', 'alarms.flag_out_of_stock',
                 'complaints.submit', 'cashbox.view', 'van_transfers.request',
                 'refunds.request',
+                'tasks.accept', 'tasks.progress', 'tasks.submit',
                 // Shield resource permissions required by services (see sales_rep).
                 'create:invoice', 'create:return_record', 'update:invoice',
             ],

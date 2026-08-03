@@ -61,21 +61,6 @@ class Home extends Component
         $this->redirect(route('app.visit', $visit));
     }
 
-    public function completeTask(int $taskId): void
-    {
-        try {
-            Task::where('id', $taskId)->where('assigned_to', auth()->id())->update([
-                'status' => 'done',
-                'completed_at' => now(),
-            ]);
-            $this->successMessage = app()->getLocale() === 'ar' ? 'تم إكمالة المهمة' : 'Task completed';
-        } catch (\Throwable $e) {
-            $this->errorMessage = app()->getLocale() === 'ar'
-                ? 'خطأ في إكمال المهمة'
-                : 'Error completing task';
-        }
-    }
-
     public function startWork(): void
     {
         $this->validate([
@@ -122,7 +107,7 @@ class Home extends Component
             'openTasks' => Task::query()
                 ->with('customer')
                 ->where('assigned_to', $user->id)
-                ->where('status', 'open')
+                ->whereNotIn('status', ['approved', 'cancelled'])
                 ->latest()
                 ->take(10)
                 ->get(),

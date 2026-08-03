@@ -2,9 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\TaskStatus;
 use App\Filament\Resources\TaskResource\Pages;
+use App\Models\ApprovalRequest;
 use App\Models\Task;
+use App\Services\TaskService;
+use Filament\Actions\Action;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -65,6 +70,18 @@ class TaskResource extends Resource
                     ->searchable()
                     ->required()
                     ->helperText(l('اختر الشخص المسؤول عن تنفيذ المهمة', 'Select the person responsible for the task')),
+                Forms\Components\Select::make('reviewer_id')
+                    ->label(l('المراجع', 'Reviewer'))
+                    ->relationship('reviewer', 'name')
+                    ->searchable()
+                    ->required(fn ($get): bool => (bool) $get('requires_approval')),
+                Forms\Components\Select::make('final_approver_id')
+                    ->label(l('المعتمد النهائي', 'Final Approver'))
+                    ->relationship('finalApprover', 'name')
+                    ->searchable()
+                    ->different('reviewer_id')
+                    ->nullable()
+                    ->helperText(l('اختياري؛ يضيف مرحلة اعتماد ثانية', 'Optional; adds a second approval step')),
                 Forms\Components\Select::make('customer_id')
                     ->label(l('العميل', 'Customer'))
                     ->relationship('customer', 'name_ar')
@@ -82,12 +99,36 @@ class TaskResource extends Resource
                     ->label(l('تاريخ الاستحقاق', 'Due Date'))
                     ->nullable()
                     ->helperText(l('التاريخ المطلوب لإنجاز المهمة', 'The deadline for completing the task')),
-                Forms\Components\Select::make('status')
-                    ->label(l('الحالة', 'Status'))
-                    ->options(['open' => l('مفتوحة', 'Open'), 'done' => l('تم', 'Done')])
-                    ->default('open')
+                Forms\Components\Select::make('priority')
+                    ->label(l('الأولوية', 'Priority'))
+                    ->options([
+                        'low' => l('منخفضة', 'Low'),
+                        'normal' => l('عادية', 'Normal'),
+                        'high' => l('عالية', 'High'),
+                        'urgent' => l('عاجلة', 'Urgent'),
+                    ])
+                    ->default('normal')
                     ->required(),
-            ]),
+                Forms\Components\Toggle::make('requires_approval')
+                    ->label(l('تتطلب اعتماداً', 'Requires approval'))
+                    ->default(true)
+                    ->live(),
+                Forms\Components\Repeater::make('checklist')
+                    ->label(l('قائمة التحقق', 'Checklist'))
+                    ->schema([
+                        Forms\Components\TextInput::make('label')
+                            ->label(l('البند', 'Item'))
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\Toggle::make('required')
+                            ->label(l('إلزامي', 'Required'))
+                            ->default(true),
+                    ])
+                    ->columns(2)
+                    ->defaultItems(0)
+                    ->reorderable(),
+                Forms\Components\Hidden::make('status')->default(TaskStatus::Assigned->value),
+            ])->columns(2),
         ]);
     }
 
@@ -101,15 +142,96 @@ class TaskResource extends Resource
                 TextColumn::make('status')
                     ->label(l('الحالة', 'Status'))
                     ->badge()
+                    ->formatStateUsing(fn (TaskStatus|string $state): string => self::statusLabel($state))
+                    ->color(fn (TaskStatus|string $state): string => self::statusColor($state)),
+                TextColumn::make('priority')
+                    ->label(l('الأولوية', 'Priority'))
+                    ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'done' => 'success', default => 'warning'
+                        'urgent' => 'danger', 'high' => 'warning', 'low' => 'gray', default => 'info',
                     }),
                 TextColumn::make('due_date')->label(l('تاريخ الاستحقاق', 'Due Date'))->date(),
                 TextColumn::make('created_at')->label(l('تاريخ الإنشاء', 'Created'))->dateTime(),
             ])
             ->filters([
                 SelectFilter::make('status')
-                    ->options(['open' => l('مفتوحة', 'Open'), 'done' => l('تم', 'Done')]),
+                    ->options(self::statusOptions()),
+            ])
+            ->actions([
+                Action::make('approve')
+                    ->label(l('اعتماد', 'Approve'))
+                    ->icon('heroicon-o-check-circle')
+                    ->color('success')
+                    ->visible(fn (Task $record): bool => self::isCurrentApprover($record, 'tasks.approve'))
+                    ->requiresConfirmation()
+                    ->modalDescription(l(
+                        'سيتم تسجيل اعتماد هذه المهمة، وقد تنتقل إلى المعتمد التالي أو تُغلق نهائياً. الإجراء مُسجَّل.',
+                        'This records your approval. The task will either advance to the next approver or close as approved. The action is logged.',
+                    ))
+                    ->action(function (Task $record): void {
+                        app(TaskService::class)->approve($record->latestApproval, auth()->user());
+                        Notification::make()->success()->title(l('تم الاعتماد', 'Task approved'))->send();
+                    }),
+                Action::make('request_changes')
+                    ->label(l('طلب تعديلات', 'Request changes'))
+                    ->icon('heroicon-o-arrow-uturn-left')
+                    ->color('warning')
+                    ->visible(fn (Task $record): bool => self::isCurrentApprover($record, 'tasks.reject'))
+                    ->form([
+                        Forms\Components\Textarea::make('reason')
+                            ->label(l('التعديلات المطلوبة', 'Required changes'))
+                            ->required()
+                            ->maxLength(1000),
+                    ])
+                    ->requiresConfirmation()
+                    ->modalDescription(l(
+                        'ستُعاد المهمة إلى المندوب مع السبب الموضح، ويمكنه تعديلها وإعادة إرسالها. الإجراء مُسجَّل.',
+                        'The task will return to the rep with your reason and can be corrected and resubmitted. The action is logged.',
+                    ))
+                    ->action(function (Task $record, array $data): void {
+                        app(TaskService::class)->requestChanges($record->latestApproval, auth()->user(), $data['reason']);
+                        Notification::make()->success()->title(l('أُعيدت للمندوب', 'Returned to rep'))->send();
+                    }),
+                Action::make('reject')
+                    ->label(l('رفض', 'Reject'))
+                    ->icon('heroicon-o-x-circle')
+                    ->color('danger')
+                    ->visible(fn (Task $record): bool => self::isCurrentApprover($record, 'tasks.reject'))
+                    ->form([
+                        Forms\Components\Textarea::make('reason')
+                            ->label(l('سبب الرفض', 'Rejection reason'))
+                            ->required()
+                            ->maxLength(1000),
+                    ])
+                    ->requiresConfirmation()
+                    ->modalDescription(l(
+                        'سيُسجل رفض المهمة ويُخطر المندوب بالسبب. يستطيع المندوب استئنافها وإعادة إرسالها. الإجراء مُسجَّل.',
+                        'This rejects the task and notifies the rep with the reason. The rep may resume and resubmit it. The action is logged.',
+                    ))
+                    ->action(function (Task $record, array $data): void {
+                        app(TaskService::class)->reject($record->latestApproval, auth()->user(), $data['reason']);
+                        Notification::make()->success()->title(l('تم الرفض', 'Task rejected'))->send();
+                    }),
+                Action::make('reopen')
+                    ->label(l('إعادة فتح', 'Reopen'))
+                    ->icon('heroicon-o-arrow-path')
+                    ->color('warning')
+                    ->visible(fn (Task $record): bool => $record->status === TaskStatus::Approved && (auth()->user()?->can('tasks.reopen') ?? false))
+                    ->form([
+                        Forms\Components\Textarea::make('reason')
+                            ->label(l('سبب إعادة الفتح', 'Reopen reason'))
+                            ->required()
+                            ->maxLength(1000),
+                    ])
+                    ->requiresConfirmation()
+                    ->modalDescription(l(
+                        'ستُعاد المهمة المعتمدة إلى المندوب للتنفيذ مجدداً، مع الاحتفاظ بسجل الاعتماد السابق. الإجراء مُسجَّل.',
+                        'The approved task will return to the rep for more work while preserving its prior approval history. The action is logged.',
+                    ))
+                    ->action(function (Task $record, array $data): void {
+                        app(TaskService::class)->reopen($record, auth()->user(), $data['reason']);
+                        Notification::make()->success()->title(l('أُعيد فتح المهمة', 'Task reopened'))->send();
+                    }),
             ]);
     }
 
@@ -125,5 +247,61 @@ class TaskResource extends Resource
             'create' => Pages\CreateTask::route('/create'),
             'edit' => Pages\EditTask::route('/{record}/edit'),
         ];
+    }
+
+    /** @return array<string, string> */
+    private static function statusOptions(): array
+    {
+        return collect(TaskStatus::cases())->mapWithKeys(
+            fn (TaskStatus $status): array => [$status->value => self::statusLabel($status)],
+        )->all();
+    }
+
+    private static function statusLabel(TaskStatus|string $status): string
+    {
+        $value = $status instanceof TaskStatus ? $status->value : $status;
+
+        return match ($value) {
+            'draft' => l('مسودة', 'Draft'),
+            'assigned' => l('مسندة', 'Assigned'),
+            'accepted' => l('مقبولة', 'Accepted'),
+            'in_progress' => l('قيد التنفيذ', 'In progress'),
+            'submitted' => l('بانتظار الاعتماد', 'Awaiting approval'),
+            'changes_requested' => l('تحتاج تعديلات', 'Changes requested'),
+            'rejected' => l('مرفوضة', 'Rejected'),
+            'approved' => l('معتمدة', 'Approved'),
+            'reopened' => l('أُعيد فتحها', 'Reopened'),
+            'cancelled' => l('ملغاة', 'Cancelled'),
+            default => $value,
+        };
+    }
+
+    private static function statusColor(TaskStatus|string $status): string
+    {
+        $value = $status instanceof TaskStatus ? $status->value : $status;
+
+        return match ($value) {
+            'approved' => 'success',
+            'rejected', 'cancelled' => 'danger',
+            'changes_requested', 'reopened' => 'warning',
+            'submitted' => 'info',
+            default => 'gray',
+        };
+    }
+
+    private static function isCurrentApprover(Task $task, string $permission): bool
+    {
+        if ($task->status !== TaskStatus::Submitted || ! (auth()->user()?->can($permission) ?? false)) {
+            return false;
+        }
+
+        $request = $task->latestApproval;
+        if (! $request instanceof ApprovalRequest) {
+            return false;
+        }
+
+        $currentStep = $request->steps->firstWhere('sequence', $request->current_sequence);
+
+        return (int) $currentStep?->approver_id === (int) auth()->id();
     }
 }

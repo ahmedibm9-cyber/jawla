@@ -10,6 +10,7 @@ use App\Filament\Pages\ApiTokens;
 use App\Filament\Pages\CollectPayment as AdminCollectPayment;
 use App\Filament\Pages\CustomerMap;
 use App\Filament\Pages\Dashboard;
+use App\Filament\Pages\EtaSettings;
 use App\Filament\Pages\RepLiveMap;
 use App\Filament\Pages\ReportsPage;
 use App\Filament\Pages\SessionManagement;
@@ -166,6 +167,7 @@ final class VisualUiCoverage
             AdminCollectPayment::class,
             CustomerMap::class,
             Dashboard::class,
+            EtaSettings::class,
             RepLiveMap::class,
             ReportsPage::class,
             SessionManagement::class,

@@ -120,6 +120,12 @@
     <div class="more-section">
         <h2 class="more-section-title">{{ __('app.other') }}</h2>
         <div class="more-grid">
+            <a href="/app/tasks" class="more-tile">
+                <div class="more-tile-icon more-icon-amber">
+                    <x-heroicon-o-clipboard-document-check />
+                </div>
+                <span class="more-tile-label">{{ __('app.tasks') }}</span>
+            </a>
             <a href="/app/customers/create" class="more-tile">
                 <div class="more-tile-icon more-icon-purple">
                     <x-heroicon-o-user-plus />
