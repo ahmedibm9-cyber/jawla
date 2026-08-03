@@ -15,6 +15,7 @@ use App\Filament\Widgets\RepPerformanceWidget;
 use App\Filament\Widgets\SalesTodayWidget;
 use App\Filament\Widgets\VisitsTodayWidget;
 use App\Http\Middleware\FilamentAuthenticate;
+use App\Http\Middleware\EnsureValidLicense;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetActiveCompanyContext;
 use App\Http\Middleware\ThrottlePost;
@@ -106,10 +107,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 FilamentAuthenticate::class,
+                EnsureValidLicense::class,
             ])
             ->renderHook('panels::topbar.end', fn (): string => view('components._active-company', ['panel' => 'admin'])->render())
             ->renderHook('panels::head.start', fn (): string => '<link rel="preload" href="'.secure_asset('images/black-j.webp').'" as="image" fetchpriority="high">')
             ->renderHook('panels::head.end', fn (): string => view('filament.admin-dashboard-theme')->render().view('filament.onboarding-head')->render())
-            ->renderHook('panels::body.end', fn (): string => '<script>window.areRecordsPartiallySelected??=()=>!1;window.getRecordsOnPage??=()=>[];window.areRecordsSelected??=()=>!1;window.areRecordsToggleable??=()=>!0;</script>'.view('filament.onboarding-body')->render());
+            ->renderHook('panels::body.end', fn (): string => '<script>window.areRecordsPartiallySelected??=()=>!1;window.getRecordsOnPage??=()=>[];window.areRecordsSelected??=()=>!1;window.areRecordsToggleable??=()=>!0;</script><script>document.documentElement.dir="{{ app()->getLocale()==="ar"?"rtl":"ltr" }}";document.documentElement.lang="{{ app()->getLocale() }}";</script>'.view('filament.onboarding-body')->render());
     }
 }
