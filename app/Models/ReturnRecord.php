@@ -19,7 +19,7 @@ class ReturnRecord extends Model
 
     protected $fillable = [
         'company_id', 'customer_id', 'user_id', 'visit_id',
-        'against_invoice_id', 'return_number', 'total',
+        'against_invoice_id', 'destination_warehouse_id', 'quarantine_warehouse_id', 'return_number', 'total',
         'reason', 'status', 'returned_at',
         'posting_date', 'cancelled_at', 'cancelled_by',
     ];
@@ -54,6 +54,16 @@ class ReturnRecord extends Model
     public function againstInvoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class, 'against_invoice_id');
+    }
+
+    public function destinationWarehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'destination_warehouse_id');
+    }
+
+    public function quarantineWarehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'quarantine_warehouse_id');
     }
 
     public function cancelledByUser(): BelongsTo

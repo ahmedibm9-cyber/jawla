@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Server-side idempotency ledger for offline sync (CG2). One row per successfully
- * applied operation, keyed by (company_id, idempotency_key); a replay of the same
- * key returns the stored response instead of re-applying.
+ * applied operation, keyed by (company_id, user_id, idempotency_key); a replay
+ * by the same user returns the stored response instead of re-applying.
  */
 class SyncReceipt extends Model
 {

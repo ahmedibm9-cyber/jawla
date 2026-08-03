@@ -10,7 +10,8 @@ on compromise via Forge.
 - argon2id password hashing (`config/hashing.php`).
 - Sessions: httpOnly + secure (prod) + sameSite=lax + regenerate on login.
 - Admin session lifetime 12h; rep 16h.
-- Login throttle 5/min per IP + email with lockout backoff.
+- Login throttle 5/min per IP + email (via `throttle:login` middleware).
+- Sanctum API tokens expire after 24 hours (configurable via `SANCTUM_TOKEN_EXPIRATION`).
 
 ## Transport & headers
 

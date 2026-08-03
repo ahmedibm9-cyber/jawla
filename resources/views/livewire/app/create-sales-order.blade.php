@@ -31,8 +31,8 @@
                         @endforeach
                     </select>
                     <div class="grid grid-cols-2 gap-2 mt-2">
-                        <input type="number" wire:model="items.{{ $index }}.quantity" class="form-input" min="0.001" step="0.001" aria-label="{{ __('app.quantity') }}">
-                        <input type="number" wire:model="items.{{ $index }}.unit_price" class="form-input" min="0" step="0.01" aria-label="{{ __('app.unit_price') }}">
+                        <input type="number" wire:model="items.{{ $index }}.quantity" wire:change="quantityChanged({{ $index }})" class="form-input" min="0.001" step="0.001" aria-label="{{ __('app.quantity') }}">
+                        <input type="number" wire:model="items.{{ $index }}.unit_price" class="form-input" min="0" step="0.01" readonly aria-readonly="true" aria-label="{{ __('app.unit_price') }}">
                     </div>
                     @if(count($items) > 1)
                         <button type="button" wire:click="removeItem({{ $index }})" class="btn btn-outline w-full mt-2">{{ __('app.remove') }}</button>
@@ -48,7 +48,27 @@
 
             <x-ds.modal :title="__('app.sales_order_submit_title')" :message="__('app.sales_order_submit_message')">
                 <x-slot:trigger><button type="button" class="btn btn-primary w-full">{{ __('app.submit') }}</button></x-slot:trigger>
-                <x-slot:confirm><button type="button" wire:click="submit" wire:loading.attr="disabled" class="btn btn-primary w-full">{{ __('app.confirm') }}</button></x-slot:confirm>
+                <x-slot:confirm>
+                    <button type="button" wire:loading.attr="disabled" class="btn btn-primary w-full"
+                        x-data
+                        x-on:click="
+                            if (navigator.onLine) {
+                                $wire.submit();
+                            } else {
+                                try {
+                                    await window.jawlaSync.enqueue('sales_order', {
+                                        customer_id: $wire.customer_id,
+                                        requested_delivery_date: $wire.requested_delivery_date,
+                                        notes: $wire.notes,
+                                        items: JSON.parse(JSON.stringify($wire.items)),
+                                    });
+                                    $wire.queueOffline();
+                                } catch (error) {
+                                    $wire.offlineQueueFailed();
+                                }
+                            }
+                        ">{{ __('app.confirm') }}</button>
+                </x-slot:confirm>
             </x-ds.modal>
         </form>
     </div>

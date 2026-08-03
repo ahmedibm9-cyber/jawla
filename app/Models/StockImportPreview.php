@@ -17,6 +17,7 @@ class StockImportPreview extends Model
         'approved_by',
         'token_hash',
         'file_path',
+        'source_disk',
         'file_checksum',
         'parsed_rows',
         'errors',

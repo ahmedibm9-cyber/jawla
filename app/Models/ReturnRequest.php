@@ -13,7 +13,7 @@ class ReturnRequest extends Model
 {
     use BelongsToCompany;
 
-    protected $fillable = ['company_id', 'customer_id', 'user_id', 'visit_id', 'against_invoice_id', 'return_record_id', 'request_number', 'status', 'reason', 'total', 'submitted_at', 'approved_by', 'approved_at', 'received_by', 'received_at', 'receipt_notes', 'decision_reason'];
+    protected $fillable = ['company_id', 'customer_id', 'user_id', 'visit_id', 'against_invoice_id', 'return_record_id', 'destination_warehouse_id', 'quarantine_warehouse_id', 'request_number', 'status', 'reason', 'total', 'submitted_at', 'approved_by', 'approved_at', 'received_by', 'received_at', 'receipt_notes', 'decision_reason'];
 
     protected function casts(): array
     {
@@ -38,6 +38,16 @@ class ReturnRequest extends Model
     public function returnRecord(): BelongsTo
     {
         return $this->belongsTo(ReturnRecord::class);
+    }
+
+    public function destinationWarehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'destination_warehouse_id');
+    }
+
+    public function quarantineWarehouse(): BelongsTo
+    {
+        return $this->belongsTo(Warehouse::class, 'quarantine_warehouse_id');
     }
 
     public function items(): HasMany

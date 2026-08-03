@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\WebhookDeliveryResource\Pages;
 use App\Models\WebhookDelivery;
+use App\Services\LicenseService;
 use App\Services\WebhookService;
 use Filament\Actions\Action;
 use Filament\Resources\Resource;
@@ -34,7 +35,8 @@ class WebhookDeliveryResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->can('integrations.manage') ?? false;
+        return (auth()->user()?->can('integrations.manage') ?? false)
+            && app(LicenseService::class)->runtimeFeatureEnabled('webhooks');
     }
 
     public static function canCreate(): bool

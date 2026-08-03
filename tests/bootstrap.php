@@ -6,8 +6,10 @@ declare(strict_types=1);
  * Test bootstrap — runs once before the test suite.
  *
  * The suite is allowed to create and migrate databases only inside the
- * dedicated jawla_test namespace. This makes a fresh sequential run and
- * Laravel's per-worker parallel databases self-provisioning without ever
+ * dedicated jawla_test namespace. Each PHP worker receives a process-scoped
+ * database unless JAWLA_TEST_DATABASE is explicitly supplied, so concurrent
+ * RefreshDatabase resets cannot remove another worker's schema. This keeps
+ * Laravel's real PostgreSQL reset implementation without ever
  * falling back to the development database.
  */
 

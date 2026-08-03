@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\PriceQuotationRequest;
 use App\Models\ProformaInvoice;
 use App\Models\VisitReport;
+use App\Support\CsvCell;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Livewire\WithPagination;
@@ -28,7 +29,13 @@ class ReportsPage extends Page
 
     public static function canAccess(): bool
     {
-        return Auth::user()?->can('reports.view') ?? false;
+        $user = Auth::user();
+
+        return $user !== null && $user->can('reports.view') && $user->canAny([
+            'reports.visits',
+            'reports.sales',
+            'reports.financial',
+        ]);
     }
 
     public string $tab = 'visit_reports';
@@ -37,8 +44,24 @@ class ReportsPage extends Page
 
     public ?string $toDate = null;
 
+    public function mount(): void
+    {
+        if (! $this->canUseTab($this->tab)) {
+            $this->tab = collect(['visit_reports', 'quotations', 'proformas', 'invoices'])
+                ->first(fn (string $tab): bool => $this->canUseTab($tab))
+                ?? abort(403);
+        }
+    }
+
+    public function updatedTab(string $tab): void
+    {
+        abort_unless($this->canUseTab($tab), 403);
+        $this->resetPage();
+    }
+
     public function getVisitsProperty()
     {
+        $this->authorizeTab('visit_reports');
         $q = VisitReport::whereHas('visit.customer', function ($q) {
             $q->where('company_id', Auth::user()->activeCompanyId());
         })->with(['visit.customer', 'visit.user'])->latest();
@@ -55,6 +78,7 @@ class ReportsPage extends Page
 
     public function getQuotationsProperty()
     {
+        $this->authorizeTab('quotations');
         $q = PriceQuotationRequest::where('company_id', Auth::user()->activeCompanyId())
             ->with(['customer', 'product', 'quotation'])
             ->latest();
@@ -71,6 +95,7 @@ class ReportsPage extends Page
 
     public function getProformasProperty()
     {
+        $this->authorizeTab('proformas');
         $q = ProformaInvoice::where('company_id', Auth::user()->activeCompanyId())
             ->with(['customer', 'items'])
             ->latest();
@@ -87,6 +112,7 @@ class ReportsPage extends Page
 
     public function getInvoicesProperty()
     {
+        $this->authorizeTab('invoices');
         $q = Invoice::where('company_id', Auth::user()->activeCompanyId())
             ->with(['customer', 'items'])
             ->latest();
@@ -103,7 +129,7 @@ class ReportsPage extends Page
 
     public function exportCsv(): StreamedResponse
     {
-        abort_unless(Auth::user()?->can('reports.view'), 403);
+        $this->authorizeTab($this->tab);
 
         return response()->streamDownload(function (): void {
             $output = fopen('php://output', 'wb');
@@ -113,7 +139,8 @@ class ReportsPage extends Page
                 'visit_reports' => $this->exportVisits($output),
                 'quotations' => $this->exportQuotations($output),
                 'proformas' => $this->exportProformas($output),
-                default => $this->exportInvoices($output),
+                'invoices' => $this->exportInvoices($output),
+                default => abort(404),
             };
 
             fclose($output);
@@ -124,51 +151,51 @@ class ReportsPage extends Page
 
     private function exportVisits($output): void
     {
-        fputcsv($output, ['Representative', 'Customer', 'Submitted at', 'Summary']);
+        $this->writeCsv($output, ['Representative', 'Customer', 'Submitted at', 'Summary']);
         $query = VisitReport::whereHas('visit.customer', fn ($query) => $query->where('company_id', Auth::user()->activeCompanyId()))
             ->with(['visit.customer', 'visit.user'])->orderBy('id');
         $this->applyDateRange($query, 'submitted_at');
         foreach ($query->lazyById(500) as $report) {
-            fputcsv($output, [$report->visit?->user?->name, $report->visit?->customer?->name_ar, $report->submitted_at?->toIso8601String(), $report->summary]);
+            $this->writeCsv($output, [$report->visit?->user?->name, $report->visit?->customer?->name_ar, $report->submitted_at?->toIso8601String(), $report->summary]);
         }
     }
 
     private function exportQuotations($output): void
     {
-        fputcsv($output, ['Customer', 'Product', 'Quantity', 'Price', 'Status']);
+        $this->writeCsv($output, ['Customer', 'Product', 'Quantity', 'Price', 'Status']);
         $query = PriceQuotationRequest::query()
             ->where('company_id', Auth::user()->activeCompanyId())
             ->with(['customer', 'product', 'quotation'])
             ->orderBy('id');
         $this->applyDateRange($query, 'created_at');
         foreach ($query->lazyById(500) as $request) {
-            fputcsv($output, [$request->customer?->name_ar, $request->product?->name_ar, $request->quantity_requested, $request->quotation?->base_price, $request->status]);
+            $this->writeCsv($output, [$request->customer?->name_ar, $request->product?->name_ar, $request->quantity_requested, $request->quotation?->base_price, $request->status]);
         }
     }
 
     private function exportProformas($output): void
     {
-        fputcsv($output, ['Number', 'Customer', 'Total', 'Posting date', 'Status']);
+        $this->writeCsv($output, ['Number', 'Customer', 'Total', 'Posting date', 'Status']);
         $query = ProformaInvoice::query()
             ->where('company_id', Auth::user()->activeCompanyId())
             ->with('customer')
             ->orderBy('id');
         $this->applyDateRange($query, 'posting_date');
         foreach ($query->lazyById(500) as $proforma) {
-            fputcsv($output, [$proforma->proforma_number, $proforma->customer?->name_ar, $proforma->total, $proforma->posting_date?->format('Y-m-d'), $proforma->status]);
+            $this->writeCsv($output, [$proforma->proforma_number, $proforma->customer?->name_ar, $proforma->total, $proforma->posting_date?->format('Y-m-d'), $proforma->status]);
         }
     }
 
     private function exportInvoices($output): void
     {
-        fputcsv($output, ['Number', 'Customer', 'Total', 'Remaining', 'Issued at', 'Status']);
+        $this->writeCsv($output, ['Number', 'Customer', 'Total', 'Remaining', 'Issued at', 'Status']);
         $query = Invoice::query()
             ->where('company_id', Auth::user()->activeCompanyId())
             ->with('customer')
             ->orderBy('id');
         $this->applyDateRange($query, 'issued_at');
         foreach ($query->lazyById(500) as $invoice) {
-            fputcsv($output, [$invoice->invoice_number, $invoice->customer?->name_ar, $invoice->total, $invoice->remaining_amount, $invoice->issued_at?->toIso8601String(), $invoice->status?->value ?? $invoice->status]);
+            $this->writeCsv($output, [$invoice->invoice_number, $invoice->customer?->name_ar, $invoice->total, $invoice->remaining_amount, $invoice->issued_at?->toIso8601String(), $invoice->status?->value ?? $invoice->status]);
         }
     }
 
@@ -180,5 +207,28 @@ class ReportsPage extends Page
         if ($this->toDate) {
             $query->whereDate($column, '<=', $this->toDate);
         }
+    }
+
+    private function authorizeTab(string $tab): void
+    {
+        abort_unless(Auth::user()?->can('reports.view') && $this->canUseTab($tab), 403);
+    }
+
+    private function canUseTab(string $tab): bool
+    {
+        $permission = match ($tab) {
+            'visit_reports' => 'reports.visits',
+            'quotations', 'proformas' => 'reports.sales',
+            'invoices' => 'reports.financial',
+            default => null,
+        };
+
+        return $permission !== null && (Auth::user()?->can($permission) ?? false);
+    }
+
+    /** @param resource $output @param list<mixed> $cells */
+    private function writeCsv($output, array $cells): void
+    {
+        fputcsv($output, array_map(CsvCell::neutralize(...), $cells));
     }
 }

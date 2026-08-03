@@ -13,6 +13,7 @@ use App\Models\Warehouse;
 use App\Services\StockImportService;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class StockImportIntegrityTest extends TestCase
@@ -142,5 +143,31 @@ class StockImportIntegrityTest extends TestCase
 
         $this->expectException(DomainException::class);
         app(StockImportService::class)->confirm($staged['token'], $otherUser, 'other.csv');
+    }
+
+    public function test_object_storage_import_is_streamed_to_a_verified_local_copy(): void
+    {
+        Storage::fake('s3');
+        Stock::create([
+            'warehouse_id' => $this->warehouse->id,
+            'product_id' => $this->product->id,
+            'quantity' => 10,
+        ]);
+        Storage::disk('s3')->put('stock-imports/opening.csv', "sku,quantity\nSAFE-IMPORT-1,11\n");
+
+        $staged = app(StockImportService::class)->stageFromDisk(
+            's3',
+            'stock-imports/opening.csv',
+            $this->warehouse,
+            $this->keeper,
+        );
+        app(StockImportService::class)->confirm($staged['token'], $this->keeper, 'opening.csv');
+
+        $this->assertSame('11.000', Stock::where('warehouse_id', $this->warehouse->id)->value('quantity'));
+        $this->assertDatabaseHas('stock_import_previews', [
+            'source_disk' => 's3',
+            'file_path' => 'stock-imports/opening.csv',
+            'status' => 'consumed',
+        ]);
     }
 }

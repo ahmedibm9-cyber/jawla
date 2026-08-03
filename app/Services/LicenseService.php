@@ -18,14 +18,7 @@ class LicenseService
         return DB::transaction(function () use ($payload, $document, $signature, $actor): InstallationLicense {
             $license = InstallationLicense::query()->updateOrCreate(
                 ['license_id' => $payload['license_id']],
-                [
-                    'licensee' => $payload['licensee'],
-                    'installation_id' => $payload['installation_id'] ?? null,
-                    'edition' => $payload['edition'],
-                    'max_users' => $payload['max_users'] ?? null,
-                    'features' => $payload['features'] ?? [],
-                    'valid_from' => $payload['valid_from'],
-                    'expires_at' => $payload['expires_at'],
+                $this->persistedClaims($payload) + [
                     'status' => $this->dateStatus($payload['valid_from'], $payload['expires_at']),
                     'raw_document' => $document,
                     'signature' => $signature,
@@ -48,7 +41,7 @@ class LicenseService
             'The stored license document has changed.',
         ));
 
-        $license->update([
+        $license->update($this->persistedClaims($payload) + [
             'status' => $this->dateStatus($payload['valid_from'], $payload['expires_at']),
             'last_verified_at' => now(),
         ]);
@@ -76,6 +69,51 @@ class LicenseService
         return $license;
     }
 
+    public function assertRuntimeValid(): ?InstallationLicense
+    {
+        if (config('jawla.is_demo')) {
+            return null;
+        }
+
+        return $this->assertValid();
+    }
+
+    public function assertRuntimeFeature(string $feature): void
+    {
+        $license = $this->assertRuntimeValid();
+        if ($license === null) {
+            return;
+        }
+
+        throw_unless(in_array($feature, $license->features ?? [], true), new \DomainException(
+            "The installed license does not enable {$feature}.",
+        ));
+    }
+
+    public function runtimeFeatureEnabled(string $feature): bool
+    {
+        $license = $this->assertRuntimeValid();
+
+        return $license === null || in_array($feature, $license->features ?? [], true);
+    }
+
+    public function assertCanActivateUser(?int $userId = null): void
+    {
+        if (config('jawla.is_demo') || User::query()->count() === 0) {
+            return;
+        }
+
+        $license = $this->assertValid();
+        if ($license->max_users === null) {
+            return;
+        }
+
+        $activeUsers = User::query()->where('is_active', true)
+            ->when($userId !== null, fn ($query) => $query->whereKeyNot($userId))
+            ->count();
+        throw_if($activeUsers >= $license->max_users, new \DomainException('The licensed active-user limit has been reached.'));
+    }
+
     /** @return array<string, mixed> */
     private function verifiedPayload(string $document, string $signature): array
     {
@@ -87,11 +125,27 @@ class LicenseService
         throw_unless($verified === 1, new \DomainException('The license signature is invalid.'));
 
         $payload = json_decode($document, true, flags: JSON_THROW_ON_ERROR);
+        throw_unless(is_array($payload), new \DomainException('The license document must contain a JSON object.'));
         foreach (['license_id', 'licensee', 'edition', 'valid_from', 'expires_at'] as $field) {
             throw_if(blank($payload[$field] ?? null), new \DomainException("License field {$field} is required."));
         }
         throw_unless((bool) preg_match('/^[0-9a-f-]{36}$/i', $payload['license_id']), new \DomainException('License id must be a UUID.'));
+        throw_unless(is_string($payload['licensee']) && mb_strlen($payload['licensee']) <= 255, new \DomainException('Licensee must be a string of at most 255 characters.'));
+        throw_unless(is_string($payload['edition']) && preg_match('/^[a-z][a-z0-9_-]{1,49}$/', $payload['edition']) === 1, new \DomainException('License edition is invalid.'));
+        throw_unless(! isset($payload['max_users']) || (is_int($payload['max_users']) && $payload['max_users'] > 0), new \DomainException('License max_users must be a positive integer.'));
+        throw_unless(! isset($payload['features']) || (is_array($payload['features']) && collect($payload['features'])->every(fn ($feature): bool => is_string($feature) && $feature !== '')), new \DomainException('License features must be non-empty strings.'));
+        throw_unless(is_string($payload['valid_from']) && is_string($payload['expires_at']), new \DomainException('License validity dates must be strings.'));
+        try {
+            $validFrom = CarbonImmutable::createFromFormat('!Y-m-d', $payload['valid_from']);
+            $expiresAt = CarbonImmutable::createFromFormat('!Y-m-d', $payload['expires_at']);
+        } catch (\Throwable) {
+            throw new \DomainException('License validity dates are invalid.');
+        }
+        throw_unless($validFrom !== false && $expiresAt !== false && $expiresAt->gte($validFrom), new \DomainException('License validity dates are invalid.'));
         $configuredInstallation = (string) config('jawla.license.installation_id');
+        if (app()->isProduction()) {
+            throw_if($configuredInstallation === '', new \DomainException('JAWLA_INSTALLATION_ID is required in production.'));
+        }
         if ($configuredInstallation !== '') {
             throw_unless(hash_equals($configuredInstallation, (string) ($payload['installation_id'] ?? '')), new \DomainException(
                 'This license belongs to a different installation.',
@@ -99,6 +153,20 @@ class LicenseService
         }
 
         return $payload;
+    }
+
+    /** @param array<string, mixed> $payload @return array<string, mixed> */
+    private function persistedClaims(array $payload): array
+    {
+        return [
+            'licensee' => $payload['licensee'],
+            'installation_id' => $payload['installation_id'] ?? null,
+            'edition' => $payload['edition'],
+            'max_users' => $payload['max_users'] ?? null,
+            'features' => array_values(array_unique($payload['features'] ?? [])),
+            'valid_from' => $payload['valid_from'],
+            'expires_at' => $payload['expires_at'],
+        ];
     }
 
     private function dateStatus(string $validFrom, string $expiresAt): string

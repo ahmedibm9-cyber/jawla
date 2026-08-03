@@ -8,6 +8,7 @@ use App\Services\Sync\Handlers\ExpenseSyncHandler;
 use App\Services\Sync\Handlers\PaymentSyncHandler;
 use App\Services\Sync\Handlers\ReturnRequestSyncHandler;
 use App\Services\Sync\Handlers\ReturnSyncHandler;
+use App\Services\Sync\Handlers\SalesOrderSyncHandler;
 use App\Services\Sync\Handlers\SaleSyncHandler;
 use App\Services\Sync\Handlers\VisitReportSyncHandler;
 use App\Services\Sync\SyncHandlerRegistry;
@@ -25,6 +26,7 @@ class SyncServiceProvider extends ServiceProvider
     {
         $this->app->tag([
             SaleSyncHandler::class,
+            SalesOrderSyncHandler::class,
             PaymentSyncHandler::class,
             CollectionSubmissionSyncHandler::class,
             ReturnSyncHandler::class,

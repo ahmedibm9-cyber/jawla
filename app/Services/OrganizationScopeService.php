@@ -8,6 +8,11 @@ use Illuminate\Database\Eloquent\Builder;
 
 class OrganizationScopeService
 {
+    public function canAccessUser(User $actor, int $userId): bool
+    {
+        return $this->scopeUsers(User::query()->whereKey($userId), $actor)->exists();
+    }
+
     /**
      * Limit a user query to the actor's assigned organization subtree.
      * Administrators and users without an explicit unit retain company-wide

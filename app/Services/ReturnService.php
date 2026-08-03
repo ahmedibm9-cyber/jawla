@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Data\ReturnStockDestination;
 use App\Enums\InvoiceStatus;
 use App\Enums\StockReason;
 use App\Exceptions\Domain\DomainException;
@@ -33,6 +34,7 @@ class ReturnService
         ?int $againstInvoiceId = null,
         ?int $visitId = null,
         string $reason = '',
+        ?ReturnStockDestination $stockDestination = null,
     ): ReturnRecord {
         app(ActiveCompanyContext::class)->assertMatches($companyId);
 
@@ -51,9 +53,10 @@ class ReturnService
             $againstInvoiceId,
             $visitId,
             $reason,
+            $stockDestination,
         ): ReturnRecord {
-            $actor = User::withoutGlobalScopes()->whereKey($userId)->lockForUpdate()->firstOrFail();
-            if (! $actor->hasCompanyAccess($companyId) || ! $actor->can('create:return_record')) {
+            $representative = User::withoutGlobalScopes()->whereKey($userId)->lockForUpdate()->firstOrFail();
+            if (! $representative->hasCompanyAccess($companyId) || ! $representative->can('create:return_record')) {
                 throw new DomainException('Only an assigned sales rep may create an invoice-linked return.');
             }
             $invoice = Invoice::whereKey($againstInvoiceId)
@@ -76,20 +79,33 @@ class ReturnService
                 ->where('company_id', $companyId)
                 ->lockForUpdate()
                 ->firstOrFail();
-            $van = Warehouse::where('user_id', $userId)
-                ->where('company_id', $companyId)
-                ->where('type', 'van')
-                ->where('is_active', true)
-                ->lockForUpdate()
-                ->first();
-            if (! $van) {
-                throw new DomainException('An active same-company van warehouse is required for returns.');
+            if ($stockDestination === null) {
+                $stockActorId = $userId;
+                $sellableWarehouse = Warehouse::where('user_id', $userId)
+                    ->where('company_id', $companyId)->where('type', 'van')->where('is_active', true)
+                    ->lockForUpdate()->first();
+                $quarantine = Warehouse::where('company_id', $companyId)->where('type', 'quarantine')
+                    ->where('is_active', true)->lockForUpdate()->first();
+                if ($sellableWarehouse === null) {
+                    throw new DomainException('An active same-company van warehouse is required for field returns.');
+                }
+            } else {
+                $stockActor = User::withoutGlobalScopes()->whereKey($stockDestination->stockActorId)
+                    ->lockForUpdate()->firstOrFail();
+                if (! $stockActor->hasCompanyAccess($companyId) || ! $stockActor->can('return_requests.receive')) {
+                    throw new DomainException('Only an authorized same-company warehouse user may receive this return.');
+                }
+                $stockActorId = (int) $stockActor->id;
+                $sellableWarehouse = Warehouse::withoutGlobalScopes()
+                    ->whereKey($stockDestination->sellableWarehouseId)->where('company_id', $companyId)
+                    ->where('type', 'main')->where('is_active', true)->lockForUpdate()->first();
+                if ($sellableWarehouse === null) {
+                    throw new DomainException('Sellable returns require an active same-company main warehouse.');
+                }
+                $quarantine = $stockDestination->quarantineWarehouseId === null ? null : Warehouse::withoutGlobalScopes()
+                    ->whereKey($stockDestination->quarantineWarehouseId)->where('company_id', $companyId)
+                    ->where('type', 'quarantine')->where('is_active', true)->lockForUpdate()->first();
             }
-            $quarantine = Warehouse::where('company_id', $companyId)
-                ->where('type', 'quarantine')
-                ->where('is_active', true)
-                ->lockForUpdate()
-                ->first();
 
             $return = ReturnRecord::create([
                 'company_id' => $companyId,
@@ -97,6 +113,8 @@ class ReturnService
                 'user_id' => $userId,
                 'visit_id' => $visitId,
                 'against_invoice_id' => $invoice->id,
+                'destination_warehouse_id' => $sellableWarehouse->id,
+                'quarantine_warehouse_id' => $quarantine?->id,
                 'return_number' => app(DocumentNumberService::class)->generate('sales_return', $companyId),
                 'total' => 0,
                 'reason' => $reason,
@@ -156,6 +174,12 @@ class ReturnService
                     '',
                 );
                 $lineGross = bcadd($lineTotal, $taxAmount, 2);
+                if ($stockDestination !== null) {
+                    $this->assertSnapshot($input, 'unit_price', (string) $original->unit_price, 2);
+                    $this->assertSnapshot($input, 'line_total', $lineTotal, 2);
+                    $this->assertSnapshot($input, 'tax_amount', $taxAmount, 2);
+                    $this->assertSnapshot($input, 'total', $lineGross, 2);
+                }
 
                 $returnItem = ReturnItem::create([
                     'return_id' => $return->id,
@@ -172,7 +196,7 @@ class ReturnService
                 $subtotal = bcadd($subtotal, $lineTotal, 2);
                 $taxTotal = bcadd($taxTotal, $taxAmount, 2);
 
-                $destination = $condition === 'damaged' ? $quarantine : $van;
+                $destination = $condition === 'damaged' ? $quarantine : $sellableWarehouse;
                 $this->stock->increment(
                     $destination->id,
                     $original->product_id,
@@ -180,7 +204,7 @@ class ReturnService
                     (float) $quantity,
                     StockReason::Return,
                     $return,
-                    $userId,
+                    $stockActorId,
                 );
             }
 
@@ -192,7 +216,7 @@ class ReturnService
                 'customer_id' => $customerId,
                 'invoice_id' => $invoice->id,
                 'return_id' => $return->id,
-                'created_by' => $userId,
+                'created_by' => $stockActorId,
                 'credit_number' => app(DocumentNumberService::class)->generate('credit_note', $companyId),
                 'subtotal' => $subtotal,
                 'tax_amount' => $taxTotal,
@@ -237,7 +261,7 @@ class ReturnService
                     'customer_id' => $customerId,
                     'invoice_id' => $invoice->id,
                     'return_id' => $return->id,
-                    'created_by' => $userId,
+                    'created_by' => $stockActorId,
                     'credit_number' => app(DocumentNumberService::class)->generate('credit_note', $companyId),
                     'amount' => $unallocatedCredit,
                     'remaining_amount' => $unallocatedCredit,
@@ -301,20 +325,24 @@ class ReturnService
                 ->where('company_id', $return->company_id)
                 ->lockForUpdate()
                 ->firstOrFail();
-            $van = Warehouse::where('user_id', $return->user_id)
-                ->where('company_id', $return->company_id)
-                ->where('type', 'van')
+            $sellableWarehouse = Warehouse::where('company_id', $return->company_id)
+                ->when(
+                    $return->destination_warehouse_id !== null,
+                    fn ($query) => $query->whereKey($return->destination_warehouse_id),
+                    fn ($query) => $query->where('user_id', $return->user_id)->where('type', 'van'),
+                )
                 ->where('is_active', true)
                 ->lockForUpdate()
                 ->firstOrFail();
             $quarantine = Warehouse::where('company_id', $return->company_id)
                 ->where('type', 'quarantine')
+                ->when($return->quarantine_warehouse_id !== null, fn ($query) => $query->whereKey($return->quarantine_warehouse_id))
                 ->where('is_active', true)
                 ->lockForUpdate()
                 ->first();
 
             foreach ($return->items()->lockForUpdate()->get() as $item) {
-                $source = $item->condition === 'damaged' ? $quarantine : $van;
+                $source = $item->condition === 'damaged' ? $quarantine : $sellableWarehouse;
                 if ($source === null) {
                     throw new DomainException('The original return stock location is unavailable.');
                 }
@@ -376,5 +404,13 @@ class ReturnService
 
             return $return->fresh();
         }, 3);
+    }
+
+    /** @param array<string, mixed> $input */
+    private function assertSnapshot(array $input, string $field, string $actual, int $scale): void
+    {
+        if (array_key_exists($field, $input) && bccomp((string) $input[$field], $actual, $scale) !== 0) {
+            throw new DomainException('The approved return value no longer matches the immutable invoice snapshot.');
+        }
     }
 }

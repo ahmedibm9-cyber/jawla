@@ -2,8 +2,12 @@
 
 namespace App\Filament\Resources;
 
+use App\Data\ReturnStockDestination;
 use App\Filament\Resources\ReturnRequestResource\Pages;
 use App\Models\ReturnRequest;
+use App\Models\User;
+use App\Models\Warehouse;
+use App\Services\OrganizationScopeService;
 use App\Services\ReturnRequestService;
 use Filament\Actions\Action;
 use Filament\Forms;
@@ -12,6 +16,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ReturnRequestResource extends Resource
 {
@@ -69,10 +74,26 @@ class ReturnRequestResource extends Resource
                 ->action(fn (ReturnRequest $record, array $data) => app(ReturnRequestService::class)->reject($record->latestApproval, auth()->user(), $data['reason'])),
             Action::make('receive')->label(l('استلام في المخزن', 'Warehouse receipt'))->color('success')
                 ->visible(fn (ReturnRequest $record): bool => $record->status === 'approved' && (auth()->user()?->can('return_requests.receive') ?? false))
-                ->form([Forms\Components\Textarea::make('notes')->label(l('ملاحظات الاستلام', 'Receipt notes'))->maxLength(1000)])
+                ->form([
+                    Forms\Components\Select::make('destination_warehouse_id')
+                        ->label(l('مخزن الأصناف الصالحة', 'Sellable destination warehouse'))
+                        ->options(fn () => Warehouse::query()->where('company_id', auth()->user()->activeCompanyId())
+                            ->where('type', 'main')->where('is_active', true)->orderBy('name_ar')->pluck('name_ar', 'id'))
+                        ->required(),
+                    Forms\Components\Select::make('quarantine_warehouse_id')
+                        ->label(l('مخزن الحجر للتالف', 'Damaged-goods quarantine'))
+                        ->options(fn () => Warehouse::query()->where('company_id', auth()->user()->activeCompanyId())
+                            ->where('type', 'quarantine')->where('is_active', true)->orderBy('name_ar')->pluck('name_ar', 'id')),
+                    Forms\Components\Textarea::make('notes')->label(l('ملاحظات الاستلام', 'Receipt notes'))->maxLength(1000),
+                ])
                 ->requiresConfirmation()->modalDescription(l('سيؤدي الاستلام إلى إضافة الأصناف الصالحة للمخزون والتالفة للحجر، وإصدار الإشعار الدائن وتحديث رصيد العميل. هذا إجراء مالي ومخزني مُسجَّل.', 'Receipt adds sellable goods to stock, damaged goods to quarantine, issues the credit note, and updates the customer balance. This is a logged stock and financial action.'))
                 ->action(function (ReturnRequest $record, array $data): void {
-                    app(ReturnRequestService::class)->receive($record, auth()->user(), $data['notes'] ?? null);
+                    $destination = new ReturnStockDestination(
+                        (int) $data['destination_warehouse_id'],
+                        isset($data['quarantine_warehouse_id']) ? (int) $data['quarantine_warehouse_id'] : null,
+                        (int) auth()->id(),
+                    );
+                    app(ReturnRequestService::class)->receive($record, auth()->user(), $destination, $data['notes'] ?? null);
                     Notification::make()->success()->title(l('تم استلام المرتجع', 'Return received'))->send();
                 }),
         ])->bulkActions([]);
@@ -81,5 +102,18 @@ class ReturnRequestResource extends Resource
     public static function getPages(): array
     {
         return ['index' => Pages\ListReturnRequests::route('/')];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery()->with(['latestApproval.steps', 'items']);
+        $actor = auth()->user();
+        if ($actor === null) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        $visibleUsers = app(OrganizationScopeService::class)->scopeUsers(User::query()->select('users.id'), $actor);
+
+        return $query->whereIn('user_id', $visibleUsers);
     }
 }

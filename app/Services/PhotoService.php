@@ -70,6 +70,31 @@ class PhotoService
         }
     }
 
+    /** @param array{name:string,mime:string,base64:string} $evidence */
+    public function storeEncodedEvidence(array $evidence, User $rep): Photo
+    {
+        $mime = strtolower(trim($evidence['mime']));
+        if (! in_array($mime, ['image/jpeg', 'image/png', 'image/webp'], true)) {
+            throw new RuntimeException('The collection evidence format is not supported.');
+        }
+
+        $contents = base64_decode($evidence['base64'], true);
+        if ($contents === false || $contents === '' || strlen($contents) > 5 * 1024 * 1024) {
+            throw new RuntimeException('The collection evidence is invalid or exceeds 5 MB.');
+        }
+
+        $temporaryPath = tempnam(sys_get_temp_dir(), 'jawla-evidence-');
+        if ($temporaryPath === false || file_put_contents($temporaryPath, $contents) === false) {
+            throw new RuntimeException('A temporary evidence file could not be created.');
+        }
+
+        try {
+            return $this->store(new UploadedFile($temporaryPath, basename($evidence['name']), $mime, null, true), $rep);
+        } finally {
+            @unlink($temporaryPath);
+        }
+    }
+
     /**
      * Re-encode supported images before upload. This strips EXIF and ancillary
      * metadata while the file is still local, so the same privacy guarantee

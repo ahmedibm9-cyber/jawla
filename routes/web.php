@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\OnboardingController;
 use App\Http\Controllers\App\LoginController;
 use App\Http\Controllers\App\PdfController;
 use App\Http\Controllers\CompanyContextController;
+use App\Http\Controllers\LicenseRecoveryController;
 use App\Http\Controllers\SystemPageController;
 use App\Livewire\App\AddCustomer;
 use App\Livewire\App\CashReconcile;
@@ -49,12 +50,16 @@ Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
     ->middleware('throttle:10,1')
     ->name('locale.switch');
 
+Route::get('/locale/current', [SystemPageController::class, 'currentLocale'])
+    ->middleware('cache.headers:no-store,private')
+    ->name('locale.current');
+
 Route::post('/company/switch', [CompanyContextController::class, 'update'])
-    ->middleware(['auth', 'throttle:post'])
+    ->middleware(['auth', 'license', 'throttle:post'])
     ->name('company.switch');
 
 Route::post('/api/onboarding/complete', [OnboardingController::class, 'complete'])
-    ->middleware(['auth', 'throttle:post'])
+    ->middleware(['auth', 'license', 'throttle:post'])
     ->name('api.onboarding.complete');
 
 // Admin (Filament) is auto-registered by the panel provider.
@@ -63,6 +68,12 @@ Route::post('/api/onboarding/complete', [OnboardingController::class, 'complete'
 Route::get('/admin/logout', [SystemPageController::class, 'adminLogout'])
     ->middleware('throttle:10,1');
 
+Route::middleware(['auth'])->group(function (): void {
+    Route::get('/admin/license-recovery', [LicenseRecoveryController::class, 'create'])->name('license.recovery');
+    Route::post('/admin/license-recovery', [LicenseRecoveryController::class, 'store'])
+        ->middleware('throttle:post')->name('license.recovery.store');
+});
+
 // Old rep login route — redirect to unified login
 Route::get('/app/login', [SystemPageController::class, 'appLoginRedirect'])->name('app.login');
 
@@ -70,7 +81,7 @@ Route::get('/app/login', [SystemPageController::class, 'appLoginRedirect'])->nam
 Route::get('/app/sales-flow', [SystemPageController::class, 'salesFlowRedirect']);
 
 // Rep PWA route group (protected)
-Route::middleware(['web', 'auth', 'ensure.rep', 'ensure.device'])->prefix('app')->name('app.')->group(function () {
+Route::middleware(['web', 'auth', 'license', 'ensure.rep', 'ensure.device'])->prefix('app')->name('app.')->group(function () {
     Route::get('/device', DeviceRegistration::class)->name('device');
     Route::get('/', Home::class)->name('home');
     Route::get('/visit/{visit}', VisitFlow::class)->name('visit');

@@ -14,8 +14,8 @@ use App\Filament\Widgets\PendingQuotationsWidget;
 use App\Filament\Widgets\RepPerformanceWidget;
 use App\Filament\Widgets\SalesTodayWidget;
 use App\Filament\Widgets\VisitsTodayWidget;
-use App\Http\Middleware\FilamentAuthenticate;
 use App\Http\Middleware\EnsureValidLicense;
+use App\Http\Middleware\FilamentAuthenticate;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetActiveCompanyContext;
 use App\Http\Middleware\ThrottlePost;
@@ -104,6 +104,7 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
                 SecurityHeaders::class,
                 ThrottlePost::class,
+                'throttle:login', // 5/min per email+ip for login attempts
             ])
             ->authMiddleware([
                 FilamentAuthenticate::class,
@@ -111,11 +112,19 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->renderHook('panels::topbar.end', fn (): string => view('components._active-company', ['panel' => 'admin'])->render())
             ->renderHook('panels::head.start', fn (): string => '<link rel="preload" href="'.secure_asset('images/black-j.webp').'" as="image" fetchpriority="high">')
-            ->renderHook('panels::head.end', fn (): string => view('filament.admin-dashboard-theme')->render().view('filament.onboarding-head')->render())
-            ->renderHook('panels::body.end', function (): string {
+            ->renderHook('panels::head.end', function (): string {
                 $dir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
                 $lang = app()->getLocale();
-                return '<script>window.areRecordsPartiallySelected??=()=>!1;window.getRecordsOnPage??=()=>[];window.areRecordsSelected??=()=>!1;window.areRecordsToggleable??=()=>!0;</script><script>document.documentElement.dir="'.$dir.'";document.documentElement.lang="'.$lang.'";</script>'.view('filament.onboarding-body')->render();
+                return view('filament.admin-dashboard-theme')->render()
+                    .view('filament.onboarding-head')->render()
+                    .'<script>document.documentElement.dir="'.$dir.'";document.documentElement.lang="'.$lang.'";'
+                    .'document.addEventListener("livewire:navigated",()=>{'
+                    .'fetch("/locale/current",{headers:{"Accept":"application/json"}})'
+                    .'.then(r=>r.json()).then(d=>{document.documentElement.dir=d.dir;document.documentElement.lang=d.lang;})'
+                    .'.catch(()=>{});});</script>';
+            })
+            ->renderHook('panels::body.end', function (): string {
+                return '<script>window.areRecordsPartiallySelected??=()=>!1;window.getRecordsOnPage??=()=>[];window.areRecordsSelected??=()=>!1;window.areRecordsToggleable??=()=>!0;</script>'.view('filament.onboarding-body')->render();
             });
     }
 }

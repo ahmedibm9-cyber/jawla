@@ -142,6 +142,13 @@ class VanTransferService implements VanTransferServiceContract
             foreach ($transfer->items as $item) {
                 $ordered = (float) $item->quantity;
                 $received = $itemQuantities[$item->id] ?? $ordered;
+                if ($received > $ordered) {
+                    throw new DomainException(
+                        app()->getLocale() === 'ar'
+                            ? 'الكمية المستلمة لا يمكن أن تتجاوز الكمية المطلوبة'
+                            : 'Received quantity cannot exceed ordered quantity'
+                    );
+                }
                 $exception = max(0, $ordered - $received);
 
                 $item->update([

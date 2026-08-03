@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Services\ReturnRequestService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -74,10 +75,11 @@ class LogReturn extends Component
             $this->success = true;
             $this->successMessage = __('app.return_request_submitted').' — '.$return->request_number;
             $this->resetForm();
-        } catch (\Throwable $e) {
-            $this->errorMessage = app()->getLocale() === 'ar'
-                ? 'حدث خطأ أثناء إرسال المرتجع: '.$e->getMessage()
-                : 'Error submitting return: '.$e->getMessage();
+        } catch (\DomainException|AuthorizationException $exception) {
+            $this->errorMessage = $exception->getMessage();
+        } catch (\Throwable $exception) {
+            report($exception);
+            $this->errorMessage = __('app.workflow_failed');
         }
     }
 

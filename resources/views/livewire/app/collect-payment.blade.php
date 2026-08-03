@@ -38,8 +38,9 @@
                 @endif
 
                 <div class="form-group">
-                    <label class="form-label">{{ __('app.collection_evidence') }}</label>
-                    <livewire:app.photo-capture :max-photos="3" />
+                    <label class="form-label">{{ __('app.collection_evidence') }} *</label>
+                    <livewire:app.photo-capture :max-photos="3" :key="'collection-evidence-'.$photoCaptureKey" />
+                    @error('photoIds') <small class="form-error">{{ $message }}</small> @enderror
                 </div>
 
                 <div class="form-group">
@@ -89,15 +90,25 @@
                                 if (navigator.onLine) {
                                     $wire.submit();
                                 } else {
-                                    await window.jawlaSync.enqueue('collection_submission', {
-                                        customer_id: $wire.customer_id,
-                                        invoice_id: $wire.invoice_id,
-                                        amount: $wire.amount,
-                                        method: $wire.method,
-                                        reference_number: $wire.reference_number,
-                                        notes: $wire.notes,
-                                    });
-                                    $wire.queueOffline();
+                                    try {
+                                        const evidence = await window.jawlaSync.readEvidence(document.getElementById('photo-capture-input'));
+                                        if (!evidence) {
+                                            $wire.evidenceMissing();
+                                            return;
+                                        }
+                                        await window.jawlaSync.enqueue('collection_submission', {
+                                            customer_id: $wire.customer_id,
+                                            invoice_id: $wire.invoice_id,
+                                            amount: $wire.amount,
+                                            method: $wire.method,
+                                            reference_number: $wire.reference_number,
+                                            notes: $wire.notes,
+                                            evidence,
+                                        });
+                                        $wire.queueOffline();
+                                    } catch (error) {
+                                        $wire.offlineQueueFailed();
+                                    }
                                 }
                             ">{{ __('app.confirm') }}</button>
                     </x-slot:confirm>

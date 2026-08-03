@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureApprovedDevice;
 use App\Http\Middleware\EnsureRecentPasswordConfirmation;
 use App\Http\Middleware\EnsureRepRole;
+use App\Http\Middleware\EnsureValidLicense;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetActiveCompanyContext;
 use App\Http\Middleware\SetLocale;
@@ -20,12 +21,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_HOST | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO | Request::HEADER_X_FORWARDED_AWS_ELB);
+        // Trust proxies configured via TRUSTED_PROXIES env var (comma-separated IPs).
+        // Default '*' for development; restrict in production to known proxy IPs.
+        $trustedProxies = env('TRUSTED_PROXIES', '*');
+        $middleware->trustProxies(at: $trustedProxies, headers: Request::HEADER_X_FORWARDED_FOR | Request::HEADER_X_FORWARDED_HOST | Request::HEADER_X_FORWARDED_PORT | Request::HEADER_X_FORWARDED_PROTO | Request::HEADER_X_FORWARDED_AWS_ELB);
 
         $middleware->alias([
             'ensure.rep' => EnsureRepRole::class,
             'ensure.device' => EnsureApprovedDevice::class,
             'step-up' => EnsureRecentPasswordConfirmation::class,
+            'license' => EnsureValidLicense::class,
         ]);
 
         // All unauthenticated users are redirected to the unified login page.
@@ -45,6 +50,10 @@ return Application::configure(basePath: dirname(__DIR__))
             ->withoutOverlapping();
         $schedule->command('app:verify-license')
             ->daily()
+            ->onOneServer()
+            ->withoutOverlapping();
+        $schedule->command('app:deliver-webhooks')
+            ->everyMinute()
             ->onOneServer()
             ->withoutOverlapping();
     })

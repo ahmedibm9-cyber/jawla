@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\SalesOrder;
 use App\Models\User;
 use App\Policies\Concerns\ChecksCompanyOwnership;
+use App\Services\OrganizationScopeService;
 
 class SalesOrderPolicy
 {
@@ -17,7 +18,8 @@ class SalesOrderPolicy
 
     public function view(User $user, SalesOrder $record): bool
     {
-        return $user->can('view:sales_order') && $this->matchesCompany($user, $record);
+        return $user->can('view:sales_order') && $this->matchesCompany($user, $record)
+            && app(OrganizationScopeService::class)->canAccessUser($user, (int) $record->user_id);
     }
 
     public function create(User $user): bool
@@ -27,7 +29,8 @@ class SalesOrderPolicy
 
     public function update(User $user, SalesOrder $record): bool
     {
-        return $user->can('sales_orders.approve') && $this->matchesCompany($user, $record);
+        return $user->can('sales_orders.approve') && $this->matchesCompany($user, $record)
+            && app(OrganizationScopeService::class)->canAccessUser($user, (int) $record->user_id);
     }
 
     public function delete(User $user, SalesOrder $record): bool

@@ -5,9 +5,13 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\WebhookEndpointResource\Pages;
 use App\Models\WebhookEndpoint;
 use App\Rules\SafeWebhookUrl;
+use App\Services\LicenseService;
+use App\Services\WebhookService;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -37,7 +41,8 @@ class WebhookEndpointResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->can('integrations.manage') ?? false;
+        return (auth()->user()?->can('integrations.manage') ?? false)
+            && app(LicenseService::class)->runtimeFeatureEnabled('webhooks');
     }
 
     public static function form(Schema $schema): Schema
@@ -46,7 +51,10 @@ class WebhookEndpointResource extends Resource
             Forms\Components\TextInput::make('name')->label(l('الاسم', 'Name'))->required()->maxLength(255),
             Forms\Components\TextInput::make('url')->label('HTTPS URL')->url()->rule(new SafeWebhookUrl)->required()->maxLength(2000),
             Forms\Components\TextInput::make('secret')->label(l('سر التوقيع', 'Signing secret'))->password()
-                ->required(fn ($record): bool => $record === null)->dehydrated(fn ($state): bool => filled($state))->maxLength(500),
+                ->default(fn ($record): ?string => $record === null ? base64_encode(random_bytes(32)) : null)
+                ->required(fn ($record): bool => $record === null)->dehydrated(fn ($state): bool => filled($state))
+                ->minLength(32)->maxLength(500)
+                ->helperText(l('يظهر السر عند الإنشاء أو التدوير فقط. خزّنه بأمان.', 'The secret is shown only at creation or rotation. Store it securely.')),
             Forms\Components\CheckboxList::make('events')->label(l('الأحداث', 'Events'))->options([
                 'task.approved' => 'Task approved',
                 'sales_order.approved' => 'Sales order approved',
@@ -67,7 +75,21 @@ class WebhookEndpointResource extends Resource
             Tables\Columns\TextColumn::make('events')->label(l('الأحداث', 'Events'))->badge(),
             Tables\Columns\IconColumn::make('is_active')->label(l('نشط', 'Active'))->boolean(),
             Tables\Columns\TextColumn::make('deliveries_count')->counts('deliveries')->label(l('عمليات التسليم', 'Deliveries')),
-        ])->actions([EditAction::make()])->bulkActions([DeleteBulkAction::make()]);
+        ])->actions([
+            EditAction::make(),
+            Action::make('rotate_secret')
+                ->label(l('تدوير السر', 'Rotate secret'))
+                ->icon('heroicon-o-arrow-path')
+                ->requiresConfirmation()
+                ->modalDescription(l('سيُبطل هذا السر جميع التوقيعات الجديدة بالسر السابق. انسخ السر الجديد فوراً.', 'New signatures will no longer use the old secret. Copy the new secret immediately.'))
+                ->action(function (WebhookEndpoint $record): void {
+                    $secret = app(WebhookService::class)->rotateSecret($record, auth()->user());
+                    Notification::make()->success()->persistent()
+                        ->title(l('تم تدوير السر', 'Secret rotated'))
+                        ->body($secret)
+                        ->send();
+                }),
+        ])->bulkActions([DeleteBulkAction::make()]);
     }
 
     public static function getPages(): array

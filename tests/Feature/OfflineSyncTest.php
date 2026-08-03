@@ -98,6 +98,50 @@ class OfflineSyncTest extends TestCase
         $this->assertSame($first[0]['result']['photo_id'], $second[0]['result']['photo_id']);
     }
 
+    public function test_replayed_key_with_changed_payload_is_rejected_without_a_client_hash(): void
+    {
+        $handler = $this->photoHandler();
+        app(SyncHandlerRegistry::class)->register('make_photo', $handler);
+        $service = app(SyncService::class);
+
+        $service->process($this->rep, [['key' => 'changed', 'type' => 'make_photo', 'payload' => ['value' => 1]]]);
+        $result = $service->process($this->rep, [['key' => 'changed', 'type' => 'make_photo', 'payload' => ['value' => 2]]]);
+
+        $this->assertSame('mismatch', $result[0]['status']);
+        $this->assertSame(1, $handler->calls);
+    }
+
+    public function test_forged_client_hash_is_rejected_before_the_handler_runs(): void
+    {
+        $handler = $this->photoHandler();
+        app(SyncHandlerRegistry::class)->register('make_photo', $handler);
+
+        $result = app(SyncService::class)->process($this->rep, [[
+            'key' => 'forged-hash',
+            'type' => 'make_photo',
+            'payload' => ['value' => 1],
+            'payload_hash' => str_repeat('0', 64),
+        ]]);
+
+        $this->assertSame('mismatch', $result[0]['status']);
+        $this->assertSame(0, $handler->calls);
+        $this->assertDatabaseMissing('sync_receipts', ['idempotency_key' => 'forged-hash']);
+    }
+
+    public function test_same_company_users_have_independent_idempotency_keys(): void
+    {
+        app(SyncHandlerRegistry::class)->register('make_photo', $this->photoHandler());
+        $otherRep = User::factory()->create(['company_id' => $this->company->id]);
+
+        $service = app(SyncService::class);
+        $first = $service->process($this->rep, [['key' => 'shared-user-key', 'type' => 'make_photo', 'payload' => []]]);
+        $second = $service->process($otherRep, [['key' => 'shared-user-key', 'type' => 'make_photo', 'payload' => []]]);
+
+        $this->assertSame('applied', $first[0]['status']);
+        $this->assertSame('applied', $second[0]['status']);
+        $this->assertDatabaseCount('sync_receipts', 2);
+    }
+
     public function test_legacy_ambiguous_receipt_is_quarantined_instead_of_replayed(): void
     {
         $handler = $this->photoHandler();

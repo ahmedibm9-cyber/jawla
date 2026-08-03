@@ -21,12 +21,15 @@
 
         {{-- Tabs --}}
         <x-filament::tabs>
+            @can('reports.visits')
             <x-filament::tabs.item
                 wire:click="$set('tab', 'visit_reports')"
                 :active="$tab === 'visit_reports'"
             >
                 {{ l('زيارات', 'Visits') }}
             </x-filament::tabs.item>
+            @endcan
+            @can('reports.sales')
             <x-filament::tabs.item
                 wire:click="$set('tab', 'quotations')"
                 :active="$tab === 'quotations'"
@@ -39,12 +42,15 @@
             >
                 {{ l('فواتير مبدئية', 'Proformas') }}
             </x-filament::tabs.item>
+            @endcan
+            @can('reports.financial')
             <x-filament::tabs.item
                 wire:click="$set('tab', 'invoices')"
                 :active="$tab === 'invoices'"
             >
                 {{ l('فواتير', 'Invoices') }}
             </x-filament::tabs.item>
+            @endcan
         </x-filament::tabs>
 
         {{-- Tab Content --}}

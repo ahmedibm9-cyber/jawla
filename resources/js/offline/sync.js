@@ -148,6 +148,30 @@ async function enqueue(type, payload, opts) {
   return record;
 }
 
+async function readEvidence(input) {
+  const file = input?.files?.[0];
+  if (!file) return null;
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    throw new Error("Unsupported evidence format.");
+  }
+  if (file.size < 1 || file.size > 5 * 1024 * 1024) {
+    throw new Error("Evidence must be between 1 byte and 5 MB.");
+  }
+
+  const dataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+
+  return {
+    name: file.name,
+    mime: file.type,
+    base64: String(dataUrl).split(",", 2)[1],
+  };
+}
+
 async function retry(id) {
   await outbox.markPending(id);
   await emitStatus();
@@ -260,6 +284,7 @@ if (identity) {
     failed: outbox.failed,
     hasPending,
     storageEstimate: emitStoragePressure,
+    readEvidence,
   };
   window.jawlaSyncQueue = syncQueueController;
   window.jawlaOffline = {

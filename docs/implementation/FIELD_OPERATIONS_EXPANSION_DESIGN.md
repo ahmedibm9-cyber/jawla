@@ -60,17 +60,21 @@ Alternative transitions:
 ### Sales order
 
 The implemented first lifecycle is `draft -> submitted -> approved|rejected`.
-Approval freezes the commercial order snapshot. Invoicing and stock movement
+The server resolves every line from the active customer/product pricing rules
+and rejects stale or tampered browser/offline prices. Approval freezes the commercial order snapshot. Invoicing and stock movement
 remain separate transactions; approving an order does not create an invoice or
 change stock.
 
 ### Collection
 
-`pending_review -> approved|rejected`
+`pending_review -> supervisor_reviewed -> finance_reviewed -> reconciled`, with
+`rejected` available from either review step.
 
-Approval posts the collection through `PaymentService`, producing the actual
+Submission atomically requires owned, unattached receipt/photo evidence. The
+supervisor and finance reviewer are distinct approval actors. Only the explicit
+finance reconciliation transition posts through `PaymentService`, producing the
 payment, cash-box movement, and customer/invoice allocation. Rejection produces
-no financial movement. Corrections to posted payments use the existing
+no financial movement. Corrections to reconciled payments use the existing
 controlled payment reversal path.
 
 ### Return
@@ -78,8 +82,11 @@ controlled payment reversal path.
 `pending_approval -> approved|rejected`; an approved request can then become
 `received`.
 
-Warehouse receipt calls the existing transactional return service. Stock,
-credit notes, and customer balances do not change at submission or approval.
+Each request line snapshots unit price, prorated tax, net, and gross value while
+locking and reserving the remaining invoice quantity. Warehouse receipt requires
+an authorized main-warehouse destination and, for damaged items, an explicit
+quarantine warehouse. The existing transactional return service revalidates the
+approved snapshot before it changes stock, credit notes, or customer balances.
 
 ## Service pseudocode
 
@@ -126,12 +133,16 @@ longer applies. Each fails the transaction and preserves the previous state.
    installation-license administration page.
 2. Verify the exact JSON bytes with the vendor public key in
    `JAWLA_LICENSE_PUBLIC_KEY`.
-3. If `JAWLA_INSTALLATION_ID` is configured, require an exact installation-id
+3. Production requires `JAWLA_INSTALLATION_ID`; require an exact signed claim
    match.
 4. Store the signed document, its SHA-256 hash, validity window, edition,
    feature claims, and user limit; never store a reusable plaintext license key.
-5. Re-verification checks the detached signature, stored hash, dates, and active
-   user limit. License status is visible to installation administrators.
+5. Re-verification derives every enforceable column from the signed payload,
+   preventing database edits from expanding claims.
+6. Authenticated admin/PWA traffic and field-write services fail closed when the
+   license is missing, invalid, outside its validity window, over its active-user
+   limit, or missing the requested feature. The separate recovery route remains
+   available to users with `licenses.manage`.
 
 ## Operational configuration
 
@@ -139,17 +150,25 @@ longer applies. Each fails the transaction and preserves the previous state.
   accepts a browser subscription and notification payload. The optional
   `JAWLA_PUSH_GATEWAY_TOKEN` authenticates Jawla to that gateway. With no gateway
   configured, database/in-app notifications continue to work.
-- Webhook endpoints are configured per company in the admin panel. Deliveries
-  use `X-Jawla-Event` and an `X-Jawla-Signature: sha256=...` HMAC header. Failed
-  attempts are retained with bounded response excerpts and can be retried up to
-  five times.
+- Webhook endpoints are configured per company in the admin panel. Domain
+  transactions write pending outbox rows and never perform network I/O. The
+  minute scheduler leases due rows, resolves all A/AAAA records, rejects any
+  non-public address, disables redirects, pins the validated address while
+  retaining TLS hostname verification, and sends `X-Jawla-Event` plus an
+  `X-Jawla-Signature: sha256=...` HMAC header. Failed attempts use bounded
+  exponential retries up to five attempts. Signing secrets are generated from
+  32 random bytes and audited when rotated.
 - `JAWLA_LICENSE_PUBLIC_KEY` is the vendor verification key. Multiline PEM keys
   may use escaped `\\n`. `JAWLA_INSTALLATION_ID` binds licenses to one client
-  installation when set. `php artisan app:verify-license` is the deployment and
+  installation. `php artisan app:verify-license` is the deployment and
   monitoring gate; the scheduler runs it daily and returns a failing exit code
   for an invalid, expired, mismatched, or over-limit license.
-- The reports page streams CSV exports in 500-row chunks so large exports do not
-  require loading an entire report into memory.
+- The reports page authorizes visits, sales, and finance domains independently,
+  rejects unknown tabs, neutralizes spreadsheet-formula prefixes in every string
+  cell, and streams CSV exports in 500-row chunks.
+- Stock-import uploads are read through the configured filesystem disk. Remote
+  objects are streamed to short-lived local files for parsing and checksummed
+  again from the source disk at confirmation.
 
 ## Migration order
 

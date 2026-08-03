@@ -48,7 +48,7 @@ class RoleSeeder extends Seeder
             // Restricted settings pages
             'admin_preferences.view', 'api_tokens.view',
             'organization_units.view_all', 'organization_units.view_scope', 'devices.approve',
-            'sales_orders.create', 'sales_orders.approve', 'collections.review',
+            'sales_orders.create', 'sales_orders.approve', 'collections.review', 'collections.reconcile',
             'return_requests.approve', 'return_requests.receive',
             'integrations.manage', 'licenses.manage',
             // Stock / Purchasing
@@ -198,8 +198,9 @@ class RoleSeeder extends Seeder
                 // Custom
                 'products.manage_prices', 'products.view_cost', 'products.manage_cost',
                 'goods_in_transit.manage_landed_cost',
-                'invoices.view_all', 'invoices.cancel', 'payments.view_all', 'reports.financial',
+                'invoices.view_all', 'invoices.cancel', 'payments.view_all', 'reports.view', 'reports.financial',
                 'customers.view_all', 'tax_templates.manage',
+                'view_any:collection_submission', 'view:collection_submission', 'collections.reconcile',
             ],
 
             'purchasing' => [

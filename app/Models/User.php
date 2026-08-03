@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\LicenseService;
 use App\Support\ActiveCompanyContext;
 use Database\Factories\UserFactory;
 use Filament\Models\Contracts\FilamentUser;
@@ -32,6 +33,12 @@ class User extends Authenticatable implements FilamentUser
         static::creating(function (User $user) {
             if (blank($user->uuid)) {
                 $user->uuid = (string) Str::uuid();
+            }
+        });
+
+        static::saving(function (User $user): void {
+            if ($user->is_active && ($user->isDirty('is_active') || ! $user->exists)) {
+                app(LicenseService::class)->assertCanActivateUser($user->exists ? (int) $user->id : null);
             }
         });
 

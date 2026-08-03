@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\ReportsPage;
+use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\PriceQuotationRequest;
 use App\Models\ProformaInvoice;
@@ -26,6 +27,7 @@ class ReportsPageTest extends TestCase
     {
         $u = User::factory()->create();
         $u->assignRole('sales_manager');
+        $u->givePermissionTo('reports.financial');
 
         return $u;
     }
@@ -123,5 +125,43 @@ class ReportsPageTest extends TestCase
 
         $this->assertStringContainsString('OWN-EXPORT', $csv);
         $this->assertStringNotContainsString('OTHER-EXPORT', $csv);
+    }
+
+    public function test_financial_report_cannot_be_selected_without_financial_permission(): void
+    {
+        $user = User::factory()->create()->assignRole('sales_manager');
+
+        Livewire::actingAs($user)
+            ->test(ReportsPage::class)
+            ->call('$set', 'tab', 'invoices')
+            ->assertForbidden();
+    }
+
+    public function test_csv_export_neutralizes_formula_cells(): void
+    {
+        $user = $this->reportingUser();
+        $customer = Customer::factory()->create([
+            'company_id' => $user->company_id,
+            'name_ar' => '=HYPERLINK("https://attacker.test")',
+        ]);
+        Invoice::factory()->create([
+            'company_id' => $user->company_id,
+            'customer_id' => $customer->id,
+            'user_id' => $user->id,
+            'invoice_number' => '+SUM(1,1)',
+        ]);
+
+        $this->actingAs($user);
+        $page = new ReportsPage;
+        $page->tab = 'invoices';
+        $response = $page->exportCsv();
+        ob_start();
+        ($response->getCallback())();
+        $csv = ob_get_clean();
+
+        $this->assertStringContainsString("'=HYPERLINK", $csv);
+        $this->assertStringContainsString("'+SUM", $csv);
+        $this->assertStringNotContainsString("\n=HYPERLINK", $csv);
+        $this->assertStringNotContainsString("\n+SUM", $csv);
     }
 }

@@ -11,7 +11,6 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -86,8 +85,9 @@ class StockImport extends Page
         $storedPath = is_array($data['file']) ? reset($data['file']) : $data['file'];
         $this->fileName = basename((string) $storedPath);
 
-        $staged = app(StockImportService::class)->stage(
-            Storage::disk(config('filesystems.storage_disk'))->path($storedPath),
+        $staged = app(StockImportService::class)->stageFromDisk(
+            (string) config('filesystems.storage_disk'),
+            (string) $storedPath,
             $warehouse,
             Auth::user(),
         );

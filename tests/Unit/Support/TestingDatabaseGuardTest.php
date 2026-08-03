@@ -8,6 +8,7 @@ it('accepts isolated PostgreSQL test database names', function (string $database
     expect(true)->toBeTrue();
 })->with([
     'sequential base' => 'jawla_test',
+    'process worker' => 'jawla_test_process_1234',
     'named remediation run' => 'jawla_test_remediation_p0',
     'parallel worker' => 'jawla_test_remediation_p0_test_1',
 ]);

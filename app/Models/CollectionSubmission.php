@@ -12,11 +12,18 @@ class CollectionSubmission extends Model
 {
     use BelongsToCompany;
 
-    protected $fillable = ['company_id', 'customer_id', 'user_id', 'invoice_id', 'visit_id', 'payment_id', 'amount', 'method', 'reference_number', 'notes', 'status', 'captured_at', 'reviewed_by', 'reviewed_at', 'review_reason'];
+    protected $fillable = ['company_id', 'customer_id', 'user_id', 'invoice_id', 'visit_id', 'payment_id', 'amount', 'method', 'reference_number', 'notes', 'status', 'captured_at', 'supervisor_reviewed_by', 'supervisor_reviewed_at', 'finance_reviewed_by', 'finance_reviewed_at', 'reconciled_by', 'reconciled_at', 'reviewed_by', 'reviewed_at', 'review_reason'];
 
     protected function casts(): array
     {
-        return ['amount' => 'decimal:2', 'captured_at' => 'datetime', 'reviewed_at' => 'datetime'];
+        return [
+            'amount' => 'decimal:2',
+            'captured_at' => 'datetime',
+            'supervisor_reviewed_at' => 'datetime',
+            'finance_reviewed_at' => 'datetime',
+            'reconciled_at' => 'datetime',
+            'reviewed_at' => 'datetime',
+        ];
     }
 
     public function customer(): BelongsTo

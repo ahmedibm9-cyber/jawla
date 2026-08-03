@@ -4,6 +4,8 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SalesOrderResource\Pages;
 use App\Models\SalesOrder;
+use App\Models\User;
+use App\Services\OrganizationScopeService;
 use App\Services\SalesOrderService;
 use Filament\Actions\Action;
 use Filament\Forms;
@@ -12,6 +14,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class SalesOrderResource extends Resource
 {
@@ -72,5 +75,18 @@ class SalesOrderResource extends Resource
     public static function getPages(): array
     {
         return ['index' => Pages\ListSalesOrders::route('/')];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery()->with(['latestApproval.steps']);
+        $actor = auth()->user();
+        if ($actor === null) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        $visibleUsers = app(OrganizationScopeService::class)->scopeUsers(User::query()->select('users.id'), $actor);
+
+        return $query->whereIn('user_id', $visibleUsers);
     }
 }

@@ -93,9 +93,25 @@ class OfflineSyncHandlersTest extends TestCase
     public function test_all_rep_write_types_are_registered(): void
     {
         $registry = app(SyncHandlerRegistry::class);
-        foreach (['sale', 'payment', 'return', 'expense', 'complaint', 'visit_report'] as $type) {
+        foreach (['sale', 'payment', 'return', 'expense', 'complaint', 'visit_report', 'sales_order', 'collection_submission', 'return_request'] as $type) {
             $this->assertTrue($registry->has($type), "missing handler: {$type}");
         }
+    }
+
+    public function test_sales_order_sync_uses_server_authoritative_price(): void
+    {
+        $result = $this->process('sales-order-1', 'sales_order', [
+            'customer_id' => $this->customer->id,
+            'items' => [[
+                'product_id' => $this->product->id,
+                'quantity' => 1,
+                'unit_price' => 0,
+            ]],
+        ]);
+
+        $this->assertSame('conflict', $result['status']);
+        $this->assertDatabaseMissing('sync_receipts', ['idempotency_key' => 'sales-order-1']);
+        $this->assertDatabaseCount('sales_orders', 0);
     }
 
     public function test_sale_applies_once_and_decrements_stock(): void

@@ -9,6 +9,7 @@ use App\Services\NumberSequenceService;
 use App\Support\ActiveCompanyContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use ReflectionProperty;
 use RuntimeException;
 use Tests\TestCase;
@@ -90,6 +91,32 @@ class NumberSequenceServiceTest extends TestCase
         $partsB = explode('-', $b);
         $this->assertSame(1, (int) $partsA[3]);
         $this->assertSame(1, (int) $partsB[3]);
+    }
+
+    public function test_same_company_abbreviation_isolated_by_composite_document_constraints(): void
+    {
+        $companyA = Company::factory()->create(['abbr' => 'DUP']);
+        $companyB = Company::factory()->create(['abbr' => 'DUP']);
+
+        $this->assertSame(
+            $this->gen('sales_order', $companyA->id),
+            $this->gen('sales_order', $companyB->id),
+        );
+
+        $salesOrderIndexes = collect(Schema::getIndexes('sales_orders'));
+        $returnRequestIndexes = collect(Schema::getIndexes('return_requests'));
+        $this->assertTrue($salesOrderIndexes->contains(
+            fn (array $index): bool => $index['unique'] && $index['columns'] === ['company_id', 'order_number'],
+        ));
+        $this->assertTrue($returnRequestIndexes->contains(
+            fn (array $index): bool => $index['unique'] && $index['columns'] === ['company_id', 'request_number'],
+        ));
+        $this->assertFalse($salesOrderIndexes->contains(
+            fn (array $index): bool => $index['unique'] && $index['columns'] === ['order_number'],
+        ));
+        $this->assertFalse($returnRequestIndexes->contains(
+            fn (array $index): bool => $index['unique'] && $index['columns'] === ['request_number'],
+        ));
     }
 
     public function test_auto_creates_naming_series_row_when_missing(): void

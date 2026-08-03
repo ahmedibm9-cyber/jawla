@@ -2,6 +2,7 @@
 
 namespace App\Services\Sync;
 
+use App\Exceptions\Domain\StalePriceException;
 use App\Models\SyncReceipt;
 use App\Models\User;
 use App\Support\ActiveCompanyContext;
@@ -14,7 +15,7 @@ use Illuminate\Validation\ValidationException;
  * Applies a batch of offline-queued operations with exactly-once semantics.
  *
  * For each operation the engine:
- *  1. returns the stored response if the (company, idempotency_key) was already
+ *  1. returns the stored response if the (company, user, idempotency_key) was already
  *     applied (replay — never re-runs);
  *  2. reserves the key by inserting a receipt (the unique constraint makes this
  *     the concurrency guard — a racing duplicate is caught and reported as such);
@@ -54,7 +55,7 @@ class SyncService
         $key = $op['key'] ?? $op['idempotency_key'] ?? null;
         $type = $op['type'] ?? null;
         $payload = $op['payload'] ?? [];
-        $payloadHash = $op['payload_hash'] ?? null;
+        $clientPayloadHash = $op['payload_hash'] ?? null;
         $deviceId = $op['device_id'] ?? null;
 
         if (! is_string($key) || $key === '' || ! is_string($type) || $type === '') {
@@ -63,6 +64,11 @@ class SyncService
 
         if (! $this->registry->has($type)) {
             return ['key' => $key, 'status' => 'unsupported'];
+        }
+
+        $payloadHash = $this->payloadHash($protocolVersion, $type, $payload);
+        if (is_string($clientPayloadHash) && ! $this->clientHashMatches($clientPayloadHash, $protocolVersion, $type, $payload)) {
+            return ['key' => $key, 'status' => 'mismatch', 'error' => 'Payload integrity check failed.'];
         }
 
         try {
@@ -80,7 +86,7 @@ class SyncService
                         ];
                     }
 
-                    if ($existing->payload_hash !== null && $payloadHash !== null && $existing->payload_hash !== $payloadHash) {
+                    if (! hash_equals((string) $existing->payload_hash, $payloadHash)) {
                         return ['key' => $key, 'status' => 'mismatch', 'error' => 'Payload mismatch for same idempotency key'];
                     }
 
@@ -103,6 +109,12 @@ class SyncService
 
                 return ['key' => $key, 'status' => 'applied', 'result' => $result];
             }, attempts: 3);
+        } catch (StalePriceException) {
+            return [
+                'key' => $key,
+                'status' => 'conflict',
+                'error' => __('app.sales_order_price_changed'),
+            ];
         } catch (ValidationException) {
             return $this->failure(
                 $rep,
@@ -113,11 +125,11 @@ class SyncService
             );
         } catch (QueryException $e) {
             // A concurrent request can pass the initial lookup, then lose the
-            // database's unique (company_id, idempotency_key) race. Re-read the
+            // database's unique (company_id, user_id, idempotency_key) race. Re-read the
             // durable receipt so the client receives its original outcome.
             $existing = $this->findReceipt($rep, $key);
             if ($existing?->response !== null) {
-                if ($existing->payload_hash !== null && $payloadHash !== null && $existing->payload_hash !== $payloadHash) {
+                if (! hash_equals((string) $existing->payload_hash, $payloadHash)) {
                     return ['key' => $key, 'status' => 'mismatch', 'error' => 'Payload mismatch for same idempotency key'];
                 }
 
@@ -189,6 +201,7 @@ class SyncService
     {
         $query = SyncReceipt::withoutGlobalScopes()
             ->where('company_id', $rep->activeCompanyId())
+            ->where('user_id', $rep->id)
             ->where('idempotency_key', $key);
 
         if ($lock) {
@@ -196,5 +209,39 @@ class SyncService
         }
 
         return $query->first();
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function payloadHash(int $protocolVersion, string $type, array $payload): string
+    {
+        $canonical = $this->canonicalize([
+            'protocol_version' => $protocolVersion,
+            'type' => $type,
+            'payload' => $payload,
+        ]);
+
+        return hash('sha256', json_encode($canonical, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    }
+
+    /** @param array<string, mixed> $payload */
+    private function clientHashMatches(string $provided, int $protocolVersion, string $type, array $payload): bool
+    {
+        $canonical = $this->payloadHash($protocolVersion, $type, $payload);
+        $legacy = hash('sha256', json_encode(['type' => $type, 'payload' => $payload], JSON_THROW_ON_ERROR));
+
+        return hash_equals($canonical, $provided) || hash_equals($legacy, $provided);
+    }
+
+    private function canonicalize(mixed $value): mixed
+    {
+        if (! is_array($value)) {
+            return $value;
+        }
+
+        if (! array_is_list($value)) {
+            ksort($value, SORT_STRING);
+        }
+
+        return array_map(fn (mixed $entry): mixed => $this->canonicalize($entry), $value);
     }
 }

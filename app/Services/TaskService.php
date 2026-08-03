@@ -16,6 +16,7 @@ class TaskService
 {
     public function __construct(
         private readonly ApprovalService $approvals,
+        private readonly WebhookService $webhooks,
     ) {}
 
     public function accept(Task $task, User $rep): Task
@@ -124,11 +125,11 @@ class TaskService
                     'decision_reason' => null,
                 ]);
                 $this->notifyRepAfterCommit($task, 'approved');
-                DB::afterCommit(fn () => app(WebhookService::class)->dispatch((int) $task->company_id, 'task.approved', [
+                $this->webhooks->dispatch((int) $task->company_id, 'task.approved', [
                     'task_id' => $task->id,
                     'assigned_to' => $task->assigned_to,
                     'approved_at' => $task->approved_at?->toIso8601String(),
-                ]));
+                ]);
                 Activity::log('task_approved', $task, "Task #{$task->id} approved");
             } else {
                 Activity::log('task_approval_advanced', $task, "Task #{$task->id} advanced to the next approver");

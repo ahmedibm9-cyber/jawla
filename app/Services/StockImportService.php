@@ -11,6 +11,7 @@ use App\Models\WarehouseImportLog;
 use App\Services\Contracts\StockService as StockServiceContract;
 use App\Support\ActiveCompanyContext;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Spatie\SimpleExcel\SimpleExcelReader;
 
 class StockImportService
@@ -118,7 +119,38 @@ class StockImportService
         $this->authorizeImporter($user, $warehouse);
         app(ActiveCompanyContext::class)->assertMatches((int) $warehouse->company_id);
 
-        $preview = $this->preview($absolutePath, $warehouse);
+        return $this->stagePreview([
+            'local_path' => $absolutePath,
+            'stored_path' => $absolutePath,
+            'source_disk' => null,
+        ], $warehouse, $user);
+    }
+
+    /** @return array{token: string, preview: array, expires_at: string, requires_approval: bool} */
+    public function stageFromDisk(string $disk, string $path, Warehouse $warehouse, User $user): array
+    {
+        $this->authorizeImporter($user, $warehouse);
+        app(ActiveCompanyContext::class)->assertMatches((int) $warehouse->company_id);
+
+        return $this->withLocalCopy(
+            $disk,
+            $path,
+            fn (string $localPath): array => $this->stagePreview([
+                'local_path' => $localPath,
+                'stored_path' => $path,
+                'source_disk' => $disk,
+            ], $warehouse, $user),
+        );
+    }
+
+    /**
+     * @param  array{local_path: string, stored_path: string, source_disk: ?string}  $source
+     * @return array{token: string, preview: array, expires_at: string, requires_approval: bool}
+     */
+    private function stagePreview(array $source, Warehouse $warehouse, User $user): array
+    {
+
+        $preview = $this->preview($source['local_path'], $warehouse);
         $threshold = (string) config('jawla.stock_import.large_variance_threshold', '1000.000');
         $requiresApproval = collect($preview['valid'])->contains(function (array $row) use ($threshold): bool {
             $current = number_format((float) $row['current'], 3, '.', '');
@@ -136,7 +168,8 @@ class StockImportService
             'warehouse_id' => $warehouse->id,
             'staged_by' => $user->id,
             'token_hash' => hash('sha256', $token),
-            'file_path' => $absolutePath,
+            'file_path' => $source['stored_path'],
+            'source_disk' => $source['source_disk'],
             'file_checksum' => $preview['checksum'],
             'parsed_rows' => $preview['valid'],
             'errors' => $preview['errors'],
@@ -188,15 +221,11 @@ class StockImportService
             if ($staged->requires_approval && $staged->approved_at === null) {
                 throw new DomainException('This opening balance or large variance requires sales-manager approval.');
             }
-            if (! is_file($staged->file_path)
-                || ! hash_equals($staged->file_checksum, hash_file('sha256', $staged->file_path))) {
-                throw new DomainException('The staged stock-import file changed after preview.');
-            }
             if (WarehouseImportLog::where('checksum', $staged->file_checksum)->exists()) {
                 throw new DomainException('This exact file was already imported.');
             }
 
-            $reparsed = $this->preview($staged->file_path, $warehouse);
+            $reparsed = $this->reparseStagedFile($staged, $warehouse);
             if ($reparsed['errors'] !== [] || $reparsed['valid'] === []) {
                 throw new DomainException('The stock import no longer passes server validation.');
             }
@@ -282,6 +311,60 @@ class StockImportService
         }
         if (in_array($staged->status, ['invalid', 'consumed'], true)) {
             throw new DomainException('The stock-import preview cannot be used.');
+        }
+    }
+
+    /** @return array{valid: array, errors: array, checksum: string, headings_ok: bool} */
+    private function reparseStagedFile(StockImportPreview $staged, Warehouse $warehouse): array
+    {
+        $verify = function (string $localPath) use ($staged, $warehouse): array {
+            if (! is_file($localPath) || ! hash_equals($staged->file_checksum, hash_file('sha256', $localPath))) {
+                throw new DomainException('The staged stock-import file changed after preview.');
+            }
+
+            return $this->preview($localPath, $warehouse);
+        };
+
+        return $staged->source_disk === null
+            ? $verify($staged->file_path)
+            : $this->withLocalCopy($staged->source_disk, $staged->file_path, $verify);
+    }
+
+    private function withLocalCopy(string $disk, string $path, callable $callback): mixed
+    {
+        $source = Storage::disk($disk)->readStream($path);
+        if (! is_resource($source)) {
+            throw new DomainException('The uploaded stock-import file cannot be read.');
+        }
+
+        $localPath = tempnam(sys_get_temp_dir(), 'jawla-stock-import-');
+        if ($localPath === false) {
+            fclose($source);
+            throw new DomainException('A temporary stock-import file could not be created.');
+        }
+
+        $target = fopen($localPath, 'wb');
+        if (! is_resource($target)) {
+            fclose($source);
+            @unlink($localPath);
+            throw new DomainException('A temporary stock-import file could not be opened.');
+        }
+
+        try {
+            $bytesCopied = stream_copy_to_stream($source, $target);
+            throw_if($bytesCopied === false, new DomainException('The uploaded stock-import file could not be copied.'));
+            fclose($source);
+            fclose($target);
+
+            return $callback($localPath);
+        } finally {
+            if (is_resource($source)) {
+                fclose($source);
+            }
+            if (is_resource($target)) {
+                fclose($target);
+            }
+            @unlink($localPath);
         }
     }
 

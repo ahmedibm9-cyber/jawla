@@ -11,13 +11,22 @@ class WebhookEndpoint extends Model
 {
     use BelongsToCompany;
 
-    protected $fillable = ['company_id', 'name', 'url', 'secret', 'events', 'is_active', 'timeout_seconds', 'created_by'];
+    protected $fillable = ['company_id', 'name', 'url', 'secret', 'secret_rotated_at', 'events', 'is_active', 'timeout_seconds', 'created_by'];
 
     protected $hidden = ['secret'];
 
     protected function casts(): array
     {
-        return ['secret' => 'encrypted', 'events' => 'array', 'is_active' => 'boolean'];
+        return ['secret' => 'encrypted', 'secret_rotated_at' => 'datetime', 'events' => 'array', 'is_active' => 'boolean'];
+    }
+
+    protected static function booted(): void
+    {
+        static::saving(function (WebhookEndpoint $endpoint): void {
+            if ($endpoint->isDirty('secret') && strlen((string) $endpoint->secret) < 32) {
+                throw new \DomainException('Webhook signing secrets must contain at least 32 characters.');
+            }
+        });
     }
 
     public function deliveries(): HasMany

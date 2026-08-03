@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\CollectionSubmission;
 use App\Models\User;
 use App\Policies\Concerns\ChecksCompanyOwnership;
+use App\Services\OrganizationScopeService;
 
 class CollectionSubmissionPolicy
 {
@@ -17,7 +18,8 @@ class CollectionSubmissionPolicy
 
     public function view(User $user, CollectionSubmission $record): bool
     {
-        return $user->can('view:collection_submission') && $this->matchesCompany($user, $record);
+        return $user->can('view:collection_submission') && $this->matchesCompany($user, $record)
+            && app(OrganizationScopeService::class)->canAccessUser($user, (int) $record->user_id);
     }
 
     public function create(User $user): bool
@@ -27,7 +29,9 @@ class CollectionSubmissionPolicy
 
     public function update(User $user, CollectionSubmission $record): bool
     {
-        return $user->can('collections.review') && $this->matchesCompany($user, $record);
+        return ($user->can('collections.review') || $user->can('collections.reconcile'))
+            && $this->matchesCompany($user, $record)
+            && app(OrganizationScopeService::class)->canAccessUser($user, (int) $record->user_id);
     }
 
     public function delete(User $user, CollectionSubmission $record): bool

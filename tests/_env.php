@@ -23,12 +23,14 @@ use Tests\Support\TestingDatabaseGuard;
  * need separate databases. The shared TestingDatabaseGuard enforces the
  * dangerous subset at every boundary.
  */
-$database = getenv('JAWLA_TEST_DATABASE');
-$database = is_string($database) && $database !== '' ? $database : 'jawla_test';
+$configuredDatabase = getenv('JAWLA_TEST_DATABASE');
+$database = is_string($configuredDatabase) && $configuredDatabase !== ''
+    ? $configuredDatabase
+    : 'jawla_test_process_'.getmypid();
 
 $testToken = getenv('TEST_TOKEN');
-if ($database === 'jawla_test' && is_string($testToken) && $testToken !== '') {
-    $database .= '_'.$testToken;
+if ((! is_string($configuredDatabase) || $configuredDatabase === '') && is_string($testToken) && $testToken !== '') {
+    $database = 'jawla_test_worker_'.$testToken.'_'.getmypid();
 }
 
 TestingDatabaseGuard::assertSafe('testing', 'pgsql', $database);
@@ -60,4 +62,4 @@ foreach ($pinned as $key => $value) {
     $_SERVER[$key] = $value;
 }
 
-unset($database, $key, $testToken, $value, $pinned);
+unset($configuredDatabase, $database, $key, $testToken, $value, $pinned);

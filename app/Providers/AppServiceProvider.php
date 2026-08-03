@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Observers\AuditObserver;
 use App\Services\ComplaintService;
 use App\Services\Contracts\AlarmService;
+use App\Services\Contracts\DnsResolver;
 use App\Services\Contracts\DocumentNumberService;
 use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\InvoiceService;
@@ -24,6 +25,7 @@ use App\Services\Eta\NullEtaClient;
 use App\Services\Eta\UnsignedEtaSigner;
 use App\Services\HttpPushGateway;
 use App\Services\InvoiceCalculationService as InvoiceCalculationServiceImpl;
+use App\Services\NativeDnsResolver;
 use App\Services\NumberSequenceService;
 use App\Services\OutOfStockService;
 use App\Services\PaymentService;
@@ -63,6 +65,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(InvoiceCalculationService::class, InvoiceCalculationServiceImpl::class);
         $this->app->bind(PricingService::class, fn () => app(\App\Services\PricingService::class));
         $this->app->bind(DocumentNumberService::class, fn () => app(NumberSequenceService::class));
+        $this->app->bind(DnsResolver::class, NativeDnsResolver::class);
         $this->app->bind(AlarmService::class, fn () => app(\App\Services\AlarmService::class));
         $this->app->bind(\App\Services\Contracts\OutOfStockService::class, fn () => app(OutOfStockService::class));
         $this->app->singleton(ComplaintService::class);
@@ -148,13 +151,13 @@ class AppServiceProvider extends ServiceProvider
             ->group(base_path('routes/api.php'));
 
         // Rep offline-sync endpoint (CG2), same guard stack as the rep PWA group.
-        Route::middleware(['web', 'auth', 'ensure.rep'])
+        Route::middleware(['web', 'auth', 'license', 'ensure.rep'])
             ->prefix('app')
             ->name('app.')
             ->group(base_path('routes/rep-sync.php'));
 
         // Rep offline-snapshot endpoint — returns cached read data for IndexedDB.
-        Route::middleware(['web', 'auth', 'ensure.rep'])
+        Route::middleware(['web', 'auth', 'license', 'ensure.rep'])
             ->prefix('app')
             ->name('app.')
             ->group(base_path('routes/rep-offline.php'));

@@ -44,9 +44,10 @@ jobs:
       - run: npm audit --audit-level=high
 
   # Passive warnings remain report-only (`-I`). Scanner/runtime failures block.
+  # Runs on PRs (non-blocking) and on push to master (blocking).
   dast-zap:
-    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
+    continue-on-error: ${{ github.event_name == 'pull_request' }}
     services:
       postgres:
         image: postgres:16@sha256:33f923b05f64ca54ac4401c01126a6b92afe839a0aa0a52bc5aeb5cc958e5f20

@@ -2,10 +2,12 @@
 
 namespace App\Livewire\App;
 
+use App\Exceptions\Domain\DomainException as AppDomainException;
 use App\Livewire\Concerns\CapturesPhotos;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Services\CollectionSubmissionService;
+use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -36,6 +38,8 @@ class CollectPayment extends Component
 
     public ?string $printNotice = null;
 
+    public int $photoCaptureKey = 0;
+
     public function updatedCustomerId(): void
     {
         $this->invoice_id = null;
@@ -50,7 +54,10 @@ class CollectPayment extends Component
             return;
         }
 
-        $inv = Invoice::find($value);
+        $inv = Invoice::query()->whereKey($value)
+            ->where('company_id', auth()->user()->activeCompanyId())
+            ->where('customer_id', $this->customer_id)
+            ->first();
         if ($inv) {
             $this->amount = (float) $inv->remaining_amount;
         }
@@ -65,6 +72,8 @@ class CollectPayment extends Component
             'method' => 'required|string|in:cash,cheque,transfer,other',
             'reference_number' => 'nullable|required_if:method,cheque,transfer|string|max:255',
             'notes' => 'nullable|string|max:500',
+            'photoIds' => 'required|array|min:1|max:3',
+            'photoIds.*' => 'integer',
         ]);
 
         try {
@@ -77,15 +86,22 @@ class CollectPayment extends Component
                     'invoice_id' => $this->invoice_id ?: null,
                     'reference_number' => $this->reference_number,
                     'notes' => $this->notes,
+                    'evidence_photo_ids' => $this->photoIds,
                 ],
             );
-        } catch (\Throwable $e) {
-            $this->addError('amount', $e->getMessage());
+        } catch (AppDomainException|\DomainException|AuthorizationException $exception) {
+            $this->addError('amount', $exception->getMessage());
+
+            return;
+        } catch (\Throwable $exception) {
+            report($exception);
+            $this->addError('amount', __('app.workflow_failed'));
 
             return;
         }
 
-        $this->attachPhotos($submission);
+        $this->photoIds = [];
+        $this->photoCaptureKey++;
         $this->lastPaymentId = null;
         $this->success = true;
         $this->successMessage = __('app.collection_submitted').' — '.number_format((float) $submission->amount, 2);
@@ -106,8 +122,19 @@ class CollectPayment extends Component
             ? 'تم حفظ الدفعة دون اتصال وستتم مزامنتها تلقائيًا عند عودة الاتصال.'
             : 'Payment saved offline — it will sync automatically when you are back online.';
 
-        $this->reset(['customer_id', 'invoice_id', 'amount', 'method', 'reference_number', 'notes']);
+        $this->reset(['customer_id', 'invoice_id', 'amount', 'method', 'reference_number', 'notes', 'photoIds']);
+        $this->photoCaptureKey++;
         $this->method = 'cash';
+    }
+
+    public function evidenceMissing(): void
+    {
+        $this->addError('photoIds', __('app.collection_evidence_required'));
+    }
+
+    public function offlineQueueFailed(): void
+    {
+        $this->addError('amount', __('app.workflow_failed'));
     }
 
     public function render()
