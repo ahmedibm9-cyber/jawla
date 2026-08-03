@@ -15,6 +15,7 @@ class Company extends Model
         'tax_number', 'commercial_registration_number',
         'address', 'phone', 'logo_path', 'currency', 'vat_percent',
         'bank_name', 'bank_account', 'bank_iban', 'rep_discount_percent', 'is_active',
+        'require_approved_devices',
         'geofence_radius_m',
         'country', 'zatca_enabled', 'zatca_csid', 'zatca_secret', 'zatca_environment',
         'eta_enabled', 'eta_taxpayer_activity_code',
@@ -29,6 +30,7 @@ class Company extends Model
         'vat_percent' => 'decimal:2',
         'rep_discount_percent' => 'decimal:2',
         'is_active' => 'boolean',
+        'require_approved_devices' => 'boolean',
         'zatca_enabled' => 'boolean',
         'eta_enabled' => 'boolean',
     ];
@@ -91,5 +93,15 @@ class Company extends Model
     public function activities(): HasMany
     {
         return $this->hasMany(Activity::class);
+    }
+
+    public function organizationUnits(): HasMany
+    {
+        return $this->hasMany(OrganizationUnit::class);
+    }
+
+    public function devices(): HasMany
+    {
+        return $this->hasMany(Device::class);
     }
 }

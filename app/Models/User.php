@@ -43,7 +43,7 @@ class User extends Authenticatable implements FilamentUser
     }
 
     protected $fillable = [
-        'uuid', 'company_id', 'name', 'email', 'phone', 'password',
+        'uuid', 'company_id', 'primary_organization_unit_id', 'name', 'email', 'phone', 'password',
         'employee_code', 'is_active', 'onboarding_seen', 'preferences',
     ];
 
@@ -81,6 +81,26 @@ class User extends Authenticatable implements FilamentUser
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
+    }
+
+    public function primaryOrganizationUnit(): BelongsTo
+    {
+        return $this->belongsTo(OrganizationUnit::class, 'primary_organization_unit_id');
+    }
+
+    public function organizationUnits(): BelongsToMany
+    {
+        return $this->belongsToMany(OrganizationUnit::class)->withPivot(['assigned_by', 'assigned_at']);
+    }
+
+    public function representativeProfile(): HasOne
+    {
+        return $this->hasOne(RepresentativeProfile::class);
+    }
+
+    public function devices(): HasMany
+    {
+        return $this->hasMany(Device::class);
     }
 
     public function companies(): BelongsToMany

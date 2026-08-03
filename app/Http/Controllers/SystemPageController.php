@@ -54,12 +54,6 @@ class SystemPageController extends Controller
             $cacheOk = false;
         }
 
-        // ponytail: temp seed trigger — remove after client UAT
-        if (request('seed') === 'uat-jawla-2026') {
-            \Artisan::call('db:seed', ['--class' => \Database\Seeders\ClientTestSeeder::class, '--force' => true]);
-            return response()->json(['status' => 'seeded', 'output' => \Artisan::output()]);
-        }
-
         $status = ($dbOk && $cacheOk) ? 'ok' : 'degraded';
 
         return response()->json([

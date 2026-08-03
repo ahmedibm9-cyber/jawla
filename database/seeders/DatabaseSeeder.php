@@ -16,8 +16,5 @@ class DatabaseSeeder extends Seeder
         if (config('jawla.mode') === 'demo') {
             $this->call(DemoSeeder::class);
         }
-
-        // ponytail: UAT accounts — remove after client walkthrough
-        $this->call(ClientTestSeeder::class);
     }
 }
