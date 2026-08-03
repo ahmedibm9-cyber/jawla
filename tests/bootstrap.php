@@ -67,14 +67,9 @@ $app->make(Kernel::class)->bootstrap();
 // and every service-level unit test trips the tenancy guard.
 $app['env'] = 'testing';
 
-// Ensure every migration has run — the hasTable guard used to skip pending
-// migrations when the DB already existed from a prior run, which left the
-// Spatie permissions table missing after it was added.
-$app->make(Kernel::class)->call('migrate', [
-    '--env' => 'testing',
-    '--force' => true,
-    '--quiet' => true,
-]);
+// Ponytail: Removed `migrate` call — RefreshDatabase::migrate:fresh handles
+// schema lifecycle per test. The bootstrap `migrate` created stale sequences
+// that collide with RefreshDatabase's drop-all-then-recreate cycle.
 
 // Purge every named connection so no stale PDO handles survive into tests.
 foreach ($app->make('db')->getConnections() as $name => $conn) {

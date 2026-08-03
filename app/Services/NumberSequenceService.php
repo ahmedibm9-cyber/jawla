@@ -49,6 +49,8 @@ class NumberSequenceService implements DocumentNumberService
         'proforma' => 'PI',
         'purchase_request' => 'PR',
         'purchase_order' => 'PO',
+        'sales_order' => 'SO',
+        'return_request' => 'RR',
     ];
 
     public function generate(string $docType, int $companyId, ?int $year = null): string
