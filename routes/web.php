@@ -46,13 +46,13 @@ Route::get('/offline', [SystemPageController::class, 'offline']);
 
 Route::get('/health', [SystemPageController::class, 'health']);
 
-Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
-    ->middleware('throttle:10,1')
-    ->name('locale.switch');
-
 Route::get('/locale/current', [SystemPageController::class, 'currentLocale'])
     ->middleware('cache.headers:no-store,private')
     ->name('locale.current');
+
+Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
+    ->middleware('throttle:10,1')
+    ->name('locale.switch');
 
 Route::post('/company/switch', [CompanyContextController::class, 'update'])
     ->middleware(['auth', 'license', 'throttle:post'])
