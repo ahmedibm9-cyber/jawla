@@ -11,19 +11,15 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EnsureApprovedDevice
 {
-    private static ?bool $columnExists = null;
-
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
 
         // ponytail: defensive check — column may not exist on older migrations
-        if (self::$columnExists === null) {
-            self::$columnExists = Schema::hasColumn('companies', 'require_approved_devices');
-        }
+        $columnExists = Schema::hasColumn('companies', 'require_approved_devices');
 
         $requiresApproval = $user !== null
-            && self::$columnExists
+            && $columnExists
             && (bool) $user->company()->value('require_approved_devices');
 
         if ($user === null || ! $requiresApproval || $request->routeIs('app.device', 'app.logout')) {
