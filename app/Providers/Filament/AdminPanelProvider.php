@@ -104,7 +104,6 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
                 SecurityHeaders::class,
                 ThrottlePost::class,
-                'throttle:login', // 5/min per email+ip for login attempts
             ])
             ->authMiddleware([
                 FilamentAuthenticate::class,
@@ -115,6 +114,7 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook('panels::head.end', function (): string {
                 $dir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
                 $lang = app()->getLocale();
+
                 return view('filament.admin-dashboard-theme')->render()
                     .view('filament.onboarding-head')->render()
                     .'<script>document.documentElement.dir="'.$dir.'";document.documentElement.lang="'.$lang.'";'

@@ -8,7 +8,7 @@ use App\Models\Complaint;
 use App\Models\Customer;
 use App\Models\Photo;
 use App\Models\Product;
-use App\Models\ReturnRecord;
+use App\Models\ReturnRequest;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Services\InvoiceService;
@@ -108,7 +108,7 @@ class PhotoWireInTest extends TestCase
             ->set('items.0.condition', 'sellable')
             ->call('submit');
 
-        $return = ReturnRecord::query()->latest('id')->firstOrFail();
+        $return = ReturnRequest::query()->latest('id')->firstOrFail();
         $fresh = $photo->fresh();
         $this->assertSame($return->getMorphClass(), $fresh->photable_type);
         $this->assertSame($return->id, $fresh->photable_id);

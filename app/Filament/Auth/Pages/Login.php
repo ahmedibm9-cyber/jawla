@@ -14,8 +14,10 @@ class Login extends BaseLogin
 {
     public function authenticate(): ?LoginResponse
     {
+        $email = strtolower(trim((string) ($this->data['email'] ?? '')));
+
         try {
-            $this->rateLimit(5);
+            $this->rateLimit(5, 60, 'authenticate', static::class.'|'.$email);
         } catch (TooManyRequestsException $exception) {
             $this->getRateLimitedNotification($exception)?->send();
 
