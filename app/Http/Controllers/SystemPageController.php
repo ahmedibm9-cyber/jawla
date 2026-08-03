@@ -60,7 +60,6 @@ class SystemPageController extends Controller
             'status' => $status,
             'db' => $dbOk ? 'ok' : 'failed',
             'cache' => $cacheOk ? 'ok' : 'failed',
-            'deploy' => 'cac0bca',
         ], $dbOk && $cacheOk ? 200 : 503)
             ->header('Cache-Control', 'no-store, private');
     }

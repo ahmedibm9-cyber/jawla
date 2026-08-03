@@ -18,7 +18,7 @@
                 id="customer-map"
                 role="img"
                 aria-label="{{ $ar ? 'خريطة مواقع العملاء' : 'Customer locations map' }}"
-                class="h-[calc(100vh-12rem)] w-full rounded-lg border border-gray-200 dark:border-gray-700"
+                style="width:100%;height:calc(100vh - 12rem);border-radius:8px;border:1px solid #d1d5db;"
             ></div>
         </div>
     @endif
