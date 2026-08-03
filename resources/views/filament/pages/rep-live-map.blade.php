@@ -33,6 +33,7 @@
 @push('scripts')
 <link rel="stylesheet" href="/leaflet.css" />
 <script src="/leaflet.js"></script>
+<script src="/popup-content.js"></script>
 <script>
     window.repLiveMap = function (points) {
         return {
