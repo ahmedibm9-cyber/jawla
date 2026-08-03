@@ -5,6 +5,7 @@ namespace App\Livewire\App;
 use App\Models\Invoice;
 use App\Models\ProformaInvoice;
 use App\Models\PurchaseRequest;
+use App\Models\SalesOrder;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -20,7 +21,7 @@ class Orders extends Component
 
     public function setType(string $type): void
     {
-        if (! in_array($type, ['invoices', 'proformas', 'offers'], true)) {
+        if (! in_array($type, ['sales_orders', 'invoices', 'proformas', 'offers'], true)) {
             return;
         }
 
@@ -30,7 +31,10 @@ class Orders extends Component
 
     public function render()
     {
-        if ($this->type === 'offers') {
+        if ($this->type === 'sales_orders') {
+            $documents = SalesOrder::query()->where('user_id', auth()->id())
+                ->with('customer')->latest()->simplePaginate(15);
+        } elseif ($this->type === 'offers') {
             $documents = PurchaseRequest::where('user_id', auth()->id())
                 ->with(['product', 'supplier', 'purchaseOrder'])
                 ->orderByDesc('created_at')

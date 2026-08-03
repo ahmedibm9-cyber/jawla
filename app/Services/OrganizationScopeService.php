@@ -47,8 +47,8 @@ class OrganizationScopeService
         for ($depth = 0; $depth < 3 && $frontier->isNotEmpty(); $depth++) {
             $children = OrganizationUnit::query()
                 ->whereIn('parent_id', $frontier->all())
+                ->whereNotIn('id', $all->all())
                 ->pluck('id')
-                ->diff($all)
                 ->values();
             $all = $all->merge($children)->unique();
             $frontier = $children;

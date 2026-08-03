@@ -53,9 +53,10 @@ class PdfController extends Controller
 
     private function download(string $path, string $filename): Response
     {
-        abort_unless(Storage::disk('private')->exists($path), 404);
+        $disk = config('filesystems.storage_disk');
+        abort_unless(Storage::disk($disk)->exists($path), 404);
 
-        return response(Storage::disk('private')->get($path), 200, [
+        return response(Storage::disk($disk)->get($path), 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => "inline; filename=\"{$filename}\"",
         ]);

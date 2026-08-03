@@ -6,6 +6,11 @@
     <div class="page-body">
         {{-- Type toggle --}}
         <div class="flex gap-2 mb-4" role="tablist" aria-label="{{ __('app.orders') }}">
+            <button type="button" role="tab" aria-selected="{{ $type === 'sales_orders' ? 'true' : 'false' }}" aria-controls="order-panel"
+                class="btn flex-1 {{ $type === 'sales_orders' ? 'btn-primary' : 'btn-outline' }}"
+                wire:click="setType('sales_orders')">
+                {{ __('app.sales_orders') }}
+            </button>
             <button type="button" role="tab" aria-selected="{{ $type === 'invoices' ? 'true' : 'false' }}" aria-controls="order-panel"
                 class="btn flex-1 {{ $type === 'invoices' ? 'btn-primary' : 'btn-outline' }}"
                 wire:click="setType('invoices')">
@@ -30,7 +35,11 @@
 
         <div id="order-panel" role="tabpanel">
         @if($documents->isEmpty())
-            @if($type === 'offers')
+            @if($type === 'sales_orders')
+                <x-ds.empty icon="heroicon-o-shopping-cart" :message="__('app.no_sales_orders')">
+                    <x-slot:action><a href="/app/orders/create" class="btn btn-primary no-underline">{{ __('app.create_sales_order') }}</a></x-slot:action>
+                </x-ds.empty>
+            @elseif($type === 'offers')
                 <x-ds.empty icon="heroicon-o-shopping-cart" :message="__('app.no_offers_yet')">
                     <x-slot:action>
                         <a href="/app/purchase-offer" class="btn btn-primary no-underline">{{ __('app.submit_purchase_offer') }}</a>
@@ -43,6 +52,18 @@
                     </x-slot:action>
                 </x-ds.empty>
             @endif
+        @elseif($type === 'sales_orders')
+            <div class="mb-3"><a href="/app/orders/create" class="btn btn-primary no-underline w-full">{{ __('app.create_sales_order') }}</a></div>
+            @foreach($documents as $order)
+                <div wire:key="sales-order-{{ $order->id }}" class="card mb-2">
+                    <div class="flex justify-between gap-2">
+                        <div><strong>{{ $order->order_number }}</strong><small class="block text-text-secondary">{{ $order->customer?->name_ar }}</small></div>
+                        <div class="text-end"><strong>{{ number_format((float) $order->total, 2) }} EGP</strong><span class="badge badge-info block mt-1">{{ __('app.sales_order_status_'.$order->status) }}</span></div>
+                    </div>
+                    @if($order->decision_reason)<p class="text-sm text-danger mt-2">{{ $order->decision_reason }}</p>@endif
+                </div>
+            @endforeach
+            {{ $documents->links() }}
         @elseif($type === 'offers')
             @foreach($documents as $offer)
                 @php

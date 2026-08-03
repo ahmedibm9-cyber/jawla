@@ -64,7 +64,7 @@ class StockImport extends Page
                 ->required(),
             Forms\Components\FileUpload::make('file')
                 ->label(l('ملف CSV', 'CSV File'))
-                ->disk('private')
+                ->disk(config('filesystems.storage_disk'))
                 ->directory('stock-imports')
                 ->acceptedFileTypes(['text/csv', 'text/plain', 'application/vnd.ms-excel'])
                 ->maxSize(2048)
@@ -87,7 +87,7 @@ class StockImport extends Page
         $this->fileName = basename((string) $storedPath);
 
         $staged = app(StockImportService::class)->stage(
-            Storage::disk('private')->path($storedPath),
+            Storage::disk(config('filesystems.storage_disk'))->path($storedPath),
             $warehouse,
             Auth::user(),
         );

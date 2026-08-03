@@ -8,6 +8,9 @@
                     type="date"
                     :label="l('من', 'From')"
                 />
+                <x-filament::button wire:click="exportCsv" icon="heroicon-o-arrow-down-tray">
+                    {{ l('تصدير CSV', 'Export CSV') }}
+                </x-filament::button>
                 <x-filament::input
                     wire:model.live="toDate"
                     type="date"

@@ -2,17 +2,20 @@
 
 namespace App\Notifications;
 
+use App\Notifications\Channels\PushChannel;
 use Illuminate\Notifications\Notification;
 
 /**
- * Base class for rep-facing outcome notifications. Database channel only —
- * push is deferred to v1.1; the in-app bell covers AM4 in beta.
+ * Base class for rep-facing outcome notifications. Push is enabled when this
+ * self-hosted installation has a compatible gateway configured.
  */
 abstract class RepNotification extends Notification
 {
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return config('jawla.push.gateway_url')
+            ? ['database', PushChannel::class]
+            : ['database'];
     }
 
     /**

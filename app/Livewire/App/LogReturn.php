@@ -6,7 +6,7 @@ use App\Livewire\Concerns\CapturesPhotos;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
-use App\Services\ReturnService;
+use App\Services\ReturnRequestService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -58,22 +58,21 @@ class LogReturn extends Component
         ]);
 
         try {
-            $return = app(ReturnService::class)->create(
-                companyId: auth()->user()->activeCompanyId(),
-                userId: auth()->id(),
+            $return = app(ReturnRequestService::class)->submit(
+                rep: auth()->user(),
                 customerId: $this->customer_id,
+                invoiceId: $this->against_invoice_id,
                 items: array_map(fn (array $item) => [
                     'invoice_item_id' => (int) $item['invoice_item_id'],
                     'quantity' => (float) $item['quantity'],
                     'condition' => $item['condition'],
                 ], $this->items),
-                againstInvoiceId: $this->against_invoice_id,
                 reason: $this->reason,
             );
 
             $this->attachPhotos($return);
             $this->success = true;
-            $this->successMessage = __('app.return_submitted').' — '.$return->return_number;
+            $this->successMessage = __('app.return_request_submitted').' — '.$return->request_number;
             $this->resetForm();
         } catch (\Throwable $e) {
             $this->errorMessage = app()->getLocale() === 'ar'

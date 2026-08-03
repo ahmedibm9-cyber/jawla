@@ -17,6 +17,13 @@ class CustomerLocation extends Model
         return ['latitude' => 'decimal:7', 'longitude' => 'decimal:7', 'is_primary' => 'boolean', 'is_active' => 'boolean'];
     }
 
-    public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
-    public function outlet(): BelongsTo { return $this->belongsTo(CustomerOutlet::class, 'customer_outlet_id'); }
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function outlet(): BelongsTo
+    {
+        return $this->belongsTo(CustomerOutlet::class, 'customer_outlet_id');
+    }
 }

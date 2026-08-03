@@ -6,8 +6,9 @@ use App\Enums\TaskStatus;
 use App\Filament\Resources\TaskResource\Pages;
 use App\Models\ApprovalRequest;
 use App\Models\Task;
-use App\Services\TaskService;
+use App\Models\User;
 use App\Services\OrganizationScopeService;
+use App\Services\TaskService;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Notifications\Notification;
@@ -261,7 +262,7 @@ class TaskResource extends Resource
         }
 
         $visibleUsers = app(OrganizationScopeService::class)
-            ->scopeUsers(\App\Models\User::query()->select('users.id'), $actor);
+            ->scopeUsers(User::query()->select('users.id'), $actor);
 
         return $query->whereIn('assigned_to', $visibleUsers);
     }

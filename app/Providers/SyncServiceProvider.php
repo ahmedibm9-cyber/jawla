@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Services\Sync\Handlers\CollectionSubmissionSyncHandler;
 use App\Services\Sync\Handlers\ComplaintSyncHandler;
 use App\Services\Sync\Handlers\ExpenseSyncHandler;
 use App\Services\Sync\Handlers\PaymentSyncHandler;
+use App\Services\Sync\Handlers\ReturnRequestSyncHandler;
 use App\Services\Sync\Handlers\ReturnSyncHandler;
 use App\Services\Sync\Handlers\SaleSyncHandler;
 use App\Services\Sync\Handlers\VisitReportSyncHandler;
@@ -24,7 +26,9 @@ class SyncServiceProvider extends ServiceProvider
         $this->app->tag([
             SaleSyncHandler::class,
             PaymentSyncHandler::class,
+            CollectionSubmissionSyncHandler::class,
             ReturnSyncHandler::class,
+            ReturnRequestSyncHandler::class,
             ExpenseSyncHandler::class,
             ComplaintSyncHandler::class,
             VisitReportSyncHandler::class,

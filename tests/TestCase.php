@@ -7,6 +7,11 @@ use Tests\Support\TestingDatabaseGuard;
 
 abstract class TestCase extends BaseTestCase
 {
+    // ponytail: Drop PostgreSQL custom types (enums, etc.) during migrate:fresh.
+    // Without this, 42 enum columns leave orphaned pg_type entries that collide
+    // on re-migration (pg_type_typname_nsp_index already exists).
+    protected bool $dropTypes = true;
+
     protected function setUp(): void
     {
         TestingDatabaseGuard::assertSafe(
@@ -24,11 +29,6 @@ abstract class TestCase extends BaseTestCase
     {
         parent::tearDown();
 
-        // After parent::tearDown() destroys the app container, force-close
-        // any lingering PostgreSQL connections and let PHP garbage-collect
-        // the PDO handles. Without this, the previous test's connection may
-        // still hold row locks when the NEXT test's RefreshDatabase runs
-        // migrate:fresh (DROP TABLE CASCADE), causing intermittent deadlocks.
         gc_collect_cycles();
     }
 }

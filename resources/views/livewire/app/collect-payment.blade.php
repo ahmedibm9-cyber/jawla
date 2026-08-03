@@ -14,8 +14,10 @@
                     <small class="text-text-secondary block mb-2" aria-live="polite">{{ $printNotice }}</small>
                 @endif
                 <div class="success-actions">
-                    <x-ds.bluetooth-print-button :payload="$paymentPrintPayload" :label="__('app.print_receipt')" />
-                    <a href="/app/pdf/receipt/{{ $lastPaymentId }}" target="_blank" class="btn btn-primary no-underline text-center">{{ __('app.view_receipt') }}</a>
+                    @if($lastPaymentId)
+                        <x-ds.bluetooth-print-button :payload="$paymentPrintPayload" :label="__('app.print_receipt')" />
+                        <a href="/app/pdf/receipt/{{ $lastPaymentId }}" target="_blank" class="btn btn-primary no-underline text-center">{{ __('app.view_receipt') }}</a>
+                    @endif
                     <button class="btn btn-outline" wire:click="$set('success', false)">{{ __('app.collect_another') }}</button>
                 </div>
             </div>
@@ -25,6 +27,19 @@
                     <label for="customer_id" class="form-label">{{ __('app.customer') }} *</label>
                     <x-ds.autocomplete wire:model.live="customer_id" id="customer_id" :options="$customers" :placeholder="__('app.search_customer')" required />
                     @error('customer_id') <small id="customer_id-error" class="form-error">{{ $message }}</small> @enderror
+                </div>
+
+                @if(in_array($method, ['cheque', 'transfer'], true))
+                    <div class="form-group">
+                        <label for="reference_number" class="form-label">{{ __('app.collection_reference') }} *</label>
+                        <input type="text" wire:model="reference_number" id="reference_number" class="form-input" maxlength="255" required>
+                        @error('reference_number') <small class="form-error">{{ $message }}</small> @enderror
+                    </div>
+                @endif
+
+                <div class="form-group">
+                    <label class="form-label">{{ __('app.collection_evidence') }}</label>
+                    <livewire:app.photo-capture :max-photos="3" />
                 </div>
 
                 <div class="form-group">
@@ -74,11 +89,12 @@
                                 if (navigator.onLine) {
                                     $wire.submit();
                                 } else {
-                                    await window.jawlaSync.enqueue('payment', {
+                                    await window.jawlaSync.enqueue('collection_submission', {
                                         customer_id: $wire.customer_id,
                                         invoice_id: $wire.invoice_id,
                                         amount: $wire.amount,
                                         method: $wire.method,
+                                        reference_number: $wire.reference_number,
                                         notes: $wire.notes,
                                     });
                                     $wire.queueOffline();

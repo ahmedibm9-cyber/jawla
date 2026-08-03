@@ -9,6 +9,7 @@ use App\Services\CustomerStructureService;
 use App\Support\ActiveCompanyContext;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -99,7 +100,7 @@ class CustomerStructureTest extends TestCase
             'code' => 'OTHER', 'name_ar' => 'آخر',
         ]);
 
-        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        $this->expectException(ModelNotFoundException::class);
         app(CustomerStructureService::class)->addContact($customer, [
             'customer_outlet_id' => $otherOutlet->id,
             'name' => 'Invalid contact',

@@ -91,7 +91,7 @@
                                 if (navigator.onLine) {
                                     $wire.submit();
                                 } else {
-                                    await window.jawlaSync.enqueue('return', {
+                                    await window.jawlaSync.enqueue('return_request', {
                                         customer_id: $wire.customer_id,
                                         against_invoice_id: $wire.against_invoice_id,
                                         reason: $wire.reason,

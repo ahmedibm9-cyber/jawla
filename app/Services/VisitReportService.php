@@ -26,7 +26,7 @@ class VisitReportService
             if ($signatureDataUrl) {
                 $signaturePath = 'signatures/'.$visit->id.'_'.time().'.png';
                 $parts = explode(',', $signatureDataUrl, 2);
-                Storage::disk('private')->put($signaturePath, base64_decode($parts[1] ?? ''));
+                Storage::disk(config('filesystems.storage_disk'))->put($signaturePath, base64_decode($parts[1] ?? ''));
             }
 
             $report = VisitReport::create([

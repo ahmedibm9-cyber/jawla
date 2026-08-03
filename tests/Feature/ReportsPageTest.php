@@ -101,4 +101,27 @@ class ReportsPageTest extends TestCase
             ->call('$set', 'tab', 'quotations')
             ->assertOk();
     }
+
+    public function test_invoice_export_is_limited_to_the_active_company(): void
+    {
+        $user = $this->reportingUser();
+        Invoice::factory()->create([
+            'company_id' => $user->company_id,
+            'user_id' => $user->id,
+            'invoice_number' => 'OWN-EXPORT',
+        ]);
+        Invoice::factory()->create(['invoice_number' => 'OTHER-EXPORT']);
+
+        $this->actingAs($user);
+        $page = new ReportsPage;
+        $page->tab = 'invoices';
+        $response = $page->exportCsv();
+
+        ob_start();
+        ($response->getCallback())();
+        $csv = ob_get_clean();
+
+        $this->assertStringContainsString('OWN-EXPORT', $csv);
+        $this->assertStringNotContainsString('OTHER-EXPORT', $csv);
+    }
 }

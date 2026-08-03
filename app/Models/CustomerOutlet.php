@@ -13,10 +13,33 @@ class CustomerOutlet extends Model
 
     protected $fillable = ['company_id', 'customer_id', 'route_id', 'code', 'name_ar', 'name_en', 'phone', 'is_active'];
 
-    protected function casts(): array { return ['is_active' => 'boolean']; }
-    public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
-    public function route(): BelongsTo { return $this->belongsTo(Route::class); }
-    public function contacts(): HasMany { return $this->hasMany(CustomerContact::class); }
-    public function locations(): HasMany { return $this->hasMany(CustomerLocation::class); }
-    public function assignments(): HasMany { return $this->hasMany(CustomerAssignment::class); }
+    protected function casts(): array
+    {
+        return ['is_active' => 'boolean'];
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function route(): BelongsTo
+    {
+        return $this->belongsTo(Route::class);
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(CustomerContact::class);
+    }
+
+    public function locations(): HasMany
+    {
+        return $this->hasMany(CustomerLocation::class);
+    }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(CustomerAssignment::class);
+    }
 }

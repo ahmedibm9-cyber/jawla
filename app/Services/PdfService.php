@@ -69,8 +69,9 @@ class PdfService
         }
 
         $signaturePath = $sig;
-        $signatureSvg = is_string($signaturePath) && Storage::disk('private')->exists($signaturePath)
-            ? '<img src="data:image/png;base64,'.base64_encode(Storage::disk('private')->get($signaturePath)).'" style="max-width:160px;max-height:60px">'
+        $disk = config('filesystems.storage_disk');
+        $signatureSvg = is_string($signaturePath) && Storage::disk($disk)->exists($signaturePath)
+            ? '<img src="data:image/png;base64,'.base64_encode(Storage::disk($disk)->get($signaturePath)).'" style="max-width:160px;max-height:60px">'
             : '<span style="font-style:italic">'.e($invoice->user?->name ?? '').'</span>';
 
         $qrData = $this->qrService->generateForInvoice($invoice);

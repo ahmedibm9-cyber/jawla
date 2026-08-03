@@ -74,6 +74,13 @@ class CollectionSubmissionService
                 'collection-'.$submission->id,
             );
             $submission->update(['status' => 'approved', 'payment_id' => $payment->id, 'reviewed_by' => $actor->id, 'reviewed_at' => now()]);
+            DB::afterCommit(fn () => app(WebhookService::class)->dispatch((int) $submission->company_id, 'collection.approved', [
+                'collection_submission_id' => $submission->id,
+                'payment_id' => $payment->id,
+                'customer_id' => $submission->customer_id,
+                'amount' => $submission->amount,
+                'method' => $submission->method,
+            ]));
 
             return $submission->fresh('payment');
         });

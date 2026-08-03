@@ -12,7 +12,18 @@ class CustomerContact extends Model
 
     protected $fillable = ['company_id', 'customer_id', 'customer_outlet_id', 'name', 'job_title', 'phone', 'email', 'is_primary'];
 
-    protected function casts(): array { return ['is_primary' => 'boolean']; }
-    public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
-    public function outlet(): BelongsTo { return $this->belongsTo(CustomerOutlet::class, 'customer_outlet_id'); }
+    protected function casts(): array
+    {
+        return ['is_primary' => 'boolean'];
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function outlet(): BelongsTo
+    {
+        return $this->belongsTo(CustomerOutlet::class, 'customer_outlet_id');
+    }
 }

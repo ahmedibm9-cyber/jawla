@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Middleware\EnsureRecentPasswordConfirmation;
 use App\Http\Middleware\EnsureApprovedDevice;
+use App\Http\Middleware\EnsureRecentPasswordConfirmation;
 use App\Http\Middleware\EnsureRepRole;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetActiveCompanyContext;
@@ -40,6 +40,10 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function ($schedule): void {
         $schedule->command('app:purge-location-pings')
+            ->daily()
+            ->onOneServer()
+            ->withoutOverlapping();
+        $schedule->command('app:verify-license')
             ->daily()
             ->onOneServer()
             ->withoutOverlapping();

@@ -9,6 +9,7 @@ use App\Http\Controllers\SystemPageController;
 use App\Livewire\App\AddCustomer;
 use App\Livewire\App\CashReconcile;
 use App\Livewire\App\CollectPayment;
+use App\Livewire\App\CreateSalesOrder;
 use App\Livewire\App\DeviceRegistration;
 use App\Livewire\App\Home;
 use App\Livewire\App\LogComplaint;
@@ -76,6 +77,7 @@ Route::middleware(['web', 'auth', 'ensure.rep', 'ensure.device'])->prefix('app')
     Route::get('/customers', TodaysCustomers::class)->name('customers');
     Route::get('/visits', Visits::class)->name('visits');
     Route::get('/orders', Orders::class)->name('orders');
+    Route::get('/orders/create', CreateSalesOrder::class)->name('orders.create');
     Route::get('/notifications', Notifications::class)->name('notifications');
     Route::get('/tasks', Tasks::class)->name('tasks');
     Route::get('/quotations', QuotationFlow::class)->name('quotations');

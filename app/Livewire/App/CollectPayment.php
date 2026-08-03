@@ -2,16 +2,18 @@
 
 namespace App\Livewire\App;
 
+use App\Livewire\Concerns\CapturesPhotos;
 use App\Models\Customer;
 use App\Models\Invoice;
-use App\Services\PaymentService;
-use App\Support\ThermalPrintFormatter;
+use App\Services\CollectionSubmissionService;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
 class CollectPayment extends Component
 {
+    use CapturesPhotos;
+
     public ?int $customer_id = null;
 
     public ?int $invoice_id = null;
@@ -21,6 +23,8 @@ class CollectPayment extends Component
     public string $method = 'cash';
 
     public ?string $notes = null;
+
+    public ?string $reference_number = null;
 
     public bool $success = false;
 
@@ -52,25 +56,28 @@ class CollectPayment extends Component
         }
     }
 
-    public function submit(ThermalPrintFormatter $printer): void
+    public function submit(): void
     {
         $this->validate([
             'customer_id' => 'required|exists:customers,id',
             'invoice_id' => 'nullable|integer|exists:invoices,id',
             'amount' => 'required|numeric|min:0.01',
             'method' => 'required|string|in:cash,cheque,transfer,other',
+            'reference_number' => 'nullable|required_if:method,cheque,transfer|string|max:255',
             'notes' => 'nullable|string|max:500',
         ]);
 
         try {
-            $payment = app(PaymentService::class)->collect(
-                companyId: auth()->user()->activeCompanyId(),
-                userId: auth()->id(),
+            $submission = app(CollectionSubmissionService::class)->submit(
+                rep: auth()->user(),
                 customerId: $this->customer_id,
                 amount: (float) $this->amount,
                 method: $this->method,
-                invoiceId: $this->invoice_id ?: null,
-                notes: $this->notes ?: null,
+                attributes: [
+                    'invoice_id' => $this->invoice_id ?: null,
+                    'reference_number' => $this->reference_number,
+                    'notes' => $this->notes,
+                ],
             );
         } catch (\Throwable $e) {
             $this->addError('amount', $e->getMessage());
@@ -78,20 +85,12 @@ class CollectPayment extends Component
             return;
         }
 
-        $this->lastPaymentId = $payment->id;
+        $this->attachPhotos($submission);
+        $this->lastPaymentId = null;
         $this->success = true;
-        $this->successMessage = __('app.payment_collected').' — '.number_format((float) $payment->amount, 2);
+        $this->successMessage = __('app.collection_submitted').' — '.number_format((float) $submission->amount, 2);
 
-        try {
-            $this->paymentPrintPayload = $printer->paymentPayload($payment);
-        } catch (\Throwable) {
-            $this->paymentPrintPayload = [];
-            $this->printNotice = app()->getLocale() === 'ar'
-                ? 'تم تحصيل الدفعة لكن تعذر تجهيز بيانات الطباعة. استخدم الإيصال PDF.'
-                : 'Payment was collected, but the print payload could not be prepared. Use the PDF receipt instead.';
-        }
-
-        $this->reset(['customer_id', 'invoice_id', 'amount', 'method', 'notes']);
+        $this->reset(['customer_id', 'invoice_id', 'amount', 'method', 'reference_number', 'notes']);
         $this->method = 'cash';
     }
 
@@ -107,7 +106,7 @@ class CollectPayment extends Component
             ? 'تم حفظ الدفعة دون اتصال وستتم مزامنتها تلقائيًا عند عودة الاتصال.'
             : 'Payment saved offline — it will sync automatically when you are back online.';
 
-        $this->reset(['customer_id', 'invoice_id', 'amount', 'method', 'notes']);
+        $this->reset(['customer_id', 'invoice_id', 'amount', 'method', 'reference_number', 'notes']);
         $this->method = 'cash';
     }
 

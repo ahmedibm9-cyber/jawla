@@ -48,6 +48,9 @@ class RoleSeeder extends Seeder
             // Restricted settings pages
             'admin_preferences.view', 'api_tokens.view',
             'organization_units.view_all', 'organization_units.view_scope', 'devices.approve',
+            'sales_orders.create', 'sales_orders.approve', 'collections.review',
+            'return_requests.approve', 'return_requests.receive',
+            'integrations.manage', 'licenses.manage',
             // Stock / Purchasing
             'stock.view', 'suppliers.manage',
         ];
@@ -84,6 +87,12 @@ class RoleSeeder extends Seeder
             'complaint' => ['view_any', 'view', 'create', 'update', 'delete'],
             'organization_unit' => ['view_any', 'view', 'create', 'update', 'delete'],
             'device' => ['view_any', 'view', 'create', 'update', 'delete'],
+            'sales_order' => ['view_any', 'view', 'create', 'update', 'delete'],
+            'collection_submission' => ['view_any', 'view', 'create', 'update', 'delete'],
+            'return_request' => ['view_any', 'view', 'create', 'update', 'delete'],
+            'webhook_endpoint' => ['view_any', 'view', 'create', 'update', 'delete'],
+            'webhook_delivery' => ['view_any', 'view', 'create', 'update', 'delete'],
+            'installation_license' => ['view_any', 'view', 'create', 'update', 'delete'],
         ];
 
         foreach ($shieldPermissions as $resource => $actions) {
@@ -160,6 +169,9 @@ class RoleSeeder extends Seeder
                 'tasks.approve', 'tasks.reject', 'tasks.reopen',
                 'view_any:organization_unit', 'view:organization_unit',
                 'view_any:device', 'view:device', 'organization_units.view_scope', 'devices.approve',
+                'view_any:sales_order', 'view:sales_order', 'sales_orders.approve',
+                'view_any:collection_submission', 'view:collection_submission', 'collections.review',
+                'view_any:return_request', 'view:return_request', 'return_requests.approve',
             ],
 
             'accounts' => [
@@ -216,6 +228,7 @@ class RoleSeeder extends Seeder
                 // Custom
                 'stock.import', 'stock.adjust', 'stock.export',
                 'batches.manage', 'goods_in_transit.receive', 'reports.stock',
+                'view_any:return_request', 'view:return_request', 'return_requests.receive',
             ],
 
             'executive' => [
@@ -243,6 +256,7 @@ class RoleSeeder extends Seeder
                 'complaints.submit', 'cashbox.view', 'van_transfers.request',
                 'refunds.request',
                 'tasks.accept', 'tasks.progress', 'tasks.submit',
+                'sales_orders.create',
                 // Shield resource permissions required by services that gate on
                 // can('create:...') / can('update:...') instead of custom names.
                 'create:invoice', 'create:return_record', 'update:invoice',
@@ -259,6 +273,7 @@ class RoleSeeder extends Seeder
                 'complaints.submit', 'cashbox.view', 'van_transfers.request',
                 'refunds.request',
                 'tasks.accept', 'tasks.progress', 'tasks.submit',
+                'sales_orders.create',
                 // Shield resource permissions required by services (see sales_rep).
                 'create:invoice', 'create:return_record', 'update:invoice',
             ],

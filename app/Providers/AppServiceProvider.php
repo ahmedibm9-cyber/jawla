@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
+use App\Http\Middleware\EnsureApprovedDevice;
 use App\Models\Activity;
 use App\Models\PriceQuotation;
 use App\Models\User;
-use App\Http\Middleware\EnsureApprovedDevice;
 use App\Observers\AuditObserver;
 use App\Services\ComplaintService;
 use App\Services\Contracts\AlarmService;
@@ -14,6 +14,7 @@ use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\InvoiceService;
 use App\Services\Contracts\PaymentService as PaymentServiceContract;
 use App\Services\Contracts\PricingService;
+use App\Services\Contracts\PushGateway;
 use App\Services\Contracts\StockService;
 use App\Services\Contracts\VanTransferService as VanTransferServiceContract;
 use App\Services\Eta\Contracts\EtaClient;
@@ -21,6 +22,7 @@ use App\Services\Eta\Contracts\EtaSigner;
 use App\Services\Eta\HttpEtaClient;
 use App\Services\Eta\NullEtaClient;
 use App\Services\Eta\UnsignedEtaSigner;
+use App\Services\HttpPushGateway;
 use App\Services\InvoiceCalculationService as InvoiceCalculationServiceImpl;
 use App\Services\NumberSequenceService;
 use App\Services\OutOfStockService;
@@ -66,6 +68,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ComplaintService::class);
         $this->app->bind(VanTransferServiceContract::class, fn () => app(VanTransferService::class));
         $this->app->bind(PaymentServiceContract::class, fn () => app(PaymentService::class));
+        $this->app->bind(PushGateway::class, HttpPushGateway::class);
 
         // ETA e-invoicing. The HTTP transport (OAuth + submission + response
         // mapping) is built; it activates only when ETA is enabled AND base URLs

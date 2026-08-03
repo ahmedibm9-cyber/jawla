@@ -59,24 +59,27 @@ Alternative transitions:
 
 ### Sales order
 
-`draft -> submitted -> under_review -> approved -> warehouse_processing -> ready -> dispatched -> delivered -> closed`
-
-Alternative terminal or holding states are `changes_requested`, `rejected`,
-`partially_fulfilled`, `cancelled`, and `on_hold`. Approval freezes an immutable
-commercial snapshot. Invoicing remains a separate financial transaction.
+The implemented first lifecycle is `draft -> submitted -> approved|rejected`.
+Approval freezes the commercial order snapshot. Invoicing and stock movement
+remain separate transactions; approving an order does not create an invoice or
+change stock.
 
 ### Collection
 
-`draft -> submitted -> supervisor_review -> finance_review -> reconciled -> posted`
+`pending_review -> approved|rejected`
 
-Corrections use the existing controlled payment reversal path. Submitted
-collections are never silently edited.
+Approval posts the collection through `PaymentService`, producing the actual
+payment, cash-box movement, and customer/invoice allocation. Rejection produces
+no financial movement. Corrections to posted payments use the existing
+controlled payment reversal path.
 
 ### Return
 
-`draft -> submitted -> approved -> received -> inspected -> accepted|partially_accepted -> processed -> closed`
+`pending_approval -> approved|rejected`; an approved request can then become
+`received`.
 
-Stock and customer credit change only during processing after inspection.
+Warehouse receipt calls the existing transactional return service. Stock,
+credit notes, and customer balances do not change at submission or approval.
 
 ## Service pseudocode
 
@@ -119,13 +122,34 @@ longer applies. Each fails the transaction and preserves the previous state.
 
 ### Verify a self-hosted license
 
-1. Read the license JSON and detached signature from configured local paths.
-2. Verify the signature with the vendor public key bundled in configuration.
-3. Confirm installation identifier, licensed company count, user limit, and
-   expiry constraints.
-4. Cache only the verified claims until their next validation time.
-5. Fail closed for administrative writes when the license is invalid; preserve
-   read access and data export so client data is never held hostage.
+1. Paste the vendor-issued JSON document and detached Base64 signature into the
+   installation-license administration page.
+2. Verify the exact JSON bytes with the vendor public key in
+   `JAWLA_LICENSE_PUBLIC_KEY`.
+3. If `JAWLA_INSTALLATION_ID` is configured, require an exact installation-id
+   match.
+4. Store the signed document, its SHA-256 hash, validity window, edition,
+   feature claims, and user limit; never store a reusable plaintext license key.
+5. Re-verification checks the detached signature, stored hash, dates, and active
+   user limit. License status is visible to installation administrators.
+
+## Operational configuration
+
+- `JAWLA_PUSH_GATEWAY_URL` points to a client-operated Web Push gateway that
+  accepts a browser subscription and notification payload. The optional
+  `JAWLA_PUSH_GATEWAY_TOKEN` authenticates Jawla to that gateway. With no gateway
+  configured, database/in-app notifications continue to work.
+- Webhook endpoints are configured per company in the admin panel. Deliveries
+  use `X-Jawla-Event` and an `X-Jawla-Signature: sha256=...` HMAC header. Failed
+  attempts are retained with bounded response excerpts and can be retried up to
+  five times.
+- `JAWLA_LICENSE_PUBLIC_KEY` is the vendor verification key. Multiline PEM keys
+  may use escaped `\\n`. `JAWLA_INSTALLATION_ID` binds licenses to one client
+  installation when set. `php artisan app:verify-license` is the deployment and
+  monitoring gate; the scheduler runs it daily and returns a failing exit code
+  for an invalid, expired, mismatched, or over-limit license.
+- The reports page streams CSV exports in 500-row chunks so large exports do not
+  require loading an entire report into memory.
 
 ## Migration order
 

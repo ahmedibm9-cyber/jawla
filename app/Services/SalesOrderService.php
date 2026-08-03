@@ -81,6 +81,12 @@ class SalesOrderService
             $order = $request->approvable;
             if ($request->status === ApprovalRequestStatus::Approved) {
                 $order->update(['status' => 'approved', 'approved_by' => $actor->id, 'approved_at' => now()]);
+                DB::afterCommit(fn () => app(WebhookService::class)->dispatch((int) $order->company_id, 'sales_order.approved', [
+                    'sales_order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'customer_id' => $order->customer_id,
+                    'total' => $order->total,
+                ]));
             }
 
             return $order->fresh();

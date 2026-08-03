@@ -18,4 +18,12 @@ return [
         'activity_logs_days' => (int) env('JAWLA_RETENTION_ACTIVITY_LOGS', 365),
         'sessions_days' => (int) env('JAWLA_RETENTION_SESSIONS', 30),
     ],
+    'push' => [
+        'gateway_url' => env('JAWLA_PUSH_GATEWAY_URL'),
+        'gateway_token' => env('JAWLA_PUSH_GATEWAY_TOKEN'),
+    ],
+    'license' => [
+        'public_key' => env('JAWLA_LICENSE_PUBLIC_KEY'),
+        'installation_id' => env('JAWLA_INSTALLATION_ID'),
+    ],
 ];

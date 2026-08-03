@@ -26,6 +26,16 @@ return [
     ),
 
     /*
+    | Disk for PDFs, signatures, stock imports — anything ephemeral that would
+    | otherwise live on the local 'private' disk and vanish on deploy. Set
+    | STORAGE_DISK=s3 in production (or staging) for durable object storage.
+    */
+    'storage_disk' => env(
+        'STORAGE_DISK',
+        env('APP_ENV') === 'production' ? 's3' : 'private',
+    ),
+
+    /*
     |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------

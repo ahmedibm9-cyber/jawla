@@ -17,7 +17,7 @@ class PdfEngine
     {
         $path = "pdfs/{$filename}";
 
-        return Storage::disk('private')->exists($path) ? $path : null;
+        return Storage::disk(config('filesystems.storage_disk'))->exists($path) ? $path : null;
     }
 
     public function renderAndSave(string $html, string $filename): string
@@ -29,8 +29,9 @@ class PdfEngine
         ]);
         $mpdf->WriteHTML($html);
         $path = "pdfs/{$filename}";
-        Storage::disk('private')->makeDirectory('pdfs');
-        Storage::disk('private')->put($path, $mpdf->Output($filename, 'S'));
+        $disk = config('filesystems.storage_disk');
+        Storage::disk($disk)->makeDirectory('pdfs');
+        Storage::disk($disk)->put($path, $mpdf->Output($filename, 'S'));
 
         return $path;
     }
