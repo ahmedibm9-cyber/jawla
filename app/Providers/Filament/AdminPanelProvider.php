@@ -112,16 +112,8 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook('panels::topbar.end', fn (): string => view('components._active-company', ['panel' => 'admin'])->render())
             ->renderHook('panels::head.start', fn (): string => '<link rel="preload" href="'.secure_asset('images/black-j.webp').'" as="image" fetchpriority="high">')
             ->renderHook('panels::head.end', function (): string {
-                $dir = app()->getLocale() === 'ar' ? 'rtl' : 'ltr';
-                $lang = app()->getLocale();
-
                 return view('filament.admin-dashboard-theme')->render()
-                    .view('filament.onboarding-head')->render()
-                    .'<script>document.documentElement.dir="'.$dir.'";document.documentElement.lang="'.$lang.'";'
-                    .'document.addEventListener("livewire:navigated",()=>{'
-                    .'fetch("/locale/current",{headers:{"Accept":"application/json"}})'
-                    .'.then(r=>r.json()).then(d=>{document.documentElement.dir=d.dir;document.documentElement.lang=d.locale;})'
-                    .'.catch(()=>{});});</script>';
+                    .view('filament.onboarding-head')->render();
             })
             ->renderHook('panels::body.end', function (): string {
                 return '<script>window.areRecordsPartiallySelected??=()=>!1;window.getRecordsOnPage??=()=>[];window.areRecordsSelected??=()=>!1;window.areRecordsToggleable??=()=>!0;</script>'.view('filament.onboarding-body')->render();

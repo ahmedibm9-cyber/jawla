@@ -46,9 +46,6 @@ Route::get('/offline', [SystemPageController::class, 'offline']);
 
 Route::get('/health', [SystemPageController::class, 'health']);
 
-Route::get('/locale/current', [SystemPageController::class, 'currentLocale'])
-    ->name('locale.current');
-
 Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
     ->middleware('throttle:10,1')
     ->name('locale.switch');

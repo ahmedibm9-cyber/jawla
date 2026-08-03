@@ -74,16 +74,6 @@ class SystemPageController extends Controller
         return redirect()->route('app.sell');
     }
 
-    public function currentLocale(): JsonResponse
-    {
-        $locale = session('locale', config('app.locale'));
-
-        return response()->json([
-            'locale' => $locale,
-            'dir' => $locale === 'ar' ? 'rtl' : 'ltr',
-        ])->header('Cache-Control', 'no-store, private');
-    }
-
     public function switchLocale(string $locale): RedirectResponse
     {
         abort_unless(in_array($locale, ['en', 'ar'], true), 404);
