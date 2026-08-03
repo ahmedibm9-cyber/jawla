@@ -9,6 +9,7 @@ envsubst '${PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/htt
 # artifacts must be generated in the application container that will serve.
 php /app/artisan config:cache
 php /app/artisan route:cache
+php /app/artisan view:clear
 php /app/artisan view:cache
 
 # Public storage symlink for rep-captured photos (public disk). Each replica has
