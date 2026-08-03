@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Activity;
 use App\Models\PriceQuotation;
 use App\Models\User;
+use App\Http\Middleware\EnsureApprovedDevice;
 use App\Observers\AuditObserver;
 use App\Services\ComplaintService;
 use App\Services\Contracts\AlarmService;
@@ -41,6 +42,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -86,6 +88,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Livewire::addPersistentMiddleware(EnsureApprovedDevice::class);
+
         FilamentView::registerRenderHook(
             PanelsRenderHook::HEAD_END,
             fn (): string => view('filament.pwa-head')->render(),

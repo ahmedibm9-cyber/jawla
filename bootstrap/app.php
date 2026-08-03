@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureRecentPasswordConfirmation;
+use App\Http\Middleware\EnsureApprovedDevice;
 use App\Http\Middleware\EnsureRepRole;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetActiveCompanyContext;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'ensure.rep' => EnsureRepRole::class,
+            'ensure.device' => EnsureApprovedDevice::class,
             'step-up' => EnsureRecentPasswordConfirmation::class,
         ]);
 

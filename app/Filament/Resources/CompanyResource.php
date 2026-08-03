@@ -117,6 +117,10 @@ class CompanyResource extends Resource
                 Forms\Components\Toggle::make('is_active')
                     ->label(app()->getLocale() === 'ar' ? 'نشط' : 'Active')
                     ->default(true),
+                Forms\Components\Toggle::make('require_approved_devices')
+                    ->label(l('السماح للأجهزة المعتمدة فقط', 'Require approved devices'))
+                    ->helperText(l('عند التفعيل، يجب اعتماد جهاز كل مندوب قبل استخدام تطبيق الميدان', 'When enabled, each rep device must be approved before the field app can be used'))
+                    ->default(false),
 
                 Section::make(app()->getLocale() === 'ar' ? 'إعدادات الفوترة الإلكترونية (مصر)' : 'ETA E-Invoicing (Egypt)')
                     ->schema([

@@ -124,6 +124,56 @@ class CustomerResource extends Resource
                 Forms\Components\TextInput::make('balance')->label(l('الرصيد', 'Balance'))->numeric()->default(0)->disabled(),
             ])->columns(2),
 
+            Section::make(l('الفروع والمنافذ', 'Outlets'))->schema([
+                Forms\Components\Repeater::make('outlets')->relationship()->schema([
+                    Forms\Components\TextInput::make('code')->label(l('الكود', 'Code'))->required()->maxLength(50),
+                    Forms\Components\TextInput::make('name_ar')->label(l('الاسم بالعربية', 'Arabic name'))->required()->maxLength(255),
+                    Forms\Components\TextInput::make('name_en')->label(l('الاسم بالإنجليزية', 'English name'))->maxLength(255),
+                    Forms\Components\TextInput::make('phone')->label(l('الهاتف', 'Phone'))->tel(),
+                    Forms\Components\Select::make('route_id')->label(l('خط السير', 'Route'))->relationship('route', 'name_ar')->searchable()->preload(),
+                    Forms\Components\Toggle::make('is_active')->label(l('نشط', 'Active'))->default(true),
+                ])->columns(2)->defaultItems(0),
+            ])->collapsible(),
+
+            Section::make(l('جهات الاتصال', 'Contacts'))->schema([
+                Forms\Components\Repeater::make('contacts')->relationship()->schema([
+                    Forms\Components\TextInput::make('name')->label(l('الاسم', 'Name'))->required()->maxLength(255),
+                    Forms\Components\TextInput::make('job_title')->label(l('المنصب', 'Job title'))->maxLength(255),
+                    Forms\Components\TextInput::make('phone')->label(l('الهاتف', 'Phone'))->tel(),
+                    Forms\Components\TextInput::make('email')->label(l('البريد الإلكتروني', 'Email'))->email(),
+                    Forms\Components\Toggle::make('is_primary')->label(l('جهة الاتصال الأساسية', 'Primary contact')),
+                ])->columns(2)->defaultItems(0),
+            ])->collapsible(),
+
+            Section::make(l('المواقع', 'Locations'))->schema([
+                Forms\Components\Repeater::make('locations')->relationship()->schema([
+                    Forms\Components\Select::make('type')->label(l('النوع', 'Type'))->options([
+                        'visit' => l('زيارة', 'Visit'), 'billing' => l('فوترة', 'Billing'), 'shipping' => l('شحن', 'Shipping'),
+                    ])->default('visit')->required(),
+                    Forms\Components\TextInput::make('label')->label(l('التسمية', 'Label'))->required()->maxLength(255),
+                    Forms\Components\Textarea::make('address')->label(l('العنوان', 'Address'))->required(),
+                    Forms\Components\TextInput::make('latitude')->label(l('خط العرض', 'Latitude'))->numeric()->minValue(-90)->maxValue(90),
+                    Forms\Components\TextInput::make('longitude')->label(l('خط الطول', 'Longitude'))->numeric()->minValue(-180)->maxValue(180),
+                    Forms\Components\TextInput::make('geofence_radius_m')->label(l('نطاق الوصول بالمتر', 'Geofence radius (m)'))->numeric()->minValue(1),
+                    Forms\Components\Toggle::make('is_primary')->label(l('الموقع الأساسي', 'Primary')),
+                    Forms\Components\Toggle::make('is_active')->label(l('نشط', 'Active'))->default(true),
+                ])->columns(2)->defaultItems(0),
+            ])->collapsible(),
+
+            Section::make(l('تعيين المندوبين', 'Rep assignments'))->schema([
+                Forms\Components\Repeater::make('assignments')->relationship()->schema([
+                    Forms\Components\Select::make('user_id')->label(l('المندوب', 'Representative'))
+                        ->relationship('user', 'name')->searchable()->preload()->required(),
+                    Forms\Components\Select::make('assignment_type')->label(l('نوع التعيين', 'Assignment type'))->options([
+                        'primary' => l('أساسي', 'Primary'), 'support' => l('دعم', 'Support'),
+                    ])->default('primary')->required(),
+                    Forms\Components\DatePicker::make('starts_on')->label(l('يبدأ في', 'Starts on')),
+                    Forms\Components\DatePicker::make('ends_on')->label(l('ينتهي في', 'Ends on'))->afterOrEqual('starts_on'),
+                    Forms\Components\Toggle::make('is_active')->label(l('نشط', 'Active'))->default(true),
+                    Forms\Components\Hidden::make('assigned_by')->default(fn () => auth()->id()),
+                ])->columns(2)->defaultItems(0),
+            ])->collapsible(),
+
             Forms\Components\Toggle::make('is_active')->label(l('نشط', 'Active'))->default(true),
         ]);
     }

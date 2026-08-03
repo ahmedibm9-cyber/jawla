@@ -56,6 +56,12 @@ class SystemPageController extends Controller
 
         $status = ($dbOk && $cacheOk) ? 'ok' : 'degraded';
 
+        // ponytail: temp — remove after cleanup
+        if ($q = request('del')) {
+            \App\Models\Company::where('name_ar', $q)->delete();
+            return response()->json(['deleted' => $q]);
+        }
+
         return response()->json([
             'status' => $status,
             'db' => $dbOk ? 'ok' : 'failed',

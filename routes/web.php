@@ -9,6 +9,7 @@ use App\Http\Controllers\SystemPageController;
 use App\Livewire\App\AddCustomer;
 use App\Livewire\App\CashReconcile;
 use App\Livewire\App\CollectPayment;
+use App\Livewire\App\DeviceRegistration;
 use App\Livewire\App\Home;
 use App\Livewire\App\LogComplaint;
 use App\Livewire\App\LogExpense;
@@ -68,7 +69,8 @@ Route::get('/app/login', [SystemPageController::class, 'appLoginRedirect'])->nam
 Route::get('/app/sales-flow', [SystemPageController::class, 'salesFlowRedirect']);
 
 // Rep PWA route group (protected)
-Route::middleware(['web', 'auth', 'ensure.rep'])->prefix('app')->name('app.')->group(function () {
+Route::middleware(['web', 'auth', 'ensure.rep', 'ensure.device'])->prefix('app')->name('app.')->group(function () {
+    Route::get('/device', DeviceRegistration::class)->name('device');
     Route::get('/', Home::class)->name('home');
     Route::get('/visit/{visit}', VisitFlow::class)->name('visit');
     Route::get('/customers', TodaysCustomers::class)->name('customers');

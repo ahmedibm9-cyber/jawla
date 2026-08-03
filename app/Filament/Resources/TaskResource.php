@@ -7,6 +7,7 @@ use App\Filament\Resources\TaskResource\Pages;
 use App\Models\ApprovalRequest;
 use App\Models\Task;
 use App\Services\TaskService;
+use App\Services\OrganizationScopeService;
 use Filament\Actions\Action;
 use Filament\Forms;
 use Filament\Notifications\Notification;
@@ -16,6 +17,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class TaskResource extends Resource
 {
@@ -247,6 +249,21 @@ class TaskResource extends Resource
             'create' => Pages\CreateTask::route('/create'),
             'edit' => Pages\EditTask::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery()->with(['latestApproval.steps']);
+        $actor = auth()->user();
+
+        if ($actor === null) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        $visibleUsers = app(OrganizationScopeService::class)
+            ->scopeUsers(\App\Models\User::query()->select('users.id'), $actor);
+
+        return $query->whereIn('assigned_to', $visibleUsers);
     }
 
     /** @return array<string, string> */

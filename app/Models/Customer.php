@@ -89,4 +89,24 @@ class Customer extends Model
     {
         return $this->hasMany(ReturnRecord::class);
     }
+
+    public function outlets(): HasMany
+    {
+        return $this->hasMany(CustomerOutlet::class);
+    }
+
+    public function contacts(): HasMany
+    {
+        return $this->hasMany(CustomerContact::class);
+    }
+
+    public function locations(): HasMany
+    {
+        return $this->hasMany(CustomerLocation::class);
+    }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(CustomerAssignment::class);
+    }
 }

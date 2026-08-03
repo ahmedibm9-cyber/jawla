@@ -47,6 +47,7 @@ class RoleSeeder extends Seeder
             'users.manage', 'roles.assign', 'routes.assign',
             // Restricted settings pages
             'admin_preferences.view', 'api_tokens.view',
+            'organization_units.view_all', 'organization_units.view_scope', 'devices.approve',
             // Stock / Purchasing
             'stock.view', 'suppliers.manage',
         ];
@@ -81,6 +82,8 @@ class RoleSeeder extends Seeder
             'daily_visit_assignment' => ['view_any', 'view', 'create', 'update', 'delete'],
             'price_quotation_request' => ['view_any', 'view', 'create', 'update', 'delete'],
             'complaint' => ['view_any', 'view', 'create', 'update', 'delete'],
+            'organization_unit' => ['view_any', 'view', 'create', 'update', 'delete'],
+            'device' => ['view_any', 'view', 'create', 'update', 'delete'],
         ];
 
         foreach ($shieldPermissions as $resource => $actions) {
@@ -155,6 +158,8 @@ class RoleSeeder extends Seeder
                 'invoices.view_all', 'invoices.approve', 'invoices.cancel', 'purchase_requests.veto',
                 'van_transfers.approve',
                 'tasks.approve', 'tasks.reject', 'tasks.reopen',
+                'view_any:organization_unit', 'view:organization_unit',
+                'view_any:device', 'view:device', 'organization_units.view_scope', 'devices.approve',
             ],
 
             'accounts' => [
@@ -263,6 +268,8 @@ class RoleSeeder extends Seeder
                 'view_any:user', 'view:user', 'create:user', 'update:user', 'delete:user',
                 // Custom
                 'users.manage', 'roles.assign', 'routes.assign',
+                'view_any:organization_unit', 'view:organization_unit', 'create:organization_unit', 'update:organization_unit',
+                'view_any:device', 'view:device', 'organization_units.view_all', 'devices.approve',
             ],
 
             'system_viewer' => [
