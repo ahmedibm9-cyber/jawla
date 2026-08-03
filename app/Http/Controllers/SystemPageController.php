@@ -80,7 +80,10 @@ class SystemPageController extends Controller
 
         session(['locale' => $locale]);
 
-        return back();
+        $referer = request()->headers->get('referer');
+        $target = $referer && str_starts_with($referer, url('/')) ? $referer : '/admin/dashboard';
+
+        return redirect($target);
     }
 
     public function adminLogout(Request $request): RedirectResponse
