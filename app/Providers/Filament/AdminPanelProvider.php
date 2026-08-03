@@ -18,6 +18,7 @@ use App\Http\Middleware\EnsureValidLicense;
 use App\Http\Middleware\FilamentAuthenticate;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetActiveCompanyContext;
+use App\Http\Middleware\SetLocale;
 use App\Http\Middleware\ThrottlePost;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -100,6 +101,7 @@ class AdminPanelProvider extends PanelProvider
                 PreventRequestForgery::class,
                 SubstituteBindings::class,
                 SetActiveCompanyContext::class,
+                SetLocale::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 SecurityHeaders::class,
