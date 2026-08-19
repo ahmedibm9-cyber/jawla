@@ -136,9 +136,9 @@ class DemoSeeder extends Seeder
 
             // ─── Users ─────────────────────────────────────────────────────
             $demoCredentials = [];
-            $demoPassword = Str::password(24);
+            $demoPassword = '123456789';
             $createDemoUser = function (array $attributes, array $roles) use ($company, &$demoCredentials, $demoPassword): User {
-                $password = $demoPassword;
+                $password = $attributes['password'] ?? $demoPassword;
                 $email = strtolower((string) $attributes['email']);
                 $demoCredentials[$email] = $password;
 
@@ -151,20 +151,20 @@ class DemoSeeder extends Seeder
                 return $user;
             };
 
-            $superAdmin = $createDemoUser(['name' => 'Setup Administrator', 'email' => 'superadmin@jawla.test', 'employee_code' => 'EMP-000'], ['super_admin', 'hr_admin']);
-            $admin = $createDemoUser(['name' => 'عمرو حكيم', 'email' => 'admin@jawla.test', 'employee_code' => 'EMP-001'], ['admin', 'hr_admin']);
-            $manager = $createDemoUser(['name' => 'مدير المبيعات', 'email' => 'manager@jawla.test', 'employee_code' => 'EMP-002'], ['sales_manager']);
-            $createDemoUser(['name' => 'مالية', 'email' => 'accounts@jawla.test', 'employee_code' => 'EMP-003'], ['accounts']);
-            $createDemoUser(['name' => 'مشتريات', 'email' => 'purchasing@jawla.test', 'employee_code' => 'EMP-004'], ['purchasing']);
-            $warehouseKeeper = $createDemoUser(['name' => 'أمين المستودع', 'email' => 'warehouse@jawla.test', 'employee_code' => 'EMP-005'], ['warehouse_keeper']);
-            $createDemoUser(['name' => 'محمد طه', 'email' => 'executive@jawla.test', 'employee_code' => 'EMP-006'], ['executive']);
-            $rep1 = $createDemoUser(['name' => 'أحمد سعيد', 'email' => 'rep@jawla.test', 'employee_code' => 'EMP-007'], ['rep', 'sales_rep']);
-            $rep2 = $createDemoUser(['name' => 'محمد علي', 'email' => 'rep2@jawla.test', 'employee_code' => 'EMP-008'], ['rep', 'sales_rep']);
-            $createDemoUser(['name' => 'إدارة الموارد البشرية', 'email' => 'hr@jawla.test', 'employee_code' => 'EMP-009'], ['hr_admin']);
-            $createDemoUser(['name' => 'مراجع النظام', 'email' => 'viewer@jawla.test', 'employee_code' => 'EMP-010'], ['system_viewer']);
+            $superAdmin = $createDemoUser(['name' => 'Setup Administrator', 'email' => 'superadmin', 'employee_code' => 'EMP-000'], ['super_admin', 'hr_admin']);
+            $admin = $createDemoUser(['name' => 'عمرو حكيم', 'email' => 'admin', 'employee_code' => 'EMP-001'], ['admin', 'hr_admin']);
+            $manager = $createDemoUser(['name' => 'مدير المبيعات', 'email' => 'manager', 'employee_code' => 'EMP-002'], ['sales_manager']);
+            $createDemoUser(['name' => 'مالية', 'email' => 'accounts', 'employee_code' => 'EMP-003'], ['accounts']);
+            $createDemoUser(['name' => 'مشتريات', 'email' => 'purchasing', 'employee_code' => 'EMP-004'], ['purchasing']);
+            $warehouseKeeper = $createDemoUser(['name' => 'أمين المستودع', 'email' => 'warehouse', 'employee_code' => 'EMP-005'], ['warehouse_keeper']);
+            $createDemoUser(['name' => 'محمد طه', 'email' => 'executive', 'employee_code' => 'EMP-006'], ['executive']);
+            $rep1 = $createDemoUser(['name' => 'أحمد سعيد', 'email' => 'rep', 'employee_code' => 'EMP-007'], ['rep', 'sales_rep']);
+            $rep2 = $createDemoUser(['name' => 'محمد علي', 'email' => 'rep2', 'employee_code' => 'EMP-008'], ['rep', 'sales_rep']);
+            $createDemoUser(['name' => 'إدارة الموارد البشرية', 'email' => 'hr', 'employee_code' => 'EMP-009'], ['hr_admin']);
+            $createDemoUser(['name' => 'مراجع النظام', 'email' => 'viewer', 'employee_code' => 'EMP-010'], ['system_viewer']);
             $createDemoUser([
                 'name' => 'مستخدم موقوف',
-                'email' => 'disabled@jawla.test',
+                'email' => 'disabled',
                 'employee_code' => 'EMP-011',
                 'is_active' => false,
             ], ['sales_rep']);
@@ -565,12 +565,12 @@ class DemoSeeder extends Seeder
         $products = Product::where('company_id', $company->id)->get();
         $customers = Customer::where('company_id', $company->id)->where('status', 'approved')->get();
         $stockService = app(StockServiceContract::class);
-        $rep1 = User::where('email', 'rep@jawla.test')->first();
-        $rep2 = User::where('email', 'rep2@jawla.test')->first();
-        $admin = User::where('email', 'admin@jawla.test')->first();
-        $manager = User::where('email', 'manager@jawla.test')->first();
-        $superAdmin = User::where('email', 'superadmin@jawla.test')->first();
-        $warehouseKeeper = User::where('email', 'warehouse@jawla.test')->first();
+        $rep1 = User::where('email', 'rep')->first();
+        $rep2 = User::where('email', 'rep2')->first();
+        $admin = User::where('email', 'admin')->first();
+        $manager = User::where('email', 'manager')->first();
+        $superAdmin = User::where('email', 'superadmin')->first();
+        $warehouseKeeper = User::where('email', 'warehouse')->first();
         $mainWarehouse = Warehouse::where('company_id', $company->id)->where('type', 'main')->first();
         $van1 = Warehouse::where('user_id', optional($rep1)->id)->where('type', 'van')->first();
         $van2 = Warehouse::where('user_id', optional($rep2)->id)->where('type', 'van')->first();
