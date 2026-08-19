@@ -8,31 +8,26 @@ return new class extends Migration
 {
     public function up(): void
     {
-        $mapping = [
-            'superadmin@jawla.test' => 'superadmin',
-            'admin@jawla.test' => 'admin',
-            'rep@jawla.test' => 'rep',
-            'rep2@jawla.test' => 'rep2',
-            'manager@jawla.test' => 'manager',
-            'warehouse@jawla.test' => 'warehouse',
-            'accounts@jawla.test' => 'accounts',
-            'purchasing@jawla.test' => 'purchasing',
-            'executive@jawla.test' => 'executive',
-            'hr@jawla.test' => 'hr',
-            'viewer@jawla.test' => 'viewer',
-            'disabled@jawla.test' => 'disabled',
+        $emails = [
+            'superadmin@jawla.test',
+            'admin@jawla.test',
+            'rep@jawla.test',
+            'rep2@jawla.test',
+            'manager@jawla.test',
+            'warehouse@jawla.test',
+            'accounts@jawla.test',
+            'purchasing@jawla.test',
+            'executive@jawla.test',
+            'hr@jawla.test',
+            'viewer@jawla.test',
+            'disabled@jawla.test',
         ];
 
         $newPassword = Hash::make('123456789');
 
-        foreach ($mapping as $oldEmail => $newEmail) {
-            DB::table('users')
-                ->where('email', $oldEmail)
-                ->update([
-                    'email' => $newEmail,
-                    'password' => $newPassword,
-                ]);
-        }
+        DB::table('users')
+            ->whereIn('email', $emails)
+            ->update(['password' => $newPassword]);
     }
 
     public function down(): void
