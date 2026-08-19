@@ -51,8 +51,9 @@ class ProductionDeploymentSafetyTest extends TestCase
         $this->assertStringContainsString('artisan config:cache', $startScript);
         $this->assertStringContainsString('artisan route:cache', $startScript);
         $this->assertStringContainsString('artisan view:cache', $startScript);
-        $this->assertStringContainsString('preDeployCommand = "php artisan config:clear && php artisan route:clear && php artisan migrate --force"', $railway);
+        $this->assertStringContainsString('preDeployCommand = "php artisan config:clear && php artisan route:clear && php artisan view:clear"', $railway);
         $this->assertStringNotContainsString('preDeployCommand = "php artisan migrate --force &&', $railway);
+        $this->assertStringContainsString('artisan migrate --force', $startScript);
         $this->assertStringContainsString('ARG PHPREDIS_VERSION=', $dockerfile);
         $this->assertStringContainsString('ARG PHPREDIS_SHA256=', $dockerfile);
         $this->assertStringContainsString('sha256sum -c', $dockerfile);
