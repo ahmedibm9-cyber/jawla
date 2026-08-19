@@ -68,6 +68,27 @@ if (app()->environment('production')) {
             ]),
         ]);
     });
+
+    Route::get('/_debug/seed', function () {
+        ob_start();
+        try {
+            \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+            $output = ob_get_clean();
+            return response()->json([
+                'status' => 'ok',
+                'output' => $output,
+                'artisan_output' => \Illuminate\Support\Facades\Artisan::output(),
+            ]);
+        } catch (\Throwable $e) {
+            $output = ob_get_clean();
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'output' => $output,
+            ]);
+        }
+    });
 }
 
 Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
