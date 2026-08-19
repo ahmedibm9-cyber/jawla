@@ -46,50 +46,6 @@ Route::get('/offline', [SystemPageController::class, 'offline']);
 
 Route::get('/health', [SystemPageController::class, 'health']);
 
-// Temporary debug — remove after verifying seed
-if (app()->environment('production')) {
-    Route::get('/_debug/users', function () {
-        $users = \App\Models\User::select('id', 'email', 'is_active', 'password', 'created_at')->get();
-        $mode = config('jawla.mode');
-        $isDemo = config('jawla.is_demo');
-        $envMode = env('JAWLA_MODE');
-        return response()->json([
-            'mode' => $mode,
-            'is_demo' => $isDemo,
-            'env_jawla_mode' => $envMode,
-            'user_count' => $users->count(),
-            'users' => $users->map(fn ($u) => [
-                'id' => $u->id,
-                'email' => $u->email,
-                'is_active' => $u->is_active,
-                'has_password' => filled($u->password),
-                'password_is_hashed' => \Illuminate\Support\Facades\Hash::isHashed($u->password),
-                'created_at' => $u->created_at,
-            ]),
-        ]);
-    });
-
-    Route::get('/_debug/seed', function () {
-        ob_start();
-        try {
-            \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
-            $output = ob_get_clean();
-            return response()->json([
-                'status' => 'ok',
-                'output' => $output,
-                'artisan_output' => \Illuminate\Support\Facades\Artisan::output(),
-            ]);
-        } catch (\Throwable $e) {
-            $output = ob_get_clean();
-            return response()->json([
-                'status' => 'error',
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'output' => $output,
-            ]);
-        }
-    });
-}
 
 Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
     ->middleware('throttle:10,1')
