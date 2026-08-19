@@ -5,8 +5,16 @@ PORT="${PORT:-8080}"
 
 envsubst '${PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/http.d/default.conf
 
-# Railway pre-deploy commands run in a separate container, so filesystem cache
-# artifacts must be generated in the application container that will serve.
+php /app/artisan config:clear 2>/dev/null || true
+php /app/artisan cache:clear 2>/dev/null || true
+
+mkdir -p /app/storage/framework/cache/data
+chown -R www-data:www-data /app/storage
+
+# Railway pre-deploy runs in a separate container; run migrations here so
+# tables (cache, sessions, etc.) exist before config:cache touches them.
+php /app/artisan migrate --force
+
 php /app/artisan config:cache
 php /app/artisan route:cache
 php /app/artisan view:clear
