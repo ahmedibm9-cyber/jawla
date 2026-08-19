@@ -17,7 +17,7 @@ php /app/artisan migrate --force
 
 # Seed demo data on first boot (idempotent — DemoSeeder skips if already seeded)
 if [ "${JAWLA_MODE:-}" = "demo" ]; then
-    php /app/artisan db:seed --force 2>/dev/null || true
+    php /app/artisan db:seed --force 2>&1 || echo "SEED_FAILED"
 fi
 
 php /app/artisan config:cache
