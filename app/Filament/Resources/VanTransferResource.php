@@ -23,6 +23,11 @@ class VanTransferResource extends Resource
         return VanTransfer::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:van_transfer') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-truck';

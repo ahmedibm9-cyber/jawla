@@ -6,11 +6,15 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Services\PaymentService;
 use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * @property Form $form
+ */
 class CollectPayment extends Page
 {
     protected string $view = 'filament.pages.collect-payment';
@@ -53,7 +57,8 @@ class CollectPayment extends Page
                 ->required(),
             Forms\Components\Select::make('invoice_id')
                 ->label(l('فاتورة', 'Invoice'))
-                ->options(fn (callable $get) => Invoice::where('customer_id', $get('customer_id'))
+                ->options(fn (callable $get) => Invoice::where('company_id', Auth::user()->activeCompanyId())
+                    ->where('customer_id', $get('customer_id'))
                     ->whereIn('status', ['submitted', 'partially_paid'])
                     ->whereRaw('remaining_amount > 0')
                     ->pluck('invoice_number', 'id'))

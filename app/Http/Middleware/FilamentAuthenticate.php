@@ -16,7 +16,8 @@ class FilamentAuthenticate extends Middleware
 
         // Redirect pure reps to the PWA. Multi-role users (e.g. admin + rep)
         // keep admin-panel access — canAccessPanel() already allows all roles.
-        if ($user && ! $request->hasHeader('X-Livewire')) {
+        // Check unconditionally — X-Livewire header must not bypass this.
+        if ($user) {
             $repRoles = ['sales_rep', 'rep'];
             $hasOnlyRepRoles = $user->getRoleNames()->every(fn (string $r) => in_array($r, $repRoles, true));
 

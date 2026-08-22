@@ -24,6 +24,11 @@ class GoodsInTransitResource extends Resource
         return GoodsInTransit::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:goods_in_transit') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-truck';

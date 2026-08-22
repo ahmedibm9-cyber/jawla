@@ -6,6 +6,7 @@ import {
   prepareSafeLogout,
 } from "../../resources/js/offline/logout-guard.js";
 import { checkQuota } from "../../resources/js/offline/outbox.js";
+import { enqueue } from "../../resources/js/offline/sync.js";
 
 test("logout is blocked without clearing when offline operations remain", async () => {
   let cleared = false;
@@ -120,4 +121,78 @@ test("storage pressure uses stable threshold boundaries", async () => {
 
 test("storage pressure is unavailable rather than crashing without Storage API", async () => {
   assert.equal(await checkQuota(), null);
+});
+
+test("offline sale is queued for sync", async () => {
+  const result = await enqueue("sale", {
+    customerId: "CUST-001",
+    visitId: "VISIT-001",
+    items: [{ productId: "PROD-001", quantity: 2 }],
+  });
+
+  assert.equal(result.status, "queued");
+  assert.equal(result.offline, true);
+});
+
+test("offline sale data persists in IndexedDB after reconnect", async () => {
+  // Test that offline data is preserved in IndexedDB
+  const db = await indexedDB.open("jawla-cache");
+
+  db.onupgradeneeded = (event) => {
+    const database = event.target.result;
+    if (!database.objectStoreNames.contains("offline-sales")) {
+      database.createObjectStore("offline-sales");
+    }
+  };
+
+  await new Promise((resolve) => (db.onerror = resolve));
+
+  const transaction = db.transaction("offline-sales", "readwrite");
+  const store = transaction.objectStore("offline-sales");
+  store.put(
+    {
+      soldAt: new Date().toISOString(),
+      items: [{ productId: "PROD-001", quantity: 2 }],
+    },
+    "sale-1"
+  );
+
+  await new Promise((resolve) => (transaction.oncomplete = resolve));
+
+  const retrieveTransaction = db.transaction("offline-sales", "readonly");
+  const retrieveStore = retrieveTransaction.objectStore("offline-sales");
+  const retrieved = retrieveStore.get("sale-1");
+
+  retrieve.onsuccess = () => {
+    assert.equal(retrieved.result.items[0].productId, "PROD-001");
+    assert.equal(retrieved.result.items[0].quantity, 2);
+  };
+
+  await new Promise((resolve) => (retrieve.onsuccess = resolve));
+  db.close();
+});
+
+test("offline sale queuing rejects insufficient stock", async () => {
+  const result = await enqueue("sale", {
+    customerId: "CUST-001",
+    visitId: "VISIT-001",
+    items: [{ productId: "PROD-001", quantity: 5 }],
+    stockCheck: async () => ({ available: 2, reserved: 0 }),
+  });
+
+  assert.equal(result.status, "rejected");
+  assert.equal(result.reason, "insufficient-stock");
+  assert.equal(result.available, 2);
+});
+
+test("offline sale queuing validates price positivity", async () => {
+  const result = await enqueue("sale", {
+    customerId: "CUST-001",
+    visitId: "VISIT-001",
+    items: [{ productId: "PROD-001", quantity: 1 }],
+    prices: { "PROD-001": -5 },
+  });
+
+  assert.equal(result.status, "rejected");
+  assert.equal(result.reason, "invalid-price");
 });

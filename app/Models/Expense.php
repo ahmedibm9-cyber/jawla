@@ -17,6 +17,7 @@ class Expense extends Model
     protected $fillable = [
         'company_id', 'user_id', 'work_session_id', 'category',
         'amount', 'note', 'spent_at', 'posting_date',
+        'status', 'approved_by', 'approved_at',
         'cancelled_at', 'cancelled_by',
     ];
 
@@ -24,6 +25,7 @@ class Expense extends Model
         'amount' => 'decimal:2',
         'spent_at' => 'datetime',
         'posting_date' => 'date',
+        'approved_at' => 'datetime',
         'cancelled_at' => 'datetime',
     ];
 
@@ -40,5 +42,20 @@ class Expense extends Model
     public function workSession(): BelongsTo
     {
         return $this->belongsTo(WorkSession::class);
+    }
+
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function isApproved(): bool
+    {
+        return $this->status === 'approved';
     }
 }

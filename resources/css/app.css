@@ -455,6 +455,37 @@
   border-radius: 6px;
   font-size: 0.75rem;
   font-weight: 600;
+  position: relative;
+}
+
+.badge::before {
+  content: var(--badge-icon, "");
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+
+/* Icon overrides for specific status badges */
+.badge-success::before {
+  --badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%233d7a18' d='M2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2zm2-1a1 1 0 011 1v12a1 1 0 102 0V1a1 1 0 01-2-1H2z'/%3E%3C/svg%3E");
+}
+.badge-warning::before {
+  --badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%23d97706' d='M2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2zm2-1a1 1 0 011 1v12a1 1 0 102 0V1a1 1 0 01-2-1H2z'/%3E%3C/svg%3E");
+}
+.badge-danger::before {
+  --badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%23dc2626' d='M2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2zm2-1a1 1 0 011 1v12a1 1 0 102 0V1a1 1 0 01-2-1H2z'/%3E%3C/svg%3E");
+}
+.badge-info::before {
+  --badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%232563eb' d='M2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2zm2-1a1 1 0 011 1v12a1 1 0 102 0V1a1 1 0 01-2-1H2z'/%3E%3C/svg%3E");
+}
+.badge-neutral::before {
+  --badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%236b7fa3' d='M2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2zm2-1a1 1 0 011 1v12a1 1 0 102 0V1a1 1 0 01-2-1H2z'/%3E%3C/svg%3E");
 }
 
 .badge-warning {
@@ -1328,6 +1359,11 @@
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
+@media (max-width: 359px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* ---- Success Screen ---- */
 .success-screen {
@@ -1673,8 +1709,8 @@ dialog[open] {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
   background: var(--color-surface-hover);
   box-shadow: none;

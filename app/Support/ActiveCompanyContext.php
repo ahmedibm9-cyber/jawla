@@ -102,6 +102,9 @@ final class ActiveCompanyContext
         $this->allowUnscoped = app()->runningUnitTests();
     }
 
+    /**
+     * @internal Use only in SetActiveCompanyContext middleware when no user is logged in.
+     */
     public function allowUnscoped(): void
     {
         $this->companyId = null;

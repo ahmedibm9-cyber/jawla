@@ -19,6 +19,11 @@ class RouteResource extends Resource
         return Route::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:route') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-map';

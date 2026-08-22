@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Complaint;
+use App\Models\Customer;
 use App\Notifications\ComplaintResolved;
 use App\Support\ActiveCompanyContext;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,10 @@ class ComplaintService
     public function log(int $companyId, int $userId, int $customerId, string $type, string $description, ?int $visitId = null): Complaint
     {
         app(ActiveCompanyContext::class)->assertMatches($companyId);
+
+        if (! Customer::where('company_id', $companyId)->whereKey($customerId)->exists()) {
+            throw new \DomainException('Customer does not belong to this company.');
+        }
 
         return DB::transaction(function () use ($companyId, $userId, $customerId, $type, $description, $visitId): Complaint {
             $complaint = Complaint::create([

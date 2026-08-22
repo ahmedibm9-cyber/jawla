@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Filament\Auth\Pages\Login;
 use App\Models\User;
 use Database\Seeders\DemoSeeder;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 use Livewire\Livewire;
@@ -17,7 +17,7 @@ use Tests\TestCase;
  */
 class RepLoginLifecycleTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     /** @var array<string, string> email → known password (avoids shared-file race) */
     private array $knownPasswords = [];

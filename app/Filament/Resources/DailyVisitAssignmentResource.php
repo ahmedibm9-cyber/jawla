@@ -20,6 +20,11 @@ class DailyVisitAssignmentResource extends Resource
         return DailyVisitAssignment::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:daily_visit_assignment') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-calendar-days';

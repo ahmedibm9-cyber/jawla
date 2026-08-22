@@ -49,7 +49,7 @@ class AddCustomer extends Component
             'longitude' => $validated['longitude'],
             'status' => 'pending',
             'added_by' => $user->id,
-            'is_active' => true,
+            'is_active' => false,
         ]);
 
         $alarms->raise(

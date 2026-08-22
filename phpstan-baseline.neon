@@ -1,0 +1,1255 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$line_total\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Console/Commands/SeedTransactionsCommand.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Console/Commands/SeedTransactionsCommand.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Console/Commands/SeedTransactionsCommand.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/SeedTransactionsCommand.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Console/Commands/VerifyInstallationLicense.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Contracts\\Auth\\Authenticatable\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Auth/Pages/Login.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Contracts\\Auth\\StatefulGuard\:\:attemptWhen\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Auth/Pages/Login.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Contracts\\Auth\\StatefulGuard\:\:getProvider\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Auth/Pages/Login.php
+
+		-
+			message: '#^Call to method getState\(\) on an unknown class Filament\\Forms\\Form\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Filament/Pages/CollectPayment.php
+
+		-
+			message: '#^PHPDoc tag @property for property App\\Filament\\Pages\\CollectPayment\:\:\$form contains unknown class Filament\\Forms\\Form\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Filament/Pages/CollectPayment.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Pages/CustomerMap.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$base_price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Pages/ReportsPage.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$customer\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Pages/ReportsPage.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Filament/Pages/ReportsPage.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Pages/ReportsPage.php
+
+		-
+			message: '#^Call to method getState\(\) on an unknown class Filament\\Forms\\Form\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Filament/Pages/StockImport.php
+
+		-
+			message: '#^PHPDoc tag @property for property App\\Filament\\Pages\\StockImport\:\:\$form contains unknown class Filament\\Forms\\Form\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Filament/Pages/StockImport.php
+
+		-
+			message: '#^Method App\\Filament\\Pages\\SupplierComparison\:\:getGroupsProperty\(\) should return Illuminate\\Support\\Collection\<string, array\{product\: App\\Models\\Product, offers\: Illuminate\\Support\\Collection\}\> but returns Illuminate\\Support\\Collection\<\(int\|string\), array\{product\: mixed, offers\: mixed\}\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Filament/Pages/SupplierComparison.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\:\:expiringWithin\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Resources/BatchResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$eta_enabled\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/InvoiceResource.php
+
+		-
+			message: '#^Call to an undefined method Filament\\Actions\\Action\:\:can\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Resources/PaymentResource.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notify\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Resources/PriceQuotationRequestResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/PurchaseOrderResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/PurchaseOrderResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$approver_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/TaskResource.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:hasRole\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Resources/UserResource/Pages/CreateUser.php
+
+		-
+			message: '#^Cannot call method hasRole\(\) on Illuminate\\Database\\Eloquent\\Model\|int\|string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Filament/Resources/UserResource/Pages/EditUser.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$balance\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/OfflineSnapshotController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currency\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/OfflineSnapshotController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$geofence_radius_m\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/OfflineSnapshotController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/OfflineSnapshotController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/OfflineSnapshotController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/OfflineSnapshotController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/OfflineSnapshotController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$vat_percent\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/App/OfflineSnapshotController.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Livewire/App/DeviceRegistration.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$route_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/App/Home.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:stocks\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Livewire/App/MorePage.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$base_price\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Livewire/App/QuotationFlow.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Livewire/App/QuotationFlow.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$rep_minus\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/App/QuotationFlow.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$rep_plus\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/App/QuotationFlow.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$vat_applicable\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/App/QuotationFlow.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$vat_percent\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/App/QuotationFlow.php
+
+		-
+			message: '#^Property App\\Livewire\\App\\QuotationFlow\:\:\$quotation \(App\\Models\\PriceQuotation\|null\) does not accept Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Livewire/App/QuotationFlow.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$vat_percent\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Livewire/App/SalesFlow.php
+
+		-
+			message: '#^Property App\\Livewire\\App\\SalesFlow\:\:\$cartSubtotal \(float\) does not accept string\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Livewire/App/SalesFlow.php
+
+		-
+			message: '#^Property App\\Livewire\\App\\SalesFlow\:\:\$cartTotal \(float\) does not accept string\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Livewire/App/SalesFlow.php
+
+		-
+			message: '#^Property App\\Livewire\\App\\SalesFlow\:\:\$cartVatAmount \(float\) does not accept string\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Livewire/App/SalesFlow.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Models/Activity.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Models/Activity.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Alarm.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/ApprovalRequest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Batch.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/CashBox.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/CashReconciliation.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/CollectionSubmission.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/CompanyBankAccount.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Complaint.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/CreditNote.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Customer.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/CustomerAssignment.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/CustomerContact.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/CustomerCredit.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/CustomerGroup.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/CustomerLocation.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/CustomerOutlet.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/DailyVisitAssignment.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Device.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Expense.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/GoodsInTransit.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Invoice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/LocationPing.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/ModeOfPayment.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/NamingSeries.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/OrganizationUnit.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/OutOfStockRequest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Payment.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Photo.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/PriceList.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/PriceQuotationRequest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Product.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/ProductCategory.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/ProformaInvoice.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/PurchaseOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/PurchaseRequest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/PushSubscription.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Refund.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/RepresentativeProfile.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/ReturnRecord.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/ReturnRequest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Reversal.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Route.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/SalesOrder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/SalesTarget.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/StockCountSession.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/StockImportPreview.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/StockMovement.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Supplier.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/SupplierQuotation.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/SyncReceipt.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Task.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/TaxTemplate.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Territory.php
+
+		-
+			message: '#^Property App\\Models\\User\:\:\$preferences \(string\|null\) does not accept array\<string, mixed\>\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/VanTransfer.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Visit.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/Warehouse.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/WebhookDelivery.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/WebhookEndpoint.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Models/WorkSession.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/ComplaintResolved.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/OutOfStockResolved.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/PurchaseOfferOutcome.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Notifications/QuotationOutcome.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/AlarmService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/AlarmService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ComplaintService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notify\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/ComplaintService.php
+
+		-
+			message: '#^Anonymous function should return App\\Models\\CustomerContact but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/CustomerStructureService.php
+
+		-
+			message: '#^Anonymous function should return App\\Models\\CustomerLocation but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/CustomerStructureService.php
+
+		-
+			message: '#^Anonymous function should return App\\Models\\CustomerOutlet but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/CustomerStructureService.php
+
+		-
+			message: '#^Method App\\Services\\CustomerStructureService\:\:outletForCustomer\(\) should return App\\Models\\CustomerOutlet\|null but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/CustomerStructureService.php
+
+		-
+			message: '#^Property App\\Models\\Device\:\:\$status \(string\) does not accept App\\Enums\\DeviceStatus\:\:Approved\|App\\Enums\\DeviceStatus\:\:Pending\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Services/DeviceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Eta/EtaDocumentBuilder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$line_total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Eta/EtaDocumentBuilder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/Eta/EtaDocumentBuilder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/Eta/EtaDocumentBuilder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Eta/EtaDocumentBuilder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Eta/EtaDocumentBuilder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Eta/EtaDocumentBuilder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/Eta/EtaDocumentBuilder.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/EtaQrStrategy.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_number\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/EtaQrStrategy.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$batch_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/GoodsInTransitService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/GoodsInTransitService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/GoodsInTransitService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Services/GoodsInTransitService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/GoodsInTransitService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$batch_id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$line_total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/InvoiceService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/LocationPingService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notify\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/OutOfStockService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$account_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PdfService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PdfService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$bank_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PdfService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$iban\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PdfService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$invoice_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PdfService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/PdfService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/PdfService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$report\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PdfService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PdfService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$rep_discount_percent\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PricingService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Services/ProformaService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$vat_applicable\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ProformaService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$vat_percent\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ProformaService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notify\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/PurchaseRequestService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$condition\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnRequestService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$invoice_item_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnRequestService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$line_total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnRequestService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnRequestService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnRequestService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnRequestService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnRequestService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$batch_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/ReturnService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$condition\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$invoice_item_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$line_total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/ReturnService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/ReturnService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/ReturnService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$batch_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/StockCountService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$expected_quantity\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/StockCountService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$physical_quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/StockCountService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/StockCountService.php
+
+		-
+			message: '#^Method App\\Services\\StockCountService\:\:record\(\) should return App\\Models\\StockCountItem but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/StockCountService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$company_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/StockService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/StockService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:notify\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/TaskService.php
+
+		-
+			message: '#^Cannot access property \$value on string\.$#'
+			identifier: property.nonObject
+			count: 2
+			path: app/Services/TaskService.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Services/TaskService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$batch_id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/VanTransferService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/VanTransferService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/VanTransferService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/VanTransferService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$secret\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/WebhookService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$timeout_seconds\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/WebhookService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$url\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/WebhookService.php
+
+		-
+			message: '#^Cannot call method gte\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Services/WebhookService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$supervisor\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/WorkflowApproverResolver.php
+
+		-
+			message: '#^Method App\\Services\\WorkflowApproverResolver\:\:forSubmitter\(\) should return App\\Models\\User but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/WorkflowApproverResolver.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/ZatcaQrBase.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tax_number\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/ZatcaQrBase.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currency\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Support/ThermalPrintFormatter.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$invoice_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/ThermalPrintFormatter.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$line_total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/ThermalPrintFormatter.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_ar\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Support/ThermalPrintFormatter.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name_en\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Support/ThermalPrintFormatter.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/ThermalPrintFormatter.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/ThermalPrintFormatter.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/ThermalPrintFormatter.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$unit_price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Support/ThermalPrintFormatter.php

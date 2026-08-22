@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   APP_ENV: testing
   PAO_DISABLE: "1"
@@ -25,6 +29,7 @@ jobs:
           extensions: mbstring, xml, ctype, json, bcmath, pgsql
           tools: composer:v2
           coverage: none
+          composer: true
       - run: composer install --no-interaction --no-progress --prefer-dist
       - run: ./vendor/bin/pint --test
 
@@ -38,11 +43,12 @@ jobs:
           extensions: mbstring, xml, ctype, json, bcmath, pgsql, gd, intl, zip
           tools: composer:v2
           coverage: none
+          composer: true
       - run: composer install --no-interaction --no-progress --prefer-dist
       - run: cp .env.example .env
       - run: php artisan key:generate --force
       - name: PHPStan runtime-safety gate
-        run: ./vendor/bin/phpstan analyse --level=0 --memory-limit=2G --no-progress
+        run: ./vendor/bin/phpstan analyse --level=3 --memory-limit=2G --no-progress
 
   build:
     runs-on: ubuntu-latest
@@ -54,6 +60,7 @@ jobs:
           extensions: mbstring, xml, ctype, bcmath, pgsql, gd, intl, zip
           tools: composer:v2
           coverage: none
+          composer: true
       - run: composer install --no-dev --no-scripts --no-interaction --no-progress --prefer-dist
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
@@ -89,6 +96,7 @@ jobs:
           php-version: "8.3"
           tools: composer:v2
           coverage: none
+          composer: true
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22"
@@ -97,7 +105,92 @@ jobs:
       - run: npm ci
       - run: composer validate --strict --no-check-publish
       - run: composer audit
-      - run: npm audit --audit-level=high
+      - run: npm audit --audit-level=high --omit=dev
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16@sha256:33f923b05f64ca54ac4401c01126a6b92afe839a0aa0a52bc5aeb5cc958e5f20
+        env:
+          POSTGRES_DB: jawla_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      APP_ENV: testing
+      DB_CONNECTION: pgsql
+      DB_HOST: 127.0.0.1
+      DB_PORT: 5432
+      DB_DATABASE: jawla_test
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      CACHE_STORE: database
+      SESSION_DRIVER: database
+      QUEUE_CONNECTION: database
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: shivammathur/setup-php@b604ade2a87db23f8871b7182e69ec5e75effb45 # v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, xml, ctype, json, bcmath, pgsql, gd, intl, zip
+          tools: composer:v2
+          coverage: none
+          composer: true
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: composer install --no-interaction --no-progress --prefer-dist
+      - run: npm ci
+      - run: npm run build
+      - run: cp .env.example .env
+      - run: php artisan key:generate --force
+      - run: php artisan migrate --force
+      - name: Start server and run Lighthouse
+        run: |
+          php artisan serve --host=127.0.0.1 --port=8765 &
+          SERVER_PID=$!
+          sleep 5
+          npx lhci autorun --config=lighthouserc.json || exit_code=$?
+          kill $SERVER_PID 2>/dev/null || true
+          exit ${exit_code:-0}
+
+  backup-verification:
+    runs-on: ubuntu-latest
+    name: Backup Verification
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Verify backup environment variables
+        run: |
+          missing=0
+          reasons=()
+          if [ -z "${BACKUP_STORAGE_URI:-}" ]; then
+            missing=$((missing+1))
+            reasons+=("BACKUP_STORAGE_URI is not set")
+          fi
+          if [ -z "${BACKUP_AGE_RECIPIENT:-}" ]; then
+            missing=$((missing+1))
+            reasons+=("BACKUP_AGE_RECIPIENT is not set")
+          fi
+          if [ -n "${RESTORE_EVIDENCE_FILE:-}" ] && [ ! -f "$RESTORE_EVIDENCE_FILE" ]; then
+            missing=$((missing+1))
+            reasons+=("RESTORE_EVIDENCE_FILE not found: $RESTORE_EVIDENCE_FILE")
+          fi
+          if [ $missing -gt 0 ]; then
+            echo "backup-verification-failed=true" >> $GITHUB_OUTPUT
+            echo "Missing backup configuration:" >&2
+            for r in "${reasons[@]}"; do echo "  - $r" >&2; done
+            exit 1
+          fi
+          echo "backup-verification-failed=false" >> $GITHUB_OUTPUT
+          echo "All backup environment variables are configured"
 
   secret-scan:
     runs-on: ubuntu-latest
@@ -147,6 +240,7 @@ jobs:
           extensions: mbstring, xml, ctype, json, bcmath, pgsql, gd, intl, zip
           tools: composer:v2
           coverage: none
+          composer: true
       - run: composer install --no-interaction --no-progress --prefer-dist
       - run: cp .env.example .env
       - run: php artisan key:generate --force
@@ -188,6 +282,7 @@ jobs:
           extensions: mbstring, xml, ctype, json, bcmath, pgsql, sockets, gd, intl, zip
           tools: composer:v2
           coverage: none
+          composer: true
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22"

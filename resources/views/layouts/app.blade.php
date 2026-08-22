@@ -115,14 +115,14 @@
       e.preventDefault();
       deferredPrompt = e;
       setTimeout(() => {
-        if (deferredPrompt) {
+        if (deferredPrompt && !localStorage.getItem('jawla_pwa_dismissed')) {
           const banner = document.createElement('div');
           banner.id = 'pwa-install-banner';
           banner.className = 'pwa-install-banner';
           banner.innerHTML = '<span class="pwa-install-banner-text">{{ l("ثبّت التطبيق", "Install App") }}</span><div><button id="pwa-install-btn" class="pwa-install-btn">{{ l("تثبيت", "Install") }}</button><button id="pwa-dismiss-btn" class="pwa-dismiss-btn">{{ l("لاحقاً", "Later") }}</button></div>';
           document.body.appendChild(banner);
           document.getElementById('pwa-install-btn').addEventListener('click', () => { deferredPrompt.prompt(); deferredPrompt = null; banner.remove(); });
-          document.getElementById('pwa-dismiss-btn').addEventListener('click', () => { deferredPrompt = null; banner.remove(); });
+          document.getElementById('pwa-dismiss-btn').addEventListener('click', () => { localStorage.setItem('jawla_pwa_dismissed', '1'); deferredPrompt = null; banner.remove(); });
         }
       }, 30000);
     });

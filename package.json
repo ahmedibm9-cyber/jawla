@@ -11,6 +11,8 @@
     "test:pwa-browser": "playwright test tests/JavaScript/pwa-readiness.spec.js"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
+    "@lhci/cli": "^0.14.0",
     "@playwright/test": "^1.61.1",
     "@tailwindcss/vite": "^4.0.0",
     "concurrently": "^9.0.1",
@@ -23,6 +25,7 @@
   },
   "dependencies": {
     "@sentry/browser": "^10.67.0",
-    "leaflet": "^1.9.4"
+    "leaflet": "^1.9.4",
+    "web-vitals": "^4.2.4"
   }
 }

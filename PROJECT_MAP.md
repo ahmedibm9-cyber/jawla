@@ -1,337 +1,253 @@
-# Jawla — Project Map
+# PROJECT MAP
 
-**Revision:** `7b1dd3a` plus inspected working-tree changes
-**Companion:** `PROJECT_EXPLORATION_REPORT.md`
+## Directory and Module Map
 
-## System at a glance
-
-Jawla is one Laravel process with two authenticated user surfaces:
-
-- `/app`: mobile-first Livewire PWA for sales reps.
-- `/admin`: Filament back office for managers, finance, warehouse, purchasing, and administrators.
-
-Both surfaces delegate business mutations to `app/Services/` and persist through Eloquent to PostgreSQL. A device-local IndexedDB outbox adds offline delivery for six rep mutation types.
-
-```mermaid
-flowchart TB
-    Rep["Rep PWA /app<br/>Livewire + Alpine + service worker"]
-    Admin["Admin /admin<br/>Filament"]
-    Api["Public API /api/v1<br/>Sanctum read API"]
-    Outbox["User-scoped IndexedDB outbox"]
-    Http["Laravel HTTP layer<br/>routes + middleware + validation"]
-    Sync["SyncController → SyncService<br/>typed handlers + receipts"]
-    Services["Service layer<br/>transactions + business invariants"]
-    Models["Eloquent models<br/>company scope + policies"]
-    Pg[("PostgreSQL")]
-    Redis[("Redis<br/>prod cache/session/queue")]
-    S3[("S3-compatible photo storage")]
-    ETA["Egyptian Tax Authority"]
-    Sentry["Sentry"]
-
-    Rep --> Http
-    Rep --> Outbox
-    Outbox -->|"POST /app/sync"| Sync
-    Admin --> Http
-    Api --> Http
-    Http --> Services
-    Sync --> Services
-    Services --> Models
-    Models --> Pg
-    Http --> Redis
-    Services --> S3
-    Services --> ETA
-    Http --> Sentry
-    Services --> Sentry
+```
+jawla/
+├── app/                          # Laravel application core
+│   ├── Console/                  # Artisan commands
+│   ├── Data/                     # Data transfer objects
+│   ├── Enums/                    # Business state enums
+│   ├── Exceptions/               # Domain exceptions
+│   ├── Filament/                 # Admin panel (Filament 4)
+│   │   ├── Auth/                 # Login/authentication
+│   │   ├── Resources/            # 32 CRUD resources
+│   │   ├── Pages/                # Dashboard, Reports, CollectPayment
+│   │   └── Widgets/              # Dashboard widgets
+│   ├── Helpers.php               # Global helper functions
+│   ├── Http/                     # Controllers, Middleware, Requests
+│   │   ├── Controllers/          # API and web controllers
+│   │   ├── Middleware/           # 9 custom middleware
+│   │   ├── Requests/            # Form request validation
+│   │   └── Resources/           # API resources
+│   ├── Livewire/                 # Rep PWA components
+│   │   └── App/                  # 20+ Livewire components
+│   ├── Models/                   # 85 Eloquent models
+│   │   └── Concerns/            # Traits (BelongsToCompany, AppendOnly)
+│   ├── Notifications/            # Notification classes
+│   ├── Observers/               # Audit observers
+│   ├── Policies/                # Authorization policies
+│   ├── Providers/               # Service providers
+│   ├── Rules/                   # Validation rules
+│   ├── Services/                # 56 service classes (business logic)
+│   │   ├── Contracts/           # Service interfaces
+│   │   ├── Eta/                 # ETA e-invoicing client
+│   │   └── Sync/                # Offline sync handlers
+│   └── Support/                 # Helper classes
+├── config/                       # Laravel configuration
+├── database/                     # Migrations, seeders, factories
+│   ├── migrations/              # 140 migration files
+│   ├── factories/               # Model factories
+│   └── seeders/                 # Demo data seeder
+├── docs/                         # Documentation (67 files)
+├── lang/                         # Translation files (AR/EN)
+├── public/                       # Web root, compiled assets
+├── resources/                    # Views, JS, CSS
+│   ├── views/
+│   │   ├── layouts/             # App and admin layouts
+│   │   ├── livewire/            # Livewire component views
+│   │   └── filament/            # Filament customization
+│   └── js/                      # Client-side JavaScript
+├── routes/                       # Route definitions
+│   ├── web.php                  # Main routes
+│   ├── api.php                  # API routes
+│   ├── rep-sync.php             # Offline sync endpoint
+│   └── rep-offline.php          # Offline snapshot endpoint
+├── scripts/                      # Deployment, backup, verify scripts
+├── tests/                        # Test suites
+│   ├── Feature/                 # 77 feature test files
+│   ├── Unit/                    # Unit tests
+│   ├── Browser/                 # Playwright E2E tests
+│   ├── JavaScript/              # JS tests
+│   └── k6/                      # Performance tests
+└── vendor/                       # Composer dependencies
 ```
 
-Text explanation: online Livewire/Filament requests enter the ordinary Laravel web stack. Offline rep writes are first stored on the device, then replayed into a dedicated authenticated sync endpoint. Online and offline mutations converge at the same service methods.
+## Entry Points
 
-## Directory and module map
+### Web Routes (`routes/web.php`)
 
-| Path | Purpose | Important consumers / dependencies | Test surface |
-|---|---|---|---|
-| `app/Livewire/App/` | 24 rep PWA components | Routes, Blade views, services, scoped models | Feature and Browser tests |
-| `app/Filament/` | Admin resources/pages/widgets/auth | Filament provider, policies, services | Feature/resource tests, Browser tests |
-| `app/Http/Controllers/` | Thin system, auth, PDF, API, sync endpoints | Services and resources | Feature tests |
-| `app/Http/Middleware/` | Company context, locale, security headers, rep role, POST throttle | Global web/admin/API route stacks | Auth/security/tenancy tests |
-| `app/Services/` | Business logic and transaction boundary | Models, contracts, integrations | Unit + Feature service tests |
-| `app/Services/Sync/` | Exactly-once offline replay | Sync receipt, typed handlers, domain services | OfflineSync tests |
-| `app/Services/Eta/` | ETA document build, signing seam, OAuth/submit client | Invoice, HTTP client, config | Unit tests with fake HTTP |
-| `app/Models/` | 68 Eloquent domain/data records | PostgreSQL, scopes, policies, resources | Factories + Feature tests |
-| `app/Models/Concerns/` | Tenant and delete-protection behavior | Company-scoped/ledger models | Tenancy + finance tests |
-| `app/Policies/` | Filament/domain authorization | Spatie permissions, ownership helper | Policy/role Feature tests |
-| `app/Support/` | Money/GPS/value helpers, active company context, scrubbing | Services/middleware | Unit tests |
-| `resources/views/` | Rep/admin/custom component Blade | Livewire/Filament | Compile/Feature/Browser tests |
-| `resources/js/offline/` | IndexedDB outbox, sync engine, status | PWA layout and rep forms | Indirect Feature/Browser coverage |
-| `resources/css/app.css` | Tailwind v4 tokens and component styling | Vite build | Build + Browser/a11y smoke |
-| `public/sw.js` | Public asset caching and offline navigation fallback | Browser service-worker runtime | PWA asset check + Browser tests |
-| `routes/` | Web, API, sync, console entry points | Providers/bootstrap | Route and endpoint tests |
-| `database/migrations/` | 127 immutable schema migrations | PostgreSQL | RefreshDatabase suites |
-| `database/seeders/` | Roles/demo/performance fixtures | Local/test only | Seeder/role tests |
-| `config/` | Runtime drivers, integrations, security | Environment variables | Config/Feature tests |
-| `.github/workflows/` | CI, E2E, security, deploy orchestration | GitHub + Railway assumptions | External CI |
-| `docker/`, `Dockerfile` | PHP-FPM/Nginx runtime | Railway/container deploy | Build/deploy validation |
-| `scripts/` | Verify, deploy, backup, restore, PWA checks | Operator/CI environments | Manual/CI |
-| `docs/` | Architecture, rules, runbooks, readiness | Contributors/operators | Evidence review |
-| `tests/` | Pest Unit/Feature/Browser and load scripts | PostgreSQL + Playwright | Verification surface |
+- `/` - Root redirect
+- `/login` - Unified login (reps + admins)
+- `/admin/*` - Filament admin panel
+- `/app/*` - Rep PWA (Livewire)
+- `/health` - Health check endpoint
 
-## Entry points
+### Admin Panel (`/admin`)
 
-### HTTP
+- `Dashboard` - Overview widgets
+- `ReportsPage` - Sales reports
+- `CollectPayment` - Admin payment collection
+- 32 CRUD resources for master data
 
-| URI | Handler | Boundary |
-|---|---|---|
-| `GET /` | `SystemPageController::root` | Redirect to unified login |
-| `GET /login` | `App\Filament\Auth\Pages\Login` | Timeboxed credential check, 5-attempt rate limit |
-| `GET /admin/*` | Filament panel | Auth + panel role + company context |
-| `GET /app/*` | Livewire rep components | Web auth + active rep role |
-| `POST /app/sync` | `App\Http\Controllers\App\SyncController::store` | Auth + rep + POST throttle + max 100 operations |
-| `GET /api/v1/*` | API v1 controllers | Sanctum + ability + active company + API throttle |
-| `GET /health` | `SystemPageController::health` | Application DB/cache readiness |
-| `GET /up` | Laravel health route | Infrastructure liveness |
+### Rep PWA (`/app`)
 
-Evidence: `routes/web.php:32-103`, `routes/rep-sync.php:6-13`, `routes/api.php:19-28`, `bootstrap/app.php:15-20`.
+- `Home` - Today's overview
+- `SalesFlow` - Invoice creation wizard
+- `CollectPayment` - Payment collection
+- `VisitFlow` - Customer visit management
+- `StockSearch` - Van inventory lookup
 
-### CLI and schedule
-
-- `php artisan app:purge-location-pings`, scheduled daily (`bootstrap/app.php:39-41`).
-- `php artisan app:bootstrap-production`.
-- `php artisan app:seed-transactions`.
-- Closure command `inspire` in `routes/console.php`.
-
-### Build and deployment
-
-- Vite inputs: `resources/css/app.css`, `resources/js/app.js` (`vite.config.js:6-29`).
-- Container: pinned Node asset-build stage, then PHP-FPM/Nginx entry through
-  `/app/docker/start-container.sh` (`Dockerfile`).
-- Railway predeploy: forward migrations + config/route/view caches; `/health`
-  dependency readiness; restart-on-failure (`railway.toml`).
-- Promotion: blocking CI -> exact-SHA staging -> readiness/ZAP -> protected
-  production environment -> same-SHA production (`.github/workflows/deploy.yml`).
-- Rollback: named Railway deployment, explicit confirmation, protected
-  production environment, terminal-state and readiness verification
-  (`.github/workflows/rollback.yml`).
-
-## Component relationships
+## Component Relationships
 
 ```mermaid
-flowchart LR
-    Routes["routes/web.php"]
-    Livewire["app/Livewire/App"]
-    Filament["app/Filament"]
-    Controllers["app/Http/Controllers"]
-    Policies["app/Policies"]
-    Context["ActiveCompanyContext"]
-    Scope["BelongsToCompany"]
-    Contracts["app/Services/Contracts"]
-    DomainServices["Invoice / Payment / Return / Expense / Transfer services"]
-    Pricing["Pricing + InvoiceCalculation"]
-    Stock["StockService"]
-    Ledger["Invoice, Payment, Return, StockMovement"]
-    SyncService["SyncService"]
-    Handlers["6 Sync handlers"]
-    Receipt["SyncReceipt"]
+graph TD
+    A[Rep Login] --> B[Work Session Start]
+    B --> C[Route Selection]
+    C --> D[Customer Visit]
+    D --> E[Sales Flow]
+    E --> F[Invoice Creation]
+    F --> G[Stock Decrement]
+    E --> H[Payment Collection]
+    H --> I[Cash Box Update]
+    D --> J[Return Recording]
+    J --> K[Stock Increment]
 
-    Routes --> Livewire
-    Routes --> Controllers
-    Filament --> Policies
-    Livewire --> Contracts
-    Controllers --> Contracts
-    Contracts --> DomainServices
-    DomainServices --> Pricing
-    DomainServices --> Stock
-    DomainServices --> Ledger
-    Context --> Scope
-    Scope --> Ledger
-    SyncService --> Handlers
-    SyncService --> Receipt
-    Handlers --> DomainServices
+    L[Admin Login] --> M[Dashboard]
+    M --> N[Master Data Management]
+    M --> O[Approval Workflows]
+    M --> P[Reports & Analytics]
 ```
 
-Dependency rule: UI/controllers may orchestrate and validate, but the transaction and business rule belong in a service. Stock writes must pass through `StockService`.
-
-## Data-flow map
-
-### Offline sale
+## Data Flow Diagram
 
 ```mermaid
 sequenceDiagram
-    participant Rep as Rep UI
-    participant IDB as IndexedDB outbox
-    participant Client as sync.js
-    participant Endpoint as SyncController
-    participant Engine as SyncService
-    participant Handler as SaleSyncHandler
-    participant Invoice as InvoiceService
-    participant Stock as StockService
+    participant Rep as Sales Rep
+    participant PWA as Livewire PWA
+    participant Service as Service Layer
     participant DB as PostgreSQL
+    participant Stock as StockService
 
-    Rep->>IDB: enqueue sale + UUID + hash + device ID
-    Note over Rep,IDB: unit_price is optional; server pricing is authoritative
-    Client->>IDB: read pending, dependency-sort
-    Client->>Endpoint: POST /app/sync
-    Endpoint->>Engine: validated operations
-    Engine->>DB: begin transaction, lock/find receipt
-    Engine->>Handler: handle(rep, payload, key)
-    Handler->>Invoice: create with product and quantity
-    Invoice->>Invoice: derive and validate effective price
-    Invoice->>Stock: decrement locked van stock
-    Stock->>DB: stock + matching movement
-    Invoice->>DB: invoice + items + balance
-    Engine-->>Client: status=applied or duplicate
-    Client->>IDB: remove completed operation
+    Rep->>PWA: Start Visit
+    PWA->>Service: Create Visit
+    Service->>DB: Insert Visit (GPS data)
+
+    Rep->>PWA: Add to Cart
+    PWA->>Service: Validate Stock
+    Service->>Stock: Check Balance
+    Stock-->>Service: Available Qty
+
+    Rep->>PWA: Submit Invoice
+    PWA->>Service: Create Invoice
+    Service->>DB: BEGIN TRANSACTION
+    Service->>DB: Insert Invoice
+    Service->>DB: Insert Invoice Items
+    Service->>Stock: Decrement Stock
+    Stock->>DB: Insert Stock Movement
+    Service->>DB: Update Customer Balance
+    Service->>DB: COMMIT TRANSACTION
+
+    Rep->>PWA: Collect Payment
+    PWA->>Service: Process Payment
+    Service->>DB: BEGIN TRANSACTION
+    Service->>DB: Insert Payment
+    Service->>DB: Update Cash Box
+    Service->>DB: Update Invoice Status
+    Service->>DB: COMMIT TRANSACTION
 ```
 
-Producer/consumer evidence:
+## Critical Files
 
-- Producer: `resources/views/livewire/app/sales-flow.blade.php:193-205`.
-- Server contract: `app/Services/Sync/Handlers/SaleSyncHandler.php`.
-- Authoritative price validation: `app/Services/InvoiceService.php`.
-- Reconciliation: `resources/js/offline/sync.js`.
+### Business Logic (Service Layer)
 
-### Online invoice
+- `app/Services/InvoiceService.php` - Invoice creation with transactions
+- `app/Services/StockService.php` - Stock movement pattern
+- `app/Services/PaymentService.php` - Payment collection with idempotency
+- `app/Services/VanTransferService.php` - Van stock transfers
+- `app/Services/ReturnService.php` - Return processing
 
-```mermaid
-flowchart TD
-    Submit["SalesFlow::submit"]
-    Validate["Livewire validation + customer/cart checks"]
-    Invoice["InvoiceService::create"]
-    Auth["Seller permission + company access"]
-    Pricing["Server effective price + VAT calculation"]
-    Number["Per-company number sequence"]
-    Rows["Invoice + items + snapshots"]
-    Stock["StockService::decrement<br/>row lock + no-negative guard"]
-    Movement["StockMovement"]
-    Balance["Customer balance"]
-    Commit["Commit / rollback together"]
+### Core Models
 
-    Submit --> Validate --> Invoice --> Auth --> Pricing --> Number --> Rows --> Stock
-    Stock --> Movement
-    Stock --> Balance
-    Movement --> Commit
-    Balance --> Commit
-```
+- `app/Models/Invoice.php` - Invoice entity with e-invoicing fields
+- `app/Models/Customer.php` - Customer with approval workflow
+- `app/Models/Visit.php` - Visit with GPS tracking
+- `app/Models/Stock.php` - Van inventory
+- `app/Models/Payment.php` - Payment with idempotency
 
-Evidence: `SalesFlow.php:201-281`, `InvoiceService.php:36-188`, `StockService.php:96-140`.
+### Configuration
 
-### Tenant selection and scoping
+- `app/Providers/AppServiceProvider.php` - Service bindings
+- `app/Providers/Filament/AdminPanelProvider.php` - Admin panel config
+- `config/app.php` - Application configuration
+- `config/database.php` - Database connections
 
-```mermaid
-flowchart LR
-    Request["Authenticated request"]
-    Selector["Header/session company selector"]
-    Access["User::hasCompanyAccess"]
-    Context["ActiveCompanyContext"]
-    Scope["BelongsToCompany global scope"]
-    Query["Scoped Eloquent queries/writes"]
-    Policy["ChecksCompanyOwnership policy helper"]
+### Security
 
-    Request --> Selector --> Access --> Context --> Scope --> Query
-    Request --> Policy
-    Context -. "expected, but not used" .-> Policy
-```
+- `app/Http/Middleware/EnsureRepRole.php` - Rep role enforcement
+- `app/Http/Middleware/EnsureValidLicense.php` - License validation
+- `app/Http/Middleware/EnsureApprovedDevice.php` - Device approval
+- `app/Http/Middleware/SecurityHeaders.php` - Security headers
 
-The dotted edge is the current design gap: the policy helper compares the primary `user.company_id`, not the active company (`ChecksCompanyOwnership.php:8-13`).
+## Change-Sensitive Zones
 
-## Core data relationships
+### High Risk Areas
 
-```mermaid
-erDiagram
-    COMPANY ||--o{ USER : primary_membership
-    COMPANY }o--o{ USER : company_user
-    COMPANY ||--o{ CUSTOMER : owns
-    COMPANY ||--o{ PRODUCT : owns
-    COMPANY ||--o{ WAREHOUSE : owns
-    CUSTOMER ||--o{ VISIT : visited
-    USER ||--o{ VISIT : performs
-    CUSTOMER ||--o{ INVOICE : receives
-    USER ||--o{ INVOICE : sells
-    INVOICE ||--|{ INVOICE_ITEM : contains
-    PRODUCT ||--o{ INVOICE_ITEM : sold_as
-    WAREHOUSE ||--o{ STOCK : holds
-    PRODUCT ||--o{ STOCK : stocked
-    STOCK ||--o{ STOCK_MOVEMENT : explained_by
-    INVOICE ||--o{ PAYMENT : allocated
-    INVOICE ||--o{ RETURN_RECORD : returned_against
-    COMPANY ||--o{ SYNC_RECEIPT : idempotency_scope
-    USER ||--o{ SYNC_RECEIPT : submits
-```
+1. **InvoiceService.php** - Money mutations, stock decrements
+2. **StockService.php** - Inventory management, audit trail
+3. **PaymentService.php** - Cash collection, balance updates
+4. **Database migrations** - Schema changes affect all models
+5. **Middleware stack** - Security and authorization
 
-This is a conceptual map; line-item and movement references use additional foreign/polymorphic relationships in source.
+### Medium Risk Areas
 
-## Critical files
+1. **Livewire components** - Rep PWA user experience
+2. **Filament resources** - Admin panel functionality
+3. **E-invoicing integration** - ETA/ZATCA compliance
+4. **Offline sync handlers** - Data consistency
 
-| File | Why it matters | Blast radius |
-|---|---|---|
-| `bootstrap/app.php` | Global routing, middleware, exceptions, schedule | Every request/process |
-| `app/Providers/AppServiceProvider.php` | Service bindings, rate limiters, API/sync registration | Most runtime paths |
-| `routes/web.php` | Rep and system route surface | All web journeys |
-| `app/Support/ActiveCompanyContext.php` | Current tenant identity | Every scoped operation |
-| `app/Models/Concerns/BelongsToCompany.php` | Fail-closed query/write scope | Cross-company isolation |
-| `app/Policies/Concerns/ChecksCompanyOwnership.php` | Record policy ownership | Filament/admin authorization |
-| `app/Services/InvoiceService.php` | Invoice transaction, server pricing, stock/balance | Revenue and inventory |
-| `app/Services/PaymentService.php` | Collection/allocation/cash behavior | Cash and receivables |
-| `app/Services/ReturnService.php` | Returns, credit notes, credits | Inventory and customer balance |
-| `app/Services/StockService.php` | Only authorized stock mutation path | All inventory |
-| `app/Services/Sync/SyncService.php` | Idempotent offline ingestion | All offline writes |
-| `resources/js/offline/outbox.js` | Durable client mutation storage | Offline data survival |
-| `resources/js/offline/sync.js` | Replay and conflict reconciliation | Offline correctness |
-| `public/sw.js` | Offline fallback/cache privacy | PWA behavior after logout/update |
-| `database/migrations/2026_07_26_000009_enforce_append_only_ledgers.php` | Delete guards/FKs for ledgers | Financial integrity |
-| `railway.toml`, `Dockerfile` | Production startup/migration/health | Deployment availability |
+### Low Risk Areas
 
-## Change-sensitive zones
+1. **Test files** - No production impact
+2. **Documentation** - Reference only
+3. **Configuration files** - Environment-specific
 
-1. **Financial services:** require success, validation, authorization, and rollback/failure tests.
-2. **Stock and batches:** require row-lock, non-negative, movement-pair, FEFO, and company tests.
-3. **Offline contracts:** client producer, controller envelope, handler validation, idempotency receipt, and UI reconciliation must change together.
-4. **Tenancy:** active context, global scopes, direct `withoutGlobalScopes`, and policy ownership must be reviewed as one boundary.
-5. **Enums/status transitions:** resource actions and service transitions must match the source enum.
-6. **Number sequences and snapshots:** invoice/return numbering and immutable historical presentation have accounting impact.
-7. **Migrations/triggers:** migrations are immutable after release; PostgreSQL-specific SQL is present.
-8. **Filament resource discovery/policies:** broad admin blast radius and role-specific visibility.
-9. **Photo storage:** local and true S3 adapters behave differently; test both.
-10. **Deployment and CI:** repository workflows rely on external Railway configuration and branch/environment settings.
-11. **Translations/RTL/accessibility:** every user-visible change must work in Arabic RTL and English LTR.
+## Generated or Protected Areas
 
-Recent churn reinforces these zones: across the last 40 commits, `resources/css/app.css`, payment/invoice/return services, routes, layout, sales-flow Blade, sync service, and role seeding were among the most frequently changed files.
+### Generated Files (Never Edit)
 
-## Generated, protected, and external-state areas
+- `public/build/` - Vite output
+- `bootstrap/cache/` - Laravel cache
+- `storage/` - Runtime logs, cache, compiled views
+- `composer.lock` - Only via `composer install`
+- `package-lock.json` - Only via `npm ci`
 
-| Path / surface | Classification | Handling |
-|---|---|---|
-| `vendor/` | Generated dependency tree | Do not hand-edit |
-| `node_modules/` | Generated dependency tree | Do not hand-edit |
-| `public/build/` | Generated Vite output | Regenerate with build only |
-| `bootstrap/cache/` | Generated Laravel cache | Regenerate/clear through Artisan |
-| `storage/` | Runtime/cache/log/private files | Never treat as source |
-| `.env` | Protected secrets | Never read into reports or commit |
-| `composer.lock`, `package-lock.json` | Protected lockfiles | Change only through approved package workflow |
-| `database/database.sqlite` | Protected test artifact | Do not modify |
-| `docs/BUSINESS_RULES.md`, `docs/SECURITY.md` | Protected specifications | Read-only to agents |
-| Railway/GitHub/S3/Sentry/ETA settings | External state | Repository configuration is not proof of live state |
+### Protected Files (No Modification)
 
-## Downstream reading order
+- `docs/BUSINESS_RULES.md` - Spec, not implementation
+- `docs/SECURITY.md` - Spec, not implementation
+- `.env` - Secrets, never committed
+- `database/database.sqlite` - Test artifact
 
-For any consequential change:
+### Multi-Tenant Boundaries
 
-1. `AGENTS.md`
-2. `PROJECT_EXPLORATION_REPORT.md`
-3. The relevant section of `docs/ARCHITECTURE_CURRENT.md` and business/security specs
-4. Route/UI entry point
-5. Service contract and implementation
-6. Models/scopes/policies/migrations
-7. Existing success and failure-path tests
-8. `COMMANDS.md` for safe validation
+- All core tables have `company_id` column
+- `BelongsToCompany` trait enforces scoping
+- `ActiveCompanyContext` singleton tracks current company
+- Cross-company access blocked at service layer
 
-For the first recommended fix, read in this order:
+## Key Architectural Patterns
 
-1. `resources/views/livewire/app/sales-flow.blade.php`
-2. `resources/js/offline/outbox.js`
-3. `resources/js/offline/sync.js`
-4. `app/Http/Controllers/App/SyncController.php`
-5. `app/Services/Sync/Handlers/SaleSyncHandler.php`
-6. `app/Services/InvoiceService.php`
-7. `tests/Feature/RepFlowOfflineUxTest.php`
-8. `tests/Feature/OfflineSyncHandlersTest.php`
-9. `tests/Feature/Sync/IntentIdPassthroughTest.php`
+1. **Service Layer Pattern** - All business logic in services
+2. **Repository Pattern** - Models as repositories, services as business logic
+3. **DTO Pattern** - `app/Data/` for data transfer objects
+4. **Observer Pattern** - `app/Observers/` for audit trails
+5. **Policy Pattern** - `app/Policies/` for authorization
+6. **Contract Pattern** - `app/Services/Contracts/` for service interfaces
+
+## Testing Strategy
+
+- **Unit Tests** - `tests/Unit/` (isolated logic)
+- **Feature Tests** - `tests/Feature/` (77 files covering critical flows)
+- **Browser Tests** - `tests/Browser/` (Playwright E2E)
+- **Performance Tests** - `tests/k6/` (load testing)
+- **JavaScript Tests** - `tests/JavaScript/` (PWA offline safety)
+
+## Deployment Configuration
+
+- **Platform:** Railway (config exists in `railway.toml`)
+- **Environment:** Production-ready with Sentry integration
+- **Database:** PostgreSQL with connection pooling
+- **Assets:** Vite-built, served from `public/build/`
+- **Queue:** Laravel queue worker for background jobs
+- **Logs:** Laravel Pail for real-time log viewing

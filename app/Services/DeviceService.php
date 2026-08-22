@@ -26,6 +26,24 @@ class DeviceService
         throw_if($name === '' || mb_strlen($name) > 255, new \InvalidArgumentException('A valid device name is required.'));
 
         return DB::transaction(function () use ($user, $deviceUuid, $name, $platform, $fingerprint, $metadata): Device {
+            // ponytail: max devices per user, configurable via jawla.max_devices_per_user
+            $maxDevices = (int) config('jawla.max_devices_per_user', 5);
+            $existingCount = Device::query()
+                ->where('user_id', $user->getKey())
+                ->where('company_id', $user->activeCompanyId())
+                ->where('device_uuid', '!=', $deviceUuid)
+                ->count();
+            if ($existingCount >= $maxDevices) {
+                throw new \DomainException(
+                    app()->getLocale() === 'ar'
+                        ? "تم الوصول للحد الأقصى للأجهزة المسجلة ({$maxDevices})"
+                        : "Device limit reached ({$maxDevices})"
+                );
+            }
+
+            // ponytail: auto-approve only applies to NEW devices — existing unapproved
+            // devices are NOT retroactively approved when require_approved_devices is toggled off.
+            // This is intentional: admins must manually approve/reject pending devices.
             $autoApprove = ! (bool) $user->company()->value('require_approved_devices');
             $device = Device::query()->firstOrNew([
                 'company_id' => $user->activeCompanyId(),

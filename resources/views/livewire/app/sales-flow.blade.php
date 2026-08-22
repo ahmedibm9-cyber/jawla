@@ -32,7 +32,7 @@
                 @if($selectedCustomer)
                     <div class="card flex justify-between items-center">
                         <span>{{ $selectedCustomer->name_ar }}</span>
-                        <button type="button" wire:click="$set('customerId', 0)" class="text-danger text-sm bg-transparent border-0 cursor-pointer">{{ __('app.change') }}</button>
+                        <button type="button" wire:click="clearCustomer()" class="text-danger text-sm bg-transparent border-0 cursor-pointer">{{ __('app.change') }}</button>
                     </div>
                 @else
                     <input type="text" id="customerSearch" wire:model.live.debounce.300ms="customerSearch" autocomplete="off" class="form-input"
@@ -49,9 +49,23 @@
                         </div>
                     @endif
                 @endif
-            </div>
 
-            {{-- Product search --}}
+                {{-- Customer last-visit preview --}}
+                @if($selectedCustomer)
+                <div class="card bg-surface-alt mb-4 p-4" aria-label="{{ $selectedCustomer->name_ar ? l('معاينة العميل', 'Customer preview') : '' }}">
+                    <div class="flex items-start gap-3">
+                        <strong class="text-sm capitalize">{{ $selectedCustomer->name_ar }}</strong>
+                        @if($lastVisitAt)
+                        <div class="flex-1">
+                            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" class="mr-2 opacity-70"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54.504 1.867-1.084 1.867-2.5a5.97 5.97 0 00-.793-5.388l-2.426-2.15a5.924 5.924 0 00-2.066.076 5.919 5.919 0 00-.808 4.128L12 21a5.917 5.917 0 00.46-3.47l1.957-.758c1.074-.377 2.324-1.06 2.324-2.5C15.9 10.713 13.528 7.5 9 7.5a5.986 5.986 0 00-3.031.06l-1.806.368Zm0-2a3 3 0 110-6 3 3 0 010 6z"/></svg>
+                            <span class="text-text-secondary text-xs block">{{ $lastVisitAt->format('M j, Y') }}</span>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
+                {{-- Product search --}}
             <div class="form-group">
                 <label for="productSearch" class="form-label">{{ __('app.products') }}</label>
                 <input type="text" id="productSearch" wire:model.live.debounce.300ms="productSearch" autocomplete="off" class="form-input"

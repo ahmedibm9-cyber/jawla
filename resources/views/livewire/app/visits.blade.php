@@ -14,6 +14,9 @@
                 <x-slot:action>
                     <a href="/app" class="btn btn-primary no-underline">{{ __('app.back_home') }}</a>
                 </x-slot:action>
+                <x-slot:action secondary>
+                    <a href="/app/visits/create" class="btn btn-ghost no-underline text-text-secondary">{{ __('app.schedule_first_visit') }}</a>
+                </x-slot:action>
             </x-ds.empty>
         @else
             @php $lastDate = null; @endphp

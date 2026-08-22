@@ -28,6 +28,11 @@ class AlarmResource extends Resource
         return Alarm::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:alarm') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-bell-alert';

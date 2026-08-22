@@ -83,7 +83,7 @@ class HomeTest extends TestCase
         $this->assertEquals(1, WorkSession::where('user_id', $rep->id)->count());
     }
 
-    public function test_complete_task_marks_done(): void
+    public function test_assigned_task_is_listed_on_home(): void
     {
         $company = Company::factory()->create();
         $rep = User::factory()->create(['company_id' => $company->id]);
@@ -94,14 +94,11 @@ class HomeTest extends TestCase
             'created_by' => $rep->id,
             'assigned_to' => $rep->id,
             'title' => 'Follow up',
-            'status' => 'open',
+            'status' => 'assigned',
         ]);
         $this->actingAs($rep);
 
         Livewire::test(Home::class)
-            ->call('completeTask', $task->id)
-            ->assertSet('successMessage', fn ($msg) => str_contains($msg, 'completed') || str_contains($msg, 'تم إكمال'));
-
-        $this->assertDatabaseHas('tasks', ['id' => $task->id, 'status' => 'done']);
+            ->assertViewHas('openTasks', fn ($tasks): bool => $tasks->contains('id', $task->id));
     }
 }

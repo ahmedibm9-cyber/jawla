@@ -11,3 +11,6 @@ Artisan::command('inspire', function () {
 Schedule::command('app:deliver-webhooks --limit=50')
     ->everyMinute()
     ->withoutOverlapping(10);
+
+Schedule::command('app:backup-db')
+    ->dailyAt('02:00');

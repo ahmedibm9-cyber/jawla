@@ -78,15 +78,18 @@ class StockSearch extends Component
 
     public function render()
     {
+        abort_unless(auth()->user()->can('view:stock'), 403);
+
         $results = collect();
 
         if (strlen($this->search) >= 2) {
+            $escaped = addcslashes(trim($this->search), '%_');
             $results = Product::query()
                 ->where('company_id', auth()->user()->activeCompanyId())
-                ->where(function ($q) {
-                    $q->where('sku', 'ilike', "%{$this->search}%")
-                        ->orWhere('name_ar', 'ilike', "%{$this->search}%")
-                        ->orWhere('name_en', 'ilike', "%{$this->search}%");
+                ->where(function ($q) use ($escaped) {
+                    $q->where('sku', 'ilike', "%{$escaped}%")
+                        ->orWhere('name_ar', 'ilike', "%{$escaped}%")
+                        ->orWhere('name_en', 'ilike', "%{$escaped}%");
                 })
                 ->where('is_active', true)
                 ->with(['stocks' => fn ($q) => $q->where('quantity', '>', 0)->with('warehouse')])

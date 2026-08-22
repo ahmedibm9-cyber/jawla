@@ -24,3 +24,8 @@ public/build
 .tests
 tests
 .github
+check_*.php
+fix_*.php
+list_users.php
+test_db.php
+verify_user.php

@@ -23,6 +23,11 @@ class PurchaseRequestResource extends Resource
         return PurchaseRequest::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:purchase_request') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-shopping-cart';

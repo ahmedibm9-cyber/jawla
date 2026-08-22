@@ -3,6 +3,8 @@
 namespace App\Livewire\App;
 
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -55,12 +57,24 @@ class ProfilePage extends Component
     {
         $user = auth()->user();
 
+        if ($this->newPassword !== '') {
+            $throttleKey = 'password-change:user:'.$user->id;
+
+            if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+                $this->addError('currentPassword', __('app.password_change_rate_limited'));
+
+                return;
+            }
+
+            RateLimiter::hit($throttleKey, 60);
+        }
+
         $this->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email,'.$user->id],
             'phone' => ['nullable', 'string', 'max:20'],
             'currentPassword' => ['nullable', 'string'],
-            'newPassword' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'newPassword' => ['nullable', 'string', Password::min(8)->letters()->mixedCase()->numbers()->symbols(), 'confirmed'],
         ]);
 
         if ($this->newPassword !== '') {
@@ -85,6 +99,14 @@ class ProfilePage extends Component
         }
 
         $user->save();
+
+        if ($this->newPassword !== '') {
+            // Invalidate all other sessions for this user
+            \DB::table('sessions')
+                ->where('user_id', $user->id)
+                ->where('id', '!=', session()->getId())
+                ->delete();
+        }
 
         $this->editing = false;
         $this->success = true;

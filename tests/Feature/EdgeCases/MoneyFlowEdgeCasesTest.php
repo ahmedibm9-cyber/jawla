@@ -22,7 +22,7 @@ use App\Services\PaymentService;
 use App\Services\ReturnService;
 use App\Support\ActiveCompanyContext;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -35,7 +35,7 @@ use Tests\TestCase;
  */
 class MoneyFlowEdgeCasesTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     private Company $company;
 

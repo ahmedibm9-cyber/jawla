@@ -100,7 +100,7 @@ class PayloadHashTest extends TestCase
         $this->assertSame('Payload mismatch for same idempotency key', $second[0]['error']);
     }
 
-    public function test_same_key_without_hash_falls_back_to_duplicate(): void
+    public function test_same_key_without_hash_still_rejects_a_changed_payload(): void
     {
         $this->stubHandler();
         $svc = app(SyncService::class);
@@ -115,6 +115,7 @@ class PayloadHashTest extends TestCase
             ['key' => 'nohash1', 'type' => 'noop', 'payload' => ['foo' => 'baz']],
         ]);
 
-        $this->assertSame('duplicate', $second[0]['status']);
+        $this->assertSame('mismatch', $second[0]['status']);
+        $this->assertSame('Payload mismatch for same idempotency key', $second[0]['error']);
     }
 }

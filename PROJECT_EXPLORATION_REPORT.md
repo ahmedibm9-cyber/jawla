@@ -1,350 +1,213 @@
-# Jawla — Project Exploration Report
-
-**Exploration date:** 2026-07-29
-
-**Repository:** `C:\projects\jawla`
-
-**Revision inspected:** `7b1dd3a` on `master`, plus the working-tree changes listed under “Scope and state”
-**Status:** **Complete exploration; downstream implementation is safe to plan, but the application is not ready for a real-data production launch.**
-
-> **Post-exploration implementation addendum (2026-07-29):** The offline-sale
-> payload mismatch, active-company stock/policy defects, object-storage image
-> sanitization, and PHPStan runtime-symbol defects identified by this dossier
-> were remediated after the exploration snapshot. Release/promotion controls
-> were also implemented. The final isolated Unit + Feature run passed 666 tests
-> / 1,878 assertions; Pint, PHPStan level 0, Laravel optimization, Vite build,
-> and PWA budgets also passed. The original evidence below remains the
-> historical baseline that motivated those changes; current status is tracked in
-> `docs/PRODUCTION_READINESS_IMPLEMENTATION.md`.
-
-## Executive summary
-
-Jawla (جولة) is a bilingual Arabic/English field-sales CRM/ERP for Egyptian distribution teams. Reps use a Livewire PWA at `/app` to run routes, visit customers with GPS, sell from van stock, collect payments, record returns and expenses, and reconcile cash. Back-office roles use a Filament panel at `/admin`. The deployment unit is one Laravel 13 monolith backed by PostgreSQL; application-level `company_id` scoping supports a user switching among assigned companies.
-
-The strongest architectural pattern is the service layer: financial and stock-changing flows delegate to services, use database transactions, and route inventory changes through `StockService`. The most important runtime path is offline mutation replay: IndexedDB outbox → `POST /app/sync` → `SyncService` → a typed handler → the same domain service used online.
-
-The highest-priority defect found in that path was remediated after exploration.
-Offline items may omit `unit_price`; the server derives authoritative pricing,
-while supplied stale/tampered prices remain subject to service validation.
-
-Current code-level verification is green: 666 Unit + Feature tests / 1,878
-assertions, repository-wide Pint, PHPStan level 0, production asset build,
-Laravel optimization, and PWA budgets passed. Production remains NO-GO because
-Linux browser/CI/security evidence and the external tax, restore, rollback,
-performance, accessibility, device, incident, privacy, and UAT gates are not
-complete.
-
-## Scope and state
-
-- **Verified fact:** Primary target is the single repository at `C:\projects\jawla`; no sibling project was needed to reconstruct the running application.
-- **Verified fact:** Investigation was read-only except for the five exploration dossier files.
-- **Verified fact:** The shared worktree changed during exploration. Revision `7b1dd3a` became `HEAD`, and concurrent edits now exist in `.github/workflows/ci.yml`, `AGENTS.md`, `Makefile`, plus untracked `docs/TASK_CONTEXT_BROWSER_TEST_LIMITATION.md`. Those edits were inspected but not modified by this exploration.
-- **Constraint:** `.env` values and credentials were not read or reported. Only environment-variable names from committed configuration were considered.
-- **Constraint:** `docs/BUSINESS_RULES.md`, `docs/SECURITY.md`, lockfiles, generated assets, and application code were not edited.
-
-## Project identity and purpose
-
-| Conclusion | Classification | Evidence |
-|---|---|---|
-| Field-sales CRM/ERP for reps and back-office users | Verified fact | `AGENTS.md:3-8`; `README.md:1-5` |
-| Arabic and English, with RTL/LTR rendering | Verified fact | `resources/views/layouts/app.blade.php:1-2`; `app/Http/Middleware/SetLocale.php:9-23` |
-| Egyptian operating context and EGP-only accounting | Verified fact | `composer.json:5`; `docs/adr/0001-single-currency-egp.md`; `app/Services/InvoiceService.php:131-139` |
-| One deployable Laravel monolith | Verified fact | `AGENTS.md:40-43`; `bootstrap/app.php:15-54` |
-| Multi-company access within one application deployment | Verified fact | `app/Models/User.php:80-105`; `app/Http/Requests/SwitchCompanyRequest.php:9-22` |
-| Expected scale is 6–20 reps | Tentative inference | Mentioned in earlier project material, but no current capacity contract or production metrics were found |
-
-## Verified technology stack
-
-Runtime versions were queried from the installed environment/package metadata on 2026-07-29.
-
-| Layer | Installed version / contract | Evidence |
-|---|---|---|
-| PHP | 8.3.32; project constraint `^8.3` | `composer.json:12`; `php --version` |
-| Laravel | 13.20.0 | `composer.json:23`; `php artisan --version`; installed Composer metadata |
-| Filament | 4.12.1 | `composer.json:22`; installed Composer metadata |
-| Livewire | 3.8.2 (transitive through Filament) | installed Composer metadata; Livewire components under `app/Livewire/App/` |
-| PostgreSQL | Required application/test database; deployment targets PostgreSQL 16 | `AGENTS.md:42`; `phpunit.xml:31-36`; `.github/workflows/ci.yml:25-37` |
-| Tailwind CSS | 4.3.2 | `package.json:13,19`; installed npm metadata; `resources/css/app.css:1` |
-| Vite | 8.1.4 | `package.json:20`; installed npm metadata |
-| Playwright | 1.61.1 | `package.json:12`; installed npm metadata |
-| Pest | Constraint `^4.7.5` | `composer.json:54` |
-| Larastan/PHPStan | Larastan 3.10.0 / PHPStan 2.2.6 | installed Composer metadata / command output |
-| Laravel Pint | 1.29.3 | installed Composer metadata |
-| Maps | Leaflet 1.9.4 + OpenStreetMap tiles | `package.json:24`; `resources/css/app.css:2`; `SecurityHeaders.php:43` |
-| Storage | Local disks plus S3-compatible object storage | `config/filesystems.php:16-75` |
-| Error tracking | Sentry Laravel 4.x and browser SDK 10.67.0 | `composer.json:28`; `package.json:23`; `config/sentry.php:10-61` |
-| PDF / QR | mPDF 8.3, simple-qrcode 4.2 | `composer.json:27,29` |
-
-## Repository inventory
-
-Counts are from `rg --files` on the inspected working tree and exclude dependencies/generated build output.
-
-| Surface | Inventory |
-|---|---:|
-| Application PHP files | 333 |
-| Eloquent models | 68 |
-| Service-layer PHP files, including contracts/sync/ETA | 66 |
-| Rep Livewire components | 24 |
-| Filament files | 99 |
-| Migrations | 127, containing 73 `Schema::create` calls |
-| HTTP routes | 121 from `php artisan route:list --json` |
-| PHP test files | 113 |
-| Browser test files | 7 |
-| Documentation files | 99 |
-
-Primary modules:
-
-- `app/Livewire/App/`: rep PWA interaction layer.
-- `app/Filament/`: admin resources, pages, widgets, authentication.
-- `app/Services/`: financial, inventory, visits, purchasing, offline sync, ETA, photos, PDFs.
-- `app/Models/`: Eloquent domain/data model.
-- `app/Policies/` and middleware: authorization, tenancy context, throttling, security headers.
-- `resources/js/offline/`: device-scoped IndexedDB outbox and sync engine.
-- `database/migrations/`: PostgreSQL schema and integrity constraints.
-- `routes/`: web, public API, console, and isolated rep-sync route.
-- `tests/`: Pest Unit/Feature/Browser plus k6/stress assets.
-
-## Architecture
-
-### Request and process entry points
-
-- `bootstrap/app.php:15-45` registers web/console routing, `/up`, middleware, schedule, and JSON exception behavior.
-- `app/Providers/AppServiceProvider.php:43-170` binds services, configures rate limiters, registers `/api` and `/app/sync`, and applies production boot checks.
-- `app/Providers/Filament/AdminPanelProvider.php:39-113` defines `/admin`, resource discovery, widgets, and admin middleware.
-- `routes/web.php:32-103` exposes `/login`, `/health`, company switching, and the rep PWA.
-- `routes/api.php:19-28` exposes read-only, Sanctum-authenticated product/customer APIs.
-- `routes/rep-sync.php:6-13` exposes the offline sync endpoint behind web auth, rep role, and POST throttling.
-- `bootstrap/app.php:39-41` schedules `app:purge-location-pings` daily.
-
-### Runtime boundaries
-
-1. **HTTP/UI layer:** Filament, Livewire components, controllers, middleware, validation.
-2. **Service layer:** transactions, business invariants, numbering, price calculation, stock mutation, integrations.
-3. **Data layer:** Eloquent models and PostgreSQL constraints/triggers.
-4. **Device offline layer:** service worker for public assets/offline fallback, IndexedDB for authenticated mutation outbox.
-5. **Infrastructure:** Railway/Docker configuration, PostgreSQL, Redis in production, S3-compatible photo storage, Sentry, ETA.
-
-## Traced runtime flow: offline sale → sync → invoice
-
-### Intended path
-
-1. Rep confirms an invoice while offline.
-2. Browser queues a `sale` record in a device/user-scoped IndexedDB database.
-3. The outbox generates a UUID idempotency key, SHA-256 payload hash, and device ID.
-4. On reconnect/visibility, the client posts up to 100 ordered operations to `/app/sync`.
-5. The controller validates the envelope and maps protocol/device/hash fields.
-6. `SyncService` checks company context, reserves `(company_id, idempotency_key)` in a transaction, invokes the registered handler, and stores the handler response atomically.
-7. `SaleSyncHandler` calls `InvoiceService::create()`.
-8. `InvoiceService` authorizes the seller, locks customer/user records, recalculates server-authoritative prices and tax, creates invoice/items/snapshots, decrements van stock through `StockService`, writes movements, and updates customer balance.
-9. Client deletes applied/duplicate records or marks mismatch/failed/conflict records for review.
-
-### Evidence
-
-- Queue and identity: `resources/js/offline/outbox.js:6-18,21-37,85-113`.
-- Flush and reconciliation: `resources/js/offline/sync.js:59-121,124-140,216-249`.
-- Endpoint validation: `app/Http/Controllers/App/SyncController.php:18-41`.
-- Exactly-once transaction: `app/Services/Sync/SyncService.php:50-127`.
-- Handler registration: `app/Providers/SyncServiceProvider.php:20-31`.
-- Invoice transaction: `app/Services/InvoiceService.php:36-188`.
-- Stock lock/non-negative check/movement: `app/Services/StockService.php:96-140`.
-
-### Observed contract break
-
-- The UI queues `items` with only `product_id` and `quantity`: `resources/views/livewire/app/sales-flow.blade.php:193-205`.
-- `SaleSyncHandler` requires `items.*.unit_price`: `app/Services/Sync/Handlers/SaleSyncHandler.php:23-32`.
-- The handler validates before calling `InvoiceService`: `SaleSyncHandler.php:25-36`.
-- `sync.js` marks a `failed` result as failed in the outbox: `resources/js/offline/sync.js:101-113`.
-
-**Conclusion:** a sale produced by the actual offline UI cannot satisfy the current server contract. **Confidence 98/100.** Not 100 because a live browser-to-database reproduction was not run; the static producer/consumer mismatch is otherwise direct.
-
-The three focused offline test files passed together (28 tests, 85 assertions), but they verify the queue UI and server handlers separately. They do not submit the exact Blade-produced sale payload to `SaleSyncHandler`, so the green targeted result does not contradict the contract defect.
-
-### Failure and observability behavior
-
-- Network/401/419 leaves items pending for retry (`sync.js:97-120`).
-- Unsupported, invalid, or handler failures become per-operation results rather than aborting the batch (`SyncService.php:58-64,125-127`).
-- Duplicate keys return stored results; hash mismatches are quarantined (`SyncService.php:71-85`).
-- Legacy receipts with a null response become conflicts requiring support (`SyncService.php:69-78`).
-- Sentry is registered for exceptions (`bootstrap/app.php:42-53`) and scrubs sensitive keys (`app/Support/SentryScrubber.php:19-81`).
-- **Risk:** sync failure responses expose raw exception messages (`SyncService.php:125-127`), which can include internal database/query details.
-
-## Domain model and glossary
-
-### Core domains
-
-| Domain | Core records and responsibilities |
-|---|---|
-| Tenant and identity | `Company`, `User`, `company_user`, roles/permissions, active company context |
-| Route execution | `Route`, `DailyVisitAssignment`, `WorkSession`, `Visit`, `VisitReport`, `LocationPing` |
-| Sales | `Customer`, `Product`, `PriceList`, `ProductPrice`, `Invoice`, `InvoiceItem`, `Payment` |
-| Inventory | `Warehouse`, `Stock`, `StockMovement`, `Batch`, `VanTransfer`, stock counts/imports |
-| Returns and corrections | `ReturnRecord`, `ReturnItem`, `CreditNote`, `CustomerCredit`, `Refund`, `Reversal` |
-| Procurement | `Supplier`, `PurchaseRequest`, `PurchaseOrder`, `GoodsInTransit`, `LandedCost` |
-| Operations | `Expense`, `CashBox`, `CashReconciliation`, `Complaint`, `Alarm`, `Task`, `Photo` |
-| Offline delivery | `SyncReceipt`, client outbox record, protocol/device/hash metadata |
-
-### State vocabulary
-
-- Invoice enum: `draft`, `issued`, `submitted`, `cancelled`, `amended`, `partially_paid`, `paid`, `credited`, `voided` (`app/Enums/InvoiceStatus.php:5-16`).
-- Van transfer enum: `pending`, `accepted`, `shipped`, `received`, `rejected`, `cancelled` (`app/Enums/VanTransferStatus.php:5-13`).
-- Visit enum: `open`, `closed` (`app/Enums/VisitStatus.php:5-9`).
-- Visit purposes: `sale`, `collection`, `return`, `survey`, `other`, `custom_visit` (`app/Enums/VisitPurpose.php:5-13`).
-- Stock reasons: sale, return, transfer, adjustment, initial, purchase, landed cost, transit, inter-company, reversal (`app/Enums/StockReason.php:5-19`).
-
-### Important invariants
-
-- No negative stock; row lock plus rejection in `StockService` (`StockService.php:103-139`).
-- Invoice creation, numbering, item creation, stock decrement, and balance update share one transaction (`InvoiceService.php:36-188`).
-- Supplied prices are checked against server-authoritative effective prices (`InvoiceService.php:91-110`).
-- Company-scoped models fail closed when no active company is set (`BelongsToCompany.php:12-61`).
-- User switching is limited to assigned companies (`SwitchCompanyRequest.php:9-22`).
-- Financial/ledger tables are deletion-protected in Eloquent and PostgreSQL (`AppendOnly.php:7-14`; migration `2026_07_26_000009...php:71-83`).
-- **Clarification:** “append-only” means delete-protected, not immutable. Models such as invoices and sync receipts are intentionally updated as lifecycle state changes.
-
-### Glossary
-
-| Term | Jawla meaning |
-|---|---|
-| Jawla | A rep’s daily field round/route |
-| Van stock | Inventory held in a rep-associated van warehouse |
-| Active company | The company selected for the current request/session |
-| Proforma | Pre-sale commercial document, not the final financial invoice |
-| Reconciliation | End-of-day comparison of expected and counted cash |
-| FEFO | Earliest-expiry-first batch selection |
-| Outbox | Device-local IndexedDB queue of unsynced rep writes |
-| Sync receipt | Server idempotency record for a successfully applied/replayed operation |
-| ETA | Egyptian Tax Authority e-invoicing integration |
-| ZATCA | Saudi QR/e-invoicing compatibility code present in the product |
-
-## Data stores and interfaces
-
-### Persistence
-
-- PostgreSQL is the application and test-system database. Tests are pinned to `jawla_test`; `TestingDatabaseGuard` rejects other names (`phpunit.xml:25-39`; `tests/Support/TestingDatabaseGuard.php:9-21`).
-- The tenant boundary is an active-company service plus `BelongsToCompany` global scope/create/update/delete guards (`ActiveCompanyContext.php:9-103`; `BelongsToCompany.php:10-62`).
-- Redis is configured for production session/cache/queue use (`railway.toml:11-19`; `docs/DEPLOYMENT.md:26-50`).
-- Browser IndexedDB holds pending/failed/conflict outbox records (`outbox.js:6-8,93-169`).
-- Cache Storage contains public build/images/icons and an offline page only; authenticated HTML/API/PDF responses are network-only (`public/sw.js:58-95`).
-- Photos target a configurable local/S3 disk and store the disk per row (`config/filesystems.php:18-75`; `PhotoService.php:21-48`).
-
-### External and public interfaces
-
-| Interface | Producer → consumer | Auth / contract | Failure behavior |
-|---|---|---|---|
-| Rep sync | PWA → Laravel `/app/sync` | Session + CSRF + rep role + throttle; max 100 ops; v1 header | Per-operation statuses; network/session failures remain queued |
-| Public API v1 | External client → `/api/v1/products`, `/customers`, `/whoami` | Sanctum token, abilities, company context, 60/min token/IP | Laravel JSON errors; lists paginated max 100 |
-| ETA | Laravel → ETA OAuth/document APIs | Client credentials + taxpayer certificate signer | Disabled by default; null/unsigned path rejects rather than claiming success |
-| S3-compatible photos | Laravel → Railway bucket/S3 | Server-side object-storage credentials | Storage adapter reports failures; see S3 EXIF risk below |
-| Sentry | Server/browser → Sentry | DSN; PII and sensitive-key controls | Optional when DSN/package unavailable |
-| Maps/GPS | Browser → geolocation and OSM tiles | Browser permission; no OSM auth | UI must handle denied/unavailable position |
-
-ETA details: OAuth token cache and 30-second timeouts exist (`HttpEtaClient.php:34-83`), but no retry/backoff is implemented. A real CAdES-BES signer and preproduction validation remain go-live blockers (`UnsignedEtaSigner.php:7-19`; `docs/GO_LIVE_READINESS.md:42-58`).
-
-Environment-variable names and purposes are summarized in `COMMANDS.md`; no values are included here.
-
-## Development and operations
-
-The declared contributor interface is the Makefile (`AGENTS.md:24-38`; `Makefile:1-56`). GNU Make is not installed on the inspected Windows host, so underlying commands were run directly. Detailed statuses and side effects are in `COMMANDS.md`.
-
-Deployment evidence points primarily to Railway:
-
-- Docker runs PHP-FPM plus Nginx (`Dockerfile:1-58`; `docker/start-container.sh:1-14`).
-- Railway predeploy migrates and caches configuration/routes/views, starts two replicas, and checks `/up` (`railway.toml:1-20`).
-- The GitHub deploy workflow does not call a deployment API; it assumes Railway auto-deploy and only echoes/smoke-checks (`.github/workflows/deploy.yml:11-40`).
-- Backup/restore helpers fail closed, but the restore log is empty (`scripts/backup.sh:1-27`; `scripts/restore-backup.sh:1-28`; `docs/BACKUP_RESTORE.md:59-69`).
-
-## Quality and risk findings
-
-| ID | Severity | Finding | Classification / confidence | Recommended next investigation |
-|---|---|---|---|---|
-| R1 | Resolved in code | Offline sale pricing mismatch | Exact price-less payload now has regression coverage; server pricing is authoritative | Retain Linux offline browser coverage |
-| R2 | Resolved as verification blocker | Aggregate suite previously exceeded 1 GB | 2 GB isolated run passed 666 tests / 1,878 assertions | Optimize suite memory as technical debt |
-| R3 | Resolved in code | Active-company and Stock policy mismatch | Secondary-company and Stock ownership matrix passes | Retain tenant matrix in blocking CI |
-| R4 | Resolved in code | Photo sanitizer assumed a local S3 path | Decode/re-encode occurs before upload; adapter-independent tests pass | Exercise a real disposable bucket in staging |
-| R5 | Resolved in code | Sync exposed raw exceptions | Stable bilingual codes go to clients; details remain server-side | Monitor Sentry/log correlation |
-| R6 | Repository control implemented | Staging/production promotion was not enforced by workflow | Exact-SHA promotion and protected production workflow implemented | Verify external GitHub/Railway settings and exercise it |
-| R7 | Medium | “Append-only” wording overstates immutability; only deletes are blocked while updates are common | Verified fact, 95 | Document delete-protected lifecycle ledgers precisely and test allowed/forbidden mutations |
-| R8 | Medium | Current documentation conflicts on Tailwind, hosting, branches, route caching, and test counts | Verified contradiction, 98 | Make `ARCHITECTURE_CURRENT.md` and this dossier authoritative; update stale README/CONTRIBUTING/DEPLOYMENT text in a separate task |
-| R9 | High | ETA signer/preprod evidence and independent restore drill remain missing; current release authority says NO-GO | Verified docs / external completion unknown, 95 | Complete named go-live gates and retain evidence before real data |
-| R10 | Medium | New browser-test CI coverage exists only in concurrent uncommitted changes and has not run on Linux CI | Verified worktree fact, 100 | Review/commit the separate browser-test task, then inspect first CI result |
-
-### Multi-company policy contradiction
-
-`SetActiveCompanyContext` and `SwitchCompanyRequest` allow a user to select any assigned company (`SetActiveCompanyContext.php:19-39`; `SwitchCompanyRequest.php:9-22`). However, `ChecksCompanyOwnership` compares only the user’s primary `company_id` to the model (`app/Policies/Concerns/ChecksCompanyOwnership.php:8-13`). This is fail-closed rather than a cross-company leak, but it can deny legitimate access after switching. `Stock` has no `company_id` (`app/Models/Stock.php:9-29`), yet `StockPolicy::view` uses the same check (`StockPolicy.php:18-20`).
-
-### S3 photo contradiction
-
-The committed readiness document claims durable S3 photo storage is complete (`docs/GO_LIVE_READINESS.md:60-69`). `PhotoService` stores first, then calls `Storage::disk($disk)->path($path)` and local filesystem/GD functions (`PhotoService.php:32-71`). The S3 test substitutes a local fake (`tests/Feature/PhotoDiskConfigTest.php:48-56`), so it does not validate the real adapter behavior.
-
-## Contradictions and stale evidence
-
-1. `README.md:13-16` says Tailwind 3, includes `spatie/laravel-activitylog`, and names Forge; installed dependencies/current architecture show Tailwind 4, a custom `Activity` model, and Railway configuration.
-2. `CONTRIBUTING.md:6-8` says `main`; Git and workflows use `master`.
-3. `docs/DEPLOYMENT.md:1-18` describes Forge, while lines 26-65 and `railway.toml` describe Railway.
-4. `docs/DEPLOYMENT.md:39` says route caching is disabled; `railway.toml:2` enables it, and `php artisan route:cache` succeeded during exploration.
-5. `docs/GO_LIVE_READINESS.md:20-34` preserves older passing test counts that do not describe the current 2026-07-29 run.
-6. The prior exploration dossier called the CI branch mismatch critical. At inspected `HEAD`, `.github/workflows/ci.yml:3-7` targets `master`; that mismatch is resolved.
-7. The prior dossier’s enum/state lists did not match current enums; this report uses source enums.
-
-## Unknowns ledger
-
-See `OPEN_QUESTIONS.md` for resolution steps. The decisions currently unsafe to assume are:
-
-- whether Railway auto-deploy/approvals actually enforce staged production promotion;
-- whether ETA credentials/signer/preprod acceptance and restore/rollback drills exist outside the repository;
-- whether the Linux browser-test, security, and promotion jobs pass for the
-  final commit;
-- whether staging S3, performance, accessibility, device, and incident drills
-  pass.
-
-## Confidence table
-
-| Major conclusion | Score | Why not higher |
-|---|---:|---|
-| Project purpose and user journeys | 98 | Production user count and current adoption are not observable from code |
-| Installed technology stack | 100 | Direct package/runtime evidence |
-| Monolith/service-layer architecture | 97 | Not every Filament action/service call was traced |
-| Online invoice transaction | 98 | Direct code plus tests inspected; no live UI execution |
-| Offline sync engine semantics | 96 | Direct code and server tests; no live browser replay |
-| Offline sale contract remediation | 98 | Direct service and regression-test evidence; Linux browser flow remains |
-| Tenant scoping model | 94 | Core scope/context verified; not every model/policy exhaustively tested |
-| Multi-company policy remediation | 96 | Direct code plus active-secondary-company and Stock matrix tests |
-| Deployment design | 82 | Repository configuration is clear; external Railway settings are not visible |
-| Production readiness NO-GO | 95 | Current authoritative runbook says NO-GO; external evidence could have changed |
-| Current verification status | 100 | Commands run and results inspected on 2026-07-29 |
-
-## Recommended next actions
-
-1. Run the final commit through blocking Linux CI, browser E2E, secret/security
-   scanning, staging readiness, and DAST.
-2. Exercise the protected same-SHA production promotion and rollback workflows
-   against Railway with named approvers.
-3. Complete ETA signer/preproduction and tax-owner approval.
-4. Complete encrypted backup/scratch restore and rollback drills with measured
-   RPO/RTO and reconciled evidence.
-5. Complete staging S3, performance, accessibility, physical-device offline,
-   incident, privacy/legal, and multi-role UAT gates.
-
-## Readiness for downstream work
-
-- **Planning a code change:** Ready. Use `PROJECT_MAP.md`, the flow above, and the risk list.
-- **Implementing offline sales:** Code contract is ready; Linux browser and
-  physical offline/reconnect evidence remain required for field rollout.
-- **General feature development:** Ready, with tenant/service/transaction constraints preserved.
-- **Production launch or real customer data:** Not ready. The documented
-  external and final-commit CI/governance gates still block a safe launch.
-
-## Evidence index
-
-High-value starting points:
-
-- Instructions: `AGENTS.md`, `CLAUDE.md`
-- Current architecture: `docs/ARCHITECTURE_CURRENT.md`
-- Release authority: `docs/GO_LIVE_READINESS.md`
-- Boot/routing: `bootstrap/app.php`, `app/Providers/AppServiceProvider.php`, `routes/web.php`, `routes/rep-sync.php`, `routes/api.php`
-- Offline client: `resources/js/offline/outbox.js`, `resources/js/offline/sync.js`
-- Offline server: `app/Http/Controllers/App/SyncController.php`, `app/Services/Sync/SyncService.php`, `app/Services/Sync/Handlers/`
-- Sales/stock: `app/Services/InvoiceService.php`, `app/Services/StockService.php`, `app/Services/PricingService.php`
-- Tenancy: `app/Support/ActiveCompanyContext.php`, `app/Models/Concerns/BelongsToCompany.php`, `app/Policies/Concerns/ChecksCompanyOwnership.php`
-- Deployment/recovery: `railway.toml`, `Dockerfile`, `.github/workflows/`, `scripts/backup.sh`, `scripts/restore-backup.sh`
-- Tests: `tests/Feature/OfflineSyncTest.php`, `tests/Feature/OfflineSyncHandlersTest.php`, `tests/Feature/RepFlowOfflineUxTest.php`, `tests/Feature/Tenancy/`
+# PROJECT EXPLORATION REPORT
+
+## Executive Summary
+
+Jawla (جولة) is a bilingual (Arabic/English) field-sales CRM/ERP application built for the Egyptian market. It manages sales representatives' daily field operations: check-in, route planning, customer visits with GPS tracking, van stock sales, cash collection, and returns. The system supports both admin (Filament) and rep (Livewire PWA) interfaces.
+
+**Primary Purpose:** Field sales management and ERP for Egyptian market operations
+**Confidence:** 95/100 (direct evidence from AGENTS.md, code structure, and business rules)
+
+## Project Identity and Purpose
+
+- **Name:** Jawla (جولة) - Arabic for "tour" or "journey"
+- **Target Users:** Field sales representatives (reps) and administrators
+- **Core Workflow:** Reps run daily "jawla" - check in, pick route, visit customers, sell from van stock, collect cash, record returns
+- **Admin Functions:** Master data management, real-time monitoring, approvals
+- **Market:** Egyptian market with VAT/e-invoicing support (ETA/ZATCA)
+
+## Verified Technology Stack
+
+| Component      | Technology                             | Evidence                                              |
+| -------------- | -------------------------------------- | ----------------------------------------------------- |
+| Backend        | Laravel 13, PHP 8.3+                   | `composer.json:11-12`                                 |
+| Admin Panel    | Filament 4                             | `composer.json:22`, `AdminPanelProvider.php`          |
+| Rep PWA        | Livewire 3 + Tailwind CSS              | `package.json:21-22`, `resources/views/livewire/app/` |
+| Database       | PostgreSQL (primary), SQLite (testing) | `composer.json:16-18`, `AGENTS.md:44`                 |
+| Frontend Build | Vite 8                                 | `package.json:22`                                     |
+| Testing        | Pest 4, Playwright                     | `composer.json:41-43`                                 |
+| Auth           | Laravel Sanctum                        | `composer.json:23`                                    |
+| Permissions    | Spatie Permission                      | `composer.json:30`                                    |
+| PDF Generation | mPDF                                   | `composer.json:27`                                    |
+| QR Codes       | SimpleSoftwareIO QR Code               | `composer.json:29`                                    |
+| Excel Import   | Spatie Simple Excel                    | `composer.json:31`                                    |
+| Error Tracking | Sentry                                 | `composer.json:28`                                    |
+| Mapping        | Leaflet                                | `package.json:26`                                     |
+
+## Architecture and Runtime Flows
+
+### High-Level Architecture
+
+- **Monolithic Laravel app** with single PostgreSQL database
+- **Dual interface pattern:** Admin panel (`/admin`) and Rep PWA (`/app`)
+- **Service layer pattern:** Business logic in `app/Services/`, controllers delegate
+- **Multi-tenant:** Company-scoped via `company_id` columns
+
+### Key Runtime Flow: Rep Sales Process
+
+1. **Login** → `/login` (unified for reps and admins)
+2. **Start Day** → Work session with GPS location
+3. **Route Selection** → Daily visit assignments
+4. **Customer Visit** → GPS check-in, geofence validation
+5. **Create Invoice** → `SalesFlow.php` → `InvoiceService::create()` with stock decrement
+6. **Collect Payment** → `PaymentService::collect()` with cash box update
+7. **Record Returns** → Stock increment with movement tracking
+8. **Cash Reconciliation** → End-of-day cash box balancing
+
+### Service Layer Pattern
+
+All business logic lives in `app/Services/`:
+
+- `InvoiceService.php` - Invoice creation with stock/financial transactions
+- `StockService.php` - Stock movements with audit trail
+- `PaymentService.php` - Payment collection with idempotency
+- `VanTransferService.php` - Van stock transfers
+- `ReturnService.php` - Return processing
+
+**Key Rule:** Money mutations happen inside `DB::transaction()` via services, never directly from controllers.
+
+## Domain Model and Glossary
+
+### Core Entities
+
+- **Company** - Multi-tenant organization
+- **User** - Rep or admin with roles/permissions
+- **Customer** - B2B customer with approval workflow
+- **Product** - Items sold from van stock
+- **Invoice** - Sales transaction with ETA/ZATCA e-invoicing
+- **Payment** - Cash collection with idempotency
+- **Visit** - Customer visit with GPS tracking
+- **WorkSession** - Daily work period
+- **Route** - Sales route with customer assignments
+- **Stock** - Van inventory with movement audit trail
+- **CashBox** - Rep's cash balance
+
+### Key Business Rules
+
+1. **No negative van stock** - Rejected at `StockService::decrement()`
+2. **Atomic sales** - Invoice + items + stock + movements in one transaction
+3. **Sequential numbers** - Per-company, server-generated, immutable
+4. **Route lock** - Reps can only visit customers on active route
+5. **Reversal is compensating, never deletion** - Audit trail preserved
+
+### State Machines
+
+- **InvoiceStatus:** Draft → Issued → Submitted → PartiallyPaid → Paid → Credited/Cancelled/Amended
+- **VisitStatus:** Open → Closed
+- **Customer status:** pending → approved/rejected
+
+## Data Stores and Interfaces
+
+### Primary Data Store
+
+- **PostgreSQL** - Single database with company-scoped tables
+- **Key tables:** companies, users, customers, products, invoices, payments, stocks, visits
+
+### External Integrations
+
+- **ETA (Egypt Tax Authority)** - E-invoicing via `HttpEtaClient`
+- **ZATCA** - Saudi Arabia e-invoicing support
+- **Sentry** - Error tracking
+- **Push notifications** - Via `HttpPushGateway`
+
+### API Surface
+
+- **Rep PWA routes** - `/app/*` with auth + license + device middleware
+- **Admin API** - Filament auto-registered
+- **Public API v1** - Sanctum-protected endpoints
+
+## Development and Operations Workflow
+
+### Setup Commands
+
+| Command          | Purpose              | Status   |
+| ---------------- | -------------------- | -------- |
+| `make setup`     | Initial setup        | Declared |
+| `make dev`       | Start dev server     | Declared |
+| `make lint`      | PHP linting          | Declared |
+| `make typecheck` | PHPStan analysis     | Declared |
+| `make test`      | Unit + Feature tests | Declared |
+| `make test-e2e`  | Browser tests        | Declared |
+| `make verify`    | Full verification    | Declared |
+| `make build`     | Build assets         | Declared |
+| `make migrate`   | Database migration   | Declared |
+| `make seed`      | Seed demo data       | Declared |
+
+### Quality Gates
+
+- `make verify` = lint + typecheck + test + test-offline + build
+- Browser tests have Windows limitation (pest-plugin-browser bug)
+- PHPStan level 0 for CI, level 6 for strict audit
+
+## Quality and Risk Findings
+
+### High Confidence Items
+
+- **Service layer pattern** - Consistent across all business logic
+- **Transaction safety** - Money mutations wrapped in DB::transaction
+- **Stock audit trail** - Every movement creates stock_movements row
+- **Multi-tenant isolation** - Company-scoped via BelongsToCompany trait
+- **Bilingual support** - RTL Arabic + LTR English throughout
+
+### Medium Confidence Items
+
+- **E-invoicing integration** - ETA client built but may need production testing
+- **Offline sync** - PWA with IndexedDB, sync handlers exist
+- **Performance testing** - k6 tests exist but not verified
+
+### Unknowns
+
+- **Production deployment status** - Railway config exists but unverified
+- **Real customer data** - Never committed (per security rules)
+- **ETA production readiness** - Unsigned signer until certificate provisioned
+
+## Contradictions and Unknowns
+
+### Verified Facts
+
+- All business logic in services layer (evidence: `app/Services/` structure)
+- Stock changes only through StockService (evidence: `StockService.php:18-26`)
+- Money mutations in DB::transaction (evidence: `InvoiceService.php:40`, `PaymentService.php:40`)
+- Company-scoped multi-tenancy (evidence: `BelongsToCompany` trait usage)
+
+### Unknowns
+
+1. **Production deployment target** - Railway config exists but no live verification
+2. **ETA production certificate** - Noted as "last go-live gate" in `AppServiceProvider.php:87`
+3. **Offline sync reliability** - Handlers exist but no end-to-end test verification
+4. **Performance under load** - k6 tests exist but results not reviewed
+
+## Confidence Table
+
+| Area                    | Confidence | Evidence Quality                        |
+| ----------------------- | ---------- | --------------------------------------- |
+| Architecture pattern    | 95/100     | Direct code inspection                  |
+| Business rules          | 95/100     | AGENTS.md + BUSINESS_RULES.md           |
+| Service layer pattern   | 95/100     | Multiple service files inspected        |
+| Transaction safety      | 95/100     | DB::transaction usage in key services   |
+| Multi-tenancy           | 95/100     | BelongsToCompany trait usage            |
+| E-invoicing integration | 75/100     | Client built, but unsigned signer       |
+| Offline sync            | 70/100     | Handlers exist, not end-to-end verified |
+| Production readiness    | 60/100     | Config exists, deployment not verified  |
+
+## Recommended Next Actions
+
+1. **Verify production deployment** - Test Railway deployment end-to-end
+2. **Test ETA integration** - Verify e-invoicing with test certificates
+3. **Validate offline sync** - Test rep PWA offline → online workflow
+4. **Performance testing** - Review k6 test results and optimize
+5. **Security audit** - Verify all middleware and rate limiting in production
+
+## Evidence Index
+
+- `AGENTS.md` - Project purpose and architecture rules
+- `composer.json` - Technology stack
+- `app/Services/InvoiceService.php` - Invoice creation with transactions
+- `app/Services/StockService.php` - Stock movement pattern
+- `app/Services/PaymentService.php` - Payment collection with idempotency
+- `app/Models/Invoice.php` - Invoice entity structure
+- `app/Models/Customer.php` - Customer entity with approval workflow
+- `app/Models/Visit.php` - Visit with GPS tracking
+- `app/Providers/AppServiceProvider.php` - Service bindings and middleware
+- `app/Providers/Filament/AdminPanelProvider.php` - Admin panel configuration
+- `database/migrations/` - Schema evolution (140 migrations)
+- `docs/BUSINESS_RULES.md` - Non-negotiable business rules

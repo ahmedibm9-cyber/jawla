@@ -70,10 +70,10 @@ class OrganizationDeviceManagementTest extends TestCase
         self::assertSame(DeviceStatus::Pending, $device->status);
 
         app(DeviceService::class)->approve($device, $admin);
-        $this->actingAs($rep)->withCookie('jawla_device_id', $deviceUuid)->get('/app')->assertOk();
+        $this->actingAs($rep)->withCookie('jawla_device_id', encrypt($deviceUuid))->get('/app')->assertOk();
 
         app(DeviceService::class)->revoke($device, $admin);
-        $this->actingAs($rep)->withCookie('jawla_device_id', $deviceUuid)->get('/app')
+        $this->actingAs($rep)->withCookie('jawla_device_id', encrypt($deviceUuid))->get('/app')
             ->assertRedirect(route('app.device'));
     }
 

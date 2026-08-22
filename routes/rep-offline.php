@@ -14,6 +14,7 @@ Route::get('offline-snapshot', OfflineSnapshotController::class)
     ->name('offline-snapshot');
 
 Route::post('push-subscriptions', [PushSubscriptionController::class, 'store'])
+    ->middleware('throttle:push-subscriptions')
     ->name('push-subscriptions.store');
 
 Route::delete('push-subscriptions', [PushSubscriptionController::class, 'destroy'])

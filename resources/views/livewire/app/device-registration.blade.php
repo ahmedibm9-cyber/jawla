@@ -1,17 +1,19 @@
 <div class="main-content"
      x-data="{
         initialize() {
+            const serverUuid = '{{ $deviceUuid }}';
             let id = localStorage.getItem('jawla_device_id');
-            if (!id) {
-                id = crypto.randomUUID();
-                localStorage.setItem('jawla_device_id', id);
+            if (!id || id !== serverUuid) {
+                localStorage.setItem('jawla_device_id', serverUuid);
+                id = serverUuid;
             }
-            $wire.set('deviceUuid', id);
-            $wire.set('platform', navigator.userAgentData?.platform || navigator.platform || 'Web');
-            $wire.set('name', `${navigator.userAgentData?.platform || navigator.platform || 'Web'} device`);
-            $wire.set('fingerprint', `${navigator.userAgent}|${navigator.language}|${screen.width}x${screen.height}`);
-            document.cookie = `jawla_device_id=${id}; Path=/; SameSite=Lax${location.protocol === 'https:' ? '; Secure' : ''}`;
-            $wire.loadStatus();
+            const ua = navigator.userAgentData?.platform || navigator.platform || 'Web';
+            $wire.set({
+                deviceUuid: id,
+                platform: ua,
+                name: ua + ' device',
+                fingerprint: navigator.userAgent + '|' + navigator.language + '|' + screen.width + 'x' + screen.height,
+            }).then(() => $wire.loadStatus());
         }
      }"
      x-init="initialize()"

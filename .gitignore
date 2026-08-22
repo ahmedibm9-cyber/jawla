@@ -3,6 +3,7 @@
 .env
 .env.backup
 .env.production
+.env.staging
 .phpactor.json
 .phpunit.result.cache
 /.codex
@@ -46,8 +47,18 @@ Thumbs.db
 /tasks/
 
 tmp_*.txt
+*_verify.cmd
+*_verify.exit
+*_verify.log
 tests/JavaScript/performance-results.json
 tests/stress/*-results.json
+
+# Local one-off diagnostics can contain environment credentials.
+/check_*.php
+/fix_*.php
+/list_users.php
+/test_db.php
+/verify_user.php
 
 # Agent tool directories (local only, never commit)
 /.codex/

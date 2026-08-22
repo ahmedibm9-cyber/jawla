@@ -17,6 +17,11 @@ class OrganizationUnitResource extends Resource
 {
     protected static ?string $model = OrganizationUnit::class;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:organization_unit') ?? false;
+    }
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-building-office-2';
 
     public static function getNavigationGroup(): ?string

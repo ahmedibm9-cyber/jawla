@@ -23,6 +23,11 @@ class SalesTargetResource extends Resource
         return SalesTarget::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:sales_target') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-flag';

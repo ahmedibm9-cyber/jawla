@@ -63,8 +63,11 @@ class ReleasePipelineTest extends TestCase
         $this->assertStringContainsString("env('APP_ENV') === 'production' ? 's3' : 'public'", $filesystems);
         $this->assertStringContainsString('FROM node:22-alpine@sha256:', $dockerfile);
         $this->assertStringContainsString('npm ci', $dockerfile);
+        $this->assertStringContainsString('COPY --from=php-dependencies /app/vendor /app/vendor', $dockerfile);
         $this->assertStringContainsString('.env*', $dockerignore);
         $this->assertStringContainsString('storage/*', $dockerignore);
+        $this->assertStringContainsString('check_*.php', $dockerignore);
+        $this->assertStringContainsString('fix_*.php', $dockerignore);
     }
 
     public function test_rollback_and_restore_require_explicit_evidence_bearing_inputs(): void

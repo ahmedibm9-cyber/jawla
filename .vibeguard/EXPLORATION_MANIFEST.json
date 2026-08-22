@@ -1,0 +1,182 @@
+{
+  "project_id": "jawla",
+  "project_name": "Jawla - Field Sales CRM/ERP",
+  "exploration_date": "2026-08-17",
+  "exploration_version": "1.0",
+
+  "verified_stack": {
+    "php": "8.3",
+    "framework": "Laravel 13",
+    "frontend": "Livewire 3 + Tailwind CSS 4",
+    "admin": "Filament 4",
+    "database": "PostgreSQL",
+    " ORM": "Eloquent (Spatie Permission for RBAC)",
+    "package_manager": "Composer / npm",
+    "build_tool": "Vite",
+    "test_framework": "Pest (PHP) + Playwright (JS)"
+  },
+
+  "verified_commands": {
+    "php_artisan_tinker": "verified",
+    "php_artisan_migrate_force": "verified",
+    "php_artisan_db_seed_demoseeder": "verified (with JAWLA_MODE=demo)",
+    "vendor_bin_pint_test": "verified",
+    "vendor_bin_phpstan_level_0": "verified",
+    "npm_audit_high": "verified (0 vulns after nanoid patch)",
+    "npm_run_build": "verified",
+    "railway_status": "verified",
+    "railway_variables": "verified",
+    "curl_health_endpoint": "verified (returns ok)"
+  },
+
+  "key_flows": {
+    "login_flow": {
+      "status": "BLOCKED",
+      "steps": [
+        "GET /login → Filament Login page",
+        "POST credentials → Livewire authenticate()",
+        "Livewire /livewire/update POST → 500 ERROR ❌",
+        "Cannot proceed past login"
+      ],
+      "root_cause": "Environment/config mismatch preventing Livewire session/serialize",
+      "resolution": "Set ALL env vars (APP_KEY, DB_*, CACHE_STORE, SESSION_DRIVER, JAWLA_MODE, APP_URL) and redeploy"
+    },
+    "health_check": {
+      "status": "VERIFIED",
+      "endpoint": "GET /health",
+      "response": "{\"status\":\"ok\",\"db\":\"ok\",\"cache\":\"ok\"}"
+    },
+    "stock_flow": {
+      "status": "CONCEPTUAL",
+      "description": "sellFromVan() → DB::transaction() → StockService → reduces van stock → writes stock_movements",
+      "constraints": [
+        "never allow negative stock",
+        "always write stock_movements row",
+        "use StockService only"
+      ]
+    }
+  },
+
+  "data_stores": {
+    "primary": "PostgreSQL (Railway)",
+    "tables_verified": [
+      "users",
+      "companies",
+      "stock_movements",
+      "products",
+      "customers"
+    ],
+    "connections": {
+      "local": "host=127.0.0.1 port=5432 dbname=jawla user=postgres password=postgres",
+      "railway": "host=postgres.railway.internal port=5432 dbname=railway user=postgres password=kqBLFViLuuGeLNMJGezIkpzDVmEjkThF"
+    }
+  },
+
+  "external_interfaces": {
+    "api_endpoints": [
+      "/health",
+      "/livewire/update",
+      "/app/*",
+      "/admin/*",
+      "/offline",
+      "/locale/{locale}"
+    ],
+    "webhook_endpoints": [],
+    "third_party_sdks": [
+      "leaflet (map library)",
+      "sentry (error tracking)",
+      "simple-qrcode (QR generation)",
+      "filament (admin panel)",
+      "livewire (PWA components)"
+    ]
+  },
+
+  "risks": {
+    "livewire_500_error": {
+      "severity": "critical",
+      "likelihood": "high",
+      "blast_radius": "all login attempts fail",
+      "confidence": 85,
+      "description": "POST /livewire/update returns 500 during login; prevents rep access"
+    },
+    "deployment_failure": {
+      "severity": "high",
+      "likelihood": "medium",
+      "blast_radius": "cannot redeploy fixed code",
+      "confidence": 75,
+      "description": "Railway deploy fails on phpredis rate-limit + missing env vars"
+    },
+    "empty_prod_db": {
+      "severity": "medium",
+      "likelihood": "high",
+      "blast_radius": "no demo data to test with",
+      "confidence": 70,
+      "description": "Production DB was empty; DemoSeeder ran but login still blocked"
+    }
+  },
+
+  "contradictions": {
+    "cache_store_config": {
+      "description": ".env has CACHE_STORE=file but deploy logs showed cache table being queried",
+      "resolution": "config:clear in preDeployCommand should resolve; stale container may still be running"
+    },
+    "health_vs_livewire": {
+      "description": "Health endpoint returns ok but Livewire /livewire/update returns 500",
+      "resolution": "Different endpoints; health is simple GET, Livewire involves session + serialization"
+    }
+  },
+
+  "unknowns": {
+    "exact_production_env": {
+      "question": "What exact set of environment variables causes the Railway production deployment to succeed?",
+      "checked": "Set APP_KEY, DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD, CACHE_STORE=file, SESSION_DRIVER=database, JAWLA_MODE=production, APP_URL=https://jawla-production.up.railway.app",
+      "blocking": "yes"
+    },
+    "livewire_500_root_cause": {
+      "question": "What exact PHP error does the /livewire/update endpoint produce?",
+      "checked": "APP_DEBUG was temporarily set true but deployment failed before error could be captured",
+      "blocking": "yes"
+    },
+    "demo_data_completeness": {
+      "question": "Does the demo seeder produce a fully functional test dataset (products, customers, routes, invoices all seeded)?",
+      "checked": "12 users seeded with password 12345678, but login still blocked at 500",
+      "blocking": "partially"
+    }
+  },
+
+  "confidence_table": {
+    "livewire_500_root_cause": 75,
+    "deployment_pipeline_failure": 80,
+    "empty_production_db": 65,
+    "backup_strategy_need": 40,
+    "phpstan_level_1_migration": 60,
+    "railway_token_ci": 45
+  },
+
+  "recommended_next_actions": [
+    "1. Set ALL environment variables on Railway (APP_KEY, DB_*, CACHE_STORE, SESSION_DRIVER, JAWLA_MODE, APP_URL)",
+    "2. Redeploy the application",
+    "3. Test login with superadmin@jawla.test / 12345678",
+    "4. If Livewire 500 persists, set APP_DEBUG=true temporarily to capture the PHP error",
+    "5. Choose and implement backup strategy (Railway PITR recommended)",
+    "6. Decide on license type (FIX-009)",
+    "7. Run FIX-005 (PHPStan level 1) after live issue is resolved"
+  ],
+
+  "evidence_index": {
+    "composer_json": "C:\\\\projects\\\\jawla\\\\composer.json",
+    "package_json": "C:\\\\projects\\\\jawla\\\\package.json",
+    "phpunit_xml": "C:\\\\projects\\\\jawla\\\\phpunit.xml",
+    "railway_toml": "C:\\\\projects\\\\jawla\\\\railway.toml",
+    "env_file": "C:\\\\projects\\\\jawla\\\\.env",
+    "security_headers": "C:\\\\projects\\\\jawla\\\\app\\\\Http\\\\Middleware\\\\SecurityHeaders.php",
+    "login_php": "C:\\\\projects\\\\jawla\\\\app\\\\Filament\\\\Auth\\\\Pages\\\\Login.php",
+    "user_model": "C:\\\\projects\\\\jawla\\\\app\\\\Models\\\\User.php",
+    "company_model": "C:\\\\projects\\\\jawla\\\\app\\\\Models\\\\Company.php",
+    "demo_seeder": "C:\\\\projects\\\\jawla\\\\database\\\\seeders\\\\DemoSeeder.php",
+    "ci_workflow": "C:\\\\projects\\\\jawla\\\\.github\\\\workflows\\\\ci.yml",
+    "deploy_logs": "Railway deployment logs (multiple attempts observed)",
+    "health_check": "GET https://jawla-production.up.railway.app/health → {\"status\":\"ok\",\"db\":\"ok\",\"cache\":\"ok\"}",
+    "livewire_500": "POST https://jawla-production.up.railway.app/livewire/update → 500"
+  }
+}

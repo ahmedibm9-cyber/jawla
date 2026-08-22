@@ -21,7 +21,7 @@ class EtaDocumentBuilder
         $company = $invoice->company;
         $customer = $invoice->customer;
 
-        $lines = $invoice->items->map(function ($item) use ($invoice): array {
+        $lines = $invoice->items->map(function ($item) use ($invoice, $company): array {
             $net = (float) $item->line_total;
             $vatRate = (float) ($invoice->company->vat_percent ?? 0);
             $vatAmount = round($net * $vatRate / 100, 2);

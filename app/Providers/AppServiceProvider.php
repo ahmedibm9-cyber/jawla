@@ -141,6 +141,11 @@ class AppServiceProvider extends ServiceProvider
             return Limit::perMinute(30)->by($key);
         });
 
+        // Push subscription updates — moderate limit (10/min per user)
+        RateLimiter::for('push-subscriptions', function (Request $request) {
+            return Limit::perMinute(10)->by('user:'.$request->user()->id);
+        });
+
         // Sync batch — tighter due to 100 ops per call (20/min per user)
         RateLimiter::for('sync', function (Request $request) {
             return Limit::perMinute(20)->by('user:'.$request->user()->id);

@@ -111,6 +111,7 @@ class Home extends Component
                 ->latest()
                 ->take(10)
                 ->get(),
+            'hasActiveSession' => (bool) session('work_session_id'),
         ]);
     }
 }

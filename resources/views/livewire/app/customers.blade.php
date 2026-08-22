@@ -25,6 +25,9 @@
                 <x-slot:action>
                     <a href="/app/customers/create" class="btn btn-primary no-underline">{{ __('app.add_customer') }}</a>
                 </x-slot:action>
+                <x-slot:action secondary>
+                    <a href="/app/routes" class="btn btn-ghost no-underline text-text-secondary">{{ __('app.set_up_route') }}</a>
+                </x-slot:action>
             </x-ds.empty>
         @else
             @foreach($customers as $customer)

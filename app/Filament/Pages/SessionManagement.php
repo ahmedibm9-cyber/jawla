@@ -22,6 +22,11 @@ class SessionManagement extends Page
 
     protected string $view = 'filament.pages.session-management';
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('admin_preferences.view') ?? false;
+    }
+
     public function getSessions(): array
     {
         return app(SessionService::class)

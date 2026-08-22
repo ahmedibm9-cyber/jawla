@@ -19,7 +19,17 @@ class ProformaService implements ProformaContract
 
     public function createFromQuotation(PriceQuotation $quotation, array $data): ProformaInvoice
     {
+        if ($quotation->valid_until && $quotation->valid_until->isPast()) {
+            throw new \DomainException(
+                app()->getLocale() === 'ar'
+                    ? 'انتهت صلاحية عرض السعر'
+                    : 'This quotation has expired'
+            );
+        }
+
         return DB::transaction(function () use ($quotation, $data): ProformaInvoice {
+            // ponytail: proformas intentionally skip stock checks — they are pre-sale
+            // documents, not actual sales. Stock is checked at invoice creation time.
             $request = PriceQuotationRequest::with(['company', 'customer', 'product'])->findOrFail($quotation->price_quotation_request_id);
             $company = $request->company;
             $product = $request->product;

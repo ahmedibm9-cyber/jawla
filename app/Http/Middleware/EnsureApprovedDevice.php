@@ -26,11 +26,24 @@ class EnsureApprovedDevice
             return $next($request);
         }
 
-        $deviceUuid = (string) $request->cookie('jawla_device_id');
+        $rawDeviceUuid = (string) $request->cookie('jawla_device_id');
+
+        if ($rawDeviceUuid === '') {
+            return redirect()->route('app.device');
+        }
+
+        try {
+            $deviceUuid = decrypt($rawDeviceUuid);
+        } catch (\Throwable) {
+            // ponytail: backward-compat — unencrypted cookie from before the fix
+            $deviceUuid = $rawDeviceUuid;
+        }
+
         $approved = $deviceUuid !== '' && Device::query()
             ->where('user_id', $user->getKey())
             ->where('device_uuid', $deviceUuid)
             ->where('status', DeviceStatus::Approved->value)
+            ->where('last_seen_at', '>=', now()->subDays(90))
             ->exists();
 
         if (! $approved) {

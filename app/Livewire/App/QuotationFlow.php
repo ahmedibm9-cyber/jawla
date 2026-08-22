@@ -101,6 +101,14 @@ class QuotationFlow extends Component
             return;
         }
 
+        if ($this->quotation->valid_until && $this->quotation->valid_until->isPast()) {
+            $this->errorMessage = app()->getLocale() === 'ar'
+                ? 'انتهت صلاحية عرض السعر'
+                : 'This quotation has expired';
+
+            return;
+        }
+
         if ($this->negotiatedPrice < $this->floor || $this->negotiatedPrice > $this->ceiling) {
             $this->errorMessage = __('errors.price.out_of_range', [
                 'price' => $this->negotiatedPrice,

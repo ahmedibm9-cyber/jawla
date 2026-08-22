@@ -4,7 +4,7 @@
     <a href="/app/profile" class="profile-hero" aria-label="{{ __('app.profile') }}">
         <div class="profile-hero-content">
             <div class="profile-hero-avatar">
-                {{ strtoupper(substr($user->name, 0, 1)) }}
+                {{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}
             </div>
             <div class="profile-hero-info">
                 <p class="profile-hero-name">{{ $user->name }}</p>
@@ -59,12 +59,6 @@
                     <x-heroicon-o-clipboard-document-check />
                 </div>
                 <span class="more-tile-label">{{ __('app.create_invoice') }}</span>
-            </a>
-            <a href="/app/collect-payment" class="more-tile">
-                <div class="more-tile-icon more-icon-emerald">
-                    <x-heroicon-o-banknotes />
-                </div>
-                <span class="more-tile-label">{{ __('app.collect_payment') }}</span>
             </a>
             <a href="/app/stock" class="more-tile">
                 <div class="more-tile-icon more-icon-green">

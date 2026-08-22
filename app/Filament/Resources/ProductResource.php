@@ -21,6 +21,11 @@ class ProductResource extends Resource
         return Product::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:product') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-cube';

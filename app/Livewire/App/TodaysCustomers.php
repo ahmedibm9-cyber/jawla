@@ -25,12 +25,15 @@ class TodaysCustomers extends Component
     {
         $customers = Customer::query()
             ->where('company_id', auth()->user()->activeCompanyId())
-            ->when($this->search, fn ($q) => $q->where(function ($q) {
-                $q->where('name_ar', 'ilike', "%{$this->search}%")
-                    ->orWhere('name_en', 'ilike', "%{$this->search}%")
-                    ->orWhere('phone', 'ilike', "%{$this->search}%")
-                    ->orWhere('code', 'ilike', "%{$this->search}%");
-            }))
+            ->when($this->search, function ($q) {
+                $escaped = addcslashes(trim($this->search), '%_');
+                $q->where(function ($q) use ($escaped) {
+                    $q->where('name_ar', 'ilike', "%{$escaped}%")
+                        ->orWhere('name_en', 'ilike', "%{$escaped}%")
+                        ->orWhere('phone', 'ilike', "%{$escaped}%")
+                        ->orWhere('code', 'ilike', "%{$escaped}%");
+                });
+            })
             ->where('is_active', true)
             ->withCount(['invoices', 'visits'])
             ->orderBy('name_ar')

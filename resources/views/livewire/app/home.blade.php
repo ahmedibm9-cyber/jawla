@@ -80,11 +80,13 @@
         @endif
 
         {{-- Start Work --}}
+        @if(!$hasActiveSession)
         <div class="home-section">
             <button class="btn btn-primary btn-lg w-full" wire:click="startWork">
                 {{ __('app.start_day') }}
             </button>
         </div>
+        @endif
 
         {{-- Quick Actions --}}
         <div class="home-section">

@@ -23,6 +23,11 @@ class StockResource extends Resource
         return Stock::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:stock') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-cube';

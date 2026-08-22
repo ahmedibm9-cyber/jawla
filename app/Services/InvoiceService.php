@@ -90,6 +90,10 @@ class InvoiceService implements InvoiceContract
 
             $lineInputs = [];
             foreach ($items as $index => $item) {
+                if (bccomp(number_format((float) $item['quantity'], 3, '.', ''), '0.000', 3) <= 0) {
+                    throw new DomainException('Invoice line quantities must be positive.');
+                }
+
                 $prod = $products->get($item['product_id']);
                 $effectivePrice = $this->pricing->effectivePrice(
                     $company->id,

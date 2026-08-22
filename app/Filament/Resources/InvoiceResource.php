@@ -21,6 +21,11 @@ class InvoiceResource extends Resource
         return Invoice::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:invoice') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-document-text';

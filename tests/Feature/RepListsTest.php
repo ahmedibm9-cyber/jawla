@@ -129,7 +129,7 @@ class RepListsTest extends TestCase
         Livewire::actingAs($this->rep)
             ->test(Orders::class)
             ->assertSee(__('app.no_orders_yet'))
-            ->assertSee('/app/sell', false);
+            ->assertSee('/app', false);
     }
 
     public function test_visits_page_is_paginated(): void

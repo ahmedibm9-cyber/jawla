@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class SystemPageController extends Controller
 {
@@ -40,6 +42,7 @@ class SystemPageController extends Controller
     {
         $dbOk = true;
         $cacheOk = true;
+        $storageOk = true;
 
         try {
             DB::select('SELECT 1');
@@ -54,13 +57,22 @@ class SystemPageController extends Controller
             $cacheOk = false;
         }
 
-        $status = ($dbOk && $cacheOk) ? 'ok' : 'degraded';
+        try {
+            $testPath = '_health_'.Str::random(8);
+            Storage::disk(config('filesystems.default'))->put($testPath, 'ok');
+            Storage::disk(config('filesystems.default'))->delete($testPath);
+        } catch (\Throwable) {
+            $storageOk = false;
+        }
+
+        $ok = $dbOk && $cacheOk && $storageOk;
 
         return response()->json([
-            'status' => $status,
+            'status' => $ok ? 'ok' : 'degraded',
             'db' => $dbOk ? 'ok' : 'failed',
             'cache' => $cacheOk ? 'ok' : 'failed',
-        ], $dbOk && $cacheOk ? 200 : 503)
+            'storage' => $storageOk ? 'ok' : 'failed',
+        ], $ok ? 200 : 503)
             ->header('Cache-Control', 'no-store, private');
     }
 
@@ -92,6 +104,7 @@ class SystemPageController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return redirect()->route('login')
+            ->header('Clear-Site-Data', '"cache", "storage"');
     }
 }

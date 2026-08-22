@@ -47,6 +47,7 @@ class Invoice extends Model
         'snapshot_customer' => 'array',
         'snapshot_items' => 'array',
         'snapshot_totals' => 'array',
+        'cryptographic_stamp' => 'encrypted',
     ];
 
     protected static function boot(): void

@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Auth;
  * in the last 30 minutes as Leaflet pins. The page polls every 30s and pushes
  * fresh points to the map via a browser event, so managers see reps move in
  * near-real-time. Read-only; company-scoped through BelongsToCompany.
+ *
+ * @property array $points
  */
 class RepLiveMap extends Page
 {

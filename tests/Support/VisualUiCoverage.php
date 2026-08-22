@@ -19,13 +19,17 @@ use App\Filament\Pages\SupplierComparison;
 use App\Filament\Resources\AlarmResource;
 use App\Filament\Resources\BatchResource;
 use App\Filament\Resources\CashReconciliationResource;
+use App\Filament\Resources\CollectionSubmissionResource;
 use App\Filament\Resources\CompanyResource;
 use App\Filament\Resources\ComplaintResource;
 use App\Filament\Resources\CustomerResource;
 use App\Filament\Resources\DailyVisitAssignmentResource;
+use App\Filament\Resources\DeviceResource;
 use App\Filament\Resources\ExpenseResource;
 use App\Filament\Resources\GoodsInTransitResource;
+use App\Filament\Resources\InstallationLicenseResource;
 use App\Filament\Resources\InvoiceResource;
+use App\Filament\Resources\OrganizationUnitResource;
 use App\Filament\Resources\PaymentResource;
 use App\Filament\Resources\PriceQuotationRequestResource;
 use App\Filament\Resources\ProductPriceResource;
@@ -34,12 +38,16 @@ use App\Filament\Resources\ProformaInvoiceResource;
 use App\Filament\Resources\PurchaseOrderResource;
 use App\Filament\Resources\PurchaseRequestResource;
 use App\Filament\Resources\ReturnRecordResource;
+use App\Filament\Resources\ReturnRequestResource;
 use App\Filament\Resources\RouteResource;
+use App\Filament\Resources\SalesOrderResource;
 use App\Filament\Resources\SalesTargetResource;
 use App\Filament\Resources\StockResource;
 use App\Filament\Resources\TaskResource;
 use App\Filament\Resources\UserResource;
 use App\Filament\Resources\VanTransferResource;
+use App\Filament\Resources\WebhookDeliveryResource;
+use App\Filament\Resources\WebhookEndpointResource;
 use App\Filament\Widgets\LowStockAlertWidget;
 use App\Filament\Widgets\OpenAlarmsWidget;
 use App\Filament\Widgets\OutstandingBalanceWidget;
@@ -98,6 +106,7 @@ final class VisualUiCoverage
             'app.customers',
             'app.visits',
             'app.orders',
+            'app.orders.create',
             'app.notifications',
             'app.quotations',
             'app.stock',
@@ -115,6 +124,8 @@ final class VisualUiCoverage
             'app.expenses',
             'app.reconcile',
             'app.transfers',
+            'app.tasks',
+            'app.device',
             'app.purchase-offer',
             'app.pdf.proforma',
             'app.pdf.invoice',
@@ -133,13 +144,17 @@ final class VisualUiCoverage
             AlarmResource::class,
             BatchResource::class,
             CashReconciliationResource::class,
+            CollectionSubmissionResource::class,
             CompanyResource::class,
             ComplaintResource::class,
             CustomerResource::class,
             DailyVisitAssignmentResource::class,
+            DeviceResource::class,
             ExpenseResource::class,
             GoodsInTransitResource::class,
+            InstallationLicenseResource::class,
             InvoiceResource::class,
+            OrganizationUnitResource::class,
             PaymentResource::class,
             PriceQuotationRequestResource::class,
             ProductPriceResource::class,
@@ -148,12 +163,16 @@ final class VisualUiCoverage
             PurchaseOrderResource::class,
             PurchaseRequestResource::class,
             ReturnRecordResource::class,
+            ReturnRequestResource::class,
             RouteResource::class,
+            SalesOrderResource::class,
             SalesTargetResource::class,
             StockResource::class,
             TaskResource::class,
             UserResource::class,
             VanTransferResource::class,
+            WebhookDeliveryResource::class,
+            WebhookEndpointResource::class,
         ];
     }
 

@@ -20,6 +20,11 @@ class CollectionSubmissionResource extends Resource
 {
     protected static ?string $model = CollectionSubmission::class;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:collection_submission') ?? false;
+    }
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-banknotes';
 
     public static function getNavigationGroup(): ?string

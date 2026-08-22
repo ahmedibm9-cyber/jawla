@@ -15,7 +15,7 @@
             onclose="document.body.style.overflow='';"
             oncancel="document.body.style.overflow='';"
             onclick="if(event.target===this){this.close();document.body.style.overflow='';}"
-            style="padding:0;border:none;background:transparent;max-width:none;width:auto;overflow:visible">
+            style="padding:0;border:none;max-width:none;width:auto;overflow:visible">
         <div class="card" style="max-width:360px;width:calc(100vw - 32px);margin:0 auto">
             <h3 class="m-0 mb-2">{{ $title }}</h3>
             <p class="m-0 mb-4 text-text-secondary">{{ $message }}</p>

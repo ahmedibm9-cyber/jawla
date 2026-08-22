@@ -16,6 +16,11 @@ class WebhookDeliveryResource extends Resource
 {
     protected static ?string $model = WebhookDelivery::class;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:webhook_delivery') ?? false;
+    }
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-list-bullet';
 
     public static function getNavigationGroup(): ?string

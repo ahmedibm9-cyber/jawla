@@ -24,6 +24,11 @@ class CustomerResource extends Resource
         return Customer::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:customer') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-user-group';

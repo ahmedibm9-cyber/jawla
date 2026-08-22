@@ -26,6 +26,19 @@ class CollectionSubmissionService
     {
         $this->licenses->assertRuntimeFeature('field_sales');
 
+        $companyId = $rep->activeCompanyId();
+        $invoiceId = $attributes['invoice_id'] ?? null;
+        $existing = CollectionSubmission::query()
+            ->where('company_id', $companyId)
+            ->where('customer_id', $customerId)
+            ->where('user_id', $rep->id)
+            ->where('invoice_id', $invoiceId)
+            ->where('status', 'pending_review')
+            ->exists();
+        if ($existing) {
+            throw new \DomainException('A pending submission already exists for this customer/invoice.');
+        }
+
         return DB::transaction(function () use ($rep, $customerId, $amount, $method, $attributes): CollectionSubmission {
             throw_unless($rep->can('payments.collect'), new AuthorizationException('You cannot capture collections.'));
             throw_unless(in_array($method, ['cash', 'cheque', 'transfer', 'other'], true), new \DomainException('Invalid collection method.'));

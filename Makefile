@@ -20,7 +20,7 @@ lint:
 	vendor/bin/pint --test
 
 typecheck:
-	PAO_DISABLE=1 vendor/bin/phpstan analyse --level=0 --memory-limit=2G
+	PAO_DISABLE=1 vendor/bin/phpstan analyse --level=3 --memory-limit=2G
 
 # The strict audit is intentionally visible while the legacy level-6 debt is
 # remediated. It is not part of `verify` until that backlog is zero.

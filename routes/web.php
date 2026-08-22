@@ -46,7 +46,6 @@ Route::get('/offline', [SystemPageController::class, 'offline']);
 
 Route::get('/health', [SystemPageController::class, 'health']);
 
-
 Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
     ->middleware('throttle:10,1')
     ->name('locale.switch');
@@ -63,7 +62,7 @@ Route::post('/api/onboarding/complete', [OnboardingController::class, 'complete'
 
 // Handle GET /admin/logout — Filament registers POST only
 Route::get('/admin/logout', [SystemPageController::class, 'adminLogout'])
-    ->middleware('throttle:10,1');
+    ->middleware(['auth', 'throttle:10,1']);
 
 Route::middleware(['auth'])->group(function (): void {
     Route::get('/admin/license-recovery', [LicenseRecoveryController::class, 'create'])->name('license.recovery');

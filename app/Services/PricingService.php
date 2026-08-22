@@ -42,6 +42,8 @@ class PricingService implements PricingServiceContract
         }
 
         $discount = $rep->company?->rep_discount_percent ?? 10;
+        // ponytail: ceiling hard-coded; make configurable if admin needs > 25%
+        $discount = min((float) $discount, 25.0);
         $minus = $base->percent((string) $discount);
 
         return new PriceRange($base, Money::zero(), $minus);
@@ -86,7 +88,17 @@ class PricingService implements PricingServiceContract
             ->orderByDesc('valid_from')
             ->value('price');
 
-        return number_format((float) ($price ?? $product->price), 2, '.', '');
+        $resolved = (float) ($price ?? $product->price);
+
+        // Enforce per-product max_discount if set
+        if ($product->max_discount !== null && $product->max_discount > 0) {
+            $maxPrice = (float) $product->price * (1 - (float) $product->max_discount / 100);
+            if ($resolved < $maxPrice) {
+                $resolved = $maxPrice;
+            }
+        }
+
+        return number_format($resolved, 2, '.', '');
     }
 
     public function createCustomerOverride(

@@ -16,5 +16,7 @@ class CompanyBankAccount extends Model
         'iban', 'swift', 'currency', 'is_default',
     ];
 
+    protected $hidden = ['account_number', 'iban', 'swift'];
+
     protected $casts = ['is_default' => 'boolean'];
 }

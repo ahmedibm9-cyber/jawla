@@ -27,6 +27,11 @@ class TaskResource extends Resource
         return Task::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:task') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-check-circle';

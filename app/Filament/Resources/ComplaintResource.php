@@ -20,6 +20,11 @@ class ComplaintResource extends Resource
         return Complaint::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:complaint') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-chat-bubble-left-ellipsis';

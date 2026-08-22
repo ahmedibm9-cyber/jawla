@@ -35,10 +35,20 @@ class LocationPingService
         $recent = LocationPing::query()
             ->where('user_id', $rep->id)
             ->where('recorded_at', '>=', Carbon::now()->subSeconds(self::DEDUPE_SECONDS))
-            ->exists();
+            ->first();
 
-        if ($recent) {
-            return null;
+        if ($recent !== null) {
+            // Reject impossible travel speed (> 500 km/h between pings)
+            $elapsed = Carbon::now()->diffInSeconds($recent->recorded_at);
+            $distanceKm = $this->haversineKm(
+                (float) $recent->latitude, (float) $recent->longitude,
+                $latitude, $longitude,
+            );
+            $speedKmh = $elapsed > 0 ? ($distanceKm / $elapsed) * 3600 : INF;
+
+            if ($speedKmh > 500) {
+                return null;
+            }
         }
 
         return LocationPing::create([
@@ -78,5 +88,14 @@ class LocationPingService
             ])
             ->values()
             ->all();
+    }
+
+    private function haversineKm(float $lat1, float $lng1, float $lat2, float $lng2): float
+    {
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLng = deg2rad($lng2 - $lng1);
+        $a = sin($dLat / 2) ** 2 + cos(deg2rad($lat1)) * cos(deg2rad($lat2)) * sin($dLng / 2) ** 2;
+
+        return 6371 * 2 * atan2(sqrt($a), sqrt(1 - $a));
     }
 }

@@ -24,9 +24,6 @@ class SecurityHeaders
         // Referrer — send origin only on cross-origin, full on same-origin
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-        // XSS Protection — legacy browsers (still blocks some attacks)
-        $response->headers->set('X-XSS-Protection', '1; mode=block');
-
         // Permissions Policy — disable unused browser features
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(self), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=()');
 
@@ -43,11 +40,12 @@ class SecurityHeaders
         // Sentry DSN: set SENTRY_DSN env var to enable error tracking; CSP connect-src already allows ingest endpoint
         $csp = implode('; ', [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://unpkg.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
             "img-src 'self' data: blob: https://*.tile.openstreetmap.org",
             "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com https://fonts.bunny.net",
-            "connect-src 'self' wss: ws: https://o4511398253625344.ingest.us.sentry.io",
+            "connect-src 'self' wss: https://o4511398253625344.ingest.us.sentry.io",
+            'upgrade-insecure-requests',
             "frame-ancestors 'none'",
             "base-uri 'self'",
             "form-action 'self'",

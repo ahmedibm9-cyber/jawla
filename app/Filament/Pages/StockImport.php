@@ -7,6 +7,7 @@ use App\Models\Warehouse;
 use App\Models\WarehouseImportLog;
 use App\Services\StockImportService;
 use Filament\Forms;
+use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
@@ -14,6 +15,9 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * @property Form $form
+ */
 class StockImport extends Page
 {
     protected string $view = 'filament.pages.stock-import';

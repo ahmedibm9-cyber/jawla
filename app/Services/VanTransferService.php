@@ -22,6 +22,8 @@ class VanTransferService implements VanTransferServiceContract
 
     public function create(int $companyId, int $fromUserId, int $toUserId, array $items, ?int $inTransitWarehouseId = null): VanTransfer
     {
+        abort_if($fromUserId === $toUserId, 422, 'Cannot transfer stock to yourself.');
+
         app(ActiveCompanyContext::class)->assertMatches($companyId);
 
         return DB::transaction(function () use ($companyId, $fromUserId, $toUserId, $items, $inTransitWarehouseId): VanTransfer {
@@ -183,10 +185,36 @@ class VanTransferService implements VanTransferServiceContract
     public function reject(int $transferId, int $userId): VanTransfer
     {
         return DB::transaction(function () use ($transferId, $userId): VanTransfer {
-            $transfer = VanTransfer::whereKey($transferId)->lockForUpdate()->firstOrFail();
+            $transfer = VanTransfer::with('items')->whereKey($transferId)->lockForUpdate()->firstOrFail();
 
-            throw_if(! in_array($transfer->status, [VanTransferStatus::Pending, VanTransferStatus::Accepted]), new \RuntimeException('Only pending or accepted transfers can be rejected.'));
+            throw_if(! in_array($transfer->status, [VanTransferStatus::Pending, VanTransferStatus::Accepted, VanTransferStatus::Shipped]), new \RuntimeException('Only pending, accepted, or shipped transfers can be rejected.'));
             throw_if($transfer->to_user_id !== $userId, new DomainException('Only the destination representative can reject this transfer.'));
+
+            if ($transfer->status === VanTransferStatus::Shipped) {
+                $inTransitId = $transfer->in_transit_warehouse_id;
+                throw_if(! $inTransitId, new \RuntimeException('In-transit warehouse is required.'));
+
+                $fromWarehouse = Warehouse::where('user_id', $transfer->from_user_id)
+                    ->where('company_id', $transfer->company_id)
+                    ->where('type', 'van')
+                    ->where('is_active', true)
+                    ->lockForUpdate()
+                    ->first();
+
+                throw_if(! $fromWarehouse, new \RuntimeException('Source van warehouse not found for user.'));
+
+                foreach ($transfer->items as $item) {
+                    $this->stock->transfer(
+                        $inTransitId,
+                        $fromWarehouse->id,
+                        $item->product_id,
+                        $item->batch_id,
+                        (float) $item->quantity,
+                        $transfer,
+                        $userId,
+                    );
+                }
+            }
 
             $transfer->update(['status' => VanTransferStatus::Rejected]);
 

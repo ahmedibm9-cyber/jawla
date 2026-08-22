@@ -22,6 +22,11 @@ class ReturnRequestResource extends Resource
 {
     protected static ?string $model = ReturnRequest::class;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:return_request') ?? false;
+    }
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-arrow-uturn-left';
 
     public static function getNavigationGroup(): ?string

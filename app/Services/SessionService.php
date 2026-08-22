@@ -11,8 +11,10 @@ class SessionService
      */
     public function listActiveSessions(int $currentSessionId): array
     {
+        $companyId = auth()->user()->activeCompanyId();
         $sessions = DB::table('sessions')
             ->join('users', 'sessions.user_id', '=', 'users.id')
+            ->where('users.company_id', $companyId)
             ->select('sessions.*', 'users.name as user_name', 'users.email as user_email')
             ->orderByDesc('sessions.last_activity')
             ->limit(100)
@@ -39,8 +41,12 @@ class SessionService
 
     public function revokeAllExceptCurrent(string $currentSessionId): int
     {
+        $companyId = auth()->user()->activeCompanyId();
+
         return (int) DB::table('sessions')
-            ->where('id', '!=', $currentSessionId)
+            ->join('users', 'sessions.user_id', '=', 'users.id')
+            ->where('users.company_id', $companyId)
+            ->where('sessions.id', '!=', $currentSessionId)
             ->delete();
     }
 

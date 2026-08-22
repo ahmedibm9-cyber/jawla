@@ -23,6 +23,11 @@ class BatchResource extends Resource
         return Batch::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:batch') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-beaker';

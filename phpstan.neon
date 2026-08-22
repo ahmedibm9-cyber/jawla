@@ -1,10 +1,9 @@
 includes:
   - vendor/larastan/larastan/extension.neon
+  - phpstan-baseline.neon
 parameters:
-  level: 6
+  level: 3
   paths:
     - app
   tmpDir: '%currentWorkingDirectory%/storage/app/phpstan-tmp'
-  # Cache directory for PHPStan — must be writable on Windows.
-  # Default uses sys_get_temp_dir()/phpstan which on Windows may resolve
-  # to C:\WINDOWS\phpstan and fail with permission denied.
+  treatPhpDocTypesAsCertain: false

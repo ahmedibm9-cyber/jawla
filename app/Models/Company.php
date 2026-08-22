@@ -33,6 +33,7 @@ class Company extends Model
         'require_approved_devices' => 'boolean',
         'zatca_enabled' => 'boolean',
         'eta_enabled' => 'boolean',
+        'zatca_secret' => 'encrypted',
     ];
 
     public function users(): HasMany

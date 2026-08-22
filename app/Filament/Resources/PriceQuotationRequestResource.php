@@ -22,6 +22,11 @@ class PriceQuotationRequestResource extends Resource
         return PriceQuotationRequest::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:price_quotation_request') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-currency-dollar';

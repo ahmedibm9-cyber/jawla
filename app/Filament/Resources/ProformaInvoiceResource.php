@@ -20,6 +20,11 @@ class ProformaInvoiceResource extends Resource
         return ProformaInvoice::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:proforma_invoice') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-document-duplicate';

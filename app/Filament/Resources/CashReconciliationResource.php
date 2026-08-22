@@ -22,6 +22,11 @@ class CashReconciliationResource extends Resource
         return CashReconciliation::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:cash_reconciliation') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-banknotes';

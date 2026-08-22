@@ -121,6 +121,7 @@ class PdfService
         ];
 
         $methodName = $methodMap[$payment->method] ?? $payment->method;
+        $receiptNumber = $payment->payment_number ?? (string) $payment->id;
         $demoBanner = $this->demoWatermark();
 
         return <<<HTML
@@ -144,7 +145,7 @@ h1{color:#6DB83B;margin:0}
   </div>
   <div style=\"text-align:right\">
     <strong>{$title}</strong><br>
-    {$receiptLabel}: {$payment->id}<br>
+    {$receiptLabel}: {$receiptNumber}<br>
     {$dateLabel}: {$payment->collected_at?->format('Y-m-d H:i')}
   </div>
 </div>
@@ -167,6 +168,11 @@ HTML;
         $company = $doc->company;
         $customer = $doc->customer;
         $items = $doc->items;
+
+        throw_if(
+            $items->count() > 500,
+            new \DomainException('Invoice exceeds 500 items limit for PDF generation')
+        );
         $lang = app()->getLocale();
 
         $title = $type === 'proforma'

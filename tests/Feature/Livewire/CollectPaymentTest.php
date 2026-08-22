@@ -4,9 +4,11 @@ namespace Tests\Feature\Livewire;
 
 use App\Enums\InvoiceStatus;
 use App\Livewire\App\CollectPayment;
+use App\Models\CollectionSubmission;
 use App\Models\Company;
 use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\Photo;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -41,20 +43,35 @@ class CollectPaymentTest extends TestCase
             ->assertSuccessful();
     }
 
-    public function test_submit_creates_payment(): void
+    public function test_submit_creates_pending_collection_with_evidence(): void
     {
         $company = Company::factory()->create();
         $rep = $this->rep($company);
+        User::factory()->create(['company_id' => $company->id])->assignRole('sales_manager');
+        User::factory()->create(['company_id' => $company->id])->assignRole('accounts');
         $customer = Customer::factory()->create(['company_id' => $company->id, 'status' => 'approved']);
+        $photo = Photo::factory()->create([
+            'company_id' => $company->id,
+            'user_id' => $rep->id,
+            'photable_type' => null,
+            'photable_id' => null,
+        ]);
         $this->actingAs($rep);
 
         Livewire::test(CollectPayment::class)
             ->set('customer_id', $customer->id)
             ->set('amount', 250.0)
             ->set('method', 'cash')
+            ->set('photoIds', [$photo->id])
             ->call('submit')
             ->assertSet('success', true)
-            ->assertSet('lastPaymentId', fn ($id) => $id > 0);
+            ->assertSet('lastPaymentId', null);
+
+        $submission = CollectionSubmission::query()->firstOrFail();
+        $this->assertSame('pending_review', $submission->status);
+        $this->assertDatabaseCount('payments', 0);
+        $this->assertSame($submission->getMorphClass(), $photo->fresh()->photable_type);
+        $this->assertSame($submission->id, $photo->fresh()->photable_id);
     }
 
     public function test_submit_validates_required_fields(): void

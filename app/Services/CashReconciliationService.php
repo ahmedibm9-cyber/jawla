@@ -35,8 +35,8 @@ class CashReconciliationService
             if ($cashBox !== null && $cashBox->company_id !== null && $cashBox->company_id !== $companyId) {
                 throw new DomainException('errors.resource.cash_box');
             }
-            $expected = $cashBox ? (float) $cashBox->balance : 0.0;
-            $variance = round($countedAmount - $expected, 2);
+            $expected = $cashBox ? $cashBox->balance : '0.00';
+            $variance = bcsub(number_format($countedAmount, 2, '.', ''), $expected, 2);
 
             $reconciliation = CashReconciliation::create([
                 'company_id' => $companyId,

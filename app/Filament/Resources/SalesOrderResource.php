@@ -20,6 +20,11 @@ class SalesOrderResource extends Resource
 {
     protected static ?string $model = SalesOrder::class;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:sales_order') ?? false;
+    }
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-shopping-cart';
 
     public static function getNavigationGroup(): ?string

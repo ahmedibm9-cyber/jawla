@@ -6,13 +6,13 @@ use App\Models\Company;
 use App\Models\User;
 use Carbon\Carbon;
 use Database\Seeders\RoleSeeder;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class SanctumTokenExpirationTest extends TestCase
 {
-    use DatabaseTransactions;
+    use RefreshDatabase;
 
     protected User $user;
 
@@ -49,15 +49,16 @@ class SanctumTokenExpirationTest extends TestCase
 
     public function test_token_has_expires_at_set(): void
     {
-        $token = $this->user->createToken('test-token');
+        $expiration = config('sanctum.expiration');
+        $token = $this->user->createToken('test-token', ['*'], Carbon::now()->addMinutes($expiration));
         $this->assertNotNull($token->accessToken->expires_at);
     }
 
     public function test_token_expires_after_configured_time(): void
     {
-        $token = $this->user->createToken('test-token');
-        $expiresAt = $token->accessToken->expires_at;
         $expectedExpiration = config('sanctum.expiration');
+        $token = $this->user->createToken('test-token', ['*'], Carbon::now()->addMinutes($expectedExpiration));
+        $expiresAt = $token->accessToken->expires_at;
 
         $this->assertNotNull($expiresAt);
         $this->assertTrue($expiresAt->isFuture());
@@ -69,13 +70,9 @@ class SanctumTokenExpirationTest extends TestCase
 
     public function test_expired_token_is_rejected(): void
     {
-        // Create a token
-        $token = $this->user->createToken('test-token');
-
-        // Manually expire the token
-        $token->accessToken->update([
-            'expires_at' => Carbon::now()->subHour(),
-        ]);
+        // Create a token that's already expired
+        $expiration = config('sanctum.expiration');
+        $token = $this->user->createToken('test-token', ['*'], Carbon::now()->subHour());
 
         // Try to use the expired token
         $response = $this->withHeaders([
@@ -88,8 +85,9 @@ class SanctumTokenExpirationTest extends TestCase
 
     public function test_valid_token_is_accepted(): void
     {
-        // Create a token (will have future expires_at)
-        $token = $this->user->createToken('test-token');
+        // Create a token with future expiration
+        $expiration = config('sanctum.expiration');
+        $token = $this->user->createToken('test-token', ['*'], Carbon::now()->addMinutes($expiration));
 
         // Try to use the valid token
         $response = $this->withHeaders([

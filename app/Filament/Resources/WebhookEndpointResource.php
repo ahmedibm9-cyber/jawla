@@ -22,6 +22,11 @@ class WebhookEndpointResource extends Resource
 {
     protected static ?string $model = WebhookEndpoint::class;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:webhook_endpoint') ?? false;
+    }
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-signal';
 
     public static function getNavigationGroup(): ?string

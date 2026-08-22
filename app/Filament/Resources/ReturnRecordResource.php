@@ -18,6 +18,11 @@ class ReturnRecordResource extends Resource
         return ReturnRecord::class;
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:return_record') ?? false;
+    }
+
     public static function getNavigationIcon(): string
     {
         return 'heroicon-o-arrow-uturn-left';

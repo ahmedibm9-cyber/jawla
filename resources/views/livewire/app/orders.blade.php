@@ -37,18 +37,29 @@
         @if($documents->isEmpty())
             @if($type === 'sales_orders')
                 <x-ds.empty icon="heroicon-o-shopping-cart" :message="__('app.no_sales_orders')">
-                    <x-slot:action><a href="/app/orders/create" class="btn btn-primary no-underline">{{ __('app.create_sales_order') }}</a></x-slot:action>
+                    <x-slot:action>
+                        <a href="/app/orders/create" class="btn btn-primary no-underline">{{ __('app.create_sales_order') }}</a>
+                    </x-slot:action>
+                    <x-slot:action secondary>
+                        <a href="/app" class="btn btn-ghost no-underline text-text-secondary">{{ __('app.back_to_dashboard') }}</a>
+                    </x-slot:action>
                 </x-ds.empty>
             @elseif($type === 'offers')
                 <x-ds.empty icon="heroicon-o-shopping-cart" :message="__('app.no_offers_yet')">
                     <x-slot:action>
                         <a href="/app/purchase-offer" class="btn btn-primary no-underline">{{ __('app.submit_purchase_offer') }}</a>
                     </x-slot:action>
+                    <x-slot:action secondary>
+                        <a href="/app" class="btn btn-ghost no-underline text-text-secondary">{{ __('app.back_to_dashboard') }}</a>
+                    </x-slot:action>
                 </x-ds.empty>
             @else
                 <x-ds.empty icon="heroicon-o-document-text" :message="__('app.no_orders_yet')">
                     <x-slot:action>
                         <a href="/app/sell" class="btn btn-primary no-underline">{{ __('app.create_invoice') }}</a>
+                    </x-slot:action>
+                    <x-slot:action secondary>
+                        <a href="/app" class="btn btn-ghost no-underline text-text-secondary">{{ __('app.back_to_dashboard') }}</a>
                     </x-slot:action>
                 </x-ds.empty>
             @endif

@@ -16,6 +16,11 @@ class InstallationLicenseResource extends Resource
 {
     protected static ?string $model = InstallationLicense::class;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:installation_license') ?? false;
+    }
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-key';
 
     public static function getNavigationGroup(): ?string

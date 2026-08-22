@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/browser";
+import { onCLS, onINP, onLCP } from "web-vitals";
 import "./maps/popup-content.js";
 import "./offline/status-indicator.js";
 import "./offline/sync.js";
@@ -32,6 +33,20 @@ if (sentryDsn) {
     replaysOnErrorSampleRate: 0.5,
     integrations: [Sentry.browserTracingIntegration()],
   });
+  // Core Web Vitals → Sentry
+  const sendMetric = (metric) => {
+    Sentry.captureMessage(
+      `${metric.name}:${Math.round(metric.value)}`,
+      metric.rating === "good"
+        ? "info"
+        : metric.rating === "needs-improvement"
+          ? "warning"
+          : "error"
+    );
+  };
+  onCLS(sendMetric);
+  onINP(sendMetric);
+  onLCP(sendMetric);
 }
 
 // Offline data cache — auto-refresh in background, expose for Livewire pages

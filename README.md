@@ -98,4 +98,4 @@ GitHub Actions pipeline: CI (lint, tests, security, build) → staging → ZAP D
 
 ## Licence
 
-Proprietary — Fulla Chemical Trading Co. All rights reserved.
+MIT — see [LICENSE](LICENSE).

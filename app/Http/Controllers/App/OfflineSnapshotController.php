@@ -31,17 +31,20 @@ class OfflineSnapshotController
                 ->where('is_active', true)
                 ->where('status', 'approved')
                 ->select(['id', 'name_ar', 'name_en', 'phone', 'code', 'address', 'latitude', 'longitude', 'balance', 'price_list_id', 'route_id'])
+                ->limit(2000)
                 ->get(),
 
             'products' => Product::where('company_id', $companyId)
                 ->where('is_active', true)
                 ->select(['id', 'sku', 'barcode', 'name_ar', 'name_en', 'unit', 'price', 'vat_applicable', 'category_id'])
+                ->limit(3000)
                 ->get(),
 
             'stock' => $vanWarehouse
                 ? Stock::where('warehouse_id', $vanWarehouse->id)
                     ->where('quantity', '>', 0)
                     ->select(['id', 'product_id', 'quantity', 'batch_id'])
+                    ->limit(5000)
                     ->get()
                 : [],
 
@@ -55,6 +58,7 @@ class OfflineSnapshotController
             'pricing' => ProductPrice::where('is_active', true)
                 ->whereIn('price_list_id', fn ($q) => $q->select('id')->from('price_lists')->where('company_id', $companyId))
                 ->select(['id', 'product_id', 'price_list_id', 'price', 'uom', 'min_quantity', 'customer_id'])
+                ->limit(5000)
                 ->get(),
 
             'company' => [
@@ -71,6 +75,7 @@ class OfflineSnapshotController
                 ->where('assigned_to', $user->id)
                 ->where('status', 'open')
                 ->select(['id', 'title', 'note', 'due_date', 'customer_id'])
+                ->limit(200)
                 ->get(),
 
             'cashbox' => $user->cashBox

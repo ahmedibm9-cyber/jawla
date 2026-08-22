@@ -4,7 +4,6 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\CompanyResource\Pages;
 use App\Models\Company;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
@@ -18,6 +17,11 @@ class CompanyResource extends Resource
     public static function getModel(): string
     {
         return Company::class;
+    }
+
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->hasRole(['admin', 'super_admin']) ?? false;
     }
 
     public static function getNavigationIcon(): string
@@ -174,9 +178,7 @@ class CompanyResource extends Resource
             ->actions([
                 EditAction::make(),
             ])
-            ->bulkActions([
-                DeleteBulkAction::make(),
-            ]);
+            ->bulkActions([]);
     }
 
     public static function getRelations(): array

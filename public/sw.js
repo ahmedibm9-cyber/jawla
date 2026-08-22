@@ -72,6 +72,22 @@ self.addEventListener("sync", (event) => {
   }
 });
 
+// Periodic Background Sync — refresh offline snapshot data periodically
+// when the app is installed and the browser supports it.
+self.addEventListener("periodicsync", (event) => {
+  if (event.tag === "jawla-periodic-sync") {
+    event.waitUntil(
+      self.clients.matchAll({ type: "window" }).then((clients) => {
+        for (const client of clients) {
+          if (client.url.includes("/app")) {
+            client.postMessage({ type: "PERIODIC_SYNC" });
+          }
+        }
+      })
+    );
+  }
+});
+
 // Push Notifications
 self.addEventListener("push", (event) => {
   if (!event.data) return;

@@ -10,7 +10,7 @@ class HttpPushGateway implements PushGateway
 {
     public function deliver(PushSubscription $subscription, array $payload): bool
     {
-        $request = Http::acceptJson()->asJson()->timeout(10);
+        $request = Http::acceptJson()->asJson()->timeout(10)->retry(3, 1000);
         $token = (string) config('jawla.push.gateway_token');
         if ($token !== '') {
             $request = $request->withToken($token);

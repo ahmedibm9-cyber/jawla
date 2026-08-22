@@ -136,7 +136,7 @@ class DemoSeeder extends Seeder
 
             // ─── Users ─────────────────────────────────────────────────────
             $demoCredentials = [];
-            $demoPassword = '123456789';
+            $demoPassword = Str::password();
             $createDemoUser = function (array $attributes, array $roles) use ($company, &$demoCredentials, $demoPassword): User {
                 $password = $attributes['password'] ?? $demoPassword;
                 $email = strtolower((string) $attributes['email']);
@@ -183,9 +183,6 @@ class DemoSeeder extends Seeder
                 json_encode($demoCredentials, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR)
             );
             @chmod(Storage::disk('private')->path('demo-credentials.json'), 0600);
-
-            // ponytail: log credentials for staging seed — remove after first run
-            \Log::info('=== DEMO CREDENTIALS ===', $demoCredentials);
 
             // ─── Warehouses ────────────────────────────────────────────────
             $mainWarehouse = Warehouse::factory()->create([
@@ -785,15 +782,14 @@ class DemoSeeder extends Seeder
                     'collected_at' => $inv->issued_at->copy()->addDays(rand(0, 15)),
                     'posting_date' => $inv->issued_at,
                 ]);
-                $inv->update([
-                    'paid_amount' => $inv->paid_amount + $amount,
-                    'remaining_amount' => $inv->remaining_amount - $amount,
+                $newPaid = $inv->paid_amount + $amount;
+                $newRemaining = $inv->remaining_amount - $amount;
+                $newStatus = $newRemaining <= 0 ? 'paid' : ($newPaid > 0 ? 'partially_paid' : $inv->status);
+                DB::table('invoices')->where('id', $inv->id)->update([
+                    'paid_amount' => $newPaid,
+                    'remaining_amount' => $newRemaining,
+                    'status' => $newStatus,
                 ]);
-                if ($inv->remaining_amount <= 0) {
-                    $inv->update(['status' => 'paid']);
-                } elseif ($inv->paid_amount > 0 && $inv->status !== 'paid') {
-                    $inv->update(['status' => 'partially_paid']);
-                }
             }
 
             // ─── Returns ──────────────────────────────────────────

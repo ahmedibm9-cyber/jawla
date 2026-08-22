@@ -58,6 +58,22 @@ if ("serviceWorker" in navigator) {
           window.location.reload()
         );
         window.addEventListener("jawla-sync-status", () => promptForUpdate());
+
+        // Register periodic background sync if supported
+        if ("periodicSync" in registration) {
+          navigator.permissions
+            .query({ name: "periodic-background-sync" })
+            .then((status) => {
+              if (status.state === "granted") {
+                registration.periodicSync
+                  .register("jawla-periodic-sync", {
+                    minInterval: 30 * 60 * 1000, // 30 minutes
+                  })
+                  .catch(() => {});
+              }
+            })
+            .catch(() => {});
+        }
       })
       .catch(() => {
         /* ignore in dev */

@@ -14,6 +14,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class UserResource extends Resource
 {
@@ -42,6 +43,11 @@ class UserResource extends Resource
         return app()->getLocale() === 'ar' ? 'المستخدمين' : 'Users';
     }
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:user') ?? false;
+    }
+
     public static function form(Schema $schema): Schema
     {
 
@@ -54,7 +60,8 @@ class UserResource extends Resource
                 Forms\Components\TextInput::make('password')->label(l('كلمة المرور', 'Password'))->password()
                     ->required(fn ($livewire) => $livewire instanceof CreateRecord)
                     ->dehydrated(fn ($state) => filled($state))
-                    ->dehydrateStateUsing(fn ($state) => Hash::make($state)),
+                    ->dehydrateStateUsing(fn ($state) => Hash::make($state))
+                    ->rule(Password::min(8)->letters()->mixedCase()->numbers()->symbols()),
                 Forms\Components\Select::make('company_id')->label(l('الشركة', 'Company'))->relationship('company', 'name_ar')->preload()->required(),
                 Forms\Components\Select::make('primary_organization_unit_id')->label(l('الوحدة التنظيمية الأساسية', 'Primary organization unit'))
                     ->relationship('primaryOrganizationUnit', 'name_ar')->searchable()->preload(),

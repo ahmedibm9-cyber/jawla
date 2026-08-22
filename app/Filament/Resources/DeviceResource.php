@@ -17,6 +17,11 @@ class DeviceResource extends Resource
 {
     protected static ?string $model = Device::class;
 
+    public static function canAccess(): bool
+    {
+        return auth()->user()?->can('view_any:device') ?? false;
+    }
+
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-device-phone-mobile';
 
     public static function getNavigationGroup(): ?string

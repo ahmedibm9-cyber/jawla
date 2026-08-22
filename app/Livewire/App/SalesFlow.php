@@ -4,6 +4,7 @@ namespace App\Livewire\App;
 
 use App\Models\Customer;
 use App\Models\Product;
+use App\Models\Visit;
 use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\InvoiceService;
 use App\Services\Contracts\LineItemInput;
@@ -55,6 +56,14 @@ class SalesFlow extends Component
         $this->selectedCustomer = Customer::find($id);
         $this->customerSearch = '';
         $this->errorMessage = '';
+        $this->recalcCart();
+    }
+
+    public function clearCustomer(): void
+    {
+        $this->customerId = 0;
+        $this->selectedCustomer = null;
+        $this->customerSearch = '';
         $this->recalcCart();
     }
 
@@ -236,6 +245,19 @@ class SalesFlow extends Component
             return;
         }
 
+        // Floor price validation: selling price must not be below cost
+        foreach ($this->cart as $item) {
+            $product = Product::find($item['product_id']);
+            if ($product && (float) $item['price'] < (float) $product->cost) {
+                $name = app()->getLocale() === 'ar' ? $product->name_ar : $product->name_en;
+                $this->errorMessage = app()->getLocale() === 'ar'
+                    ? "سعر البيع للمنتج \"{$name}\" أقل من التكلفة"
+                    : "Selling price for \"{$name}\" is below cost";
+
+                return;
+            }
+        }
+
         $customer = Customer::find($this->customerId);
         if (! $customer) {
             $this->errorMessage = app()->getLocale() === 'ar' ? 'العميل غير موجود' : 'Customer not found';
@@ -300,12 +322,13 @@ class SalesFlow extends Component
     {
         $customers = collect();
         if (strlen($this->customerSearch) >= 2 && $this->customerId <= 0) {
+            $escapedCustomer = addcslashes(trim($this->customerSearch), '%_');
             $customers = Customer::query()
                 ->where('company_id', auth()->user()->activeCompanyId())
-                ->where(function ($q) {
-                    $q->where('name_ar', 'ilike', "%{$this->customerSearch}%")
-                        ->orWhere('name_en', 'ilike', "%{$this->customerSearch}%")
-                        ->orWhere('phone', 'ilike', "%{$this->customerSearch}%");
+                ->where(function ($q) use ($escapedCustomer) {
+                    $q->where('name_ar', 'ilike', "%{$escapedCustomer}%")
+                        ->orWhere('name_en', 'ilike', "%{$escapedCustomer}%")
+                        ->orWhere('phone', 'ilike', "%{$escapedCustomer}%");
                 })
                 ->where('is_active', true)
                 ->where('status', 'approved')
@@ -315,22 +338,32 @@ class SalesFlow extends Component
 
         $products = collect();
         if (strlen($this->productSearch) >= 2) {
+            $escapedProduct = addcslashes(trim($this->productSearch), '%_');
             $products = Product::query()
                 ->where('company_id', auth()->user()->activeCompanyId())
-                ->where(function ($q) {
-                    $q->where('sku', 'ilike', "%{$this->productSearch}%")
-                        ->orWhere('name_ar', 'ilike', "%{$this->productSearch}%")
-                        ->orWhere('name_en', 'ilike', "%{$this->productSearch}%");
+                ->where(function ($q) use ($escapedProduct) {
+                    $q->where('sku', 'ilike', "%{$escapedProduct}%")
+                        ->orWhere('name_ar', 'ilike', "%{$escapedProduct}%")
+                        ->orWhere('name_en', 'ilike', "%{$escapedProduct}%");
                 })
                 ->where('is_active', true)
                 ->limit(10)
                 ->get();
         }
 
+        $lastVisitAt = null;
+        if ($this->customerId > 0) {
+            $lastVisitAt = Visit::where('user_id', auth()->id())
+                ->where('customer_id', $this->customerId)
+                ->latest()
+                ->value('created_at');
+        }
+
         return view('livewire.app.sales-flow', [
             'customers' => $customers,
             'products' => $products,
             'selectedCustomer' => $this->selectedCustomer,
+            'lastVisitAt' => $lastVisitAt,
         ]);
     }
 }

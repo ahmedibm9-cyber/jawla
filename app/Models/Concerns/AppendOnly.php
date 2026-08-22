@@ -11,5 +11,9 @@ trait AppendOnly
         static::deleting(function (): never {
             throw new DomainException('Ledger records are append-only and cannot be deleted.');
         });
+
+        static::updating(function ($model): never {
+            throw new DomainException('Ledger records are append-only and cannot be updated.');
+        });
     }
 }
