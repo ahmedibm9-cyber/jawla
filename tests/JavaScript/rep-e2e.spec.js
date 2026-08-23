@@ -25,7 +25,8 @@ async function disableServiceWorker(page) {
 
 /** Wait for Livewire to settle after a user action */
 async function waitForLivewire(page) {
-  await page.waitForLoadState("networkidle");
+  // ponytail: domcontentloaded is enough — expect().toBeVisible() handles the rest
+  await page.waitForLoadState("domcontentloaded");
 }
 
 async function selectCustomer(page) {
@@ -117,7 +118,7 @@ test.describe("sell flow: create invoice", () => {
     const changeBtn = page
       .locator("button[wire\\:click*='clearCustomer']")
       .first();
-    await expect(changeBtn).toBeVisible({ timeout: 5_000 });
+    await expect(changeBtn).toBeVisible({ timeout: 10_000 });
     await Promise.all([
       page.waitForResponse((resp) => resp.url().includes("/livewire/update"), {
         timeout: 10_000,

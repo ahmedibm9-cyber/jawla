@@ -31,6 +31,9 @@ class SecurityHeaders
         $response->headers->set('Cross-Origin-Opener-Policy', 'same-origin');
         $response->headers->set('Cross-Origin-Resource-Policy', 'same-origin');
 
+        // DNS prefetch — speed up external resource loading (fonts, tiles)
+        $response->headers->set('X-DNS-Prefetch-Control', 'on');
+
         // CSP — nonce-based migration blocked by Livewire/Alpine requiring unsafe-inline/unsafe-eval.
         // When Livewire adds nonce support (v4 roadmap), switch to nonce-based CSP:
         //   1. Generate per-request nonce: $nonce = base64_encode(random_bytes(16))

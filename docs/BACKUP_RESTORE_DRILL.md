@@ -9,7 +9,16 @@
 - `TARGET_DATABASE_URL` set to a disposable scratch database
 - `ALLOW_SCRATCH_RESTORE=1`
 
-## Drill Steps
+## Quick verification (automated)
+
+```bash
+./scripts/verify-backup.sh
+```
+
+This script downloads the latest backup, decrypts it, restores to a throwaway
+database, and runs a smoke query. Takes ~2 minutes. Run monthly.
+
+## Full drill steps
 
 ### 1. Run backup
 
@@ -64,6 +73,12 @@ After restore, verify:
 | RTO (max downtime)   |       |
 | Drilled by           |       |
 | Date drilled         |       |
+
+## Schedule
+
+- **Automated verification**: Monthly via `verify-backup.sh`
+- **Full restore drill**: Quarterly or before major releases
+- **First drill**: Within 1 week of going live
 
 ## Sign-off
 

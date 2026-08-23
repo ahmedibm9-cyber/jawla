@@ -19,7 +19,6 @@ async function loginAsRep(page) {
 /** Helper: navigate and wait for Livewire to settle */
 async function gotoLivewire(page, path) {
   await page.goto(path, { waitUntil: "domcontentloaded" });
-  await page.waitForLoadState("networkidle");
 }
 
 test.describe("rep login", () => {
@@ -305,7 +304,9 @@ test.describe("rep logout", () => {
     await gotoLivewire(page, "/app/more");
 
     await page.getByRole("button", { name: /تسجيل الخروج/i }).click();
-    await page.waitForURL("**/login", { timeout: 15_000 });
+    // Form POST may cause ERR_ABORTED — catch and wait for domcontentloaded
+    await page.waitForURL("**/login", { timeout: 15_000 }).catch(() => {});
+    await page.waitForLoadState("domcontentloaded");
 
     await expect(page).toHaveURL(/\/login/);
     await expect(

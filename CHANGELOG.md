@@ -1,49 +1,51 @@
 # Changelog
 
-All notable changes to Jawla will be documented in this file.
+All notable changes to Jawla are documented here.
 
-Format based on [Keep a Changelog](https://keepachangelog.com/).
+Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
 ### Added
 
-- AGENTS.md with comprehensive agent instructions
-- Makefile for stable command interface
-- scripts/verify for single-command validation
-- Feature spec template in specs/templates/
-- Runbooks for deploy failure, database restore, high error rate, credential rotation
-- Troubleshooting guide for common issues
-- Threat model and secrets policy in docs/SECURITY.md
-- Deploy workflow with staging/production environments
-- Security issue template
-- database/README.md with migration rules
-- Dashboard widget drag-drop reorder with persisted user preference
-- Company scoping for Visit model with migration
+- Core Web Vitals monitoring via Sentry (`web-vitals@4`)
+- Periodic background sync in service worker
+- A11y tests: color contrast (EN+AR), 200%/400% zoom
+- Offline PWA end-to-end tests
+- Lighthouse CI integration
+- Health check now verifies storage write+delete
+- Push notification retry (3 attempts, 1s backoff)
+- Password policy: `->symbols()` requirement
+- PHPStan level 3 with baseline
+- CI: composer caching, concurrency groups, `npm audit --omit=dev`
+
+### Changed
+
+- CSP: removed `unpkg.com` from `style-src`, restricted WebSocket to `wss:` only
+- CSP: added `upgrade-insecure-requests`
+- Removed deprecated `X-XSS-Protection` header
+- Moved `laravel/tinker` from `require` to `require-dev`
+- PHPStan level 0 → 3
 
 ### Fixed
 
-- Dark mode: replaced `prefers-color-scheme` media query with `.dark` class selector
-- Permission checks added to Customer, Product, GoodsInTransit, and Task policies
-- RolePolicy: removed deprecated `HandlesAuthorization` trait, fixed type hints
-- 56 inline translation ternaries replaced with `l()` helper across 11 Blade views
-- `wire:key` added to 7 `@foreach` loops to prevent DOM diffing issues
-- Badge styling in van-transfers now uses design-system classes
-- `log-return` alert replaced with `<x-ds.toast>` for consistency
-- Deleted dead `autocomplete` Blade component
-- CI pipeline: added `.env` setup before PHPStan analysis
+- README license contradiction (was "Proprietary", LICENSE file is MIT)
 
-## [0.1.0] - 2026-07-27
+### Removed
+
+- Dead files: `welcome.blade.php`, `onboarding-translations.blade.php`, `LeafletMapPicker.php`, `DataMigration.php`, `test-sort.js`
+- Empty `docker/Dockerfile`
+- `.env` artifact from CI (security bug)
+
+## [1.0.0] - 2026-08-01
 
 ### Added
 
-- Initial release with AM1→AM9 demo flow
-- Admin panel (Filament 4) and Rep PWA (Livewire 3)
-- Stock management with atomic operations
-- Invoice flow with VAT and ZATCA QR encoding
-- Role-based access control (5 roles)
-- Bilingual Arabic/English with RTL support
-- CI pipeline with Pest tests, Pint linting, PHPStan
-- Security scanning with Gitleaks and OWASP ZAP
-- Railway deployment with PostgreSQL and Redis
-- Encrypted off-host backup with restore drill
+- Initial production release
+- Laravel 13 / PHP 8.3 / Filament 4 / Livewire 3 / Tailwind 3
+- PostgreSQL 16 with 24 migrations
+- 11 roles × 300 permissions (spatie/laravel-permission)
+- 941 test methods (Unit + Feature + Browser + JavaScript)
+- PWA: service worker, offline snapshot, background sync, push notifications
+- Deployment: Railway (Docker, php-fpm + nginx, 2 replicas) + Cloudflare
+- Monitoring: Sentry DSN, structured logging, health check endpoint

@@ -74,3 +74,35 @@ The offline sync system tracks conflicts via `sync_receipts` table. Monitor:
 - Sync conflict count
 - Database connection pool usage
 - Railway deployment status
+
+## Ownership & On-call
+
+### Primary on-call
+
+| Role             | Contact        | Responsibility                                     |
+| ---------------- | -------------- | -------------------------------------------------- |
+| Engineering Lead | @ibrahim-fulla | P1 incidents, rollback decisions, database issues  |
+| Operations Owner | (assign)       | Uptime monitoring, backup verification, deployment |
+
+### Escalation path
+
+1. **P1 (service down):** Engineering Lead → immediate rollback if no fix in 15 min
+2. **P2 (error spike):** Engineering Lead → investigate within 1 hour
+3. **P3 (performance):** Engineering Lead → investigate within 4 hours
+
+### Response SLAs
+
+| Severity          | Response | Resolution target |
+| ----------------- | -------- | ----------------- |
+| P1 — Service down | 15 min   | 1 hour            |
+| P2 — Error spike  | 1 hour   | 4 hours           |
+| P3 — Performance  | 4 hours  | 24 hours          |
+
+### On-call rotation
+
+For a solo-founder project, on-call is the founder. When the team grows:
+
+1. Set up a rotation in PagerDuty or GitHub Actions
+2. Each engineer gets 1 week on-call
+3. Escalation goes to the next person after 15 min
+4. Post-incident review within 24 hours for P1/P2

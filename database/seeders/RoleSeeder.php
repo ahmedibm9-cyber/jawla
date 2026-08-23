@@ -250,7 +250,7 @@ class RoleSeeder extends Seeder
                 // Custom (reps use PWA, not Filament panel)
                 'sessions.manage', 'visits.view_assigned', 'visits.execute',
                 'visits.custom', 'customers.add', 'customers.view_own',
-                'products.view', 'products.view_stock', 'pricing.request',
+                'products.view', 'products.view_stock', 'view:stock', 'pricing.request',
                 'pricing.negotiate', 'proformas.create', 'invoices.create',
                 'invoices.view_own', 'payments.collect', 'returns.create',
                 'expenses.log', 'purchase_requests.submit', 'alarms.flag_out_of_stock',
@@ -267,7 +267,7 @@ class RoleSeeder extends Seeder
                 // Minimal role for rep panel (PWA) access — mirrors sales_rep
                 'sessions.manage', 'visits.view_assigned', 'visits.execute',
                 'visits.custom', 'customers.add', 'customers.view_own',
-                'products.view', 'products.view_stock', 'pricing.request',
+                'products.view', 'products.view_stock', 'view:stock', 'pricing.request',
                 'pricing.negotiate', 'proformas.create', 'invoices.create',
                 'invoices.view_own', 'payments.collect', 'returns.create',
                 'expenses.log', 'purchase_requests.submit', 'alarms.flag_out_of_stock',

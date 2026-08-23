@@ -16,6 +16,7 @@ use App\Services\Contracts\PaymentService as PaymentServiceContract;
 use App\Support\ActiveCompanyContext;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PaymentService implements PaymentServiceContract
 {
@@ -150,6 +151,16 @@ class PaymentService implements PaymentServiceContract
                     ]);
                 }
 
+                Log::info('Payment collected.', [
+                    'company_id' => $companyId,
+                    'user_id' => $userId,
+                    'payment_id' => $payment->id,
+                    'customer_id' => $customerId,
+                    'amount' => $money,
+                    'method' => $method,
+                    'invoice_id' => $invoiceId,
+                ]);
+
                 return $payment;
             }, 3);
         } catch (UniqueConstraintViolationException $exception) {
@@ -241,6 +252,15 @@ class PaymentService implements PaymentServiceContract
                 'amount' => $payment->amount,
                 'result_type' => Payment::class,
                 'result_id' => $payment->id,
+            ]);
+
+            Log::warning('Payment reversed.', [
+                'company_id' => $payment->company_id,
+                'user_id' => $userId,
+                'payment_id' => $payment->id,
+                'customer_id' => $payment->customer_id,
+                'amount' => $payment->amount,
+                'reason' => trim($reason),
             ]);
 
             return $payment;

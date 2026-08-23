@@ -67,3 +67,4 @@ tests/stress/*-results.json
 /.Zcode/
 /.antigravity/
 /.VScode/
+test-results/

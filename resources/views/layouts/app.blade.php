@@ -12,6 +12,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+  <link rel="dns-prefetch" href="https://*.tile.openstreetmap.org">
   @php
     $pageKeyMap = [
         'home' => 'home', 'visits' => 'visits', 'visit' => 'visits',

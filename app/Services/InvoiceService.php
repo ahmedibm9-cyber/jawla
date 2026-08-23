@@ -23,6 +23,7 @@ use App\Services\Contracts\PricingService as PricingContract;
 use App\Services\Contracts\StockService as StockContract;
 use App\Support\ActiveCompanyContext;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class InvoiceService implements InvoiceContract
 {
@@ -188,6 +189,16 @@ class InvoiceService implements InvoiceContract
                     ->update(['status' => 'converted_to_invoice']);
             }
 
+            Log::info('Invoice created.', [
+                'company_id' => $company->id,
+                'user_id' => $sellerId,
+                'invoice_id' => $invoice->id,
+                'invoice_number' => $invNumber,
+                'customer_id' => $data['customer_id'],
+                'total' => $calculation->total,
+                'items_count' => count($items),
+            ]);
+
             return $invoice;
         });
     }
@@ -274,6 +285,15 @@ class InvoiceService implements InvoiceContract
                 'amount' => $locked->total,
                 'result_type' => Invoice::class,
                 'result_id' => $locked->id,
+            ]);
+
+            Log::warning('Invoice voided.', [
+                'company_id' => $locked->company_id,
+                'user_id' => $userId,
+                'invoice_id' => $locked->id,
+                'invoice_number' => $locked->invoice_number,
+                'total' => $locked->total,
+                'reason' => trim($reason),
             ]);
 
             return $invoice->fresh();

@@ -13,6 +13,22 @@
   "lang": "ar",
   "dir": "rtl",
   "categories": ["business", "productivity"],
+  "screenshots": [
+    {
+      "src": "/images/screenshot-1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Today's visits and customer list"
+    },
+    {
+      "src": "/images/screenshot-2.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Create invoice and sell from van stock"
+    }
+  ],
   "shortcuts": [
     {
       "name": "Sell",

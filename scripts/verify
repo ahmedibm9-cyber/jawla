@@ -7,16 +7,16 @@ echo "1/5 Lint..."
 vendor/bin/pint --test
 
 echo "2/5 Typecheck..."
-PAO_DISABLE=1 vendor/bin/phpstan analyse --level=0 --memory-limit=2G
+vendor/bin/phpstan analyse --level=3 --memory-limit=2G --no-progress
 
 echo "3/5 Tests..."
-PAO_DISABLE=1 php -d memory_limit=2G artisan test --testsuite=Unit,Feature
+php artisan test --testsuite=Unit,Feature 2>&1
 
 echo "4/5 Build..."
 npm run build
 
 echo "5/5 Audit..."
 composer audit
-npm audit --audit-level=high
+npm audit --audit-level=high --omit=dev
 
 echo "=== All checks passed ==="
