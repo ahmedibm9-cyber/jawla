@@ -50,8 +50,8 @@
                         <div class="visit-card-body">
                             <div class="visit-card-top">
                                 <strong class="visit-card-name">{{ $assignment->customer?->name_ar ?? '?' }}</strong>
-                                <span class="badge @if($assignment->status === 'completed') badge-success @elseif($assignment->status === 'missed') badge-danger @else badge-warning @endif">
-                                    {{ $assignment->status === 'completed' ? __('app.done') : ($assignment->status === 'missed' ? __('app.missed') : __('app.pending')) }}
+                                <span class="badge {{ $assignment->status === 'completed' ? 'badge-success' : 'badge-warning' }}">
+                                    {{ $assignment->status === 'completed' ? __('app.done') : __('app.pending') }}
                                 </span>
                             </div>
                             <p class="visit-card-address">{{ $assignment->customer?->address }}</p>

@@ -534,7 +534,7 @@ class DemoSeeder extends Seeder
                     'user_id' => $assignedRep->id,
                     'customer_id' => $customer->id,
                     'visit_date' => today(),
-                    'status' => 'pending',
+                    'status' => 'draft',
                     'sort_order' => $i + 1,
                     'assigned_by' => $manager->id,
                 ]);

@@ -32,7 +32,7 @@ class VisitsTodayWidget extends StatsOverviewWidget
 
             $pending = DailyVisitAssignment::where('company_id', $companyId)
                 ->whereDate('visit_date', today())
-                ->where('status', 'pending')
+                ->where('status', 'approved')
                 ->count();
 
             $labels = [

@@ -6,6 +6,7 @@ use App\Models\Visit;
 use App\Models\VisitReport;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 /**
  * Persists a visit report (summary + optional signature) and closes the visit.
@@ -24,9 +25,20 @@ class VisitReportService
             $signaturePath = null;
 
             if ($signatureDataUrl) {
-                $signaturePath = 'signatures/'.$visit->id.'_'.time().'.png';
                 $parts = explode(',', $signatureDataUrl, 2);
-                Storage::disk(config('filesystems.storage_disk'))->put($signaturePath, base64_decode($parts[1] ?? ''));
+                $meta = $parts[0] ?? '';
+                $raw = base64_decode($parts[1] ?? '', true);
+                throw_unless($raw !== false && $raw !== '', new \InvalidArgumentException('Invalid signature data.'));
+                throw_unless(strlen($raw) <= 5 * 1024 * 1024, new \InvalidArgumentException('Signature exceeds 5MB limit.'));
+
+                // Verify actual MIME type via magic bytes, not just the data URL prefix
+                $finfo = new \finfo(FILEINFO_MIME_TYPE);
+                $mimeType = $finfo->buffer($raw);
+                throw_unless(in_array($mimeType, ['image/png', 'image/jpeg']), new \InvalidArgumentException('Signature must be PNG or JPEG.'));
+
+                $ext = $mimeType === 'image/png' ? 'png' : 'jpg';
+                $signaturePath = 'signatures/'.$visit->id.'_'.Str::random(20).'.'.$ext;
+                Storage::disk(config('filesystems.storage_disk'))->put($signaturePath, $raw);
             }
 
             $report = VisitReport::create([
@@ -41,6 +53,7 @@ class VisitReportService
             ]);
 
             $visit->update(['status' => 'closed']);
+            $visit->dailyVisitAssignment?->update(['status' => 'completed']);
 
             return $report;
         });

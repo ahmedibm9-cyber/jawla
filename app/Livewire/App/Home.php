@@ -30,12 +30,14 @@ class Home extends Component
         $this->visitCount = DailyVisitAssignment::query()
             ->where('user_id', $user->id)
             ->whereDate('visit_date', today())
+            ->whereIn('status', ['approved', 'completed'])
             ->count();
     }
 
     public function goToVisit(int $assignmentId): void
     {
         $assignment = DailyVisitAssignment::where('user_id', auth()->id())->findOrFail($assignmentId);
+        throw_unless($assignment->status === 'approved', new \DomainException('Only approved assignments can be visited.'));
 
         $visit = DB::transaction(function () use ($assignment) {
             $existing = Visit::where('user_id', auth()->id())
@@ -73,8 +75,8 @@ class Home extends Component
                 'user_id' => auth()->id(),
                 'started_at' => now(),
                 // GPS populated by frontend via startLat/startLng before calling this
-                'start_latitude' => $this->startLat ?? 0,
-                'start_longitude' => $this->startLng ?? 0,
+                'start_latitude' => $this->startLat,
+                'start_longitude' => $this->startLng,
             ]);
             session(['work_session_id' => $session->id]);
         }
@@ -91,13 +93,14 @@ class Home extends Component
             'todayVisits' => DailyVisitAssignment::query()
                 ->where('user_id', $user->id)
                 ->whereDate('visit_date', today())
+                ->whereIn('status', ['approved', 'completed'])
                 ->with('customer')
                 ->orderBy('sort_order')
                 ->take(100)->get(),
             'pendingCount' => DailyVisitAssignment::query()
                 ->where('user_id', $user->id)
                 ->whereDate('visit_date', today())
-                ->where('status', 'pending')
+                ->where('status', 'approved')
                 ->count(),
             'completedCount' => DailyVisitAssignment::query()
                 ->where('user_id', $user->id)

@@ -74,7 +74,9 @@ class VisitReportServiceTest extends TestCase
         $rep = User::factory()->create(['company_id' => $company->id]);
         $visit = $this->createVisit($company, $rep);
 
-        $dataUrl = 'data:image/png;base64,'.base64_encode('fake-png-data');
+        // Minimal 1x1 white PNG (89 bytes) — real magic bytes for finfo_buffer
+        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwADhQGAWjR9awAAAABJRU5ErkJggg==');
+        $dataUrl = 'data:image/png;base64,'.base64_encode($png);
 
         $report = app(VisitReportService::class)->submit($visit, [
             'summary' => 'Signed visit',

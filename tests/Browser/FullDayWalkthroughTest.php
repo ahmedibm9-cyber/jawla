@@ -70,7 +70,7 @@ function makeRepWithAssignments(): User
         'assigned_by' => $rep->id,
         'visit_date' => today(),
         'sort_order' => 1,
-        'status' => 'pending',
+        'status' => 'approved',
     ]);
 
     return $rep;
