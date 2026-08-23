@@ -56,3 +56,7 @@ tests/stress/*-results.json
 /.Zcode/
 /.antigravity/
 /.VScode/
+.env.staging
+run_phpstan_verify.cmd
+run_test_verify.cmd
+test-results/
