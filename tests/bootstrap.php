@@ -59,6 +59,8 @@ if (! $exists->fetchColumn()) {
     }
 }
 
+$admin = null;
+
 $app = require __DIR__.'/../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 
@@ -69,9 +71,10 @@ $app->make(Kernel::class)->bootstrap();
 // and every service-level unit test trips the tenancy guard.
 $app['env'] = 'testing';
 
-// Ponytail: Removed `migrate` call — RefreshDatabase::migrate:fresh handles
-// schema lifecycle per test. The bootstrap `migrate` created stale sequences
-// that collide with RefreshDatabase's drop-all-then-recreate cycle.
+// Run migrate:fresh so DatabaseTransactions tests (which don't run their own
+// migrations) find a complete schema. RefreshDatabase tests re-run this
+// themselves — safe because each process has its own isolated database.
+\Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--force' => true]);
 
 // Purge every named connection so no stale PDO handles survive into tests.
 foreach ($app->make('db')->getConnections() as $name => $conn) {
@@ -79,7 +82,7 @@ foreach ($app->make('db')->getConnections() as $name => $conn) {
     $app->make('db')->purge($name);
 }
 $app->flush();
-unset($app, $admin);
+unset($app);
 
 // The bootstrap application installs Laravel's handlers. TestCase creates its
 // own application per test, so restore PHPUnit's handlers before discovery.

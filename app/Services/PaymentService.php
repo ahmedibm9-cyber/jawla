@@ -256,9 +256,9 @@ class PaymentService implements PaymentServiceContract
         $cashBox = CashBox::withoutGlobalScopes()->where('user_id', $userId)->lockForUpdate()->first();
         if (! $cashBox) {
             $cashBox = CashBox::create(['company_id' => $companyId, 'user_id' => $userId, 'balance' => 0]);
-        }
-        if ($cashBox->company_id === null) {
-            $cashBox->update(['company_id' => $companyId]);
+        } elseif ($cashBox->company_id === null) {
+            $cashBox->company_id = $companyId;
+            $cashBox->save();
         }
 
         return $cashBox->refresh();
