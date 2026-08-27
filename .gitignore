@@ -35,6 +35,10 @@ Thumbs.db
 .playwright-cli/
 .playwright-mcp/
 .agents/
+.firecrawl/
+.vibeguard/
+design-system/
+storage/framework/views/
 *.png
 !public/images/*.png
 !public/icons/*.png
