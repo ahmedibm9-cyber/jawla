@@ -180,6 +180,12 @@
                 </div>
                 <span class="more-tile-label">{{ __('app.performance') }}</span>
             </a>
+            <a href="/app/reports/customers" class="more-tile">
+                <div class="more-tile-icon more-icon-blue">
+                    <x-heroicon-o-users />
+                </div>
+                <span class="more-tile-label">{{ __('app.customer_summary') }}</span>
+            </a>
         </div>
     </div>
 

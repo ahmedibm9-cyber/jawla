@@ -296,8 +296,8 @@ _Closes all gaps identified in competitor analysis against Bricks Rep_
 
 #### 7.8 Contacts Views Enhancement
 
-- **Status**: Not Started
-- **Note**: Table/kanban/grid toggle and CSV export for contacts page not yet implemented.
+- **Status**: Completed
+- **Evidence**: CustomerSummaryReport with sortable table, status filter, CSV export, metrics cards
 
 #### 7.9 Calls Tracking
 
@@ -306,23 +306,23 @@ _Closes all gaps identified in competitor analysis against Bricks Rep_
 
 #### 7.10 Customers Summary Report
 
-- **Status**: Not Started
-- **Note**: Dedicated customer analytics view with metrics and export not yet implemented.
+- **Status**: Completed
+- **Evidence**: CustomerSummaryReport Livewire component with metrics (total/active/new/overdue), sortable table, CSV export, status filter
 
-### Milestone 7 Status: **MOSTLY COMPLETE** (8/10 tasks done, 7.8 and 7.10 remaining)
+### Milestone 7 Status: **COMPLETE** ✅
 
 ---
 
 ## Summary
 
-| Milestone                  | Status             | Notes                                               |
-| -------------------------- | ------------------ | --------------------------------------------------- |
-| M1: Core Field Operations  | ✅ Complete        |                                                     |
-| M2: Sales & Orders         | ✅ Complete        |                                                     |
-| M3: Financial Management   | ✅ Complete        |                                                     |
-| M4: Inventory & Stock      | ✅ Complete        |                                                     |
-| M5: Advanced Features      | ✅ Complete        |                                                     |
-| M6: Production Readiness   | 🔶 Partial         | 6.4 UAT, 6.5 load testing, 6.6 launch pending       |
-| M7: Competitor Gap Closure | 🔶 Mostly Complete | 7.8 contacts views, 7.10 customer summary remaining |
+| Milestone                  | Status      | Notes                                         |
+| -------------------------- | ----------- | --------------------------------------------- |
+| M1: Core Field Operations  | ✅ Complete |                                               |
+| M2: Sales & Orders         | ✅ Complete |                                               |
+| M3: Financial Management   | ✅ Complete |                                               |
+| M4: Inventory & Stock      | ✅ Complete |                                               |
+| M5: Advanced Features      | ✅ Complete |                                               |
+| M6: Production Readiness   | 🔶 Partial  | 6.4 UAT, 6.5 load testing, 6.6 launch pending |
+| M7: Competitor Gap Closure | ✅ Complete |                                               |
 
 **Overall**: M1-M5 complete. M6 needs UAT/load testing/launch. M7 needs 2 remaining tasks (contacts views, customer summary).

@@ -562,6 +562,12 @@ return [
     'request_rejected' => 'Request rejected',
     'request_action_failed' => 'Failed to update request',
     'no_requests' => 'No requests found',
+    // Customer Summary Report
+    'customer_summary' => 'Customer Summary',
+    'total_customers' => 'Total Customers',
+    'new_this_month' => 'New This Month',
+    'overdue_balance' => 'Overdue Balance',
+    'no_customers' => 'No customers found',
     // Common
     'all' => 'All',
     'approve' => 'Approve',

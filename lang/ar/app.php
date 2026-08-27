@@ -562,6 +562,12 @@ return [
     'request_rejected' => 'تم رفض الطلب',
     'request_action_failed' => 'فشل تحديث الطلب',
     'no_requests' => 'لا توجد طلبات',
+    // Customer Summary Report
+    'customer_summary' => 'ملخص العملاء',
+    'total_customers' => 'إجمالي العملاء',
+    'new_this_month' => 'جدد هذا الشهر',
+    'overdue_balance' => 'رصيد متأخر',
+    'no_customers' => 'لا يوجد عملاء',
     // Common
     'all' => 'الكل',
     'approve' => 'موافقة',

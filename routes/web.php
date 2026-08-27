@@ -120,6 +120,7 @@ Route::middleware(['web', 'auth', 'license', 'ensure.rep', 'ensure.device'])->pr
     Route::get('/calendar', Calendar::class)->name('calendar');
     Route::get('/agenda', Agenda::class)->name('agenda');
     Route::get('/requests', AppRequests::class)->name('requests');
+    Route::get('/reports/customers', \App\Livewire\App\CustomerSummaryReport::class)->name('reports.customers');
     Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])
         ->middleware('throttle:10,1')
         ->name('pdf.proforma');
