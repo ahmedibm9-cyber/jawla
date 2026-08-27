@@ -67,9 +67,6 @@ class PurchaseRequestService
             $request = $this->lockedInStatus($request, ['sales_approved']);
             $this->assertNotExpired($request);
 
-            throw_if($request->supplier_id === null, new \RuntimeException(
-                'A supplier must be set on the offer before a purchase order can be generated.'));
-
             $lineTotal = round((float) $request->quantity * (float) $request->offered_price, 2);
 
             $order = PurchaseOrder::create([
@@ -132,6 +129,7 @@ class PurchaseRequestService
      * Rep edits a rejected offer and sends it back to the start of the
      * review chain, clearing both departments' previous decisions.
      */
+    /** @param array<string, mixed> $attributes */
     public function resubmit(PurchaseRequest $request, int $repId, array $attributes = []): PurchaseRequest
     {
         return DB::transaction(function () use ($request, $repId, $attributes): PurchaseRequest {
@@ -163,6 +161,7 @@ class PurchaseRequestService
         });
     }
 
+    /** @param array<int, string> $expected */
     private function lockedInStatus(PurchaseRequest $request, array $expected): PurchaseRequest
     {
         $fresh = PurchaseRequest::whereKey($request->getKey())->lockForUpdate()->firstOrFail();

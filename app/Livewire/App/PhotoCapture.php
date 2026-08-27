@@ -5,6 +5,7 @@ namespace App\Livewire\App;
 use App\Models\Photo;
 use App\Services\PhotoService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -20,7 +21,7 @@ class PhotoCapture extends Component
 {
     use WithFileUploads;
 
-    public $photo;
+    public mixed $photo = null;
 
     /** @var array<int, array{id: int, url: string, name: ?string}> */
     public array $stored = [];
@@ -60,7 +61,7 @@ class PhotoCapture extends Component
         $this->dispatch('photo-removed', id: $id);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.app.photo-capture');
     }

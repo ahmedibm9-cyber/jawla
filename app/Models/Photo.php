@@ -3,15 +3,32 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
+use Database\Factories\PhotoFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @property int $id
+ * @property int $company_id
+ * @property int $user_id
+ * @property string $photable_type
+ * @property int $photable_id
+ * @property string $disk
+ * @property string $path
+ * @property string $original_name
+ * @property int $size
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class Photo extends Model
 {
     use BelongsToCompany;
+
+    /** @use HasFactory<PhotoFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -23,11 +40,13 @@ class Photo extends Model
         'size' => 'integer',
     ];
 
+    /** @return MorphTo<Model, $this> */
     public function photable(): MorphTo
     {
         return $this->morphTo();
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

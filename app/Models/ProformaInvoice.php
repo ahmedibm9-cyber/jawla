@@ -3,15 +3,46 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
+use Database\Factories\ProformaInvoiceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
+/**
+ * @property int $id
+ * @property int $company_id
+ * @property int $customer_id
+ * @property int $user_id
+ * @property int|null $visit_id
+ * @property int|null $price_quotation_id
+ * @property string $proforma_number
+ * @property string $subtotal
+ * @property string $vat_amount
+ * @property string $total
+ * @property int|null $company_bank_account_id
+ * @property string $status
+ * @property string|null $notes
+ * @property Carbon|null $valid_until
+ * @property Carbon|null $posting_date
+ * @property Carbon|null $cancelled_at
+ * @property int|null $cancelled_by
+ * @property string $uuid
+ * @property string|null $hash_chain
+ * @property string|null $cryptographic_stamp
+ * @property string $zatca_status
+ * @property Carbon|null $zatca_submitted_at
+ * @property string|null $zatca_response
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class ProformaInvoice extends Model
 {
     use BelongsToCompany;
+
+    /** @use HasFactory<ProformaInvoiceFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -46,31 +77,37 @@ class ProformaInvoice extends Model
         });
     }
 
+    /** @return BelongsTo<Company, $this> */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /** @return BelongsTo<Customer, $this> */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<Visit, $this> */
     public function visit(): BelongsTo
     {
         return $this->belongsTo(Visit::class);
     }
 
+    /** @return HasMany<ProformaInvoiceItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(ProformaInvoiceItem::class);
     }
 
+    /** @return BelongsTo<CompanyBankAccount, $this> */
     public function bankAccount(): BelongsTo
     {
         return $this->belongsTo(CompanyBankAccount::class, 'company_bank_account_id');

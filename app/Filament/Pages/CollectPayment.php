@@ -11,6 +11,7 @@ use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
 
+/** @property Schema $form */
 class CollectPayment extends Page
 {
     protected string $view = 'filament.pages.collect-payment';

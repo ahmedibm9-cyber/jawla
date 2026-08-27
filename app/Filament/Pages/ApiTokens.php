@@ -51,7 +51,11 @@ class ApiTokens extends Page
         return Auth::user()?->can('api_tokens.view') ?? false;
     }
 
-    /** Bilingual ability labels for the create form. */
+    /**
+     * Bilingual ability labels for the create form.
+     *
+     * @return array<string, string>
+     */
     public function abilityOptions(): array
     {
         return ApiAbilities::options();
@@ -78,9 +82,9 @@ class ApiTokens extends Page
         abort_unless(self::canAccess(), 403);
 
         $this->validate([
-            'tokenName' => 'required|string|max:100',
-            'selectedAbilities' => 'required|array|min:1',
-            'selectedAbilities.*' => 'in:'.implode(',', ApiAbilities::keys()),
+            'tokenName' => ['required', 'string', 'max:100'],
+            'selectedAbilities' => ['required', 'array', 'min:1'],
+            'selectedAbilities.*' => ['in:'.implode(',', ApiAbilities::keys())],
         ]);
 
         try {

@@ -7,6 +7,7 @@ use App\Models\Activity;
 use App\Models\Visit;
 use App\Services\VisitReportService;
 use App\Support\GpsCoordinate;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -196,7 +197,7 @@ class VisitFlow extends Component
 
     private function geofenceRadius(): int
     {
-        return (int) ($this->visit->customer->company?->geofence_radius_m ?? 500);
+        return (int) ($this->visit->customer->company->geofence_radius_m ?? 500);
     }
 
     private function logDeclinedAttempt(float $distance): void
@@ -214,7 +215,7 @@ class VisitFlow extends Component
         ]);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.app.visit-flow', [
             'customer' => $this->visit->customer,

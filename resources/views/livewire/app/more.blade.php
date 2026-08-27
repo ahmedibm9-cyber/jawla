@@ -144,6 +144,42 @@
                 </div>
                 <span class="more-tile-label">{{ __('app.purchase_offer') }}</span>
             </a>
+            <a href="/app/todos" class="more-tile">
+                <div class="more-tile-icon more-icon-amber">
+                    <x-heroicon-o-check-circle />
+                </div>
+                <span class="more-tile-label">{{ __('app.todo') }}</span>
+            </a>
+            <a href="/app/tickets" class="more-tile">
+                <div class="more-tile-icon more-icon-orange">
+                    <x-heroicon-o-ticket />
+                </div>
+                <span class="more-tile-label">{{ __('app.tickets') }}</span>
+            </a>
+            <a href="/app/requests" class="more-tile">
+                <div class="more-tile-icon more-icon-purple">
+                    <x-heroicon-o-document-text />
+                </div>
+                <span class="more-tile-label">{{ __('app.requests') }}</span>
+            </a>
+            <a href="/app/calls" class="more-tile">
+                <div class="more-tile-icon more-icon-blue">
+                    <x-heroicon-o-phone />
+                </div>
+                <span class="more-tile-label">{{ __('app.calls') }}</span>
+            </a>
+            <a href="/app/calendar" class="more-tile">
+                <div class="more-tile-icon more-icon-green">
+                    <x-heroicon-o-calendar />
+                </div>
+                <span class="more-tile-label">{{ __('app.calendar') }}</span>
+            </a>
+            <a href="/app/performance" class="more-tile">
+                <div class="more-tile-icon more-icon-emerald">
+                    <x-heroicon-o-chart-bar />
+                </div>
+                <span class="more-tile-label">{{ __('app.performance') }}</span>
+            </a>
         </div>
     </div>
 

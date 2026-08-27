@@ -4,6 +4,7 @@ namespace App\Livewire\App;
 
 use App\Models\Customer;
 use App\Services\AlarmService;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -66,7 +67,7 @@ class AddCustomer extends Component
             : 'Customer submitted for approval';
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.app.add-customer');
     }

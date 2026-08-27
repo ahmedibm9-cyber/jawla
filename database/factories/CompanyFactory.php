@@ -17,7 +17,7 @@ class CompanyFactory extends Factory
         return [
             'name_ar' => 'شركة اختبار',
             'name_en' => 'Test Company',
-            'tax_number' => 'TAX-' . strtoupper(substr(md5((string) mt_rand()), 0, 8)),
+            'tax_number' => 'TAX-'.strtoupper(substr(md5((string) mt_rand()), 0, 8)),
             'address' => 'Test Address, Cairo',
             'phone' => '01000000000',
             'currency' => 'EGP',

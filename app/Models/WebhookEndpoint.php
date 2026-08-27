@@ -6,7 +6,22 @@ use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $company_id
+ * @property string $name
+ * @property string $url
+ * @property string|null $secret
+ * @property Carbon|null $secret_rotated_at
+ * @property array<string, mixed>|null $events
+ * @property bool $is_active
+ * @property int|null $timeout_seconds
+ * @property int|null $created_by
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class WebhookEndpoint extends Model
 {
     use BelongsToCompany;
@@ -29,11 +44,13 @@ class WebhookEndpoint extends Model
         });
     }
 
+    /** @return HasMany<WebhookDelivery, $this> */
     public function deliveries(): HasMany
     {
         return $this->hasMany(WebhookDelivery::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

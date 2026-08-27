@@ -32,6 +32,7 @@ class EtaSettings extends Page
         return auth()->user()?->hasRole(['admin', 'super_admin']) ?? false;
     }
 
+    /** @return array<string, mixed> */
     public function getConfigStatus(): array
     {
         return [
@@ -45,6 +46,7 @@ class EtaSettings extends Page
         ];
     }
 
+    /** @return Collection<int, Invoice> */
     public function getRecentSubmissions(): Collection
     {
         return Invoice::whereNotNull('eta_status')

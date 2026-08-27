@@ -6,6 +6,7 @@ use App\Models\Invoice;
 
 interface InvoiceService
 {
+    /** @param array<string, mixed> $data */
     public function create(array $data): Invoice;
 
     public function submit(Invoice $invoice): Invoice;

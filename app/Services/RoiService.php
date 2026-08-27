@@ -9,6 +9,7 @@ use Illuminate\Support\Carbon;
 
 class RoiService
 {
+    /** @return array<string, mixed> */
     public function repRoi(int $userId, Carbon $from, Carbon $to): array
     {
         $visitQuery = DailyVisitAssignment::query()

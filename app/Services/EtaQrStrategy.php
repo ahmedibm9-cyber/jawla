@@ -33,8 +33,8 @@ class EtaQrStrategy implements QrStrategy
         $totals = $invoice->snapshot_totals;
 
         $payload = [
-            'sellerName' => $snapshot['name_ar'] ?? $company?->name_ar ?? '',
-            'taxNumber' => $snapshot['tax_number'] ?? $company?->tax_number ?? '',
+            'sellerName' => $snapshot['name_ar'] ?? $company->name_ar ?? '',
+            'taxNumber' => $snapshot['tax_number'] ?? $company->tax_number ?? '',
             'invoiceTimestamp' => ($invoice->issued_at ?? $invoice->created_at)->toIso8601String(),
             'invoiceTotal' => (float) ($totals['total'] ?? $invoice->total),
             'vatAmount' => (float) ($totals['vat_amount'] ?? $invoice->vat_amount),
@@ -46,8 +46,8 @@ class EtaQrStrategy implements QrStrategy
     private function generateProformaQr(ProformaInvoice $proforma): string
     {
         $payload = [
-            'sellerName' => $proforma->company?->name_ar ?? '',
-            'taxNumber' => $proforma->company?->tax_number ?? '',
+            'sellerName' => $proforma->company->name_ar ?? '',
+            'taxNumber' => $proforma->company->tax_number ?? '',
             'invoiceTimestamp' => ($proforma->posting_date ?? $proforma->created_at)->toIso8601String(),
             'invoiceTotal' => (float) $proforma->total,
             'vatAmount' => (float) $proforma->vat_amount,

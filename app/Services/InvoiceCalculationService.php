@@ -4,10 +4,12 @@ namespace App\Services;
 
 use App\Services\Contracts\InvoiceCalculation;
 use App\Services\Contracts\InvoiceCalculationService as Contract;
+use App\Services\Contracts\LineItemInput;
 use App\Services\Contracts\LineItemResult;
 
 class InvoiceCalculationService implements Contract
 {
+    /** @param LineItemInput[] $lines */
     public function calculate(array $lines, string $vatPercent): InvoiceCalculation
     {
         $results = [];

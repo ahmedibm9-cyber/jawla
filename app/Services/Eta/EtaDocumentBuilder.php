@@ -15,21 +15,22 @@ use App\Models\Invoice;
  */
 class EtaDocumentBuilder
 {
+    /** @return array<string, mixed> */
     public function build(Invoice $invoice): array
     {
         $invoice->loadMissing(['company', 'customer', 'items.product']);
         $company = $invoice->company;
         $customer = $invoice->customer;
 
-        $lines = $invoice->items->map(function ($item) use ($invoice): array {
+        $lines = $invoice->items->map(function ($item) use ($invoice, $company): array {
             $net = (float) $item->line_total;
             $vatRate = (float) ($invoice->company->vat_percent ?? 0);
             $vatAmount = round($net * $vatRate / 100, 2);
 
             return [
-                'description' => $item->product?->name_ar ?? $item->product?->name_en ?? '',
+                'description' => $item->product->name_ar ?? $item->product->name_en ?? '',
                 'itemType' => 'EGS', // EGS = Egyptian goods/services code scheme
-                'itemCode' => $item->product?->sku ?? (string) $item->product_id,
+                'itemCode' => $item->product->sku ?? (string) $item->product_id,
                 'unitType' => 'EA',
                 'quantity' => (float) $item->quantity,
                 'unitValue' => [

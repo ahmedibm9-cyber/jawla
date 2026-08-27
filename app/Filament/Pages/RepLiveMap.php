@@ -51,6 +51,6 @@ class RepLiveMap extends Page
     /** Push fresh points to the map (invoked by wire:poll). */
     public function broadcastPoints(): void
     {
-        $this->dispatch('pings-updated', points: $this->points);
+        $this->dispatch('pings-updated', points: $this->getPointsProperty());
     }
 }

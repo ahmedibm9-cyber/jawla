@@ -28,9 +28,9 @@ abstract class ZatcaQrBase implements QrStrategy
         $snapshot = $invoice->snapshot_company;
         $totals = $invoice->snapshot_totals;
 
-        $sellerName = $snapshot['name_ar'] ?? $invoice->company?->name_ar ?? '';
-        $vatNumber = $snapshot['tax_number'] ?? $invoice->company?->tax_number ?? '';
-        $timestamp = $invoice->issued_at?->toIso8601String() ?? now()->toIso8601String();
+        $sellerName = $snapshot['name_ar'] ?? $invoice->company->name_ar ?? '';
+        $vatNumber = $snapshot['tax_number'] ?? $invoice->company->tax_number ?? '';
+        $timestamp = $invoice->issued_at->toIso8601String();
         $totalWithVat = (string) number_format((float) ($totals['total'] ?? $invoice->total), 2, '.', '');
         $vatAmount = (string) number_format((float) ($totals['vat_amount'] ?? $invoice->vat_amount), 2, '.', '');
 
@@ -45,8 +45,8 @@ abstract class ZatcaQrBase implements QrStrategy
 
     private function generateProformaQr(ProformaInvoice $proforma): string
     {
-        $sellerName = $proforma->company?->name_ar ?? '';
-        $vatNumber = $proforma->company?->tax_number ?? '';
+        $sellerName = $proforma->company->name_ar ?? '';
+        $vatNumber = $proforma->company->tax_number ?? '';
         $timestamp = $proforma->posting_date?->toIso8601String() ?? now()->toIso8601String();
         $totalWithVat = (string) number_format((float) $proforma->total, 2, '.', '');
         $vatAmount = (string) number_format((float) $proforma->vat_amount, 2, '.', '');
@@ -60,6 +60,7 @@ abstract class ZatcaQrBase implements QrStrategy
         ]);
     }
 
+    /** @param array<int, string> $fields */
     private function encodeTlv(array $fields): string
     {
         $tlv = '';

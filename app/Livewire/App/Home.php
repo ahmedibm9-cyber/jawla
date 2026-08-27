@@ -7,6 +7,7 @@ use App\Models\Task;
 use App\Models\Visit;
 use App\Models\WorkSession;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -84,7 +85,7 @@ class Home extends Component
         $this->redirect('/app');
     }
 
-    public function render()
+    public function render(): View
     {
         $user = auth()->user();
 

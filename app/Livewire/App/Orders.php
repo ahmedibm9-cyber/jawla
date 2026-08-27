@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\ProformaInvoice;
 use App\Models\PurchaseRequest;
 use App\Models\SalesOrder;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -29,7 +30,7 @@ class Orders extends Component
         $this->resetPage();
     }
 
-    public function render()
+    public function render(): View
     {
         if ($this->type === 'sales_orders') {
             $documents = SalesOrder::query()->where('user_id', auth()->id())

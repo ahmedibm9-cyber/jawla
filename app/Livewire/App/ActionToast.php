@@ -2,6 +2,7 @@
 
 namespace App\Livewire\App;
 
+use Illuminate\View\View;
 use Livewire\Attributes\On;
 use Livewire\Component;
 
@@ -24,7 +25,7 @@ class ActionToast extends Component
         $this->message = '';
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.app.action-toast');
     }

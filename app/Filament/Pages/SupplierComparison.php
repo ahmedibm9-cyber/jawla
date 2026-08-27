@@ -42,16 +42,17 @@ class SupplierComparison extends Page
     }
 
     /**
-     * Open offers grouped by product, each group sorted cheapest-first.
-     *
-     * @return Collection<string, array{product: Product, offers: Collection}>
+     * @return Collection<int|string, array{product: Product, offers: Collection<int, PurchaseRequest>}>
      */
     public function getGroupsProperty()
     {
-        return PurchaseRequest::query()
+        /** @var Collection<int, PurchaseRequest> $all */
+        $all = PurchaseRequest::query()
             ->whereIn('status', ['pending', 'sales_approved'])
             ->with(['product', 'supplier', 'user'])
-            ->get()
+            ->get();
+
+        return $all
             ->groupBy('product_id')
             ->map(fn ($offers) => [
                 'product' => $offers->first()->product,

@@ -72,7 +72,7 @@ class PurchaseOrderResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('order_number')->label(l('رقم الأمر', 'Order #'))->searchable(),
                 Tables\Columns\TextColumn::make('supplier.name_ar')->label(l('المورد', 'Supplier'))
-                    ->formatStateUsing(fn ($s, PurchaseOrder $r) => $r->supplier?->name_ar ?? $r->supplier?->name_en ?? '—'),
+                    ->formatStateUsing(fn ($s, PurchaseOrder $r) => $r->supplier->name_ar ?? $r->supplier->name_en ?? '—'),
                 Tables\Columns\TextColumn::make('items_count')->counts('items')->label(l('البنود', 'Items')),
                 Tables\Columns\TextColumn::make('total')->label(l('الإجمالي', 'Total'))->numeric(2),
                 Tables\Columns\BadgeColumn::make('status')->label(l('الحالة', 'Status'))

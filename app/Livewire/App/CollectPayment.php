@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Invoice;
 use App\Services\CollectionSubmissionService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -34,6 +35,7 @@ class CollectPayment extends Component
 
     public ?int $lastPaymentId = null;
 
+    /** @var array<string, mixed> */
     public array $paymentPrintPayload = [];
 
     public ?string $printNotice = null;
@@ -137,7 +139,7 @@ class CollectPayment extends Component
         $this->addError('amount', __('app.workflow_failed'));
     }
 
-    public function render()
+    public function render(): View
     {
         $user = auth()->user();
 

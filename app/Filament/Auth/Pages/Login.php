@@ -2,11 +2,13 @@
 
 namespace App\Filament\Auth\Pages;
 
+use App\Models\User;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
 use Filament\Auth\Http\Responses\Contracts\LoginResponse;
 use Filament\Auth\MultiFactor\Contracts\HasBeforeChallengeHook;
 use Filament\Auth\Pages\Login as BaseLogin;
 use Filament\Facades\Filament;
+use Illuminate\Auth\SessionGuard;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Timebox;
 
@@ -28,6 +30,7 @@ class Login extends BaseLogin
 
         $authGuard = Filament::auth();
 
+        /** @var SessionGuard $authGuard */
         $authProvider = $authGuard->getProvider();
         $credentials = $this->getCredentialsFromFormData($data);
         $remember = $data['remember'] ?? false;
@@ -91,7 +94,10 @@ class Login extends BaseLogin
             return null;
         }
 
+        /** @var SessionGuard $authGuard */
+        /** @var SessionGuard $authGuard */
         if (! $authGuard->attemptWhen($credentials, function (Authenticatable $user): bool {
+            /** @var User $user */
             return $user->is_active;
         }, $remember)) {
             $this->fireFailedEvent($authGuard, $user, $credentials);

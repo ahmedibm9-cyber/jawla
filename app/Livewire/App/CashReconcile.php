@@ -5,6 +5,7 @@ namespace App\Livewire\App;
 use App\Models\CashBox;
 use App\Models\CashReconciliation;
 use App\Services\CashReconciliationService;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -51,7 +52,7 @@ class CashReconcile extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         $cashBox = CashBox::where('user_id', auth()->id())->first();
 

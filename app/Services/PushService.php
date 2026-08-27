@@ -10,6 +10,7 @@ class PushService
 {
     public function __construct(private readonly PushGateway $gateway) {}
 
+    /** @param array<string, mixed> $payload */
     public function send(User $user, array $payload): int
     {
         $delivered = 0;

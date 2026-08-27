@@ -2,6 +2,7 @@
 
 namespace App\Livewire\App;
 
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -24,7 +25,7 @@ class Notifications extends Component
         $unread->markAsRead();
     }
 
-    public function render()
+    public function render(): View
     {
         $notifications = auth()->user()
             ->notifications()

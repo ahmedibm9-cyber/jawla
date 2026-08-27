@@ -26,7 +26,7 @@ class VisitReportService
 
             if ($signatureDataUrl) {
                 $parts = explode(',', $signatureDataUrl, 2);
-                $meta = $parts[0] ?? '';
+                $meta = $parts[0];
                 $raw = base64_decode($parts[1] ?? '', true);
                 throw_unless($raw !== false && $raw !== '', new \InvalidArgumentException('Invalid signature data.'));
                 throw_unless(strlen($raw) <= 5 * 1024 * 1024, new \InvalidArgumentException('Signature exceeds 5MB limit.'));

@@ -70,7 +70,7 @@ class PurchaseRequestResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('user.name')->label(l('المندوب', 'Rep')),
                 Tables\Columns\TextColumn::make('supplier.name_ar')->label(l('المورد', 'Supplier'))
-                    ->formatStateUsing(fn ($s, $r) => $r->supplier?->name_ar ?? $r->supplier?->name_en ?? l('غير محدد', 'N/A')),
+                    ->formatStateUsing(fn ($s, $r) => $r->supplier->name_ar ?? $r->supplier->name_en ?? l('غير محدد', 'N/A')),
                 Tables\Columns\TextColumn::make('product.name_ar')->label(l('المنتج', 'Product'))->searchable(),
                 Tables\Columns\TextColumn::make('quantity')->label(l('الكمية', 'Qty')),
                 Tables\Columns\TextColumn::make('offered_price')->label(l('السعر', 'Price')),

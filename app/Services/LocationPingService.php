@@ -69,10 +69,10 @@ class LocationPingService
             ->get()
             ->unique('user_id')
             ->map(fn (LocationPing $p) => [
-                'name' => $p->user?->name ?? '—',
+                'name' => $p->user->name ?? '—',
                 'lat' => (float) $p->latitude,
                 'lng' => (float) $p->longitude,
-                'accuracy' => $p->accuracy !== null ? (float) $p->accuracy : null,
+                'accuracy' => (float) $p->accuracy,
                 'seen_at' => $p->recorded_at->format('H:i'),
                 'minutes_ago' => (int) $p->recorded_at->diffInMinutes(Carbon::now()),
             ])

@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\PurchaseRequest;
 use App\Models\Supplier;
 use App\Services\PurchaseRequestService;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -117,7 +118,7 @@ class SubmitPurchaseOffer extends Component
             : 'Purchase offer submitted for review';
     }
 
-    public function render()
+    public function render(): View
     {
         $companyId = auth()->user()->activeCompanyId();
 

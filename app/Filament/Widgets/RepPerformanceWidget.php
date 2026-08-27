@@ -6,6 +6,7 @@ use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class RepPerformanceWidget extends StatsOverviewWidget
 {
@@ -40,7 +41,7 @@ class RepPerformanceWidget extends StatsOverviewWidget
             $reps = User::forCompany($user->activeCompanyId())
                 ->whereHas('roles', fn ($q) => $q->where('name', 'rep'))
                 ->withCount(['visits as visits_today' => fn ($q) => $q->whereDate('checkin_at', $today)])
-                ->withSum('invoices as sales_today', fn ($q) => $q->whereDate('issued_at', $today)->whereNotIn('status', ['cancelled']))
+                ->withSum('invoices as sales_today', DB::raw('(select coalesce(sum(total),0) from invoices where invoices.user_id = users.id and DATE(issued_at) = \''.$today->format('Y-m-d').'\' and status not in (\'cancelled\'))'))
                 ->get();
 
             $totalVisits = $reps->sum('visits_today');

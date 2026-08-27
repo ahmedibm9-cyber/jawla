@@ -22,6 +22,9 @@ class LineItemResult
 
 class InvoiceCalculation
 {
+    /**
+     * @param  array<int, LineItemResult>  $lines
+     */
     public function __construct(
         public readonly string $subtotal,
         public readonly string $vatAmount,
@@ -32,5 +35,6 @@ class InvoiceCalculation
 
 interface InvoiceCalculationService
 {
+    /** @param array<int, LineItemInput> $lines */
     public function calculate(array $lines, string $vatPercent): InvoiceCalculation;
 }

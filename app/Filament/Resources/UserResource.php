@@ -97,7 +97,7 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('name')->label(l('الاسم', 'Name'))->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('email')->label(l('البريد', 'Email'))->searchable(),
                 Tables\Columns\TextColumn::make('employee_code')->label(l('الكود', 'Code')),
-                Tables\Columns\TextColumn::make('roles.name')->label(l('الصلاحية', 'Roles'))->formatStateUsing(fn ($state) => collect($state)->join(', ')),
+                Tables\Columns\TextColumn::make('roles.name')->label(l('الصلاحية', 'Roles'))->formatStateUsing(fn ($state) => is_array($state) ? implode(', ', $state) : (string) $state),
                 Tables\Columns\TextColumn::make('company.name_ar')->label(l('الشركة', 'Company')),
                 Tables\Columns\TextColumn::make('primaryOrganizationUnit.name_ar')->label(l('الوحدة', 'Unit')),
                 Tables\Columns\IconColumn::make('is_active')->label(l('نشط', 'Active'))->boolean(),

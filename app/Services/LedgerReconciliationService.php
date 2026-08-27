@@ -14,6 +14,7 @@ use App\Support\ActiveCompanyContext;
 
 class LedgerReconciliationService
 {
+    /** @return array<string, mixed> */
     public function report(int $companyId): array
     {
         app(ActiveCompanyContext::class)->assertMatches($companyId);
@@ -64,6 +65,7 @@ class LedgerReconciliationService
         return $drift;
     }
 
+    /** @param array<int, array{id: int, stored: string, ledger: string, difference: string}> $rows */
     private function record(array &$rows, int $id, string $stored, string $expected, int $scale): void
     {
         if (bccomp($stored, $expected, $scale) !== 0) {

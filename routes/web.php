@@ -8,26 +8,34 @@ use App\Http\Controllers\CompanyContextController;
 use App\Http\Controllers\LicenseRecoveryController;
 use App\Http\Controllers\SystemPageController;
 use App\Livewire\App\AddCustomer;
+use App\Livewire\App\Agenda;
+use App\Livewire\App\Calendar;
+use App\Livewire\App\CallHistory;
 use App\Livewire\App\CashReconcile;
 use App\Livewire\App\CollectPayment;
 use App\Livewire\App\CreateSalesOrder;
 use App\Livewire\App\DeviceRegistration;
 use App\Livewire\App\Home;
+use App\Livewire\App\LogCall;
 use App\Livewire\App\LogComplaint;
 use App\Livewire\App\LogExpense;
 use App\Livewire\App\LogReturn;
 use App\Livewire\App\MorePage;
 use App\Livewire\App\Notifications;
 use App\Livewire\App\Orders;
+use App\Livewire\App\PerformanceDashboard;
 use App\Livewire\App\ProfilePage;
 use App\Livewire\App\QuotationFlow;
+use App\Livewire\App\Requests as AppRequests;
 use App\Livewire\App\SalesFlow;
 use App\Livewire\App\SettingsPage;
 use App\Livewire\App\StockSearch;
 use App\Livewire\App\SubmitPurchaseOffer;
 use App\Livewire\App\SyncQueue;
 use App\Livewire\App\Tasks;
+use App\Livewire\App\Tickets;
 use App\Livewire\App\TodaysCustomers;
+use App\Livewire\App\Todos;
 use App\Livewire\App\VanTransfers;
 use App\Livewire\App\VisitFlow;
 use App\Livewire\App\Visits;
@@ -45,7 +53,6 @@ Route::get('/admin', [SystemPageController::class, 'adminRoot']);
 Route::get('/offline', [SystemPageController::class, 'offline']);
 
 Route::get('/health', [SystemPageController::class, 'health']);
-
 
 Route::get('/locale/{locale}', [SystemPageController::class, 'switchLocale'])
     ->middleware('throttle:10,1')
@@ -104,6 +111,14 @@ Route::middleware(['web', 'auth', 'license', 'ensure.rep', 'ensure.device'])->pr
     Route::get('/reconcile', CashReconcile::class)->name('reconcile');
     Route::get('/transfers', VanTransfers::class)->name('transfers');
     Route::get('/purchase-offer', SubmitPurchaseOffer::class)->name('purchase-offer');
+    Route::get('/todos', Todos::class)->name('todos');
+    Route::get('/tickets', Tickets::class)->name('tickets');
+    Route::get('/calls/log/{customer}', LogCall::class)->name('calls.log');
+    Route::get('/calls/history/{customer}', CallHistory::class)->name('calls.history');
+    Route::get('/performance', PerformanceDashboard::class)->name('performance');
+    Route::get('/calendar', Calendar::class)->name('calendar');
+    Route::get('/agenda', Agenda::class)->name('agenda');
+    Route::get('/requests', AppRequests::class)->name('requests');
     Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])
         ->middleware('throttle:10,1')
         ->name('pdf.proforma');

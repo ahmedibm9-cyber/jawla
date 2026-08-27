@@ -5,6 +5,7 @@ namespace App\Livewire\App;
 use App\Livewire\Concerns\CapturesPhotos;
 use App\Models\Customer;
 use App\Services\ComplaintService;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -60,7 +61,7 @@ class LogComplaint extends Component
             : 'Complaint saved offline — it will sync automatically when you are back online.';
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.app.log-complaint', [
             'customers' => Customer::where('company_id', auth()->user()->activeCompanyId())

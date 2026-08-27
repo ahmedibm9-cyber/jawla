@@ -26,6 +26,7 @@ class ReturnService
 {
     public function __construct(private readonly StockService $stock) {}
 
+    /** @param array<int, array{invoice_item_id: int, quantity: float, condition?: string, unit_price?: float, line_total?: float, tax_amount?: float, total?: float}> $items */
     public function create(
         int $companyId,
         int $userId,
@@ -127,7 +128,7 @@ class ReturnService
             $taxTotal = '0.00';
             $seen = [];
             foreach ($items as $input) {
-                $invoiceItemId = (int) ($input['invoice_item_id'] ?? 0);
+                $invoiceItemId = (int) $input['invoice_item_id'];
                 if ($invoiceItemId < 1 || isset($seen[$invoiceItemId])) {
                     throw new DomainException('Each returned invoice line must be present exactly once.');
                 }
@@ -141,7 +142,7 @@ class ReturnService
                     throw new DomainException('The returned line is not part of the original invoice.');
                 }
 
-                $quantity = number_format((float) ($input['quantity'] ?? 0), 3, '.', '');
+                $quantity = number_format((float) $input['quantity'], 3, '.', '');
                 if (bccomp($quantity, '0.000', 3) <= 0) {
                     throw new DomainException('Return quantity must be greater than zero.');
                 }

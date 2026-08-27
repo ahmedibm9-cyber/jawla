@@ -10,10 +10,12 @@ use Filament\Forms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/** @property Schema $form */
 class StockImport extends Page
 {
     protected string $view = 'filament.pages.stock-import';
@@ -25,6 +27,7 @@ class StockImport extends Page
     /** @var array<int, TemporaryUploadedFile|string> */
     public array $file = [];
 
+    /** @var array{valid: list<mixed>, errors: list<mixed>}|null */
     public ?array $preview = null;
 
     public ?string $fileName = null;
@@ -165,6 +168,7 @@ class StockImport extends Page
         Notification::make()->title(l('تم اعتماد التسوية.', 'Adjustment approved.'))->success()->send();
     }
 
+    /** @return Collection<int, StockImportPreview> */
     public function getPendingApprovalsProperty()
     {
         if (! Auth::user()->can('view_any:stock')) {
@@ -190,6 +194,7 @@ class StockImport extends Page
         );
     }
 
+    /** @return Collection<int, WarehouseImportLog> */
     public function getRecentImportsProperty()
     {
         return WarehouseImportLog::query()

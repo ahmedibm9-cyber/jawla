@@ -118,8 +118,7 @@ class Dashboard extends BaseDashboard
             ->map(fn (mixed $widget): string => $this->widgetKey($widget))
             ->all();
         $configured = collect($widgets)
-            ->filter(fn (mixed $widget): bool => is_array($widget)
-                && isset($widget['key'])
+            ->filter(fn (mixed $widget): bool => isset($widget['key'])
                 && is_string($widget['key'])
                 && in_array($widget['key'], $available, true))
             ->unique('key')
@@ -147,7 +146,10 @@ class Dashboard extends BaseDashboard
         return parent::getWidgets();
     }
 
-    /** @param array<int, mixed> $widgets */
+    /**
+     * @param  array<int, mixed>  $widgets
+     * @return array<int, mixed>
+     */
     protected function orderedWidgets(array $widgets): array
     {
         $order = auth()->user()?->preference('dashboard_widgets');
@@ -211,7 +213,7 @@ class Dashboard extends BaseDashboard
                         ->addable(false)
                         ->deletable(false)
                         ->collapsible(false)
-                        ->itemLabel(fn (array $state): ?string => $this->widgetLabel($state['key'] ?? ''))
+                        ->itemLabel(fn (array $state): string => $this->widgetLabel($state['key'] ?? ''))
                         ->schema([
                             Hidden::make('key'),
                             Toggle::make('visible')

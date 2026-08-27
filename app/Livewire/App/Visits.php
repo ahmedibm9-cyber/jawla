@@ -3,6 +3,7 @@
 namespace App\Livewire\App;
 
 use App\Models\Visit;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -12,7 +13,7 @@ class Visits extends Component
 {
     use WithPagination;
 
-    public function render()
+    public function render(): View
     {
         $visits = Visit::query()
             ->where('user_id', auth()->id())

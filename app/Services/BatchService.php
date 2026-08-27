@@ -21,7 +21,7 @@ class BatchService
         return Batch::query()->fefoForProduct($productId)->first();
     }
 
-    /** Batches for a company's products expiring within the window. */
+    /** @return \Illuminate\Database\Eloquent\Collection<int, Batch> */
     public function expiringSoon(int $companyId, int $days = 30): Collection
     {
         return Batch::query()
@@ -32,7 +32,7 @@ class BatchService
             ->get();
     }
 
-    /** Already-expired active batches for a company. */
+    /** @return \Illuminate\Database\Eloquent\Collection<int, Batch> */
     public function expired(int $companyId): Collection
     {
         return Batch::query()

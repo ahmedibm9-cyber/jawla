@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\CreditNote;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\ProformaInvoice;
+use App\Models\SalesOrder;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Generator;
 
@@ -65,14 +67,14 @@ class PdfService
             $invoice->load('items.product', 'company', 'customer', 'visit.report', 'user');
             $company = $invoice->company;
             $customer = $invoice->customer;
-            $sig = $invoice->visit?->report?->signature_path ?? $invoice->user?->name;
+            $sig = $invoice->visit->report->signature_path ?? $invoice->user->name;
         }
 
         $signaturePath = $sig;
         $disk = config('filesystems.storage_disk');
         $signatureSvg = is_string($signaturePath) && Storage::disk($disk)->exists($signaturePath)
             ? '<img src="data:image/png;base64,'.base64_encode(Storage::disk($disk)->get($signaturePath)).'" style="max-width:160px;max-height:60px">'
-            : '<span style="font-style:italic">'.e($invoice->user?->name ?? '').'</span>';
+            : '<span style="font-style:italic">'.e($invoice->user->name ?? '').'</span>';
 
         $qrData = $this->qrService->generateForInvoice($invoice);
         $qr = $this->qrSvg($qrData);
@@ -162,6 +164,7 @@ HTML.
 HTML;
     }
 
+    /** @param Invoice|ProformaInvoice|SalesOrder $doc */
     private function render(string $type, $doc, string $qr, string $signature = ''): string
     {
         $company = $doc->company;
@@ -191,13 +194,13 @@ HTML;
 
         $rows = '';
         foreach ($items as $item) {
-            $pName = $lang === 'ar' ? ($item->product?->name_ar ?? '') : ($item->product?->name_en ?? '');
+            $pName = $lang === 'ar' ? ($item->product->name_ar ?? '') : ($item->product->name_en ?? '');
             $rows .= '<tr><td>'.e($pName)."</td><td>{$item->quantity}</td><td>".number_format((float) $item->unit_price, 2).'</td><td>'.number_format((float) $item->line_total, 2).'</td></tr>';
         }
 
         $bank = $doc instanceof ProformaInvoice && $doc->company_bank_account_id
-            ? e($doc->bankAccount?->bank_name ?? '').' · '.e($doc->bankAccount?->iban ?? $doc->bankAccount?->account_number ?? '')
-            : e($company?->bank_name ?? '').' · '.e($company?->bank_iban ?? '');
+            ? e($doc->bankAccount->bank_name ?? '').' · '.e($doc->bankAccount->iban ?? $doc->bankAccount->account_number ?? '')
+            : e($company->bank_name ?? '').' · '.e($company->bank_iban ?? '');
 
         $number = $type === 'proforma' ? $doc->proforma_number : $doc->invoice_number;
         $date = $doc->posting_date?->format('Y-m-d') ?? '';
@@ -254,6 +257,10 @@ HTML;
         return '<div class="qr">'.$qr.'</div>';
     }
 
+    /**
+     * @param  Invoice|ProformaInvoice|SalesOrder|CreditNote  $doc
+     * @param  iterable<mixed>  $items
+     */
     private function renderSnapshot(string $type, $doc, object $company, object $customer, $items, string $qr, string $signature = ''): string
     {
         $lang = app()->getLocale();
@@ -280,7 +287,7 @@ HTML;
 
         $rows = '';
         foreach ($items as $item) {
-            $pName = $lang === 'ar' ? ($item->product?->name_ar ?? '') : ($item->product?->name_en ?? '');
+            $pName = $lang === 'ar' ? ($item->product->name_ar ?? '') : ($item->product->name_en ?? '');
             $rows .= '<tr><td>'.e($pName)."</td><td>{$item->quantity}</td><td>".number_format((float) $item->unit_price, 2).'</td><td>'.number_format((float) $item->line_total, 2).'</td></tr>';
         }
 

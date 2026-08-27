@@ -49,11 +49,13 @@ class GoodsInTransitResource extends Resource
         return auth()->user()?->can('create:goods_in_transit') ?? false;
     }
 
+    /** @param GoodsInTransit $record */
     public static function canEdit($record): bool
     {
         return auth()->user()?->can('update:goods_in_transit') ?? false;
     }
 
+    /** @param GoodsInTransit $record */
     public static function canDelete($record): bool
     {
         return auth()->user()?->can('delete:goods_in_transit') ?? false;

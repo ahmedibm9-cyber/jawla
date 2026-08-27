@@ -13,6 +13,8 @@ Tasks are organized using vertical slicing - each milestone delivers a complete,
 - Reduced risk through incremental validation
 - Clear progress visibility to stakeholders
 
+---
+
 ## Milestone 1: Core Field Operations Foundation
 
 _Delivers basic representative daily workflow with visit management_
@@ -123,6 +125,8 @@ _Delivers basic representative daily workflow with visit management_
 - All actions are recorded in audit trail
 - Representative can view daily progress metrics
 
+---
+
 ## Milestone 2: Sales and Order Processing
 
 _Delivers basic sales order creation and processing capabilities_
@@ -205,6 +209,8 @@ _Delivers basic sales order creation and processing capabilities_
 - Invoice can be paid and payment applied correctly
 - Sales performance metrics visible on dashboard
 - All financial transactions recorded in audit trail
+
+---
 
 ## Milestone 3: Financial Management and Collections
 
@@ -290,6 +296,8 @@ _Delivers payment processing, collections, and financial reporting capabilities_
 - Financial reports accurately reflect company financial position
 - Expenses can be submitted, approved, and reimbursed
 - All financial transactions recorded with full audit trail
+
+---
 
 ## Milestone 4: Inventory Management and Stock Control
 
@@ -389,6 +397,8 @@ _Delivers warehouse and vehicle stock management capabilities_
 - Vehicle stock properly utilized in sales and replenished from warehouse
 - Inventory reports accurately reflect stock levels and movements
 - All inventory transactions recorded in audit trail
+
+---
 
 ## Milestone 5: Advanced Features and Integration
 
@@ -520,6 +530,8 @@ _Delivers advanced features, integration capabilities, and system refinements_
 - Performance targets met and system scalable
 - Full Arabic/English localization and accessibility compliance achieved
 
+---
+
 ## Milestone 6: Production Readiness and Launch
 
 _Delivers production-ready system with monitoring, documentation, and launch preparation_
@@ -619,6 +631,327 @@ _Delivers production-ready system with monitoring, documentation, and launch pre
 - Performance targets met under load
 - System ready for launch with go/no-go decision made
 
+---
+
+## Milestone 7: Competitor Gap Closure (Bricks Rep Parity)
+
+_Closes all gaps identified in competitor analysis against Bricks Rep (gpccompany.bricks-rep.com)_
+
+**Source:** `docs/COMPETITOR_GAP_ANALYSIS.md`  
+**Date:** 2026-08-23
+
+### Gap Summary
+
+| Priority | Feature                             | Gap Severity | Jawla Advantage Preserved  |
+| -------- | ----------------------------------- | ------------ | -------------------------- |
+| HIGH     | Calendar view                       | Missing      | —                          |
+| HIGH     | Todos/Tasks system                  | Missing      | —                          |
+| HIGH     | Performance dashboard               | Basic only   | Invoicing, payments, stock |
+| MEDIUM   | Agenda view                         | Missing      | —                          |
+| MEDIUM   | Tickets system                      | Missing      | —                          |
+| MEDIUM   | Requests system                     | Missing      | —                          |
+| MEDIUM   | Non-planned visit recording         | Missing      | —                          |
+| LOW      | Contacts views (kanban/grid/export) | Basic only   | —                          |
+| LOW      | Calls tracking                      | Missing      | —                          |
+| LOW      | Customers summary report            | Basic only   | —                          |
+
+---
+
+### 7.1 Calendar View
+
+- **Description**: Add a monthly calendar page to the Rep PWA showing visits, todos, and tasks by date
+- **Dependencies**: 1.5 (Visit Management), 1.6 (Dashboard)
+- **Owner**: Frontend Developer
+- **Spec**:
+  - Monthly calendar grid (7 columns, 5-6 rows)
+  - Prev/Next month navigation + Today button
+  - Each day cell shows dot indicators for: visits (blue), todos (orange), tickets (red)
+  - Tap a day → expands to show that day's items list
+  - Filter by type (visits/todos/tickets)
+  - Date range param in URL for deep-linking (`?from=2026-08-01&to=2026-08-31`)
+  - RTL support: week starts Sunday (Arabic convention)
+- **Data sources**:
+  - `daily_visit_assignments` → scheduled_date
+  - `todos` → due_date (new table, see 7.2)
+  - `tickets` → created_at (new table, see 7.5)
+- **Verification**:
+  - Calendar renders with correct month/year
+  - Visits appear on correct dates
+  - Todos appear on correct dates
+  - Navigation between months works
+  - Today button returns to current month
+  - RTL layout correct
+  - Filter toggles work
+- **Estimated Effort**: 3 days
+
+### 7.2 Todos/Tasks System
+
+- **Description**: Standalone todo/task management with New/Done states, integrated into daily agenda
+- **Dependencies**: 1.2 (Users)
+- **Owner**: Full Stack Developer
+- **Spec**:
+  - New `todos` table:
+    - `id`, `company_id`, `user_id`, `title`, `description`, `priority` (low/medium/high), `status` (new/done), `due_date`, `completed_at`, `is_active`, timestamps
+  - Rep PWA Todos page:
+    - Two tabs: "New" / "Done"
+    - Add new todo: title (required), description (optional), priority, due date
+    - Complete: tap checkbox → status = done, completed_at = now
+    - Filter by priority, date range
+    - Search by title
+  - Admin Filament resource: full CRUD for managing todos across all reps
+  - Integration with Calendar (7.1) and Agenda (7.4)
+- **Verification**:
+  - Can create a todo with title, priority, due date
+  - Todo appears in "New" tab
+  - Can mark todo as done → moves to "Done" tab
+  - Todos appear on Calendar on due_date
+  - Todos appear in Agenda view
+  - RTL support works
+  - Filter and search work
+- **Estimated Effort**: 4 days
+
+### 7.3 Performance Dashboard
+
+- **Description**: Rich performance metrics page with Overview, Analysis, Daily, Detailed, and Coverage tabs
+- **Dependencies**: 1.5 (Visits), 2.4 (Invoicing), 3.1 (Payments)
+- **Owner**: Frontend Developer + Backend Developer
+- **Spec**:
+  - New `performance_metrics` computed endpoint (or use existing visit/invoice/payment data)
+  - **Overview tab**:
+    - Period selector (month nav: prev/next)
+    - Members filter (select rep or "all")
+    - Metric cards: Coverage %, Frequency, Call rate, Plan achievement %
+    - Summary: working days, total expenses, total visits, detailing count
+  - **Analysis tab**:
+    - Trend charts (line) for key metrics over time
+    - Comparison: this month vs last month
+  - **Daily tab**:
+    - Day-by-day breakdown table
+    - Columns: date, visits planned, visits completed, coverage %, orders count, amount
+  - **Detailed tab**:
+    - Per-rep breakdown with all metrics
+    - Sortable by any metric
+    - Export to CSV
+  - **Coverage tab**:
+    - Map view showing visited vs planned locations
+    - Coverage heatmap by territory
+  - **Metric calculations**:
+    - Coverage = visits_completed / visits_planned × 100
+    - Frequency = total_visits / working_days
+    - Call rate = total_visits / total_customers_assigned
+    - Plan achievement = orders_completed / orders_target × 100
+  - **Backend endpoints**:
+    - `GET /app/performance/overview?period=2026-08`
+    - `GET /app/performance/analysis?period=2026-08`
+    - `GET /app/performance/daily?period=2026-08`
+    - `GET /app/performance/detailed?period=2026-08`
+    - `GET /app/performance/coverage?period=2026-08`
+- **Verification**:
+  - All 5 tabs render correctly
+  - Metrics calculate correctly from underlying data
+  - Period navigation works
+  - Member filter works
+  - CSV export works
+  - RTL support works
+  - Charts render correctly
+- **Estimated Effort**: 6 days
+
+### 7.4 Agenda View
+
+- **Description**: Daily agenda combining visits, todos, and tasks in a single timeline view
+- **Dependencies**: 7.1 (Calendar), 7.2 (Todos), 1.5 (Visits)
+- **Owner**: Frontend Developer
+- **Spec**:
+  - New page: `/app/agenda`
+  - Date selector (prev/next day + today)
+  - Sections:
+    - **Planned Visits**: from `daily_visit_assignments` for selected date
+    - **Recorded Visits**: completed visits for selected date
+    - **Todos**: todos due on selected date
+  - Each item shows: time, customer name (for visits), title (for todos), status badge
+  - "Record Non-planned Visit" button (see 7.7)
+  - Tap item → navigates to detail (visit report or todo edit)
+  - RTL support
+- **Verification**:
+  - Agenda shows correct date's items
+  - Planned visits listed with customer names
+  - Completed visits shown with status
+  - Todos due today shown
+  - Navigation between days works
+  - Non-planned visit button works
+  - RTL layout correct
+- **Estimated Effort**: 3 days
+
+### 7.5 Tickets System
+
+- **Description**: Support ticket creation and tracking with status workflow
+- **Dependencies**: 1.2 (Users), 1.3 (Customers)
+- **Owner**: Full Stack Developer
+- **Spec**:
+  - New `tickets` table:
+    - `id`, `company_id`, `user_id` (creator), `customer_id` (optional), `title`, `description`, `status` (new/disabled/in_progress/completed/cancelled), `priority`, `assigned_to`, `resolved_at`, timestamps
+  - Rep PWA Tickets page:
+    - Table view + Kanban view toggle
+    - Search by title, filter by status
+    - Add New Ticket: title, description, customer (optional), priority
+    - Status workflow: جديد → قيد التنفيذ → اكتمل (or ملغي / معطل)
+    - Tap ticket → detail view with status change button
+  - Admin Filament resource: full CRUD, assign tickets to reps/managers
+  - Status history audit trail
+- **Verification**:
+  - Can create a ticket
+  - Ticket appears in list
+  - Can change status through workflow
+  - Table/Kanban toggle works
+  - Search and filter work
+  - Admin can assign tickets
+  - RTL support works
+- **Estimated Effort**: 4 days
+
+### 7.6 Requests System
+
+- **Description**: Request/approval workflow for manager sign-off (e.g., discount requests, leave requests, price overrides)
+- **Dependencies**: 1.2 (Users), 5.1 (Approval engine, or simple version)
+- **Owner**: Full Stack Developer
+- **Spec**:
+  - New `requests` table:
+    - `id`, `company_id`, `user_id` (requester), `type` (discount/leave/price_override/other), `title`, `description`, `status` (new/approved/rejected/done), `reviewed_by`, `reviewed_at`, `review_notes`, timestamps
+  - Rep PWA Requests page:
+    - Table view + Kanban view toggle
+    - Search, filter by status/type
+    - Add New Request: type, title, description
+    - Status workflow: جديد → تم الموافقة → تم (or تم الرفض)
+  - Manager approval interface:
+    - View pending requests
+    - Approve/reject with notes
+  - Admin Filament resource: full CRUD
+- **Verification**:
+  - Can create a request
+  - Request appears in list
+  - Manager can approve/reject
+  - Status changes correctly
+  - Table/Kanban toggle works
+  - RTL support works
+- **Estimated Effort**: 4 days
+
+### 7.7 Non-Planned Visit Recording
+
+- **Description**: Allow reps to record visits outside the planned route from the Agenda page
+- **Dependencies**: 1.5 (Visits), 7.4 (Agenda)
+- **Owner**: Full Stack Developer
+- **Spec**:
+  - "Record Non-planned Visit" button on Agenda page
+  - Quick form:
+    - Customer (searchable dropdown)
+    - Purpose (dropdown: sales, service, follow-up, other)
+    - Notes (optional)
+  - Creates visit record with:
+    - `is_out_of_route = true`
+    - `status = completed`
+    - GPS coordinates captured at submission
+    - `scheduled_date = today`
+  - Non-planned visits appear in Agenda under "Recorded Visits"
+  - Admin sees non-planned visits flagged differently in reports
+- **Verification**:
+  - Button visible on Agenda page
+  - Can select customer and submit
+  - Visit created with correct flags
+  - Appears in Agenda and Calendar
+  - GPS captured
+  - RTL support works
+- **Estimated Effort**: 2 days
+
+### 7.8 Contacts Views Enhancement
+
+- **Description**: Add table/kanban/grid view toggle and CSV export to Contacts page
+- **Dependencies**: 1.3 (Customers)
+- **Owner**: Frontend Developer
+- **Spec**:
+  - View toggle: Table (default) / Kanban (grouped by status) / Grid (card layout)
+  - Search bar (already exists, enhance with debounce)
+  - Filter by: status, area, class
+  - Export button: downloads CSV with columns (name, status, area, address, mobile, class)
+  - Kanban: columns = customer status (active/inactive/pending)
+  - Grid: card per customer with name, phone, status badge
+- **Verification**:
+  - View toggle works (3 modes)
+  - Search works
+  - Filters work
+  - CSV downloads correctly
+  - Kanban groups by status
+  - Grid shows cards
+  - RTL support works
+- **Estimated Effort**: 2 days
+
+### 7.9 Calls Tracking
+
+- **Description**: Log phone calls as separate entities linked to customers
+- **Dependencies**: 1.3 (Customers)
+- **Owner**: Backend Developer
+- **Spec**:
+  - New `calls` table:
+    - `id`, `company_id`, `user_id`, `customer_id`, `contact_id`, `direction` (inbound/outbound), `duration_seconds`, `outcome` (reached/no_answer/busy/left_voicemail), `notes`, `called_at`, timestamps
+  - Rep PWA: "Log Call" button on customer detail page
+  - Quick form: contact, duration (auto-timer or manual), outcome, notes
+  - Calls listed on customer detail page (recent calls)
+  - Admin Filament resource: list/filter/export calls
+  - Integration with Performance Dashboard (7.3) for call rate metric
+- **Verification**:
+  - Can log a call from customer page
+  - Call appears in customer's call history
+  - Duration recorded correctly
+  - Outcome options work
+  - Admin can view/filter calls
+  - Call rate metric updates in Performance dashboard
+  - RTL support works
+- **Estimated Effort**: 2 days
+
+### 7.10 Customers Summary Report
+
+- **Description**: Dedicated customer analytics view with key metrics
+- **Dependencies**: 1.3 (Customers), 1.5 (Visits), 7.9 (Calls)
+- **Owner**: Frontend Developer
+- **Spec**:
+  - New page: `/app/reports/customers`
+  - Metrics cards:
+    - Total customers (active/inactive)
+    - New customers this month
+    - Visit frequency per customer
+    - Top 10 customers by order value
+    - Customers with overdue payments
+  - Table: customer list with columns (name, last visit date, total orders, balance, status)
+  - Sort by any column
+  - Filter by status, area, date range
+  - Export to CSV
+- **Verification**:
+  - Page renders with correct metrics
+  - Table data is accurate
+  - Sorting works
+  - Filtering works
+  - CSV export works
+  - RTL support works
+- **Estimated Effort**: 2 days
+
+---
+
+### Milestone 7 Acceptance Criteria:
+
+- [ ] Calendar shows visits, todos, and tickets by date with navigation
+- [ ] Todos can be created, completed, and filtered
+- [ ] Performance dashboard shows all 5 tabs with correct metrics
+- [ ] Agenda combines visits, todos, and non-planned visits in one view
+- [ ] Tickets follow status workflow (جديد → قيد التنفيذ → اكتمل)
+- [ ] Requests follow approval workflow (جديد → تم الموافقة → تم)
+- [ ] Non-planned visits can be recorded from Agenda
+- [ ] Contacts page has table/kanban/grid toggle and CSV export
+- [ ] Calls can be logged against customers
+- [ ] Customers summary shows analytics and export
+- [ ] All pages support Arabic RTL + English LTR
+- [ ] All new tables have proper indexes and foreign keys
+- [ ] All new features have Filament admin resources
+
+---
+
 ## Cross-Milestone Dependencies and Considerations
 
 ### Critical Path
@@ -630,6 +963,8 @@ The critical path through the milestones is:
 4.1 → 4.2 → 4.3 → 4.4 → 4.5 → 4.6 →
 5.1 → 5.2 → 5.3 → 5.4 → 5.5 → 5.6 → 5.7 → 5.8 →
 6.1 → 6.2 → 6.3 → 6.4 → 6.5 → 6.6
+
+**Milestone 7 can run in parallel** with Milestones 3-6 (depends only on Milestone 1 completion + parts of Milestone 2).
 
 ### Resource Allocation Guidelines
 
@@ -693,16 +1028,11 @@ Based on the effort estimates and dependencies:
 - **Milestone 4**: ~5 weeks (Critical path: 4.1→4.2→4.3→4.4→4.5→4.6)
 - **Milestone 5**: ~8 weeks (Critical path: 5.1→5.2→5.3→5.4→5.5→5.6→5.7→5.8)
 - **Milestone 6**: ~4 weeks (Critical path: 6.1→6.2→6.3→6.4→6.5→6.6)
+- **Milestone 7**: ~4 weeks (can parallel with M3-M6, critical path: 7.2→7.4→7.7, 7.3→7.10)
 
-**Total Estimated Duration**: ~28 weeks (approximately 7 months)
+**Total Estimated Duration**: ~32 weeks (approximately 8 months)
 
-This timeline assumes:
-
-- Full-time dedication of resources
-- No major scope changes
-- Average complexity for estimated tasks
-- Reasonable availability of required skill sets
-- Standard development practices and code review processes
+Note: Milestone 7 runs in parallel with Milestones 3-6, adding only ~4 weeks to the critical path (not 32 + 4).
 
 Actual timeline may vary based on:
 

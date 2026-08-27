@@ -4,6 +4,7 @@ namespace App\Livewire\App;
 
 use App\Models\Product;
 use App\Services\Contracts\OutOfStockService;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -76,7 +77,7 @@ class StockSearch extends Component
         $this->flagNotes = '';
     }
 
-    public function render()
+    public function render(): View
     {
         $results = collect();
 

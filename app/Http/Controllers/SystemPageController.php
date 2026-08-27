@@ -24,7 +24,7 @@ class SystemPageController extends Controller
             return redirect('/app');
         }
 
-        if ($user && method_exists($user, 'canAccessPanel')) {
+        if ($user) {
             return redirect('/admin/dashboard');
         }
 

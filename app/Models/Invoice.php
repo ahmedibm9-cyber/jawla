@@ -5,16 +5,62 @@ namespace App\Models;
 use App\Enums\InvoiceStatus;
 use App\Models\Concerns\AppendOnly;
 use App\Models\Concerns\BelongsToCompany;
+use Carbon\Carbon;
+use Database\Factories\InvoiceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
+/**
+ * @property int $id
+ * @property string $uuid
+ * @property int $company_id
+ * @property int $customer_id
+ * @property int $user_id
+ * @property int|null $visit_id
+ * @property int|null $proforma_invoice_id
+ * @property string $invoice_number
+ * @property InvoiceStatus $status
+ * @property string $subtotal
+ * @property string $vat_amount
+ * @property string $total
+ * @property string $paid_amount
+ * @property string $credited_amount
+ * @property string $remaining_amount
+ * @property string|null $eta_qr
+ * @property string|null $zatca_qr
+ * @property Carbon|null $posting_date
+ * @property Carbon $issued_at
+ * @property Carbon|null $cancelled_at
+ * @property int|null $cancelled_by
+ * @property int|null $amended_from
+ * @property string|null $hash_chain
+ * @property string|null $cryptographic_stamp
+ * @property string $zatca_status
+ * @property Carbon|null $zatca_submitted_at
+ * @property string|null $zatca_response
+ * @property string $eta_status
+ * @property string|null $eta_submission_uuid
+ * @property string|null $eta_long_id
+ * @property Carbon|null $eta_submitted_at
+ * @property array<string, mixed>|null $eta_response
+ * @property array<string, mixed>|null $snapshot_company
+ * @property array<string, mixed>|null $snapshot_customer
+ * @property list<array<string, mixed>>|null $snapshot_items
+ * @property array<string, mixed>|null $snapshot_totals
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ *
+ * @method static \Illuminate\Database\Eloquent\Builder<static> query()
+ */
 class Invoice extends Model
 {
     use AppendOnly;
     use BelongsToCompany;
+
+    /** @use HasFactory<InvoiceFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -60,61 +106,73 @@ class Invoice extends Model
         });
     }
 
+    /** @return BelongsTo<Company, $this> */
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
+    /** @return BelongsTo<Customer, $this> */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<Visit, $this> */
     public function visit(): BelongsTo
     {
         return $this->belongsTo(Visit::class);
     }
 
+    /** @return BelongsTo<ProformaInvoice, $this> */
     public function proformaInvoice(): BelongsTo
     {
         return $this->belongsTo(ProformaInvoice::class, 'proforma_invoice_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function cancelledByUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'cancelled_by');
     }
 
+    /** @return BelongsTo<Invoice, $this> */
     public function amendedFrom(): BelongsTo
     {
         return $this->belongsTo(Invoice::class, 'amended_from');
     }
 
+    /** @return HasMany<InvoiceItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
     }
 
+    /** @return HasMany<Payment, $this> */
     public function payments(): HasMany
     {
         return $this->hasMany(Payment::class);
     }
 
+    /** @return HasMany<ReturnRecord, $this> */
     public function returns(): HasMany
     {
         return $this->hasMany(ReturnRecord::class, 'against_invoice_id');
     }
 
+    /** @return HasMany<CreditNote, $this> */
     public function creditNotes(): HasMany
     {
         return $this->hasMany(CreditNote::class);
     }
 
+    /** @return HasMany<InvoiceTax, $this> */
     public function taxes(): HasMany
     {
         return $this->hasMany(InvoiceTax::class);

@@ -79,7 +79,10 @@ class DailyVisitAssignmentService
         });
     }
 
-    /** @param  array<int>  $customerIds */
+    /**
+     * @param  array<int, int>  $customerIds
+     * @return array{created: int, skipped: int}
+     */
     public function bulkAssign(User $submitter, int $userId, string $visitDate, array $customerIds): array
     {
         throw_unless($submitter->can('daily_visit_assignments.create'), new AuthorizationException(

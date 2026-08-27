@@ -9,9 +9,13 @@ use App\Services\Contracts\InvoiceService;
 use App\Services\Contracts\LineItemInput;
 use App\Services\Contracts\PricingService;
 use App\Support\ThermalPrintFormatter;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
+/**
+ * @property list<array<string, mixed>> $cart
+ */
 #[Layout('layouts.app')]
 class SalesFlow extends Component
 {
@@ -25,6 +29,7 @@ class SalesFlow extends Component
 
     public string $productSearch = '';
 
+    /** @var list<array<string, mixed>> */
     public array $cart = [];
 
     public string $errorMessage = '';
@@ -33,6 +38,7 @@ class SalesFlow extends Component
 
     public int $createdInvoiceId = 0;
 
+    /** @var array<string, mixed> */
     public array $invoicePrintPayload = [];
 
     public ?string $printNotice = null;
@@ -154,7 +160,7 @@ class SalesFlow extends Component
 
     public function recalcCart(): void
     {
-        $vatPercent = (float) (auth()->user()?->company?->vat_percent ?? 0);
+        $vatPercent = (float) (auth()->user()?->company->vat_percent ?? 0);
 
         if (auth()->user() === null || auth()->user()->company === null) {
             $this->errorMessage = app()->getLocale() === 'ar'
@@ -188,14 +194,14 @@ class SalesFlow extends Component
         $calculation = app(InvoiceCalculationService::class)->calculate($inputs, (string) $vatPercent);
 
         foreach ($this->cart as $i => &$item) {
-            $item['line_total'] = $calculation->lines[$i]->lineTotal;
-            $item['vat_amount'] = $calculation->lines[$i]->vatAmount;
+            $item['line_total'] = (float) $calculation->lines[$i]->lineTotal;
+            $item['vat_amount'] = (float) $calculation->lines[$i]->vatAmount;
         }
         unset($item);
 
-        $this->cartSubtotal = $calculation->subtotal;
-        $this->cartVatAmount = $calculation->vatAmount;
-        $this->cartTotal = $calculation->total;
+        $this->cartSubtotal = (float) $calculation->subtotal;
+        $this->cartVatAmount = (float) $calculation->vatAmount;
+        $this->cartTotal = (float) $calculation->total;
     }
 
     public function submit(): void
@@ -296,7 +302,7 @@ class SalesFlow extends Component
         $this->recalcCart();
     }
 
-    public function render()
+    public function render(): View
     {
         $customers = collect();
         if (strlen($this->customerSearch) >= 2 && $this->customerId <= 0) {

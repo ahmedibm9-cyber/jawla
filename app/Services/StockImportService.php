@@ -112,7 +112,7 @@ class StockImportService
     }
 
     /**
-     * @return array{token: string, preview: array, expires_at: string, requires_approval: bool}
+     * @return array{token: string, preview: array{valid: list<array<string, mixed>>, errors: list<string>, checksum: string, headings_ok: bool}, expires_at: string, requires_approval: bool}
      */
     public function stage(string $absolutePath, Warehouse $warehouse, User $user): array
     {
@@ -126,7 +126,9 @@ class StockImportService
         ], $warehouse, $user);
     }
 
-    /** @return array{token: string, preview: array, expires_at: string, requires_approval: bool} */
+    /**
+     * @return array{token: string, preview: array{valid: list<array<string, mixed>>, errors: list<string>, checksum: string, headings_ok: bool}, expires_at: string, requires_approval: bool}
+     */
     public function stageFromDisk(string $disk, string $path, Warehouse $warehouse, User $user): array
     {
         $this->authorizeImporter($user, $warehouse);
@@ -145,7 +147,7 @@ class StockImportService
 
     /**
      * @param  array{local_path: string, stored_path: string, source_disk: ?string}  $source
-     * @return array{token: string, preview: array, expires_at: string, requires_approval: bool}
+     * @return array{token: string, preview: array{valid: list<array<string, mixed>>, errors: list<string>, checksum: string, headings_ok: bool}, expires_at: string, requires_approval: bool}
      */
     private function stagePreview(array $source, Warehouse $warehouse, User $user): array
     {
@@ -314,7 +316,7 @@ class StockImportService
         }
     }
 
-    /** @return array{valid: array, errors: array, checksum: string, headings_ok: bool} */
+    /** @return array{valid: list<array<string, mixed>>, errors: list<string>, checksum: string, headings_ok: bool} */
     private function reparseStagedFile(StockImportPreview $staged, Warehouse $warehouse): array
     {
         $verify = function (string $localPath) use ($staged, $warehouse): array {
@@ -325,9 +327,7 @@ class StockImportService
             return $this->preview($localPath, $warehouse);
         };
 
-        return $staged->source_disk === null
-            ? $verify($staged->file_path)
-            : $this->withLocalCopy($staged->source_disk, $staged->file_path, $verify);
+        return $this->withLocalCopy($staged->source_disk, $staged->file_path, $verify);
     }
 
     private function withLocalCopy(string $disk, string $path, callable $callback): mixed

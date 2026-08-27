@@ -6,7 +6,26 @@ use App\Enums\DeviceStatus;
 use App\Models\Concerns\BelongsToCompany;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $company_id
+ * @property int $user_id
+ * @property string $device_uuid
+ * @property string $name
+ * @property string $platform
+ * @property string|null $fingerprint_hash
+ * @property DeviceStatus $status
+ * @property array<string, mixed>|null $metadata
+ * @property Carbon|null $last_seen_at
+ * @property int|null $approved_by
+ * @property Carbon|null $approved_at
+ * @property int|null $revoked_by
+ * @property Carbon|null $revoked_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class Device extends Model
 {
     use BelongsToCompany;
@@ -28,16 +47,19 @@ class Device extends Model
         ];
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function approver(): BelongsTo
     {
         return $this->belongsTo(User::class, 'approved_by');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function revoker(): BelongsTo
     {
         return $this->belongsTo(User::class, 'revoked_by');

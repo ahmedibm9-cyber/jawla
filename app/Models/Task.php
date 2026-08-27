@@ -8,7 +8,36 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $company_id
+ * @property int $created_by
+ * @property int|null $assigned_to
+ * @property int|null $reviewer_id
+ * @property int|null $final_approver_id
+ * @property int|null $customer_id
+ * @property string $title
+ * @property string|null $note
+ * @property Carbon|null $due_date
+ * @property TaskStatus $status
+ * @property string|null $priority
+ * @property bool $requires_approval
+ * @property array<string, mixed>|null $checklist
+ * @property string|null $completion_notes
+ * @property string|null $decision_reason
+ * @property Carbon|null $completed_at
+ * @property Carbon|null $accepted_at
+ * @property Carbon|null $started_at
+ * @property Carbon|null $submitted_at
+ * @property Carbon|null $approved_at
+ * @property Carbon|null $rejected_at
+ * @property Carbon|null $reopened_at
+ * @property Carbon|null $cancelled_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class Task extends Model
 {
     use BelongsToCompany;
@@ -40,41 +69,49 @@ class Task extends Model
         ];
     }
 
+    /** @return BelongsTo<User, $this> */
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function assignedTo(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function reviewer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'reviewer_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function finalApprover(): BelongsTo
     {
         return $this->belongsTo(User::class, 'final_approver_id');
     }
 
+    /** @return BelongsTo<Customer, $this> */
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
 
+    /** @return MorphMany<ApprovalRequest, $this> */
     public function approvals(): MorphMany
     {
         return $this->morphMany(ApprovalRequest::class, 'approvable');
     }
 
+    /** @return MorphOne<ApprovalRequest, $this> */
     public function latestApproval(): MorphOne
     {
         return $this->morphOne(ApprovalRequest::class, 'approvable')->latestOfMany();
     }
 
+    /** @return MorphMany<Photo, $this> */
     public function photos(): MorphMany
     {
         return $this->morphMany(Photo::class, 'photable');

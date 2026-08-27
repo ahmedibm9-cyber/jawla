@@ -1,9 +1,9 @@
 <!doctype html>
-<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" data-theme="{{ session('theme', 'light') }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0F172A">
+  <meta name="theme-color" content="#4A8C2A">
   <link rel="icon" href="/images/logo-app-icon.webp" type="image/webp">
   <link rel="icon" href="/icons/icon-192.png" type="image/png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
@@ -12,6 +12,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="preconnect" href="https://fonts.bunny.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
   @php
     $pageKeyMap = [
         'home' => 'home', 'visits' => 'visits', 'visit' => 'visits',
@@ -44,7 +46,7 @@
       const saved = localStorage.getItem('theme');
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       if (saved === 'dark' || (!saved && prefersDark)) {
-        document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
       }
     })();
   </script>
@@ -76,6 +78,9 @@
       $hasCriticalNotification = (bool) ($notificationSummary->has_critical ?? false);
     @endphp
     <header class="notification-header">
+      <a href="/app/profile" class="header-avatar" aria-label="{{ __('app.profile') }}">
+        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+      </a>
       <x-_active-company panel="rep" />
       {{-- CG2 offline sync-status badge: pending/failed count from the outbox --}}
       <a href="/app/sync-queue" aria-label="{{ l('قائمة المزامنة', 'Sync queue') }}"

@@ -4,6 +4,7 @@ namespace App\Livewire\App;
 
 use App\Models\CashBox;
 use App\Services\ExpenseService;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -77,7 +78,7 @@ class LogExpense extends Component
         $this->reset(['category', 'amount', 'note']);
     }
 
-    public function render()
+    public function render(): View
     {
         $cashBox = CashBox::where('user_id', auth()->id())->first();
         $cashBoxBalance = $cashBox ? (float) $cashBox->balance : 0;

@@ -12,9 +12,6 @@ class RepProvisioningService
     public function provision(User $user): void
     {
         $companyId = $user->company_id;
-        if ($companyId === null) {
-            return;
-        }
 
         DB::transaction(function () use ($user, $companyId): void {
             Warehouse::firstOrCreate(

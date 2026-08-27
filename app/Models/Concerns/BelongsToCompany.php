@@ -33,9 +33,9 @@ trait BelongsToCompany
                 return;
             }
 
-            if ($model->company_id === null) {
-                $model->company_id = $companyId;
-            } elseif ((int) $model->company_id !== $companyId) {
+            if ($model->getAttribute('company_id') === null) {
+                $model->setAttribute('company_id', $companyId);
+            } elseif ((int) $model->getAttribute('company_id') !== $companyId) {
                 throw new AuthorizationException('Cross-company writes are forbidden.');
             }
         });
@@ -52,7 +52,7 @@ trait BelongsToCompany
                 return;
             }
 
-            if ((int) $model->company_id !== $companyId) {
+            if ((int) $model->getAttribute('company_id') !== $companyId) {
                 throw new AuthorizationException('Cross-company writes are forbidden.');
             }
         };

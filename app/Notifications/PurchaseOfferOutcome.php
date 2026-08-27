@@ -15,7 +15,7 @@ class PurchaseOfferOutcome extends RepNotification
 
     public function toDatabase(object $notifiable): array
     {
-        $product = $this->request->product?->name_ar ?? "#{$this->request->id}";
+        $product = $this->request->product->name_ar ?? "#{$this->request->id}";
         $reasonAr = $this->reason ? " — السبب: {$this->reason}" : '';
         $reasonEn = $this->reason ? " — Reason: {$this->reason}" : '';
 

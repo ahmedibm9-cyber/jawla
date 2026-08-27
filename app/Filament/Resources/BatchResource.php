@@ -90,7 +90,7 @@ class BatchResource extends Resource
                 Tables\Filters\Filter::make('expired')->label(l('منتهية', 'Expired'))
                     ->query(fn (Builder $q) => $q->whereNotNull('expiry_date')->whereDate('expiry_date', '<', today())),
                 Tables\Filters\Filter::make('expiring_soon')->label(l('قريبة الانتهاء', 'Expiring soon'))
-                    ->query(fn (Builder $q) => $q->expiringWithin(30)),
+                    ->query(fn (Builder $q) => $q->whereNotNull('expiry_date')->whereBetween('expiry_date', [today(), now()->addDays(30)])),
                 Tables\Filters\TernaryFilter::make('is_active')->label(l('نشطة', 'Active')),
             ])
             ->defaultSort('expiry_date', 'asc')

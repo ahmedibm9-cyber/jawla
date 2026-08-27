@@ -11,6 +11,7 @@ use Illuminate\Notifications\Notification;
  */
 abstract class RepNotification extends Notification
 {
+    /** @return list<string> */
     public function via(object $notifiable): array
     {
         return config('jawla.push.gateway_url')

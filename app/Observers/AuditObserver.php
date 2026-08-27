@@ -5,12 +5,14 @@ namespace App\Observers;
 use App\Models\Activity;
 use App\Models\PriceQuotation;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 class AuditObserver
 {
     /** @var array<int, string> */
     private const USER_AUDITABLE_ATTRIBUTES = ['name', 'email', 'is_active', 'company_id'];
 
+    /** @param Model $model */
     public function updated($model): void
     {
         if (! $model instanceof User) {
@@ -28,6 +30,7 @@ class AuditObserver
         Activity::log('user_edit', $model, "User edited: {$model->email}", ['changed' => $dirty]);
     }
 
+    /** @param Model $model */
     public function created($model): void
     {
         if (! $model instanceof PriceQuotation) {

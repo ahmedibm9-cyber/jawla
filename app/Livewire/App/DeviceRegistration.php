@@ -4,6 +4,7 @@ namespace App\Livewire\App;
 
 use App\Models\Device;
 use App\Services\DeviceService;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -62,7 +63,7 @@ class DeviceRegistration extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.app.device-registration');
     }

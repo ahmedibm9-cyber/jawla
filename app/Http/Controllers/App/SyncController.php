@@ -36,7 +36,7 @@ class SyncController
             'device_id' => $op['deviceId'] ?? $deviceId,
         ], $data['operations']);
 
-        $results = $sync->process(Auth::user(), $operations, (int) $request->header('X-Sync-Protocol-Version', 1));
+        $results = $sync->process(Auth::user(), $operations, (int) $request->header('X-Sync-Protocol-Version'));
 
         return response()->json(['results' => $results]);
     }

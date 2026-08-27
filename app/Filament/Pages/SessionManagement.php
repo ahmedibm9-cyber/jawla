@@ -22,6 +22,7 @@ class SessionManagement extends Page
 
     protected string $view = 'filament.pages.session-management';
 
+    /** @return array<int, object{id: string, user_id: int, user_name: string, user_email: string, ip_address: string|null, user_agent: string, last_activity: int, is_current: bool}> */
     public function getSessions(): array
     {
         return app(SessionService::class)

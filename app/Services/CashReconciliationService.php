@@ -32,7 +32,7 @@ class CashReconciliationService
             }
 
             $cashBox = CashBox::withoutGlobalScopes()->where('user_id', $userId)->lockForUpdate()->first();
-            if ($cashBox !== null && $cashBox->company_id !== null && $cashBox->company_id !== $companyId) {
+            if ($cashBox !== null && $cashBox->company_id !== $companyId) {
                 throw new DomainException('errors.resource.cash_box');
             }
             $expected = $cashBox ? (float) $cashBox->balance : 0.0;

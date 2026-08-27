@@ -2,6 +2,7 @@
 
 namespace App\Livewire\App;
 
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -13,7 +14,7 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class SyncQueue extends Component
 {
-    public function render()
+    public function render(): View
     {
         return view('livewire.app.sync-queue');
     }

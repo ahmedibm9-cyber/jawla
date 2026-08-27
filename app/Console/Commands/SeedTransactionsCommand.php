@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\InvoiceStatus;
 use App\Enums\StockReason;
 use App\Models\Alarm;
 use App\Models\Company;
@@ -124,7 +125,7 @@ class SeedTransactionsCommand extends Command
             $reqStatuses = ['pending', 'pending', 'pending', 'sales_approved', 'sales_approved', 'purchasing_approved', 'rejected_by_sales', 'purchasing_approved', 'pending', 'pending'];
             for ($i = 0; $i < 10; $i++) {
                 $prod = $products->random();
-                PurchaseRequest::create(['company_id' => $company->id, 'user_id' => $i % 2 === 0 ? $rep1->id : $rep2->id, 'product_id' => $prod->id, 'quantity' => rand(5, 40), 'offered_price' => $prod->cost * (rand(90, 110) / 100), 'currency' => 'EGP', 'status' => $reqStatuses[$i]]);
+                PurchaseRequest::create(['company_id' => $company->id, 'user_id' => $i % 2 === 0 ? $rep1->id : $rep2->id, 'product_id' => $prod->id, 'quantity' => rand(5, 40), 'offered_price' => (float) $prod->cost * (rand(90, 110) / 100), 'currency' => 'EGP', 'status' => $reqStatuses[$i]]);
             }
 
             // Invoices
@@ -144,7 +145,7 @@ class SeedTransactionsCommand extends Command
                 for ($j = 0; $j < $itemCount; $j++) {
                     $prod = $products->random();
                     $qty = rand(1, 8);
-                    $price = $prod->price;
+                    $price = (float) $prod->price;
                     $lineTotal = $qty * $price;
                     $subtotal += $lineTotal;
                     $items[] = ['product' => $prod, 'qty' => $qty, 'price' => $price, 'line' => $lineTotal];
@@ -175,10 +176,10 @@ class SeedTransactionsCommand extends Command
             // Payments
             $paymentMethods = ['cash', 'cheque', 'transfer'];
             foreach ($invoices as $inv) {
-                if ($inv->status === 'cancelled' || rand(1, 10) > 8) {
+                if ($inv->status === InvoiceStatus::Cancelled || rand(1, 10) > 8) {
                     continue;
                 }
-                $amount = rand(1, 10) <= 6 ? $inv->total : round($inv->total * (rand(3, 8) / 10), 2);
+                $amount = rand(1, 10) <= 6 ? $inv->total : round((float) $inv->total * (rand(3, 8) / 10), 2);
                 $method = $paymentMethods[array_rand($paymentMethods)];
                 Payment::create([
                     'company_id' => $company->id,
@@ -191,10 +192,10 @@ class SeedTransactionsCommand extends Command
                     'collected_at' => $inv->issued_at->copy()->addDays(rand(0, 15)),
                     'posting_date' => $inv->issued_at,
                 ]);
-                $inv->update(['paid_amount' => $inv->paid_amount + $amount, 'remaining_amount' => $inv->remaining_amount - $amount]);
+                $inv->update(['paid_amount' => (float) $inv->paid_amount + $amount, 'remaining_amount' => (float) $inv->remaining_amount - $amount]);
                 if ($inv->remaining_amount <= 0) {
                     $inv->update(['status' => 'paid']);
-                } elseif ($inv->paid_amount > 0 && $inv->status !== 'paid') {
+                } elseif ($inv->paid_amount > 0 && $inv->status !== InvoiceStatus::Paid) {
                     $inv->update(['status' => 'partially_paid']);
                 }
             }
@@ -211,7 +212,7 @@ class SeedTransactionsCommand extends Command
                 ReturnItem::create(['return_id' => $ret->id, 'product_id' => $item->product_id, 'quantity' => $item->quantity, 'unit_price' => $item->unit_price, 'line_total' => $item->line_total]);
                 $van = Warehouse::where('user_id', $inv->user_id)->where('type', 'van')->first();
                 if ($van) {
-                    $stockService->increment($van->id, $item->product_id, null, $item->quantity, StockReason::Return, $ret);
+                    $stockService->increment($van->id, $item->product_id, null, (float) $item->quantity, StockReason::Return, $ret);
                 }
             }
 

@@ -17,6 +17,9 @@ class OrganizationScopeService
      * Limit a user query to the actor's assigned organization subtree.
      * Administrators and users without an explicit unit retain company-wide
      * access, preserving existing installations until scopes are configured.
+     *
+     * @param  Builder<User>  $query
+     * @return Builder<User>
      */
     public function scopeUsers(Builder $query, User $actor): Builder
     {
@@ -42,7 +45,10 @@ class OrganizationScopeService
         });
     }
 
-    /** @param list<int> $rootIds @return list<int> */
+    /**
+     * @param  list<int>  $rootIds
+     * @return list<int>
+     */
     public function descendantIds(array $rootIds): array
     {
         $all = collect($rootIds)->map(fn ($id): int => (int) $id)->unique();

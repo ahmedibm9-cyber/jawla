@@ -5,6 +5,7 @@ namespace App\Livewire\App;
 use App\Services\LocationPingService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\View\View;
 use Livewire\Component;
 
 /**
@@ -53,7 +54,7 @@ class LocationTracker extends Component
         app(LocationPingService::class)->record($rep, $latitude, $longitude, $accuracy);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.app.location-tracker');
     }

@@ -8,6 +8,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Services\ReturnRequestService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -22,6 +23,7 @@ class LogReturn extends Component
 
     public string $reason = '';
 
+    /** @var list<array{invoice_item_id: string|int, quantity: int|float, condition: string}> */
     public array $items = [];
 
     public bool $success = false;
@@ -98,7 +100,7 @@ class LogReturn extends Component
         $this->addItem();
     }
 
-    public function render()
+    public function render(): View
     {
         $user = auth()->user();
         $companyId = $user->activeCompanyId();

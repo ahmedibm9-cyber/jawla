@@ -28,14 +28,15 @@ class FilamentAuthenticate extends Middleware
         return $next($request);
     }
 
+    /**
+     * @param  array<int, string>  $guards
+     */
     protected function authenticate($request, array $guards): void
     {
         $guard = Filament::auth();
 
         if (! $guard->check()) {
             $this->unauthenticated($request, $guards);
-
-            return;
         }
 
         $this->auth->shouldUse(Filament::getAuthGuard());

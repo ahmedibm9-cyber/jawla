@@ -20,6 +20,11 @@ class VisitsTodayWidget extends StatsOverviewWidget
         $companyId = $user->activeCompanyId();
         $lang = app()->getLocale() === 'ar' ? 'ar' : 'en';
 
+        $labels = [
+            'ar' => ['الزيارات اليوم', 'مكتملة', 'معلقة'],
+            'en' => ["Today's Visits", 'Completed', 'Pending'],
+        ];
+
         try {
             $assigned = DailyVisitAssignment::where('company_id', $companyId)
                 ->whereDate('visit_date', today())
@@ -34,11 +39,6 @@ class VisitsTodayWidget extends StatsOverviewWidget
                 ->whereDate('visit_date', today())
                 ->where('status', 'approved')
                 ->count();
-
-            $labels = [
-                'ar' => ['الزيارات اليوم', 'مكتملة', 'معلقة'],
-                'en' => ["Today's Visits", 'Completed', 'Pending'],
-            ];
 
             return [
                 Stat::make($labels[$lang][0], $assigned)

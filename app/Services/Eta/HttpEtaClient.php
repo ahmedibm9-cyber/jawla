@@ -4,6 +4,7 @@ namespace App\Services\Eta;
 
 use App\Services\Eta\Contracts\EtaClient;
 use App\Services\Eta\Contracts\EtaSigner;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Throwable;
 
@@ -118,7 +119,10 @@ class HttpEtaClient implements EtaClient
         );
     }
 
-    /** @return array<string, mixed> */
+    /**
+     * @param  Response  $response
+     * @return array<string, mixed>
+     */
     private function safeJson($response): array
     {
         try {

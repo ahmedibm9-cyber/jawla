@@ -5,6 +5,7 @@ namespace App\Livewire\App;
 use App\Enums\VanTransferStatus;
 use App\Models\VanTransfer;
 use App\Services\Contracts\VanTransferService;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -36,7 +37,7 @@ class VanTransfers extends Component
         }
     }
 
-    public function render()
+    public function render(): View
     {
         $userId = auth()->id();
 

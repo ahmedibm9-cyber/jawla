@@ -8,6 +8,7 @@ use App\Models\ProformaInvoice;
 use App\Models\VisitReport;
 use App\Support\CsvCell;
 use Filament\Pages\Page;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 use Livewire\WithPagination;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -59,6 +60,7 @@ class ReportsPage extends Page
         $this->resetPage();
     }
 
+    /** @return LengthAwarePaginator<int, VisitReport> */
     public function getVisitsProperty()
     {
         $this->authorizeTab('visit_reports');
@@ -76,6 +78,7 @@ class ReportsPage extends Page
         return $q->paginate(100, pageName: 'visitPage');
     }
 
+    /** @return LengthAwarePaginator<int, PriceQuotationRequest> */
     public function getQuotationsProperty()
     {
         $this->authorizeTab('quotations');
@@ -93,6 +96,7 @@ class ReportsPage extends Page
         return $q->paginate(100, pageName: 'quotationPage');
     }
 
+    /** @return LengthAwarePaginator<int, ProformaInvoice> */
     public function getProformasProperty()
     {
         $this->authorizeTab('proformas');
@@ -110,6 +114,7 @@ class ReportsPage extends Page
         return $q->paginate(100, pageName: 'proformaPage');
     }
 
+    /** @return LengthAwarePaginator<int, Invoice> */
     public function getInvoicesProperty()
     {
         $this->authorizeTab('invoices');
@@ -149,6 +154,7 @@ class ReportsPage extends Page
         ]);
     }
 
+    /** @param resource $output */
     private function exportVisits($output): void
     {
         $this->writeCsv($output, ['Representative', 'Customer', 'Submitted at', 'Summary']);
@@ -160,6 +166,7 @@ class ReportsPage extends Page
         }
     }
 
+    /** @param resource $output */
     private function exportQuotations($output): void
     {
         $this->writeCsv($output, ['Customer', 'Product', 'Quantity', 'Price', 'Status']);
@@ -173,6 +180,7 @@ class ReportsPage extends Page
         }
     }
 
+    /** @param resource $output */
     private function exportProformas($output): void
     {
         $this->writeCsv($output, ['Number', 'Customer', 'Total', 'Posting date', 'Status']);
@@ -186,6 +194,7 @@ class ReportsPage extends Page
         }
     }
 
+    /** @param resource $output */
     private function exportInvoices($output): void
     {
         $this->writeCsv($output, ['Number', 'Customer', 'Total', 'Remaining', 'Issued at', 'Status']);
@@ -195,10 +204,11 @@ class ReportsPage extends Page
             ->orderBy('id');
         $this->applyDateRange($query, 'issued_at');
         foreach ($query->lazyById(500) as $invoice) {
-            $this->writeCsv($output, [$invoice->invoice_number, $invoice->customer?->name_ar, $invoice->total, $invoice->remaining_amount, $invoice->issued_at?->toIso8601String(), $invoice->status?->value ?? $invoice->status]);
+            $this->writeCsv($output, [$invoice->invoice_number, $invoice->customer?->name_ar, $invoice->total, $invoice->remaining_amount, $invoice->issued_at->toIso8601String(), $invoice->status->value]);
         }
     }
 
+    /** @param object $query */
     private function applyDateRange($query, string $column): void
     {
         if ($this->fromDate) {
@@ -226,7 +236,10 @@ class ReportsPage extends Page
         return $permission !== null && (Auth::user()?->can($permission) ?? false);
     }
 
-    /** @param resource $output @param list<mixed> $cells */
+    /**
+     * @param  resource  $output
+     * @param  list<int|string|null>  $cells
+     */
     private function writeCsv($output, array $cells): void
     {
         fputcsv($output, array_map(CsvCell::neutralize(...), $cells));

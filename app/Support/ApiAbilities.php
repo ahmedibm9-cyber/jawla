@@ -33,7 +33,7 @@ final class ApiAbilities
         return array_keys(self::all());
     }
 
-    /** Bilingual label => key map for a Filament CheckboxList. */
+    /** @return array<string, string> Bilingual label => key map for a Filament CheckboxList. */
     public static function options(): array
     {
         $ar = app()->getLocale() === 'ar';

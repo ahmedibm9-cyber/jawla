@@ -13,7 +13,7 @@ class ComplaintResolved extends RepNotification
 
     public function toDatabase(object $notifiable): array
     {
-        $customer = $this->complaint->customer?->name_ar ?? "#{$this->complaint->id}";
+        $customer = $this->complaint->customer->name_ar ?? "#{$this->complaint->id}";
 
         return [
             'title_ar' => 'تم حل الشكوى',

@@ -79,7 +79,7 @@ class AdminPreferences extends Page
     {
         abort_unless(self::canAccess(), 403);
 
-        Auth::user()->setPreference('nav_group_order', array_values($this->order));
+        Auth::user()->setPreference('nav_group_order', $this->order);
 
         Notification::make()
             ->success()

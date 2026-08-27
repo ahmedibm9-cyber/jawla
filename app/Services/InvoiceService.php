@@ -33,6 +33,7 @@ class InvoiceService implements InvoiceContract
         private readonly PricingContract $pricing,
     ) {}
 
+    /** @param array<string, mixed> $data */
     public function create(array $data): Invoice
     {
         app(ActiveCompanyContext::class)->assertMatches((int) $data['company_id']);
@@ -105,7 +106,7 @@ class InvoiceService implements InvoiceContract
                 $lineInputs[] = new LineItemInput(
                     qty: (string) $item['quantity'],
                     unitPrice: (string) $effectivePrice,
-                    vatApplicable: (bool) ($prod?->vat_applicable ?? true),
+                    vatApplicable: (bool) ($prod->vat_applicable ?? true),
                 );
             }
 
@@ -248,7 +249,7 @@ class InvoiceService implements InvoiceContract
                 return $invoice->fresh();
             }
             $locked = Invoice::with('items')->whereKey($invoice->id)->lockForUpdate()->firstOrFail();
-            if (! $locked->issued_at?->isToday()) {
+            if (! $locked->issued_at->isToday()) {
                 throw new DomainException('Only an eligible same-day invoice may be voided.');
             }
             if ($locked->payments()->whereNull('cancelled_at')->exists()) {
@@ -410,6 +411,7 @@ class InvoiceService implements InvoiceContract
         return $warehouse;
     }
 
+    /** @return array<string, mixed> */
     private function buildCompanySnapshot(Company $company): array
     {
         return [
@@ -423,6 +425,7 @@ class InvoiceService implements InvoiceContract
         ];
     }
 
+    /** @return array<string, mixed> */
     private function buildCustomerSnapshot(Customer $customer): array
     {
         return [

@@ -5,7 +5,7 @@
 
     <div class="page-body">
         {{-- Theme --}}
-        <div class="card mb-4" x-data="{ dark: localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches) }" x-init="$watch('dark', val => { document.documentElement.classList.toggle('dark', val); localStorage.setItem('theme', val ? 'dark' : 'light') }); $el.querySelector('button').addEventListener('click', () => dark = !dark)">
+        <div class="card mb-4" x-data="{ dark: localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches) }" x-init="$watch('dark', val => { document.documentElement.setAttribute('data-theme', val ? 'dark' : 'light'); localStorage.setItem('theme', val ? 'dark' : 'light') }); $el.querySelector('button').addEventListener('click', () => dark = !dark)">
             <h3 class="m-0 mb-3 text-base font-semibold">{{ __('app.theme') }}</h3>
             <div class="settings-lang-btns">
                 <button type="button" class="settings-lang-btn" :class="{ 'active': !dark }" @click="dark = false">

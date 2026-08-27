@@ -20,6 +20,7 @@ class VanTransferService implements VanTransferServiceContract
         private readonly StockServiceContract $stock,
     ) {}
 
+    /** @param array<int, array{product_id: int, quantity: float, batch_id?: int|null}> $items */
     public function create(int $companyId, int $fromUserId, int $toUserId, array $items, ?int $inTransitWarehouseId = null): VanTransfer
     {
         app(ActiveCompanyContext::class)->assertMatches($companyId);
@@ -119,6 +120,7 @@ class VanTransferService implements VanTransferServiceContract
         });
     }
 
+    /** @param array<int, float>|null $itemQuantities */
     public function receive(int $transferId, int $userId, ?array $itemQuantities = null): VanTransfer
     {
         return DB::transaction(function () use ($transferId, $userId, $itemQuantities): VanTransfer {

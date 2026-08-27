@@ -22,6 +22,7 @@ class CollectionSubmissionService
         private readonly OrganizationScopeService $organizationScope,
     ) {}
 
+    /** @param array<string, mixed> $attributes */
     public function submit(User $rep, int $customerId, float $amount, string $method, array $attributes = []): CollectionSubmission
     {
         $this->licenses->assertRuntimeFeature('field_sales');

@@ -12,7 +12,7 @@ class OutOfStockResolved extends RepNotification
 
     public function toDatabase(object $notifiable): array
     {
-        $product = $this->request->product?->name_ar ?? "#{$this->request->product_id}";
+        $product = $this->request->product->name_ar ?? "#{$this->request->product_id}";
 
         return [
             'title_ar' => 'تم توفير المنتج',

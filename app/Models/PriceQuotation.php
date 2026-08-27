@@ -4,7 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $price_quotation_request_id
+ * @property string $base_price
+ * @property string $manager_plus
+ * @property string $manager_minus
+ * @property string $rep_plus
+ * @property string $rep_minus
+ * @property int $priced_by
+ * @property Carbon|null $priced_at
+ * @property Carbon|null $valid_until
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class PriceQuotation extends Model
 {
     protected $fillable = [
@@ -24,11 +39,13 @@ class PriceQuotation extends Model
         'valid_until' => 'date',
     ];
 
+    /** @return BelongsTo<PriceQuotationRequest, $this> */
     public function request(): BelongsTo
     {
         return $this->belongsTo(PriceQuotationRequest::class, 'price_quotation_request_id');
     }
 
+    /** @return BelongsTo<User, $this> */
     public function pricedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'priced_by');

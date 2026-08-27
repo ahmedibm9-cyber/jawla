@@ -3,6 +3,7 @@
 namespace App\Livewire\App;
 
 use Illuminate\Support\Facades\Hash;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -94,7 +95,7 @@ class ProfilePage extends Component
         $this->reset(['currentPassword', 'newPassword', 'newPasswordConfirmation']);
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.app.profile', [
             'user' => auth()->user()->load('company'),

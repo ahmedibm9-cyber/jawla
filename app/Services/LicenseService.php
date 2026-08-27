@@ -61,10 +61,8 @@ class LicenseService
         $license = $this->verify($license);
         throw_unless($license->status === 'active', new \DomainException('The installation license is not active.'));
 
-        if ($license->max_users !== null) {
-            $activeUsers = User::query()->where('is_active', true)->count();
-            throw_if($activeUsers > $license->max_users, new \DomainException('The active user count exceeds the licensed limit.'));
-        }
+        $activeUsers = User::query()->where('is_active', true)->count();
+        throw_if($activeUsers > $license->max_users, new \DomainException('The active user count exceeds the licensed limit.'));
 
         return $license;
     }
@@ -104,10 +102,6 @@ class LicenseService
         }
 
         $license = $this->assertValid();
-        if ($license->max_users === null) {
-            return;
-        }
-
         $activeUsers = User::query()->where('is_active', true)
             ->when($userId !== null, fn ($query) => $query->whereKeyNot($userId))
             ->count();
@@ -141,7 +135,7 @@ class LicenseService
         } catch (\Throwable) {
             throw new \DomainException('License validity dates are invalid.');
         }
-        throw_unless($validFrom !== false && $expiresAt !== false && $expiresAt->gte($validFrom), new \DomainException('License validity dates are invalid.'));
+        throw_unless($validFrom !== null && $expiresAt !== null && $expiresAt->gte($validFrom), new \DomainException('License validity dates are invalid.'));
         $configuredInstallation = (string) config('jawla.license.installation_id');
         if (app()->isProduction()) {
             throw_if($configuredInstallation === '', new \DomainException('JAWLA_INSTALLATION_ID is required in production.'));
@@ -155,7 +149,10 @@ class LicenseService
         return $payload;
     }
 
-    /** @param array<string, mixed> $payload @return array<string, mixed> */
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array{licensee: string, installation_id: string|null, edition: string, max_users: int|null, features: list<string>, valid_from: string, expires_at: string}
+     */
     private function persistedClaims(array $payload): array
     {
         return [

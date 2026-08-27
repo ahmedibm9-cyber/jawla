@@ -86,8 +86,6 @@ class ExpenseService
                 'user_id' => $userId,
                 'balance' => 0,
             ]);
-        } elseif ($cashBox->company_id === null) {
-            $cashBox->update(['company_id' => $companyId]);
         }
 
         return $cashBox->refresh();

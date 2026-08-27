@@ -12,7 +12,6 @@ class ReversalService
     public function __construct(
         private readonly InvoiceService $invoices,
         private readonly PaymentService $payments,
-        private readonly ExpenseService $expenses,
     ) {}
 
     public function reverseInvoice(Invoice $invoice, string $reason): Invoice

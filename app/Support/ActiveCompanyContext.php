@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Company;
+use App\Models\User;
 use Closure;
 use Illuminate\Auth\Access\AuthorizationException;
 
@@ -17,7 +18,7 @@ final class ActiveCompanyContext
         $this->allowUnscoped = app()->runningUnitTests();
     }
 
-    public function setFromUser($user, ?int $companyId = null): void
+    public function setFromUser(?User $user, ?int $companyId = null): void
     {
         if ($user === null) {
             $this->enforce();

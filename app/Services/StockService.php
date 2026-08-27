@@ -44,7 +44,7 @@ class StockService implements StockServiceContract
             $query->where('batch_id', $batchId);
         }
 
-        return (float) ($query->sum('quantity') ?? 0);
+        return (float) $query->sum('quantity');
     }
 
     public function reconcile(int $warehouseId, int $productId, ?int $batchId, float $countedQty, string $reason, int $userId, ?float $expectedQty = null, ?Model $reference = null): StockMovement
@@ -77,7 +77,7 @@ class StockService implements StockServiceContract
                 );
             }
             $difference = $countedQty - $current;
-            $stock->quantity = $countedQty;
+            $stock->quantity = (string) $countedQty;
             $stock->save();
 
             return StockMovement::create([
@@ -115,16 +115,16 @@ class StockService implements StockServiceContract
                 ]);
             }
 
-            $newQty = $stock->quantity + $qty;
+            $newQty = (float) $stock->quantity + $qty;
 
             if ($newQty < 0) {
                 throw new InsufficientStockException(
                     'errors.stock.insufficient',
-                    ['product' => $productId, 'available' => $stock->quantity],
+                    ['product' => (string) $productId, 'available' => (string) $stock->quantity],
                 );
             }
 
-            $stock->quantity = $newQty;
+            $stock->quantity = (string) $newQty;
             $stock->save();
 
             return StockMovement::create([
@@ -134,7 +134,7 @@ class StockService implements StockServiceContract
                 'quantity_change' => $qty,
                 'reason' => $reason,
                 'reference_type' => $ref::class,
-                'reference_id' => $ref->id,
+                'reference_id' => $ref->id, // @phpstan-ignore-line property.notFound
                 'user_id' => $userId,
             ]);
         });
@@ -145,7 +145,7 @@ class StockService implements StockServiceContract
         $batch = Batch::with('product')->find($batchId);
 
         if (! $batch) {
-            throw new DomainException('errors.batch.not_found', ['batch' => $batchId]);
+            throw new DomainException('errors.batch.not_found', ['batch' => (string) $batchId]);
         }
 
         if (! $batch->is_active) {

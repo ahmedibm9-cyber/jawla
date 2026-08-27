@@ -44,6 +44,8 @@ class RoleSeeder extends Seeder
             'expenses.log', 'purchase_requests.submit', 'alarms.flag_out_of_stock',
             'complaints.submit', 'cashbox.view', 'van_transfers.request',
             'tasks.accept', 'tasks.progress', 'tasks.submit',
+            'todos.create', 'tickets.create', 'requests.create', 'calls.log',
+            'requests.approve', 'requests.reject',
             // HR administration
             'users.manage', 'roles.assign', 'routes.assign',
             // Restricted settings pages
@@ -94,6 +96,11 @@ class RoleSeeder extends Seeder
             'webhook_endpoint' => ['view_any', 'view', 'create', 'update', 'delete'],
             'webhook_delivery' => ['view_any', 'view', 'create', 'update', 'delete'],
             'installation_license' => ['view_any', 'view', 'create', 'update', 'delete'],
+            // M7: Competitor gap closure
+            'todo' => ['view_any', 'view', 'create', 'update', 'delete'],
+            'ticket' => ['view_any', 'view', 'create', 'update', 'delete'],
+            'request' => ['view_any', 'view', 'create', 'update', 'delete'],
+            'call' => ['view_any', 'view', 'create', 'update', 'delete'],
         ];
 
         foreach ($shieldPermissions as $resource => $actions) {
@@ -174,6 +181,12 @@ class RoleSeeder extends Seeder
                 'view_any:sales_order', 'view:sales_order', 'sales_orders.approve',
                 'view_any:collection_submission', 'view:collection_submission', 'collections.review',
                 'view_any:return_request', 'view:return_request', 'return_requests.approve',
+                // M7
+                'view_any:todo', 'view:todo', 'create:todo', 'update:todo',
+                'view_any:ticket', 'view:ticket', 'create:ticket', 'update:ticket',
+                'view_any:request', 'view:request', 'create:request', 'update:request',
+                'view_any:call', 'view:call', 'create:call', 'update:call',
+                'requests.approve', 'requests.reject',
             ],
 
             'accounts' => [
@@ -263,6 +276,12 @@ class RoleSeeder extends Seeder
                 // Shield resource permissions required by services that gate on
                 // can('create:...') / can('update:...') instead of custom names.
                 'create:invoice', 'create:return_record', 'update:invoice',
+                // M7
+                'create:todo', 'update:todo',
+                'create:ticket', 'update:ticket',
+                'create:request', 'update:request',
+                'create:call', 'update:call',
+                'todos.create', 'tickets.create', 'requests.create', 'calls.log',
             ],
 
             'rep' => [
@@ -279,6 +298,12 @@ class RoleSeeder extends Seeder
                 'sales_orders.create',
                 // Shield resource permissions required by services (see sales_rep).
                 'create:invoice', 'create:return_record', 'update:invoice',
+                // M7
+                'create:todo', 'update:todo',
+                'create:ticket', 'update:ticket',
+                'create:request', 'update:request',
+                'create:call', 'update:call',
+                'todos.create', 'tickets.create', 'requests.create', 'calls.log',
             ],
 
             'hr_admin' => [

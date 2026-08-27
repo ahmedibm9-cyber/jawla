@@ -17,6 +17,7 @@ class ProformaService implements ProformaContract
         private readonly DocumentNumberService $numbers,
     ) {}
 
+    /** @param array<string, mixed> $data */
     public function createFromQuotation(PriceQuotation $quotation, array $data): ProformaInvoice
     {
         return DB::transaction(function () use ($quotation, $data): ProformaInvoice {

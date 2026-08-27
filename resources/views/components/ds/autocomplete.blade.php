@@ -76,7 +76,7 @@
     <ul id="{{ $acId }}-listbox" role="listbox" x-cloak
         x-show="open && filtered.length > 0"
         class="absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-lg shadow-lg"
-        style="background: var(--color-surface); border: 1px solid var(--color-border)">
+        style="background: var(--jj-surface); border: 1px solid var(--jj-border)">
         <template x-for="(option, index) in filtered" :key="option.value">
             <li role="option"
                 x-bind:id="'{{ $acId }}-option-' + index"

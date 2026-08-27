@@ -21,11 +21,16 @@ final readonly class EtaResult
         public array $raw = [],
     ) {}
 
+    /** @param array<string, mixed> $raw */
     public static function accepted(string $uuid, ?string $longId = null, array $raw = []): self
     {
         return new self(true, 'submitted', $uuid, $longId, [], $raw);
     }
 
+    /**
+     * @param  list<string>  $errors
+     * @param  array<string, mixed>  $raw
+     */
     public static function rejected(array $errors, array $raw = []): self
     {
         return new self(false, 'rejected', null, null, $errors, $raw);

@@ -51,11 +51,16 @@ class SentryScrubber
         return $event;
     }
 
-    /** Recursively mask values whose key contains a sensitive fragment. */
+    /**
+     * Recursively mask values whose key contains a sensitive fragment.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
     private static function scrub(array $data): array
     {
         foreach ($data as $key => $value) {
-            if (is_string($key) && self::isSensitive($key)) {
+            if (self::isSensitive($key)) {
                 $data[$key] = self::MASK;
 
                 continue;

@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Services\Contracts\PricingService;
 use App\Services\SalesOrderService;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
@@ -105,7 +106,7 @@ class CreateSalesOrder extends Component
         $this->errorMessage = __('app.workflow_failed');
     }
 
-    public function render()
+    public function render(): View
     {
         return view('livewire.app.create-sales-order', [
             'customers' => Customer::query()->where('company_id', auth()->user()->activeCompanyId())

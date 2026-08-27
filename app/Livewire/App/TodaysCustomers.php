@@ -3,6 +3,7 @@
 namespace App\Livewire\App;
 
 use App\Models\Customer;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -21,7 +22,7 @@ class TodaysCustomers extends Component
         $this->expandedCustomerId = $this->expandedCustomerId === $customerId ? 0 : $customerId;
     }
 
-    public function render()
+    public function render(): View
     {
         $customers = Customer::query()
             ->where('company_id', auth()->user()->activeCompanyId())

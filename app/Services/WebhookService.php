@@ -143,7 +143,7 @@ class WebhookService
     private function headers(WebhookDelivery $delivery, string $body): array
     {
         return [
-            'X-Jawla-Event' => $delivery->event_id,
+            'X-Jawla-Event' => (string) $delivery->event_id,
             'X-Jawla-Signature' => 'sha256='.hash_hmac('sha256', $body, $delivery->endpoint->secret),
         ];
     }

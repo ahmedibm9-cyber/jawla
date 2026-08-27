@@ -11,6 +11,7 @@ use App\Services\Contracts\DocumentNumberService;
 use App\Services\Contracts\InvoiceCalculationService;
 use App\Services\Contracts\LineItemInput;
 use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -48,7 +49,7 @@ class QuotationFlow extends Component
             ->findOrFail($id);
         $q = $this->request->quotation;
         $this->quotation = $q;
-        $this->negotiatedPrice = (float) $this->request->quotation?->base_price ?? 0;
+        $this->negotiatedPrice = (float) $this->request->quotation?->base_price;
         $this->floor = $q ? (float) $q->base_price - (float) $q->rep_minus : 0;
         $this->ceiling = $q ? (float) $q->base_price + (float) $q->rep_plus : 0;
         $this->errorMessage = null;
@@ -156,7 +157,7 @@ class QuotationFlow extends Component
         session()->flash('proforma', $proforma);
     }
 
-    public function render()
+    public function render(): View
     {
         $user = auth()->user();
 

@@ -52,11 +52,13 @@ class TaskResource extends Resource
         return auth()->user()?->can('create:task') ?? false;
     }
 
+    /** @param Task $record */
     public static function canEdit($record): bool
     {
         return auth()->user()?->can('update:task') ?? false;
     }
 
+    /** @param Task $record */
     public static function canDelete($record): bool
     {
         return auth()->user()?->can('delete:task') ?? false;

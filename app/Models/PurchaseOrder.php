@@ -3,14 +3,35 @@
 namespace App\Models;
 
 use App\Models\Concerns\BelongsToCompany;
+use Database\Factories\PurchaseOrderFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $company_id
+ * @property int $supplier_id
+ * @property string $order_number
+ * @property string $status
+ * @property Carbon $order_date
+ * @property Carbon|null $expected_delivery_date
+ * @property string|null $payment_terms
+ * @property string $currency
+ * @property string $subtotal
+ * @property string $shipping_cost
+ * @property string $total
+ * @property string|null $notes
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class PurchaseOrder extends Model
 {
     use BelongsToCompany;
+
+    /** @use HasFactory<PurchaseOrderFactory> */
     use HasFactory;
 
     protected $fillable = [
@@ -27,11 +48,13 @@ class PurchaseOrder extends Model
         'total' => 'decimal:2',
     ];
 
+    /** @return BelongsTo<Supplier, $this> */
     public function supplier(): BelongsTo
     {
         return $this->belongsTo(Supplier::class);
     }
 
+    /** @return HasMany<PurchaseOrderItem, $this> */
     public function items(): HasMany
     {
         return $this->hasMany(PurchaseOrderItem::class);

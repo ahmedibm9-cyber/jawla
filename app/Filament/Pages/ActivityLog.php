@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Services\ReversalService;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Livewire\WithPagination;
 
 class ActivityLog extends Page
@@ -74,6 +75,7 @@ class ActivityLog extends Page
         }
     }
 
+    /** @return LengthAwarePaginator<int, Activity> */
     public function getActivitiesProperty()
     {
         $q = Activity::with('user')->latest();

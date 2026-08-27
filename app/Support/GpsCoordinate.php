@@ -13,7 +13,7 @@ final readonly class GpsCoordinate
         if ($lat < -90 || $lat > 90 || $lng < -180 || $lng > 180) {
             throw new GeofenceViolationException(
                 'errors.gps.invalid',
-                ['lat' => $lat, 'lng' => $lng],
+                ['lat' => (string) $lat, 'lng' => (string) $lng],
             );
         }
     }

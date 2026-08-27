@@ -5,6 +5,7 @@ namespace App\Livewire\App;
 use App\Enums\TaskStatus;
 use App\Models\Task;
 use App\Services\TaskService;
+use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -59,7 +60,7 @@ class Tasks extends Component
         }, __('app.task_submitted'));
     }
 
-    public function render()
+    public function render(): View
     {
         $query = Task::query()
             ->where('assigned_to', auth()->id())

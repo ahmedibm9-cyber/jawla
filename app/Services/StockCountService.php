@@ -16,6 +16,7 @@ class StockCountService
 {
     public function __construct(private readonly StockService $stock) {}
 
+    /** @param array<int, int> $productIds */
     public function open(Warehouse $warehouse, User $keeper, array $productIds): StockCountSession
     {
         app(ActiveCompanyContext::class)->assertMatches((int) $warehouse->company_id);

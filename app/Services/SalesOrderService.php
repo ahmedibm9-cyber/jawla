@@ -26,7 +26,10 @@ class SalesOrderService
         private readonly OrganizationScopeService $organizationScope,
     ) {}
 
-    /** @param list<array{product_id:int, quantity:float|int|string, unit_price?:float|int|string}> $items */
+    /**
+     * @param  list<array{product_id:int, quantity:float|int|string, unit_price?:float|int|string}>  $items
+     * @param  array<string, mixed>  $attributes
+     */
     public function createAndSubmit(User $rep, int $customerId, array $items, array $attributes = []): SalesOrder
     {
         $this->licenses->assertRuntimeFeature('field_sales');

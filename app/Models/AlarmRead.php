@@ -4,7 +4,20 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property int $alarm_id
+ * @property int $user_id
+ * @property bool $acknowledged
+ * @property bool $resolved
+ * @property Carbon|null $read_at
+ * @property Carbon|null $acknowledged_at
+ * @property Carbon|null $resolved_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class AlarmRead extends Model
 {
     protected $fillable = [
@@ -20,11 +33,13 @@ class AlarmRead extends Model
         'resolved_at' => 'datetime',
     ];
 
+    /** @return BelongsTo<Alarm, $this> */
     public function alarm(): BelongsTo
     {
         return $this->belongsTo(Alarm::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

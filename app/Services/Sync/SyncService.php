@@ -30,8 +30,8 @@ class SyncService
     public function __construct(private readonly SyncHandlerRegistry $registry) {}
 
     /**
-     * @param  array<int, array{key?: string, idempotency_key?: string, type?: string, payload?: array, payload_hash?: string, device_id?: string}>  $operations
-     * @return array<int, array{key: ?string, status: string, result?: array, error?: string, error_code?: string}>
+     * @param  array<int, array{key?: string, idempotency_key?: string, type?: string, payload?: array<string, mixed>, payload_hash?: string, device_id?: string}>  $operations
+     * @return array<int, array{key: ?string, status: string, result?: array<string, mixed>, error?: string, error_code?: string}>
      */
     public function process(User $rep, array $operations, int $protocolVersion = 1): array
     {
@@ -47,8 +47,8 @@ class SyncService
     }
 
     /**
-     * @param  array{key?: string, idempotency_key?: string, type?: string, payload?: array, payload_hash?: string, device_id?: string}  $op
-     * @return array{key: ?string, status: string, result?: array, error?: string, error_code?: string}
+     * @param  array{key?: string, idempotency_key?: string, type?: string, payload?: array<string, mixed>, payload_hash?: string, device_id?: string}  $op
+     * @return array{key: ?string, status: string, result?: array<string, mixed>, error?: string, error_code?: string}
      */
     private function processOne(User $rep, array $op, int $protocolVersion): array
     {

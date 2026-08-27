@@ -13,7 +13,7 @@ class QuotationOutcome extends RepNotification
 
     public function toDatabase(object $notifiable): array
     {
-        $product = $this->request->product?->name_ar ?? "#{$this->request->id}";
+        $product = $this->request->product->name_ar ?? "#{$this->request->id}";
 
         if ($this->outcome === 'cancelled') {
             return [

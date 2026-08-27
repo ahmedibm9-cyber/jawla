@@ -58,7 +58,7 @@ class RouteResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name_ar')->label(l('الاسم', 'Name'))->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('region')->label(l('المنطقة', 'Region')),
-                Tables\Columns\TextColumn::make('users.name')->label(l('المندوبين', 'Reps'))->formatStateUsing(fn ($s) => collect($s)->join(', ')),
+                Tables\Columns\TextColumn::make('users.name')->label(l('المندوبين', 'Reps'))->formatStateUsing(fn ($s) => is_array($s) ? implode(', ', $s) : (string) $s),
                 Tables\Columns\IconColumn::make('is_active')->label(l('نشط', 'Active'))->boolean(),
             ])
             ->filters([Tables\Filters\TernaryFilter::make('is_active')])
