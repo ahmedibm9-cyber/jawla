@@ -4,7 +4,7 @@
 
 | Environment    | URL                                            | Railway                 | Notes                  |
 | -------------- | ---------------------------------------------- | ----------------------- | ---------------------- |
-| **Production** | `https://jawla-production.up.railway.app`      | service `jawla`         | 2 replicas, SFO region |
+| **Production** | `https://jawla.up.railway.app`                 | service `jawla`         | 2 replicas, SFO region |
 | **Staging**    | `https://jawla-staging-staging.up.railway.app` | service `jawla-staging` | 2 replicas, SFO region |
 
 ## Release path
