@@ -9,18 +9,23 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // 1. Map old enum values to new ones
+        $driver = DB::getDriverName();
+
+        // 1. Drop old CHECK constraint so we can write new enum values
+        if ($driver === 'mysql') {
+            DB::statement("ALTER TABLE daily_visit_assignments MODIFY COLUMN status VARCHAR(255) DEFAULT 'draft'");
+        } else {
+            DB::statement('ALTER TABLE daily_visit_assignments DROP CONSTRAINT IF EXISTS daily_visit_assignments_status_check');
+        }
+
+        // 2. Map old enum values to new ones
         DB::table('daily_visit_assignments')->where('status', 'pending')->update(['status' => 'draft']);
         DB::table('daily_visit_assignments')->where('status', 'missed')->update(['status' => 'rejected']);
 
-        // 2. Alter status column — drop old constraint and add new one
-        $driver = DB::getDriverName();
-
+        // 3. Add new CHECK constraint / ENUM
         if ($driver === 'mysql') {
             DB::statement("ALTER TABLE daily_visit_assignments MODIFY COLUMN status ENUM('draft','pending_approval','approved','rejected','completed') DEFAULT 'draft'");
         } else {
-            // PostgreSQL — drop old CHECK, add new one
-            DB::statement('ALTER TABLE daily_visit_assignments DROP CONSTRAINT IF EXISTS daily_visit_assignments_status_check');
             DB::statement("ALTER TABLE daily_visit_assignments ADD CONSTRAINT daily_visit_assignments_status_check CHECK (status IN ('draft','pending_approval','approved','rejected','completed'))");
         }
 
