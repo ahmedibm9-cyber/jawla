@@ -1,0 +1,172 @@
+/* ===================================================================
+   Jawla Design Tokens — CSS Custom Properties
+   ===================================================================
+   Prefix: --jj- (Jawla jadid / new Jawla)
+   All values here feed both app.css and Tailwind @theme.
+   Do NOT add component styles — tokens only.
+   =================================================================== */
+
+:root {
+  /* ---- Typography ---- */
+  --jj-font-arabic:
+    "Noto Sans Arabic", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --jj-font-english: "Inter", system-ui, sans-serif;
+  --jj-font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --jj-text-xs: 0.75rem; /* 12px — labels, badges */
+  --jj-text-sm: 0.875rem; /* 14px — secondary, meta */
+  --jj-text-base: 1rem; /* 16px — body */
+  --jj-text-lg: 1.125rem; /* 18px — card titles */
+  --jj-text-xl: 1.25rem; /* 20px — section headers */
+  --jj-text-2xl: 1.5rem; /* 24px — page titles */
+  --jj-text-3xl: 1.875rem; /* 30px — hero numbers */
+  --jj-text-4xl: 2.25rem; /* 36px — dashboard stats */
+
+  /* ---- Spacing (4px base) ---- */
+  --jj-space-0: 0;
+  --jj-space-1: 0.25rem; /* 4px */
+  --jj-space-2: 0.5rem; /* 8px */
+  --jj-space-3: 0.75rem; /* 12px */
+  --jj-space-4: 1rem; /* 16px */
+  --jj-space-5: 1.25rem; /* 20px */
+  --jj-space-6: 1.5rem; /* 24px */
+  --jj-space-8: 2rem; /* 32px */
+  --jj-space-10: 2.5rem; /* 40px */
+  --jj-space-12: 3rem; /* 48px */
+  --jj-space-16: 4rem; /* 64px */
+
+  /* ---- Shape ---- */
+  --jj-radius-sm: 6px;
+  --jj-radius-md: 8px;
+  --jj-radius-lg: 12px;
+  --jj-radius-xl: 16px;
+  --jj-radius-pill: 9999px;
+
+  /* ---- Elevation ---- */
+  --jj-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --jj-shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --jj-shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+  --jj-shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+  /* ---- Motion ---- */
+  --jj-duration-fast: 150ms;
+  --jj-duration-normal: 250ms;
+  --jj-duration-slow: 350ms;
+
+  /* ---- Green (primary) ---- */
+  --jj-green-50: #f0fdf4;
+  --jj-green-100: #dcfce7;
+  --jj-green-200: #bbf7d0;
+  --jj-green-300: #86efac;
+  --jj-green-400: #4ade80;
+  --jj-green-500: #4a8c2a;
+  --jj-green-600: #3d7a18;
+  --jj-green-700: #2d5c12;
+  --jj-green-800: #1e3d0c;
+  --jj-green-900: #142a08;
+
+  /* ---- Amber (accent) ---- */
+  --jj-amber-50: #fffbeb;
+  --jj-amber-100: #fef3c7;
+  --jj-amber-200: #fde68a;
+  --jj-amber-400: #fbbf24;
+  --jj-amber-500: #f59e0b;
+  --jj-amber-600: #d97706;
+
+  /* ---- Blue (info) ---- */
+  --jj-blue-50: #eff6ff;
+  --jj-blue-100: #dbeafe;
+  --jj-blue-200: #bfdbfe;
+  --jj-blue-400: #60a5fa;
+  --jj-blue-500: #3b82f6;
+  --jj-blue-600: #2563eb;
+
+  /* ---- Red (danger/error) ---- */
+  --jj-red-50: #fef2f2;
+  --jj-red-100: #fee2e2;
+  --jj-red-200: #fecaca;
+  --jj-red-400: #f87171;
+  --jj-red-500: #ef4444;
+  --jj-red-600: #dc2626;
+
+  /* ---- Neutrals ---- */
+  --jj-gray-50: #fafaf8;
+  --jj-gray-100: #f5f5f0;
+  --jj-gray-200: #ededea;
+  --jj-gray-300: #d4d4d0;
+  --jj-gray-400: #a3a3a0;
+  --jj-gray-500: #737370;
+  --jj-gray-600: #525250;
+  --jj-gray-700: #404040;
+  --jj-gray-800: #262626;
+  --jj-gray-900: #171717;
+
+  /* ---- Semantic surfaces (light mode) ---- */
+  --jj-surface: #fafaf8;
+  --jj-surface-alt: #f5f5f0;
+  --jj-surface-hover: #ededea;
+  --jj-surface-active: #e5e5e0;
+
+  --jj-text: #1a1c1e;
+  --jj-text-secondary: #525250;
+  --jj-text-muted: #737370;
+  --jj-text-inverse: #fafaf8;
+
+  --jj-border: #d4d4d0;
+  --jj-border-light: #ededea;
+
+  --jj-brand: #4a8c2a;
+  --jj-brand-hover: #3d7a18;
+  --jj-brand-pressed: #2d5c12;
+
+  --jj-focus-ring: rgba(74, 140, 42, 0.35);
+
+  /* ---- External brand colors ---- */
+  --jj-whatsapp: #25d366;
+}
+
+/* ---- Dark mode ---- */
+[data-theme="dark"] {
+  --jj-surface: #1a1c1e;
+  --jj-surface-alt: #222527;
+  --jj-surface-hover: #2a2d30;
+  --jj-surface-active: #32363a;
+
+  --jj-text: #f1f5f9;
+  --jj-text-secondary: #94a3b8;
+  --jj-text-muted: #8899b3;
+  --jj-text-inverse: #1a1c1e;
+
+  --jj-border: #333840;
+  --jj-border-light: #2a2d30;
+
+  --jj-brand: #6ab344;
+  --jj-brand-hover: #5a9e38;
+  --jj-brand-pressed: #4a8c2a;
+
+  --jj-focus-ring: rgba(106, 179, 68, 0.4);
+
+  --jj-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --jj-shadow-md:
+    0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -2px rgba(0, 0, 0, 0.15);
+  --jj-shadow-lg:
+    0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.15);
+  --jj-shadow-xl:
+    0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 8px 10px -6px rgba(0, 0, 0, 0.15);
+
+  /* Green tints adjust for dark backgrounds */
+  --jj-green-50: #0a2e0a;
+  --jj-green-100: #0f3f0f;
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --jj-duration-fast: 0.01ms;
+    --jj-duration-normal: 0.01ms;
+    --jj-duration-slow: 0.01ms;
+  }
+}
