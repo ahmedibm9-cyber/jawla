@@ -46,6 +46,14 @@ Thumbs.db
 /tasks/
 
 tmp_*.txt
+phpstan-*.txt
+phpstan-*.json
+run-phpstan.bat
+create-test-rep.php
+debug-login.cjs
+visual-verify*.cjs
+test-visual-user.php
+composer-show.txt
 tests/JavaScript/performance-results.json
 tests/stress/*-results.json
 
