@@ -13,27 +13,27 @@
   --jj-font-english: "Inter", system-ui, sans-serif;
   --jj-font-mono: "JetBrains Mono", ui-monospace, monospace;
 
-  --jj-text-xs: 0.75rem; /* 12px — labels, badges */
-  --jj-text-sm: 0.875rem; /* 14px — secondary, meta */
-  --jj-text-base: 1rem; /* 16px — body */
-  --jj-text-lg: 1.125rem; /* 18px — card titles */
-  --jj-text-xl: 1.25rem; /* 20px — section headers */
-  --jj-text-2xl: 1.5rem; /* 24px — page titles */
-  --jj-text-3xl: 1.875rem; /* 30px — hero numbers */
-  --jj-text-4xl: 2.25rem; /* 36px — dashboard stats */
+  --jj-text-xs: 0.75rem;    /* 12px — labels, badges */
+  --jj-text-sm: 0.875rem;   /* 14px — secondary, meta */
+  --jj-text-base: 1rem;     /* 16px — body */
+  --jj-text-lg: 1.125rem;   /* 18px — card titles */
+  --jj-text-xl: 1.25rem;    /* 20px — section headers */
+  --jj-text-2xl: 1.5rem;    /* 24px — page titles */
+  --jj-text-3xl: 1.875rem;  /* 30px — hero numbers */
+  --jj-text-4xl: 2.25rem;   /* 36px — dashboard stats */
 
   /* ---- Spacing (4px base) ---- */
   --jj-space-0: 0;
-  --jj-space-1: 0.25rem; /* 4px */
-  --jj-space-2: 0.5rem; /* 8px */
-  --jj-space-3: 0.75rem; /* 12px */
-  --jj-space-4: 1rem; /* 16px */
-  --jj-space-5: 1.25rem; /* 20px */
-  --jj-space-6: 1.5rem; /* 24px */
-  --jj-space-8: 2rem; /* 32px */
-  --jj-space-10: 2.5rem; /* 40px */
-  --jj-space-12: 3rem; /* 48px */
-  --jj-space-16: 4rem; /* 64px */
+  --jj-space-1: 0.25rem;    /* 4px */
+  --jj-space-2: 0.5rem;     /* 8px */
+  --jj-space-3: 0.75rem;    /* 12px */
+  --jj-space-4: 1rem;       /* 16px */
+  --jj-space-5: 1.25rem;    /* 20px */
+  --jj-space-6: 1.5rem;     /* 24px */
+  --jj-space-8: 2rem;       /* 32px */
+  --jj-space-10: 2.5rem;    /* 40px */
+  --jj-space-12: 3rem;      /* 48px */
+  --jj-space-16: 4rem;      /* 64px */
 
   /* ---- Shape ---- */
   --jj-radius-sm: 6px;
@@ -42,33 +42,36 @@
   --jj-radius-xl: 16px;
   --jj-radius-pill: 9999px;
 
-  /* ---- Elevation ---- */
-  --jj-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  /* ---- Elevation (refined — less heavy) ---- */
+  --jj-shadow-xs:
+    0 1px 2px rgba(0, 0, 0, 0.04);
+  --jj-shadow-sm:
+    0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
   --jj-shadow-md:
-    0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+    0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
   --jj-shadow-lg:
-    0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+    0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.03);
   --jj-shadow-xl:
-    0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+    0 20px 25px -5px rgba(0, 0, 0, 0.07), 0 8px 10px -6px rgba(0, 0, 0, 0.03);
 
   /* ---- Motion ---- */
   --jj-duration-fast: 150ms;
   --jj-duration-normal: 250ms;
   --jj-duration-slow: 350ms;
 
-  /* ---- Green (primary) ---- */
-  --jj-green-50: #f0fdf4;
-  --jj-green-100: #dcfce7;
-  --jj-green-200: #bbf7d0;
-  --jj-green-300: #86efac;
-  --jj-green-400: #4ade80;
-  --jj-green-500: #4a8c2a;
-  --jj-green-600: #3d7a18;
-  --jj-green-700: #2d5c12;
-  --jj-green-800: #1e3d0c;
-  --jj-green-900: #142a08;
+  /* ---- Green (primary — deeper forest) ---- */
+  --jj-green-50: #f0f7ec;
+  --jj-green-100: #dceed4;
+  --jj-green-200: #b5daa8;
+  --jj-green-300: #82c26e;
+  --jj-green-400: #56a83e;
+  --jj-green-500: #3d8a28;
+  --jj-green-600: #2f6e1e;
+  --jj-green-700: #245518;
+  --jj-green-800: #1a3e11;
+  --jj-green-900: #102809;
 
-  /* ---- Amber (accent) ---- */
+  /* ---- Amber (warning) ---- */
   --jj-amber-50: #fffbeb;
   --jj-amber-100: #fef3c7;
   --jj-amber-200: #fde68a;
@@ -84,7 +87,7 @@
   --jj-blue-500: #3b82f6;
   --jj-blue-600: #2563eb;
 
-  /* ---- Red (danger/error) ---- */
+  /* ---- Red (danger) ---- */
   --jj-red-50: #fef2f2;
   --jj-red-100: #fee2e2;
   --jj-red-200: #fecaca;
@@ -92,37 +95,37 @@
   --jj-red-500: #ef4444;
   --jj-red-600: #dc2626;
 
-  /* ---- Neutrals ---- */
-  --jj-gray-50: #fafaf8;
-  --jj-gray-100: #f5f5f0;
-  --jj-gray-200: #ededea;
-  --jj-gray-300: #d4d4d0;
-  --jj-gray-400: #a3a3a0;
-  --jj-gray-500: #737370;
-  --jj-gray-600: #525250;
-  --jj-gray-700: #404040;
-  --jj-gray-800: #262626;
-  --jj-gray-900: #171717;
+  /* ---- Neutrals (cool stone — no yellow cast) ---- */
+  --jj-gray-50: #fafafa;
+  --jj-gray-100: #f4f4f5;
+  --jj-gray-200: #e4e4e7;
+  --jj-gray-300: #d4d4d8;
+  --jj-gray-400: #a1a1aa;
+  --jj-gray-500: #71717a;
+  --jj-gray-600: #52525b;
+  --jj-gray-700: #3f3f46;
+  --jj-gray-800: #27272a;
+  --jj-gray-900: #18181b;
 
-  /* ---- Semantic surfaces (light mode) ---- */
-  --jj-surface: #fafaf8;
-  --jj-surface-alt: #f5f5f0;
-  --jj-surface-hover: #ededea;
-  --jj-surface-active: #e5e5e0;
+  /* ---- Semantic surfaces (light mode — clean white, not cream) ---- */
+  --jj-surface: #ffffff;
+  --jj-surface-alt: #f8f8fa;
+  --jj-surface-hover: #f4f4f5;
+  --jj-surface-active: #e8e8ec;
 
-  --jj-text: #1a1c1e;
-  --jj-text-secondary: #525250;
-  --jj-text-muted: #737370;
-  --jj-text-inverse: #fafaf8;
+  --jj-text: #18181b;
+  --jj-text-secondary: #52525b;
+  --jj-text-muted: #a1a1aa;
+  --jj-text-inverse: #fafafa;
 
-  --jj-border: #d4d4d0;
-  --jj-border-light: #ededea;
+  --jj-border: #e4e4e7;
+  --jj-border-light: #f0f0f2;
 
-  --jj-brand: #4a8c2a;
-  --jj-brand-hover: #3d7a18;
-  --jj-brand-pressed: #2d5c12;
+  --jj-brand: #3d8a28;
+  --jj-brand-hover: #2f6e1e;
+  --jj-brand-pressed: #245518;
 
-  --jj-focus-ring: rgba(74, 140, 42, 0.35);
+  --jj-focus-ring: rgba(61, 138, 40, 0.3);
 
   /* ---- External brand colors ---- */
   --jj-whatsapp: #25d366;
@@ -130,26 +133,29 @@
 
 /* ---- Dark mode ---- */
 [data-theme="dark"] {
-  --jj-surface: #1a1c1e;
-  --jj-surface-alt: #222527;
-  --jj-surface-hover: #2a2d30;
-  --jj-surface-active: #32363a;
+  --jj-surface: #18181b;
+  --jj-surface-alt: #1f1f23;
+  --jj-surface-hover: #27272a;
+  --jj-surface-active: #303035;
 
-  --jj-text: #f1f5f9;
-  --jj-text-secondary: #94a3b8;
-  --jj-text-muted: #8899b3;
-  --jj-text-inverse: #1a1c1e;
+  --jj-text: #f4f4f5;
+  --jj-text-secondary: #a1a1aa;
+  --jj-text-muted: #71717a;
+  --jj-text-inverse: #18181b;
 
-  --jj-border: #333840;
-  --jj-border-light: #2a2d30;
+  --jj-border: #2e2e33;
+  --jj-border-light: #27272a;
 
-  --jj-brand: #6ab344;
-  --jj-brand-hover: #5a9e38;
-  --jj-brand-pressed: #4a8c2a;
+  --jj-brand: #56a83e;
+  --jj-brand-hover: #3d8a28;
+  --jj-brand-pressed: #2f6e1e;
 
-  --jj-focus-ring: rgba(106, 179, 68, 0.4);
+  --jj-focus-ring: rgba(86, 168, 62, 0.35);
 
-  --jj-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --jj-shadow-xs:
+    0 1px 2px rgba(0, 0, 0, 0.15);
+  --jj-shadow-sm:
+    0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.12);
   --jj-shadow-md:
     0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -2px rgba(0, 0, 0, 0.15);
   --jj-shadow-lg:
@@ -158,8 +164,8 @@
     0 20px 25px -5px rgba(0, 0, 0, 0.35), 0 8px 10px -6px rgba(0, 0, 0, 0.15);
 
   /* Green tints adjust for dark backgrounds */
-  --jj-green-50: #0a2e0a;
-  --jj-green-100: #0f3f0f;
+  --jj-green-50: #0c2408;
+  --jj-green-100: #0f3009;
 }
 
 /* ---- Reduced motion ---- */

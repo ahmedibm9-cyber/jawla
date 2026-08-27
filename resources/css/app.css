@@ -23,9 +23,9 @@
   --text-3xl: 1.875rem;
 
   /* ---- Brand palette ---- */
-  --color-brand: #2d7a17;
-  --color-brand-light: #4a8c2a;
-  --color-brand-dark: #1e5c10;
+  --color-brand: #3d8a28;
+  --color-brand-light: #56a83e;
+  --color-brand-dark: #2f6e1e;
 
   --color-accent-warm: #d97706;
   --color-accent-warm-light: #f59e0b;
@@ -35,19 +35,19 @@
   --color-accent-blue-dark: #1d4ed8;
 
   /* ---- Semantic surface ---- */
-  --color-surface: #f8f6f1;
-  --color-surface-alt: #f0ede6;
-  --color-surface-hover: #e8e4dc;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f8f8fa;
+  --color-surface-hover: #f4f4f5;
 
-  --color-text-primary: #1a1612;
-  --color-text-secondary: #5c5347;
-  --color-text-muted: #7a7068;
+  --color-text-primary: #18181b;
+  --color-text-secondary: #52525b;
+  --color-text-muted: #a1a1aa;
 
-  --color-border: #d6d0c4;
-  --color-border-light: #e8e4dc;
+  --color-border: #e4e4e7;
+  --color-border-light: #f0f0f2;
 
   /* ---- Status ---- */
-  --color-success: #2d7a17;
+  --color-success: #3d8a28;
   --color-warning: #d97706;
   --color-danger: #dc2626;
   --color-info: #2563eb;
@@ -104,10 +104,10 @@
   --z-toast: 400;
 
   /* ---- More Page customization ---- */
-  --more-icon-green: #3d7a18;
+  --more-icon-green: #3d8a28;
   --more-icon-blue: #2563eb;
   --more-icon-amber: #d97706;
-  --more-icon-emerald: #3d7a18;
+  --more-icon-emerald: #3d8a28;
   --more-icon-red: #dc2626;
   --more-icon-purple: #7c3aed;
   --more-icon-orange: #ea580c;
@@ -115,16 +115,16 @@
   --more-grid-cols: 4;
 
   /* ---- Jawla design tokens (from design-tokens.css) ---- */
-  --jj-green-50: #eef8e8;
-  --jj-green-100: #d4edc8;
-  --jj-green-200: #a8d991;
-  --jj-green-300: #7cc55a;
-  --jj-green-400: #5ab033;
-  --jj-green-500: #2d7a17;
-  --jj-green-600: #1e5c10;
-  --jj-green-700: #144a0b;
-  --jj-green-800: #0d3507;
-  --jj-green-900: #072004;
+  --jj-green-50: #f0f7ec;
+  --jj-green-100: #dceed4;
+  --jj-green-200: #b5daa8;
+  --jj-green-300: #82c26e;
+  --jj-green-400: #56a83e;
+  --jj-green-500: #3d8a28;
+  --jj-green-600: #2f6e1e;
+  --jj-green-700: #245518;
+  --jj-green-800: #1a3e11;
+  --jj-green-900: #102809;
 
   --jj-amber-50: #fffbeb;
   --jj-amber-100: #fef3c7;
@@ -143,35 +143,35 @@
   --jj-red-500: #ef4444;
   --jj-red-600: #dc2626;
 
-  --jj-gray-50: #f8f6f1;
-  --jj-gray-100: #f0ede6;
-  --jj-gray-200: #e8e4dc;
-  --jj-gray-300: #d6d0c4;
-  --jj-gray-400: #a39e94;
-  --jj-gray-500: #7a7068;
-  --jj-gray-600: #5c5347;
-  --jj-gray-700: #3d362e;
-  --jj-gray-800: #2a241e;
-  --jj-gray-900: #1a1612;
+  --jj-gray-50: #fafafa;
+  --jj-gray-100: #f4f4f5;
+  --jj-gray-200: #e4e4e7;
+  --jj-gray-300: #d4d4d8;
+  --jj-gray-400: #a1a1aa;
+  --jj-gray-500: #71717a;
+  --jj-gray-600: #52525b;
+  --jj-gray-700: #3f3f46;
+  --jj-gray-800: #27272a;
+  --jj-gray-900: #18181b;
 
-  --jj-surface: #f8f6f1;
-  --jj-surface-alt: #f0ede6;
-  --jj-surface-hover: #e8e4dc;
-  --jj-surface-active: #ddd8ce;
+  --jj-surface: #ffffff;
+  --jj-surface-alt: #f8f8fa;
+  --jj-surface-hover: #f4f4f5;
+  --jj-surface-active: #e8e8ec;
 
-  --jj-text: #1a1612;
-  --jj-text-secondary: #5c5347;
-  --jj-text-muted: #7a7068;
-  --jj-text-inverse: #f8f6f1;
+  --jj-text: #18181b;
+  --jj-text-secondary: #52525b;
+  --jj-text-muted: #a1a1aa;
+  --jj-text-inverse: #fafafa;
 
-  --jj-border: #d6d0c4;
-  --jj-border-light: #e8e4dc;
+  --jj-border: #e4e4e7;
+  --jj-border-light: #f0f0f2;
 
-  --jj-brand: #2d7a17;
-  --jj-brand-hover: #1e5c10;
-  --jj-brand-pressed: #144a0b;
+  --jj-brand: #3d8a28;
+  --jj-brand-hover: #2f6e1e;
+  --jj-brand-pressed: #245518;
 
-  --jj-focus-ring: rgba(45, 122, 23, 0.35);
+  --jj-focus-ring: rgba(61, 138, 40, 0.3);
 
   --jj-radius-sm: 6px;
   --jj-radius-md: 8px;
@@ -343,8 +343,8 @@
   }
 
   body {
-    background-color: var(--color-surface-alt);
-    color: var(--color-text-primary);
+    background-color: var(--jj-surface-alt);
+    color: var(--jj-text);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
@@ -373,11 +373,11 @@
   left: 0;
   right: 0;
   display: flex;
-  background: #fdfcfa;
-  border-top: 1.5px solid var(--jj-border-light);
+  background: #ffffff;
+  border-top: 1px solid var(--jj-border-light);
   z-index: var(--z-sticky);
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  box-shadow: 0 -2px 8px -2px rgba(26, 22, 18, 0.08);
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .tab-item {
@@ -450,14 +450,12 @@
 
 /* ---- Cards ---- */
 .card {
-  background: #fdfcfa;
+  background: #ffffff;
   border-radius: var(--jj-radius-xl);
   padding: var(--jj-space-4);
   margin-bottom: 12px;
-  box-shadow:
-    0 2px 8px -2px rgba(26, 22, 18, 0.08),
-    0 1px 3px rgba(26, 22, 18, 0.06);
-  border: 1.5px solid var(--jj-border-light);
+  box-shadow: var(--jj-shadow-xs);
+  border: 1px solid var(--jj-border-light);
   transition:
     transform var(--jj-duration-fast),
     box-shadow var(--jj-duration-fast);
@@ -465,7 +463,7 @@
 
 .card:active {
   transform: scale(0.98);
-  box-shadow: 0 1px 2px rgba(26, 22, 18, 0.06);
+  box-shadow: none;
 }
 
 /* ---- Buttons ---- */
@@ -498,14 +496,14 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #2d7a17 0%, #1e5c10 100%);
+  background: var(--jj-green-500);
   color: #fff;
-  box-shadow: 0 3px 12px -2px rgba(30, 92, 16, 0.35);
+  box-shadow: 0 1px 3px rgba(61, 138, 40, 0.25);
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1e5c10 0%, #144a0b 100%);
-  box-shadow: 0 4px 16px -2px rgba(30, 92, 16, 0.45);
+  background: var(--jj-green-600);
+  box-shadow: 0 2px 6px rgba(61, 138, 40, 0.3);
 }
 
 .btn-primary:focus-visible {
@@ -581,10 +579,11 @@
 
 .badge {
   display: inline-block;
-  padding: 2px 8px;
-  border-radius: var(--jj-radius-sm);
-  font-size: var(--jj-text-xs);
+  padding: 3px 10px;
+  border-radius: var(--jj-radius-pill);
+  font-size: 0.6875rem;
   font-weight: 600;
+  letter-spacing: 0.01em;
 }
 
 .badge-warning {
@@ -671,7 +670,7 @@
   );
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-  border-radius: 8px;
+  border-radius: var(--jj-radius-md);
 }
 
 @keyframes shimmer {
@@ -767,10 +766,10 @@
 
 /* ---- Home Hero ---- */
 .home-hero {
-  background: linear-gradient(135deg, #2d7a17 0%, #1e5c10 50%, #144a0b 100%);
+  background: var(--jj-green-700);
   color: #fff;
-  padding: 32px 20px 36px;
-  margin-bottom: -12px;
+  padding: 28px 20px 32px;
+  margin-bottom: -8px;
   position: relative;
   overflow: hidden;
 }
@@ -778,10 +777,10 @@
 .home-hero::after {
   content: "";
   position: absolute;
-  bottom: -2px;
+  bottom: -1px;
   left: 0;
   right: 0;
-  height: 24px;
+  height: 20px;
   background: var(--jj-surface);
   border-radius: 50% 50% 0 0 / 100% 100% 0 0;
 }
@@ -807,10 +806,11 @@
 }
 
 .home-hero-title {
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 700;
   margin: 0 0 4px;
   line-height: 1.3;
+  letter-spacing: -0.01em;
 }
 
 .home-hero-subtitle {
@@ -845,14 +845,12 @@
 }
 
 .home-stat-card {
-  background: #fdfcfa;
+  background: #ffffff;
   border-radius: var(--jj-radius-xl);
   padding: 18px 16px;
   text-align: center;
-  box-shadow:
-    0 2px 8px -2px rgba(26, 22, 18, 0.08),
-    0 1px 3px rgba(26, 22, 18, 0.06);
-  border: 1.5px solid var(--jj-border-light);
+  box-shadow: var(--jj-shadow-xs);
+  border: 1px solid var(--jj-border-light);
   position: relative;
   overflow: hidden;
   transition:
@@ -862,7 +860,7 @@
 
 .home-stat-card:active {
   transform: scale(0.98);
-  box-shadow: 0 1px 4px rgba(26, 22, 18, 0.06);
+  box-shadow: none;
 }
 
 .home-stat-card::before {
@@ -929,10 +927,12 @@
 }
 
 .home-section-title {
-  font-size: var(--jj-text-base);
-  font-weight: 700;
+  font-size: var(--jj-text-sm);
+  font-weight: 600;
   margin: 0 0 12px;
-  color: var(--jj-text);
+  color: var(--jj-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 /* ---- Home Empty State ---- */
@@ -957,13 +957,11 @@
 /* ---- Visit Cards ---- */
 .visit-card {
   display: flex;
-  background: #fdfcfa;
+  background: #ffffff;
   border-radius: var(--jj-radius-xl);
   margin-bottom: 10px;
-  box-shadow:
-    0 2px 8px -2px rgba(26, 22, 18, 0.08),
-    0 1px 3px rgba(26, 22, 18, 0.06);
-  border: 1.5px solid var(--jj-border-light);
+  box-shadow: var(--jj-shadow-xs);
+  border: 1px solid var(--jj-border-light);
   overflow: hidden;
   transition:
     transform var(--jj-duration-fast),
@@ -972,7 +970,7 @@
 
 .visit-card:active {
   transform: scale(0.98);
-  box-shadow: 0 1px 2px rgba(26, 22, 18, 0.06);
+  box-shadow: none;
 }
 
 .visit-card-status {
@@ -1064,14 +1062,14 @@
   justify-content: center;
   gap: 8px;
   padding: 14px 16px;
-  background: linear-gradient(135deg, #2d7a17 0%, #1e5c10 100%);
+  background: var(--jj-green-500);
   color: #fff;
   border-radius: var(--jj-radius-pill);
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 600;
   min-height: 48px;
-  box-shadow: 0 2px 8px -2px rgba(30, 92, 16, 0.3);
+  box-shadow: 0 1px 3px rgba(61, 138, 40, 0.2);
   transition:
     transform var(--jj-duration-fast),
     opacity var(--jj-duration-fast);
@@ -1119,6 +1117,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(61, 138, 40, 0.2);
 }
 
 .quick-action-label {
@@ -1157,6 +1156,7 @@
   font-weight: 700;
   font-size: 1.25rem;
   flex-shrink: 0;
+  box-shadow: 0 1px 3px rgba(61, 138, 40, 0.2);
 }
 
 .more-profile-info {
@@ -1397,12 +1397,12 @@
 .form-textarea {
   width: 100%;
   padding: 12px 14px;
-  border: 1.5px solid var(--jj-border);
+  border: 1px solid var(--jj-border);
   border-radius: var(--jj-radius-lg);
   font-size: 0.9375rem;
   font-family: inherit;
   color: var(--jj-text);
-  background: var(--jj-surface);
+  background: #ffffff;
   transition:
     border-color var(--jj-duration-fast),
     box-shadow var(--jj-duration-fast);
@@ -1492,8 +1492,7 @@
   justify-content: center;
   margin: 0 auto 24px;
   animation: successPop 0.4s ease-out;
-  box-shadow: 0 4px 16px
-    color-mix(in srgb, var(--jj-green-500) 30%, transparent);
+  box-shadow: 0 2px 8px rgba(61, 138, 40, 0.25);
 }
 
 .success-checkmark svg {
@@ -1555,13 +1554,13 @@
   width: 44px;
   height: 44px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #2d7a17, #1e5c10);
+  background: var(--jj-green-500);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: 0 2px 8px rgba(30, 92, 16, 0.3);
+  box-shadow: 0 1px 3px rgba(61, 138, 40, 0.2);
 }
 
 /* ---- Profile Hero ---- */
@@ -1569,9 +1568,9 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 28px 20px;
+  padding: 24px 20px;
   margin: 0 16px 20px;
-  background: linear-gradient(135deg, #2d7a17 0%, #1e5c10 50%, #144a0b 100%);
+  background: var(--jj-green-700);
   color: #fff;
   border-radius: var(--jj-radius-xl);
   position: relative;
@@ -2465,26 +2464,30 @@ a.fi-wi-stats-overview-stat:hover {
   }
 
   .notification-fab {
-    background: var(--color-surface-hover);
-    color: var(--color-text-secondary);
+    background: var(--jj-surface-hover);
+    color: var(--jj-text-secondary);
   }
 
   .notification-fab:hover {
-    background: var(--color-brand);
+    background: var(--jj-brand);
     color: #fff;
   }
 
   .card {
-    box-shadow: var(--jj-shadow-md);
-    border-color: var(--color-border);
+    background: var(--jj-surface-alt);
+    box-shadow: var(--jj-shadow-sm);
+    border-color: var(--jj-border);
   }
 
   .home-stat-card {
-    box-shadow: var(--jj-shadow-md);
+    background: var(--jj-surface-alt);
+    box-shadow: var(--jj-shadow-sm);
+    border-color: var(--jj-border);
   }
 
   .tab-bar {
-    box-shadow: var(--jj-shadow-sm);
+    background: var(--jj-surface);
+    box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.15);
   }
 
   .badge-warning {
