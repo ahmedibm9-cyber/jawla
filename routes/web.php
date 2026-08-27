@@ -116,6 +116,7 @@ Route::middleware(['web', 'auth', 'license', 'ensure.rep', 'ensure.device'])->pr
     Route::get('/calls/log/{customer}', LogCall::class)->name('calls.log');
     Route::get('/calls/history/{customer}', CallHistory::class)->name('calls.history');
     Route::get('/performance', PerformanceDashboard::class)->name('performance');
+    Route::get('/performance/data', [\App\Http\Controllers\App\PerformanceDataController::class, 'index'])->name('performance.data');
     Route::get('/calendar', Calendar::class)->name('calendar');
     Route::get('/agenda', Agenda::class)->name('agenda');
     Route::get('/requests', AppRequests::class)->name('requests');

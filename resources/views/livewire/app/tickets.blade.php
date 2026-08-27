@@ -68,54 +68,120 @@
             </div>
         @endif
 
-        @forelse($tickets as $ticket)
-            <article class="card mb-3" wire:key="ticket-{{ $ticket->id }}">
-                <div class="flex justify-between items-start gap-3">
-                    <div class="min-w-0">
-                        <h2 class="font-semibold text-base">{{ $ticket->title }}</h2>
-                        <p class="text-sm text-text-secondary mt-1">{{ $ticket->description }}</p>
-                        @if($ticket->customer)
-                            <p class="text-sm text-text-muted mt-1">{{ l($ticket->customer->name_ar, $ticket->customer->name_en ?? $ticket->customer->name_ar) }}</p>
+        @if($viewMode === 'kanban')
+            {{-- Kanban View --}}
+            <div class="kanban-board" style="display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;">
+                @php
+                    $allTickets = \App\Models\Ticket::where('company_id', auth()->user()->company_id)
+                        ->where('is_active', true)
+                        ->with(['customer', 'assignee'])
+                        ->get()
+                        ->groupBy('status');
+                @endphp
+
+                @foreach(['new' => 'جديد', 'in_progress' => 'قيد المعالجة', 'resolved' => 'تم الحل'] as $status => $label)
+                    <div class="kanban-column" style="min-width:260px;flex:1;">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-semibold text-sm">{{ $label }}</h3>
+                            <span class="badge badge-info">{{ count($allTickets[$status] ?? []) }}</span>
+                        </div>
+                        <div class="kanban-list" data-status="{{ $status }}" style="min-height:200px;background:var(--color-bg-secondary,#f1f5f9);border-radius:8px;padding:8px;">
+                            @forelse($allTickets[$status] ?? [] as $ticket)
+                                <div class="kanban-card card mb-2 cursor-grab" data-ticket-id="{{ $ticket->id }}" style="cursor:grab;">
+                                    <h4 class="font-medium text-sm">{{ $ticket->title }}</h4>
+                                    <p class="text-xs text-text-muted mt-1 line-clamp-2">{{ $ticket->description }}</p>
+                                    @if($ticket->customer)
+                                        <p class="text-xs text-text-muted mt-1">{{ l($ticket->customer->name_ar, $ticket->customer->name_en ?? $ticket->customer->name_ar) }}</p>
+                                    @endif
+                                    <div class="flex items-center justify-between mt-2">
+                                        <span class="badge @class([
+                                            'badge-danger' => $ticket->priority === 'high',
+                                            'badge-warning' => $ticket->priority === 'medium',
+                                            'badge-info' => $ticket->priority === 'low',
+                                        ]) text-xs">{{ __('app.priority_'.$ticket->priority) }}</span>
+                                        <span class="text-xs text-text-muted">{{ $ticket->created_at->format('m/d') }}</span>
+                                    </div>
+                                </div>
+                            @empty
+                                <p class="text-xs text-text-muted text-center py-4">{{ __('app.no_tickets') }}</p>
+                            @endforelse
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+
+            @push('scripts')
+            <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+            <script>
+            document.addEventListener('livewire:initialized', () => {
+                document.querySelectorAll('.kanban-list').forEach(list => {
+                    new Sortable(list, {
+                        group: 'tickets',
+                        animation: 150,
+                        ghostClass: 'opacity-50',
+                        onEnd: function(evt) {
+                            const ticketId = evt.item.dataset.ticketId;
+                            const newStatus = evt.to.dataset.status;
+                            if (ticketId && newStatus) {
+                                Livewire.dispatch('call', { method: 'transitionStatus', params: [parseInt(ticketId), newStatus] });
+                            }
+                        }
+                    });
+                });
+            });
+            </script>
+            @endpush
+        @else
+            {{-- Table View --}}
+            @forelse($tickets as $ticket)
+                <article class="card mb-3" wire:key="ticket-{{ $ticket->id }}">
+                    <div class="flex justify-between items-start gap-3">
+                        <div class="min-w-0">
+                            <h2 class="font-semibold text-base">{{ $ticket->title }}</h2>
+                            <p class="text-sm text-text-secondary mt-1">{{ $ticket->description }}</p>
+                            @if($ticket->customer)
+                                <p class="text-sm text-text-muted mt-1">{{ l($ticket->customer->name_ar, $ticket->customer->name_en ?? $ticket->customer->name_ar) }}</p>
+                            @endif
+                        </div>
+                        <span class="badge @class([
+                            'badge-success' => $ticket->status === 'resolved',
+                            'badge-danger' => $ticket->status === 'closed',
+                            'badge-warning' => $ticket->status === 'in_progress',
+                            'badge-info' => $ticket->status === 'new',
+                            'badge-neutral' => ! in_array($ticket->status, ['resolved', 'closed', 'in_progress', 'new'], true),
+                        ])">{{ __('app.ticket_status_'.$ticket->status) }}</span>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2 mt-3 text-xs text-text-muted">
+                        <span>{{ __('app.ticket_priority') }}: {{ __('app.priority_'.$ticket->priority) }}</span>
+                        <span>· {{ __('app.ticket_created') }}: {{ $ticket->created_at->format('Y-m-d H:i') }}</span>
+                        @if($ticket->assignee)
+                            <span>· {{ __('app.ticket_assigned_to') }}: {{ $ticket->assignee->name }}</span>
                         @endif
                     </div>
-                    <span class="badge @class([
-                        'badge-success' => $ticket->status === 'resolved',
-                        'badge-danger' => $ticket->status === 'closed',
-                        'badge-warning' => $ticket->status === 'in_progress',
-                        'badge-info' => $ticket->status === 'new',
-                        'badge-neutral' => ! in_array($ticket->status, ['resolved', 'closed', 'in_progress', 'new'], true),
-                    ])">{{ __('app.ticket_status_'.$ticket->status) }}</span>
-                </div>
 
-                <div class="flex flex-wrap gap-2 mt-3 text-xs text-text-muted">
-                    <span>{{ __('app.ticket_priority') }}: {{ __('app.priority_'.$ticket->priority) }}</span>
-                    <span>· {{ __('app.ticket_created') }}: {{ $ticket->created_at->format('Y-m-d H:i') }}</span>
-                    @if($ticket->assignee)
-                        <span>· {{ __('app.ticket_assigned_to') }}: {{ $ticket->assignee->name }}</span>
-                    @endif
-                </div>
+                    <div class="mt-4 flex gap-2">
+                        @if($ticket->status === 'new')
+                            <button type="button" wire:click="transitionStatus({{ $ticket->id }}, 'in_progress')" class="btn btn-primary flex-1">
+                                {{ __('app.ticket_start') }}
+                            </button>
+                        @elseif($ticket->status === 'in_progress')
+                            <button type="button" wire:click="transitionStatus({{ $ticket->id }}, 'resolved')" class="btn btn-primary flex-1">
+                                {{ __('app.ticket_resolve') }}
+                            </button>
+                        @elseif($ticket->status === 'resolved')
+                            <button type="button" wire:click="transitionStatus({{ $ticket->id }}, 'closed')" class="btn btn-secondary flex-1">
+                                {{ __('app.ticket_close') }}
+                            </button>
+                        @endif
+                    </div>
+                </article>
+            @empty
+                <x-ds.empty icon="heroicon-o-ticket" :message="__('app.no_tickets')" />
+            @endforelse
 
-                <div class="mt-4 flex gap-2">
-                    @if($ticket->status === 'new')
-                        <button type="button" wire:click="transitionStatus({{ $ticket->id }}, 'in_progress')" class="btn btn-primary flex-1">
-                            {{ __('app.ticket_start') }}
-                        </button>
-                    @elseif($ticket->status === 'in_progress')
-                        <button type="button" wire:click="transitionStatus({{ $ticket->id }}, 'resolved')" class="btn btn-primary flex-1">
-                            {{ __('app.ticket_resolve') }}
-                        </button>
-                    @elseif($ticket->status === 'resolved')
-                        <button type="button" wire:click="transitionStatus({{ $ticket->id }}, 'closed')" class="btn btn-secondary flex-1">
-                            {{ __('app.ticket_close') }}
-                        </button>
-                    @endif
-                </div>
-            </article>
-        @empty
-            <x-ds.empty icon="heroicon-o-ticket" :message="__('app.no_tickets')" />
-        @endforelse
-
-        {{ $tickets->links() }}
+            {{ $tickets->links() }}
+        @endif
     </div>
 
     <x-tab-bar active="more" />

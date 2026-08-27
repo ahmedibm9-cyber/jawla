@@ -529,6 +529,10 @@ return [
     'revenue' => 'الإيرادات',
     'returns' => 'المرتجعات',
     'calls' => 'المكالمات',
+    'visit_trend' => 'اتجاه الزيارات',
+    'revenue_trend' => 'اتجاه الإيرادات',
+    'todo_completion' => 'نسبة إكمال المهام',
+    'completed' => 'مكتمل',
     // Calendar
     'calendar' => 'التقويم',
     'events_for' => 'أحداث',

@@ -529,6 +529,10 @@ return [
     'revenue' => 'Revenue',
     'returns' => 'Returns',
     'calls' => 'Calls',
+    'visit_trend' => 'Visit Trend',
+    'revenue_trend' => 'Revenue Trend',
+    'todo_completion' => 'Todo Completion',
+    'completed' => 'Completed',
     // Calendar
     'calendar' => 'Calendar',
     'events_for' => 'Events for',
