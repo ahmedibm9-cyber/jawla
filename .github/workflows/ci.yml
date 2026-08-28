@@ -27,6 +27,7 @@ jobs:
           coverage: none
       - run: composer install --no-scripts --no-interaction --no-progress --prefer-dist
       - run: cp .env.example .env
+      - run: mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache
       - run: php artisan key:generate --force
       - run: composer run post-autoload-dump
       - run: ./vendor/bin/pint --test
@@ -43,6 +44,7 @@ jobs:
           coverage: none
       - run: composer install --no-scripts --no-interaction --no-progress --prefer-dist
       - run: cp .env.example .env
+      - run: mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache
       - run: php artisan key:generate --force
       - run: composer run post-autoload-dump
       - name: PHPStan runtime-safety gate
@@ -99,6 +101,7 @@ jobs:
           cache: npm
       - run: composer install --no-scripts --no-interaction --no-progress --prefer-dist
       - run: cp .env.example .env
+      - run: mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache
       - run: php artisan key:generate --force
       - run: composer run post-autoload-dump
       - run: npm ci
@@ -156,6 +159,7 @@ jobs:
           coverage: none
       - run: composer install --no-scripts --no-interaction --no-progress --prefer-dist
       - run: cp .env.example .env
+      - run: mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache
       - run: php artisan key:generate --force
       - run: composer run post-autoload-dump
       - run: php artisan migrate --force
@@ -205,6 +209,7 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: cp .env.example .env
+      - run: mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache
       - run: php artisan key:generate --force
       - run: composer run post-autoload-dump
       - run: php artisan migrate --force
