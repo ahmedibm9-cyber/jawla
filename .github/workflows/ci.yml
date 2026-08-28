@@ -25,6 +25,8 @@ jobs:
           extensions: mbstring, xml, ctype, json, bcmath, pgsql
           tools: composer:v2
           coverage: none
+      - run: cp .env.example .env
+      - run: php artisan key:generate --force
       - run: composer install --no-interaction --no-progress --prefer-dist
       - run: ./vendor/bin/pint --test
 
@@ -93,6 +95,8 @@ jobs:
         with:
           node-version: "22"
           cache: npm
+      - run: cp .env.example .env
+      - run: php artisan key:generate --force
       - run: composer install --no-interaction --no-progress --prefer-dist
       - run: npm ci
       - run: composer validate --strict --no-check-publish
