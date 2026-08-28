@@ -9,7 +9,7 @@ return [
         env('APP_PRODUCTION_URL'),
     ]),
     // Railway subdomains — covers misconfigured or missing env vars.
-    'allowed_origins_patterns' => ['^https://jawla(-[a-z0-9-]+)?\.up\.railway\.app$'],
+    'allowed_origins_patterns' => ['~^https://jawla(-[a-z0-9-]+)?\.up\.railway\.app$~'],
     'allowed_headers' => [
         'Accept',
         'Authorization',
