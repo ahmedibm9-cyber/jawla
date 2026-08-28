@@ -6,8 +6,10 @@ return [
     'allowed_origins' => array_filter([
         env('APP_URL', 'http://localhost'),
         env('APP_STAGING_URL'),
+        env('APP_PRODUCTION_URL'),
     ]),
-    'allowed_origins_patterns' => [],
+    // Railway subdomains — covers misconfigured or missing env vars.
+    'allowed_origins_patterns' => ['^https://jawla(-[a-z0-9-]+)?\.up\.railway\.app$'],
     'allowed_headers' => [
         'Accept',
         'Authorization',
