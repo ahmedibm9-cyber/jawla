@@ -38,10 +38,11 @@ class Agenda extends Component
         }
 
         $companyId = auth()->user()->company_id;
+        $term = \App\Support\LikeEscape::wrap($this->customerSearch);
         $this->customers = Customer::where('company_id', $companyId)
             ->where('is_active', true)
-            ->where(fn ($q) => $q->where('name_ar', 'like', "%{$this->customerSearch}%")
-                ->orWhere('name_en', 'like', "%{$this->customerSearch}%"))
+            ->where(fn ($q) => $q->where('name_ar', 'like', $term)
+                ->orWhere('name_en', 'like', $term))
             ->limit(10)
             ->get();
     }

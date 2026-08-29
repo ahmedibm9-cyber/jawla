@@ -1,6 +1,6 @@
 <div class="main-content"
      x-data="{
-        step: '{{ $step }}',
+        step: @js($step),
         userLat: null,
         userLng: null,
         online: navigator.onLine,

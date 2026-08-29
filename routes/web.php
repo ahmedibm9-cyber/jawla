@@ -4,6 +4,7 @@ use App\Filament\Auth\Pages\Login;
 use App\Http\Controllers\Api\OnboardingController;
 use App\Http\Controllers\App\LoginController;
 use App\Http\Controllers\App\PdfController;
+use App\Http\Controllers\App\PerformanceDataController;
 use App\Http\Controllers\CompanyContextController;
 use App\Http\Controllers\LicenseRecoveryController;
 use App\Http\Controllers\SystemPageController;
@@ -14,6 +15,7 @@ use App\Livewire\App\CallHistory;
 use App\Livewire\App\CashReconcile;
 use App\Livewire\App\CollectPayment;
 use App\Livewire\App\CreateSalesOrder;
+use App\Livewire\App\CustomerSummaryReport;
 use App\Livewire\App\DeviceRegistration;
 use App\Livewire\App\Home;
 use App\Livewire\App\LogCall;
@@ -116,11 +118,11 @@ Route::middleware(['web', 'auth', 'license', 'ensure.rep', 'ensure.device'])->pr
     Route::get('/calls/log/{customer}', LogCall::class)->name('calls.log');
     Route::get('/calls/history/{customer}', CallHistory::class)->name('calls.history');
     Route::get('/performance', PerformanceDashboard::class)->name('performance');
-    Route::get('/performance/data', [\App\Http\Controllers\App\PerformanceDataController::class, 'index'])->name('performance.data');
+    Route::get('/performance/data', [PerformanceDataController::class, 'index'])->name('performance.data');
     Route::get('/calendar', Calendar::class)->name('calendar');
     Route::get('/agenda', Agenda::class)->name('agenda');
     Route::get('/requests', AppRequests::class)->name('requests');
-    Route::get('/reports/customers', \App\Livewire\App\CustomerSummaryReport::class)->name('reports.customers');
+    Route::get('/reports/customers', CustomerSummaryReport::class)->name('reports.customers');
     Route::get('/pdf/proforma/{proforma}', [PdfController::class, 'proforma'])
         ->middleware('throttle:10,1')
         ->name('pdf.proforma');

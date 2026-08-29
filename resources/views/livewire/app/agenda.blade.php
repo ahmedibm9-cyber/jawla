@@ -15,7 +15,7 @@
                         @if(count($customers) > 0)
                             <div class="border rounded-lg mt-1 max-h-40 overflow-y-auto">
                                 @foreach($customers as $customer)
-                                    <button type="button" wire:click="$set('selectedCustomerId', {{ $customer->id }}); $set('customerSearch', '{{ addslashes($customer->name_ar ?? $customer->name_en) }}')"
+                                    <button type="button" wire:click="$set('selectedCustomerId', {{ $customer->id }}); $set('customerSearch', @js($customer->name_ar ?? $customer->name_en))"
                                             class="w-full text-left px-3 py-2 hover:bg-base-200 text-sm">
                                         {{ $customer->name_ar ?? $customer->name_en }}
                                     </button>

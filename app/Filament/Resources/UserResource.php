@@ -42,6 +42,19 @@ class UserResource extends Resource
         return app()->getLocale() === 'ar' ? 'المستخدمين' : 'Users';
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $user = auth()->user();
+        $query = parent::getEloquentQuery();
+
+        if ($user && ! $user->isSuperAdmin()) {
+            $companyIds = $user->companies()->pluck('companies.id');
+            $query->whereIn('users.company_id', $companyIds);
+        }
+
+        return $query;
+    }
+
     public static function form(Schema $schema): Schema
     {
 

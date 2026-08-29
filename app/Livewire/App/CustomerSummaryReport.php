@@ -3,8 +3,6 @@
 namespace App\Livewire\App;
 
 use App\Models\Customer;
-use App\Models\Invoice;
-use App\Models\Visit;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -13,12 +11,18 @@ use Livewire\Component;
 #[Layout('layouts.app')]
 class CustomerSummaryReport extends Component
 {
+    private const ALLOWED_SORT = ['name', 'phone', 'code', 'balance', 'invoices_count', 'visits_count'];
+
     public string $sortBy = 'name';
+
     public string $sortDir = 'asc';
+
     public string $statusFilter = 'all';
 
     public function toggleSort(string $field): void
     {
+        $field = in_array($field, self::ALLOWED_SORT, true) ? $field : 'name';
+
         if ($this->sortBy === $field) {
             $this->sortDir = $this->sortDir === 'asc' ? 'desc' : 'asc';
         } else {
@@ -30,7 +34,7 @@ class CustomerSummaryReport extends Component
     /** @return array{metrics: array, customers: Collection} */
     public function getDataProperty(): array
     {
-        $companyId = auth()->user()->company_id;
+        $companyId = auth()->user()->activeCompanyId();
 
         $totalCustomers = Customer::where('company_id', $companyId)->count();
         $activeCustomers = Customer::where('company_id', $companyId)->where('is_active', true)->count();
@@ -45,11 +49,14 @@ class CustomerSummaryReport extends Component
             ->where('is_active', true)
             ->count();
 
+        $sortBy = in_array($this->sortBy, self::ALLOWED_SORT, true) ? $this->sortBy : 'name';
+        $sortDir = $this->sortDir === 'desc' ? 'desc' : 'asc';
+
         $customers = Customer::where('company_id', $companyId)
             ->withCount(['invoices', 'visits'])
             ->withSum('invoices as total_order_value', fn ($q) => $q->where('status', '!=', 'cancelled'))
             ->when($this->statusFilter !== 'all', fn ($q) => $q->where('is_active', $this->statusFilter === 'active'))
-            ->orderBy($this->sortBy, $this->sortDir)
+            ->orderBy($sortBy, $sortDir)
             ->get();
 
         return [
@@ -81,13 +88,13 @@ class CustomerSummaryReport extends Component
         ]);
 
         $csv = implode("\n", array_merge(
-            [implode(",", $headers)],
-            $rows->map(fn ($r) => implode(",", array_map(fn ($v) => '"' . str_replace('"', '""', $v) . '"', $r)))->toArray()
+            [implode(',', $headers)],
+            $rows->map(fn ($r) => implode(',', array_map(fn ($v) => '"'.str_replace('"', '""', \App\Support\CsvCell::neutralize($v)).'"', $r)))->toArray()
         ));
 
         response($csv)
             ->header('Content-Type', 'text/csv')
-            ->header('Content-Disposition', 'attachment; filename="customers_' . now()->format('Y-m-d') . '.csv"')
+            ->header('Content-Disposition', 'attachment; filename="customers_'.now()->format('Y-m-d').'.csv"')
             ->send();
     }
 

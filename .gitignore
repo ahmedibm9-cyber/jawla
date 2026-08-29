@@ -17,6 +17,7 @@
 /auth.json
 /cookies.txt
 *.cookies.txt
+/composer.phar
 /docs/production-readiness/*.rar
 /node_modules
 /public/fonts-manifest.dev.json

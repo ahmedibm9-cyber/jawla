@@ -1,0 +1,2 @@
+DROP DATABASE IF EXISTS jawla_test WITH (FORCE);
+CREATE DATABASE jawla_test;

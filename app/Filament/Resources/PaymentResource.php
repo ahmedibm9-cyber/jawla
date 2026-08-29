@@ -58,7 +58,7 @@ class PaymentResource extends Resource
                     ->label(l('إلغاء', 'Cancel'))
                     ->icon('heroicon-o-x-circle')
                     ->color('danger')
-                    ->visible(fn (Payment $r) => ! $r->cancelled_at)
+                    ->visible(fn (Payment $r) => ! $r->cancelled_at && auth()->user()->can('payments.cancel'))
                     ->requiresConfirmation()
                     ->modalHeading(l('إلغاء الدفعة', 'Cancel payment'))
                     ->modalDescription(l('سيتم إلغاء هذه الدفعة وخصمها من صندوق النقدية وإعادة الرصيد المستحق على العميل. هذا الإجراء مُسجَّل ولا يمكن التراجع عنه.', 'This cancels the payment, removes it from the cash box, and restores the customer’s outstanding balance. It is logged and cannot be undone.'))

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Exceptions\Domain\DomainException;
 use App\Models\CompanyBankAccount;
 use App\Models\PriceQuotation;
 use App\Models\PriceQuotationRequest;
@@ -26,6 +27,17 @@ class ProformaService implements ProformaContract
             $product = $request->product;
             $qty = (float) ($data['quantity'] ?? $request->quantity_requested);
             $unitPrice = (float) ($data['unit_price'] ?? $quotation->base_price);
+
+            // Validate price bounds (defense-in-depth)
+            if ($quotation->floor_price !== null && bccomp(number_format($unitPrice, 2, '.', ''), (string) $quotation->floor_price, 2) < 0) {
+                throw new DomainException('Price is below the approved floor price.');
+            }
+            if ($quotation->ceiling_price !== null && bccomp(number_format($unitPrice, 2, '.', ''), (string) $quotation->ceiling_price, 2) > 0) {
+                throw new DomainException('Price exceeds the approved ceiling price.');
+            }
+            if ($qty <= 0) {
+                throw new DomainException('Quantity must be greater than zero.');
+            }
             $lineTotal = round($qty * $unitPrice, 2);
             $vatAmount = $product->vat_applicable ? round($lineTotal * ((float) $company->vat_percent / 100), 2) : 0;
             $total = round($lineTotal + $vatAmount, 2);

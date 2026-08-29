@@ -10,6 +10,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 /** @property Schema $form */
 class CollectPayment extends Page
@@ -92,6 +93,7 @@ class CollectPayment extends Page
             method: $data['method'],
             invoiceId: $data['invoice_id'] ?? null,
             notes: $data['notes'] ?? null,
+            intentId: Str::uuid()->toString(),
         );
 
         Notification::make()

@@ -4,6 +4,7 @@ namespace App\Livewire\App;
 
 use App\Models\Customer;
 use App\Services\AlarmService;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -41,7 +42,7 @@ class AddCustomer extends Component
         $customer = Customer::create([
             'company_id' => $user->activeCompanyId(),
             'route_id' => null,
-            'code' => 'C-'.strtoupper(substr(uniqid(), -6)),
+            'code' => 'C-'.strtoupper(Str::random(8)),
             'name_ar' => $validated['name_ar'],
             'name_en' => $validated['name_en'],
             'phone' => $validated['phone'],

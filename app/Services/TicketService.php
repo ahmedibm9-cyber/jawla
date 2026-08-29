@@ -37,6 +37,8 @@ class TicketService
     public function transitionTo(Ticket $ticket, string $newStatus, int $userId, ?string $notes = null): Ticket
     {
         return DB::transaction(function () use ($ticket, $newStatus, $userId, $notes): Ticket {
+            // Re-fetch with lock to prevent concurrent state transitions
+            $ticket = Ticket::whereKey($ticket->id)->lockForUpdate()->firstOrFail();
             $ticket->transitionTo($newStatus, $userId, $notes);
 
             return $ticket->fresh();

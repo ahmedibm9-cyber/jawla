@@ -184,6 +184,19 @@ class CompanyResource extends Resource
         return [];
     }
 
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        $user = auth()->user();
+        $query = parent::getEloquentQuery();
+
+        if ($user && ! $user->isSuperAdmin()) {
+            $companyIds = $user->companies()->pluck('companies.id');
+            $query->whereIn('companies.id', $companyIds);
+        }
+
+        return $query;
+    }
+
     public static function getPages(): array
     {
         return [

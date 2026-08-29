@@ -12,7 +12,7 @@ class PerformanceDataController
     public function index(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
-        $companyId = $request->user()->company_id;
+        $companyId = $request->user()->activeCompanyId();
         $period = $request->query('period', 'today');
 
         $startDate = match ($period) {

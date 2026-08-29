@@ -179,10 +179,23 @@ class InvoiceService implements InvoiceContract
             // Customer balance update
             $customer->increment('balance', (float) $calculation->total);
 
-            // If from proforma, mark it converted
+            // If from proforma, validate ownership and mark it converted
             if (isset($data['proforma_invoice_id'])) {
-                ProformaInvoice::where('id', $data['proforma_invoice_id'])
-                    ->update(['status' => 'converted_to_invoice']);
+                $proforma = ProformaInvoice::where('id', $data['proforma_invoice_id'])
+                    ->where('company_id', $company->id)
+                    ->where('customer_id', $data['customer_id'])
+                    ->lockForUpdate()
+                    ->first();
+
+                if (! $proforma) {
+                    throw new DomainException('errors.resource.proforma');
+                }
+
+                if ($proforma->status === 'converted_to_invoice') {
+                    throw new DomainException('Proforma invoice has already been converted.');
+                }
+
+                $proforma->update(['status' => 'converted_to_invoice']);
             }
 
             return $invoice;

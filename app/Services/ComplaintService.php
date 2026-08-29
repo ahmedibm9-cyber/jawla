@@ -43,6 +43,13 @@ class ComplaintService
     public function resolve(Complaint $complaint, int $userId, string $resolution): Complaint
     {
         return DB::transaction(function () use ($complaint, $userId, $resolution): Complaint {
+            // Re-fetch with lock to prevent concurrent resolve
+            $complaint = Complaint::whereKey($complaint->id)->lockForUpdate()->firstOrFail();
+
+            if ($complaint->status !== 'open') {
+                return $complaint;
+            }
+
             $complaint->update([
                 'status' => 'resolved',
                 'assigned_to' => $userId,

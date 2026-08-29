@@ -97,7 +97,7 @@ class Tickets extends Component
     public function render(): View
     {
         $query = Ticket::query()
-            ->where('company_id', auth()->user()->company_id)
+            ->where('company_id', auth()->user()->activeCompanyId())
             ->where('is_active', true)
             ->with(['customer', 'assignee']);
 

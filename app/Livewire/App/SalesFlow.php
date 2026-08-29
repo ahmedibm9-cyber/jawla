@@ -107,6 +107,7 @@ class SalesFlow extends Component
         }
 
         $product = Product::query()
+            ->where('company_id', auth()->user()->activeCompanyId())
             ->where('is_active', true)
             ->where(fn ($q) => $q->where('barcode', $code)->orWhere('sku', $code))
             ->first();

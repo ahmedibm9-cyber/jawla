@@ -151,13 +151,13 @@ class AppServiceProvider extends ServiceProvider
             ->group(base_path('routes/api.php'));
 
         // Rep offline-sync endpoint (CG2), same guard stack as the rep PWA group.
-        Route::middleware(['web', 'auth', 'license', 'ensure.rep'])
+        Route::middleware(['web', 'auth', 'license', 'ensure.rep', 'ensure.device'])
             ->prefix('app')
             ->name('app.')
             ->group(base_path('routes/rep-sync.php'));
 
         // Rep offline-snapshot endpoint — returns cached read data for IndexedDB.
-        Route::middleware(['web', 'auth', 'license', 'ensure.rep'])
+        Route::middleware(['web', 'auth', 'license', 'ensure.rep', 'ensure.device'])
             ->prefix('app')
             ->name('app.')
             ->group(base_path('routes/rep-offline.php'));

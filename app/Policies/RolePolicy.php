@@ -19,7 +19,8 @@ class RolePolicy
 
     public function view(User $u, Role $role): bool
     {
-        return $u->can('view:role') && $this->matchesCompany($u, $role);
+        // Spatie roles are global (not per-company) — only check permission
+        return $u->can('view:role');
     }
 
     public function create(User $u): bool
@@ -29,12 +30,12 @@ class RolePolicy
 
     public function update(User $u, Role $role): bool
     {
-        return $u->can('update:role') && $this->matchesCompany($u, $role);
+        return $u->can('update:role');
     }
 
     public function delete(User $u, Role $role): bool
     {
-        return $u->can('delete:role') && $this->matchesCompany($u, $role);
+        return $u->can('delete:role');
     }
 
     public function deleteAny(User $u): bool

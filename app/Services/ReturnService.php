@@ -322,6 +322,16 @@ class ReturnService
                 throw new DomainException('The linked credit note is not eligible for reversal.');
             }
 
+            // Check if the credit note has been applied to any invoice
+            $creditApplied = Invoice::where('company_id', $return->company_id)
+                ->where('credited_amount', '>', 0)
+                ->where('id', '!=', $return->against_invoice_id)
+                ->where('updated_at', '>', $creditNote->created_at)
+                ->exists();
+            if ($creditApplied) {
+                throw new DomainException('The credit note has been applied to other invoices and cannot be reversed.');
+            }
+
             $customer = Customer::whereKey($return->customer_id)
                 ->where('company_id', $return->company_id)
                 ->lockForUpdate()

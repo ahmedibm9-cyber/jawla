@@ -11,7 +11,17 @@ class EnsureValidLicense
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() === null || config('jawla.is_demo')) {
+        if ($request->user() === null) {
+            return $next($request);
+        }
+
+        // In demo mode, skip license checks — but NEVER in production.
+        // If someone sets JAWLA_IS_DEMO=true on a production env, fail hard.
+        if (config('jawla.is_demo')) {
+            if (app()->isProduction()) {
+                abort(500, 'Demo mode is not allowed in production.');
+            }
+
             return $next($request);
         }
 

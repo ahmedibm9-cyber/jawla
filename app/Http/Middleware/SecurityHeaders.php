@@ -41,13 +41,20 @@ class SecurityHeaders
         //   3. Replace 'unsafe-inline' with nonce in script-src and style-src
         //   4. Remove 'unsafe-eval' (Alpine v3.x still needs it — check Alpine v4 release)
         // Sentry DSN: set SENTRY_DSN env var to enable error tracking; CSP connect-src already allows ingest endpoint
+        $sentryHost = '';
+        $sentryDsn = config('sentry.dsn', '');
+        if ($sentryDsn !== '') {
+            $parsed = parse_url($sentryDsn);
+            $sentryHost = $parsed['host'] ?? '';
+        }
+
         $csp = implode('; ', [
             "default-src 'self'",
             "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://unpkg.com",
             "img-src 'self' data: blob: https://*.tile.openstreetmap.org",
             "font-src 'self' data: https://fonts.googleapis.com https://fonts.gstatic.com https://fonts.bunny.net",
-            "connect-src 'self' wss: ws: https://o4511398253625344.ingest.us.sentry.io",
+            "connect-src 'self' wss: ws:".($sentryHost !== '' ? " https://{$sentryHost}" : ''),
             "frame-ancestors 'none'",
             "base-uri 'self'",
             "form-action 'self'",

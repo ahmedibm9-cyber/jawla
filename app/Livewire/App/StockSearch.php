@@ -82,12 +82,13 @@ class StockSearch extends Component
         $results = collect();
 
         if (strlen($this->search) >= 2) {
+            $term = \App\Support\LikeEscape::wrap($this->search);
             $results = Product::query()
                 ->where('company_id', auth()->user()->activeCompanyId())
-                ->where(function ($q) {
-                    $q->where('sku', 'ilike', "%{$this->search}%")
-                        ->orWhere('name_ar', 'ilike', "%{$this->search}%")
-                        ->orWhere('name_en', 'ilike', "%{$this->search}%");
+                ->where(function ($q) use ($term) {
+                    $q->where('sku', 'ilike', $term)
+                        ->orWhere('name_ar', 'ilike', $term)
+                        ->orWhere('name_en', 'ilike', $term);
                 })
                 ->where('is_active', true)
                 ->with(['stocks' => fn ($q) => $q->where('quantity', '>', 0)->with('warehouse')])

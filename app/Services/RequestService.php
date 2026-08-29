@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Request;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class RequestService
 {
@@ -23,23 +24,32 @@ class RequestService
 
     public function approve(Request $request, User $reviewer, ?string $notes = null): Request
     {
-        $request->approve($reviewer->id, $notes);
+        return DB::transaction(function () use ($request, $reviewer, $notes): Request {
+            $request = Request::whereKey($request->id)->lockForUpdate()->firstOrFail();
+            $request->approve($reviewer->id, $notes);
 
-        return $request->fresh();
+            return $request->fresh();
+        });
     }
 
     public function reject(Request $request, User $reviewer, string $reason): Request
     {
-        $request->reject($reviewer->id, $reason);
+        return DB::transaction(function () use ($request, $reviewer, $reason): Request {
+            $request = Request::whereKey($request->id)->lockForUpdate()->firstOrFail();
+            $request->reject($reviewer->id, $reason);
 
-        return $request->fresh();
+            return $request->fresh();
+        });
     }
 
     public function markDone(Request $request): Request
     {
-        $request->markDone();
+        return DB::transaction(function () use ($request): Request {
+            $request = Request::whereKey($request->id)->lockForUpdate()->firstOrFail();
+            $request->markDone();
 
-        return $request->fresh();
+            return $request->fresh();
+        });
     }
 
     public function getForCompany(int $companyId, array $filters = []): Collection

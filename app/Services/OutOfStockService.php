@@ -63,6 +63,9 @@ class OutOfStockService implements OutOfStockServiceContract
     public function resolve(OutOfStockRequest $request, int $userId): OutOfStockRequest
     {
         return DB::transaction(function () use ($request, $userId): OutOfStockRequest {
+            // Re-fetch with lock to prevent concurrent resolve
+            $request = OutOfStockRequest::whereKey($request->id)->lockForUpdate()->firstOrFail();
+
             if ($request->status !== 'open') {
                 return $request;
             }
