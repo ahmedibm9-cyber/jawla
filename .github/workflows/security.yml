@@ -38,7 +38,11 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: composer install --no-scripts --no-interaction --prefer-dist --no-progress
+      - run: cp .env.example .env
+      - run: mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache
+      - run: php artisan key:generate --force
+      - run: composer run post-autoload-dump
       - run: npm ci
       - run: composer audit
       - run: npm audit --audit-level=high
@@ -75,7 +79,11 @@ jobs:
           php-version: "8.3"
           extensions: mbstring, pdo, pdo_pgsql, intl, gd, zip, bcmath
           coverage: none
-      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: composer install --no-scripts --no-interaction --prefer-dist --no-progress
+      - run: cp .env.example .env
+      - run: mkdir -p storage/framework/{cache,sessions,views} bootstrap/cache
+      - run: php artisan key:generate --force
+      - run: composer run post-autoload-dump
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: "22"
