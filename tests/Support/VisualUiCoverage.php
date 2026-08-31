@@ -20,13 +20,16 @@ use App\Filament\Resources\AlarmResource;
 use App\Filament\Resources\BatchResource;
 use App\Filament\Resources\CallResource;
 use App\Filament\Resources\CashReconciliationResource;
+use App\Filament\Resources\CollectionSubmissionResource;
 use App\Filament\Resources\CompanyResource;
 use App\Filament\Resources\ComplaintResource;
 use App\Filament\Resources\CustomerResource;
 use App\Filament\Resources\DailyVisitAssignmentResource;
+use App\Filament\Resources\DeviceResource;
 use App\Filament\Resources\ExpenseResource;
 use App\Filament\Resources\GoodsInTransitResource;
 use App\Filament\Resources\InvoiceResource;
+use App\Filament\Resources\OrganizationUnitResource;
 use App\Filament\Resources\PaymentResource;
 use App\Filament\Resources\PriceQuotationRequestResource;
 use App\Filament\Resources\ProductPriceResource;
@@ -34,8 +37,11 @@ use App\Filament\Resources\ProductResource;
 use App\Filament\Resources\ProformaInvoiceResource;
 use App\Filament\Resources\PurchaseOrderResource;
 use App\Filament\Resources\PurchaseRequestResource;
+use App\Filament\Resources\RequestResource;
 use App\Filament\Resources\ReturnRecordResource;
+use App\Filament\Resources\ReturnRequestResource;
 use App\Filament\Resources\RouteResource;
+use App\Filament\Resources\SalesOrderResource;
 use App\Filament\Resources\SalesTargetResource;
 use App\Filament\Resources\StockResource;
 use App\Filament\Resources\TaskResource;
@@ -136,13 +142,16 @@ final class VisualUiCoverage
             BatchResource::class,
             CallResource::class,
             CashReconciliationResource::class,
+            CollectionSubmissionResource::class,
             CompanyResource::class,
             ComplaintResource::class,
             CustomerResource::class,
             DailyVisitAssignmentResource::class,
+            DeviceResource::class,
             ExpenseResource::class,
             GoodsInTransitResource::class,
             InvoiceResource::class,
+            OrganizationUnitResource::class,
             PaymentResource::class,
             PriceQuotationRequestResource::class,
             ProductPriceResource::class,
@@ -150,8 +159,11 @@ final class VisualUiCoverage
             ProformaInvoiceResource::class,
             PurchaseOrderResource::class,
             PurchaseRequestResource::class,
+            RequestResource::class,
             ReturnRecordResource::class,
+            ReturnRequestResource::class,
             RouteResource::class,
+            SalesOrderResource::class,
             SalesTargetResource::class,
             StockResource::class,
             TaskResource::class,
