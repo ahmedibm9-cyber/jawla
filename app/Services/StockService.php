@@ -123,7 +123,7 @@ class StockService implements StockServiceContract
                     'quantity_change' => $qty,
                     'reason' => $reason,
                     'reference_type' => $ref::class,
-                    'reference_id' => $ref->id, // @phpstan-ignore-line property.notFound
+                    'reference_id' => $ref->id,
                     'user_id' => $userId,
                 ]);
             });
