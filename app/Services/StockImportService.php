@@ -330,8 +330,12 @@ class StockImportService
         return $this->withLocalCopy($staged->source_disk, $staged->file_path, $verify);
     }
 
-    private function withLocalCopy(string $disk, string $path, callable $callback): mixed
+    private function withLocalCopy(?string $disk, string $path, callable $callback): mixed
     {
+        if ($disk === null) {
+            return $callback($path);
+        }
+
         $source = Storage::disk($disk)->readStream($path);
         if (! is_resource($source)) {
             throw new DomainException('The uploaded stock-import file cannot be read.');

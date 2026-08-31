@@ -18,6 +18,7 @@ use App\Filament\Pages\StockImport;
 use App\Filament\Pages\SupplierComparison;
 use App\Filament\Resources\AlarmResource;
 use App\Filament\Resources\BatchResource;
+use App\Filament\Resources\CallResource;
 use App\Filament\Resources\CashReconciliationResource;
 use App\Filament\Resources\CompanyResource;
 use App\Filament\Resources\ComplaintResource;
@@ -133,6 +134,7 @@ final class VisualUiCoverage
         return [
             AlarmResource::class,
             BatchResource::class,
+            CallResource::class,
             CashReconciliationResource::class,
             CompanyResource::class,
             ComplaintResource::class,
