@@ -45,6 +45,7 @@ use App\Filament\Widgets\OpenAlarmsWidget;
 use App\Filament\Widgets\OutstandingBalanceWidget;
 use App\Filament\Widgets\PendingQuotationsWidget;
 use App\Filament\Widgets\RepPerformanceWidget;
+use App\Filament\Widgets\RepRoiWidget;
 use App\Filament\Widgets\SalesTodayWidget;
 use App\Filament\Widgets\VisitsTodayWidget;
 
@@ -185,6 +186,7 @@ final class VisualUiCoverage
             OutstandingBalanceWidget::class,
             PendingQuotationsWidget::class,
             RepPerformanceWidget::class,
+            RepRoiWidget::class,
             SalesTodayWidget::class,
             VisitsTodayWidget::class,
         ];
