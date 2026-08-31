@@ -12,6 +12,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class CompanyResource extends Resource
 {
@@ -184,7 +185,7 @@ class CompanyResource extends Resource
         return [];
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $user = auth()->user();
         $query = parent::getEloquentQuery();

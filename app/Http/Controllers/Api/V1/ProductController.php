@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Resources\Api\V1\ProductResource;
 use App\Models\Product;
+use App\Support\LikeEscape;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -18,7 +19,7 @@ class ProductController
     {
         $products = Product::query()
             ->when($request->filled('q'), fn ($query) => $query->where(function ($w) use ($request) {
-                $term = \App\Support\LikeEscape::wrap($request->string('q'));
+                $term = LikeEscape::wrap($request->string('q'));
                 $w->where('name_ar', 'like', $term)
                     ->orWhere('name_en', 'like', $term)
                     ->orWhere('sku', 'like', $term);

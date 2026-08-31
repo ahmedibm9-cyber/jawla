@@ -13,6 +13,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
@@ -42,7 +43,7 @@ class UserResource extends Resource
         return app()->getLocale() === 'ar' ? 'المستخدمين' : 'Users';
     }
 
-    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    public static function getEloquentQuery(): Builder
     {
         $user = auth()->user();
         $query = parent::getEloquentQuery();

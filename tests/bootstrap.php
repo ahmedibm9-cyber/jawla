@@ -14,6 +14,7 @@ declare(strict_types=1);
  */
 
 use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Support\Facades\Artisan;
 use Tests\Support\TestingDatabaseGuard;
 
 require_once __DIR__.'/../vendor/autoload.php';
@@ -74,7 +75,7 @@ $app['env'] = 'testing';
 // Run migrate:fresh so DatabaseTransactions tests (which don't run their own
 // migrations) find a complete schema. RefreshDatabase tests re-run this
 // themselves — safe because each process has its own isolated database.
-\Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--force' => true]);
+Artisan::call('migrate:fresh', ['--force' => true]);
 
 // Purge every named connection so no stale PDO handles survive into tests.
 foreach ($app->make('db')->getConnections() as $name => $conn) {

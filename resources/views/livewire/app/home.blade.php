@@ -26,6 +26,11 @@
                     </p>
                 </div>
             </div>
+            {{-- Sync Status Indicator --}}
+            <div class="sync-status" wire:click="refreshSyncStatus" role="status" aria-label="{{ $syncStatus['label'] }}">
+                <span class="sync-dot sync-dot-{{ $syncStatus['status'] }}"></span>
+                <span class="sync-label">{{ $syncStatus['label'] }}</span>
+            </div>
         </div>
 
         {{-- Today's Plan --}}

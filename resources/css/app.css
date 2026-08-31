@@ -816,8 +816,66 @@
 .home-hero-subtitle {
   margin: 0;
   opacity: 0.85;
-  font-size: var(--jj-text-sm);
-  line-height: 1.5;
+  font-size: var(--text-sm);
+}
+
+/* ---- Sync Status Indicator ---- */
+.sync-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 2;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: var(--text-xs);
+  color: #fff;
+}
+
+.sync-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.sync-dot-ok {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.6);
+}
+
+.sync-dot-warning {
+  background: #eab308;
+  box-shadow: 0 0 6px rgba(234, 179, 8, 0.6);
+}
+
+.sync-dot-error {
+  background: #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.6);
+  animation: sync-pulse 2s infinite;
+}
+
+.sync-dot-unknown {
+  background: #9ca3af;
+}
+
+@keyframes sync-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.sync-label {
+  white-space: nowrap;
 }
 
 .home-hero-avatar {

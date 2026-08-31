@@ -3,6 +3,7 @@
 namespace App\Livewire\App;
 
 use App\Models\DailyVisitAssignment;
+use App\Models\SyncReceipt;
 use App\Models\Task;
 use App\Models\Visit;
 use App\Models\WorkSession;
@@ -24,6 +25,9 @@ class Home extends Component
 
     public string $successMessage = '';
 
+    /** @var array{status: string, label: string, last_sync: string|null} */
+    public array $syncStatus = ['status' => 'unknown', 'label' => '', 'last_sync' => null];
+
     public function mount(): void
     {
         $user = auth()->user();
@@ -33,6 +37,45 @@ class Home extends Component
             ->whereDate('visit_date', today())
             ->whereIn('status', ['approved', 'completed'])
             ->count();
+
+        $this->refreshSyncStatus();
+    }
+
+    public function refreshSyncStatus(): void
+    {
+        $userId = auth()->id();
+        $companyId = auth()->user()->activeCompanyId();
+
+        $lastSync = SyncReceipt::where('user_id', $userId)
+            ->where('company_id', $companyId)
+            ->latest('created_at')
+            ->value('created_at');
+
+        if ($lastSync === null) {
+            $this->syncStatus = [
+                'status' => 'warning',
+                'label' => __('app.sync_never'),
+                'last_sync' => null,
+            ];
+        } elseif ($lastSync->diffInMinutes(now()) <= 5) {
+            $this->syncStatus = [
+                'status' => 'ok',
+                'label' => __('app.sync_ok'),
+                'last_sync' => $lastSync->diffForHumans(),
+            ];
+        } elseif ($lastSync->diffInMinutes(now()) <= 30) {
+            $this->syncStatus = [
+                'status' => 'warning',
+                'label' => __('app.sync_late'),
+                'last_sync' => $lastSync->diffForHumans(),
+            ];
+        } else {
+            $this->syncStatus = [
+                'status' => 'error',
+                'label' => __('app.sync_stale'),
+                'last_sync' => $lastSync->diffForHumans(),
+            ];
+        }
     }
 
     public function goToVisit(int $assignmentId): void
@@ -91,6 +134,7 @@ class Home extends Component
 
         return view('livewire.app.home', [
             'user' => $user,
+            'syncStatus' => $this->syncStatus,
             'todayVisits' => DailyVisitAssignment::query()
                 ->where('user_id', $user->id)
                 ->whereDate('visit_date', today())

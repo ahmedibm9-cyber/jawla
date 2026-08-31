@@ -4,6 +4,7 @@ namespace App\Livewire\App;
 
 use App\Models\Product;
 use App\Services\Contracts\OutOfStockService;
+use App\Support\LikeEscape;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -82,7 +83,7 @@ class StockSearch extends Component
         $results = collect();
 
         if (strlen($this->search) >= 2) {
-            $term = \App\Support\LikeEscape::wrap($this->search);
+            $term = LikeEscape::wrap($this->search);
             $results = Product::query()
                 ->where('company_id', auth()->user()->activeCompanyId())
                 ->where(function ($q) use ($term) {

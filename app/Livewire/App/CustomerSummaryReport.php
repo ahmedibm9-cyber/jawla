@@ -3,6 +3,7 @@
 namespace App\Livewire\App;
 
 use App\Models\Customer;
+use App\Support\CsvCell;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -89,7 +90,7 @@ class CustomerSummaryReport extends Component
 
         $csv = implode("\n", array_merge(
             [implode(',', $headers)],
-            $rows->map(fn ($r) => implode(',', array_map(fn ($v) => '"'.str_replace('"', '""', \App\Support\CsvCell::neutralize($v)).'"', $r)))->toArray()
+            $rows->map(fn ($r) => implode(',', array_map(fn ($v) => '"'.str_replace('"', '""', CsvCell::neutralize($v)).'"', $r)))->toArray()
         ));
 
         response($csv)

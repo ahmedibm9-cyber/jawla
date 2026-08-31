@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Company;
-use App\Models\Customer;
 use App\Models\User;
 use App\Models\Warehouse;
 use Database\Seeders\RoleSeeder;
@@ -10,7 +9,6 @@ use Database\Seeders\RoleSeeder;
  * Smoke tests for Milestone 7 features.
  * Verifies pages render and contain expected content.
  */
-
 function makeRepForM7(): User
 {
     test()->seed(RoleSeeder::class);

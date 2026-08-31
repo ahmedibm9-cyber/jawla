@@ -418,6 +418,15 @@ return [
     'sync_validation_failed' => 'This offline action contains invalid or outdated data. Review it before retrying.',
     'sync_storage_failed' => 'The offline action could not be saved safely. Please retry or contact support.',
     'sync_processing_failed' => 'The offline action could not be processed. Please retry or contact support.',
+
+    'sync_never' => 'Never synced',
+
+    'sync_ok' => 'Synced',
+
+    'sync_late' => 'Sync delayed',
+
+    'sync_stale' => 'Offline — data pending',
+
     'collect_another' => 'Collect Another Payment',
     'original_invoice' => 'Original Invoice',
     'invoice_line' => 'Invoice Line',

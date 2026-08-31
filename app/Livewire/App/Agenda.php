@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Models\ReturnRecord;
 use App\Models\Todo;
 use App\Models\Visit;
+use App\Support\LikeEscape;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
@@ -38,7 +39,7 @@ class Agenda extends Component
         }
 
         $companyId = auth()->user()->company_id;
-        $term = \App\Support\LikeEscape::wrap($this->customerSearch);
+        $term = LikeEscape::wrap($this->customerSearch);
         $this->customers = Customer::where('company_id', $companyId)
             ->where('is_active', true)
             ->where(fn ($q) => $q->where('name_ar', 'like', $term)

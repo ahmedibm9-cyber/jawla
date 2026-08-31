@@ -3,6 +3,7 @@
 namespace App\Livewire\App;
 
 use App\Models\Customer;
+use App\Support\LikeEscape;
 use Illuminate\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
@@ -27,7 +28,7 @@ class TodaysCustomers extends Component
         $customers = Customer::query()
             ->where('company_id', auth()->user()->activeCompanyId())
             ->when($this->search, fn ($q) => $q->where(function ($q) {
-                $term = \App\Support\LikeEscape::wrap($this->search);
+                $term = LikeEscape::wrap($this->search);
                 $q->where('name_ar', 'ilike', $term)
                     ->orWhere('name_en', 'ilike', $term)
                     ->orWhere('phone', 'ilike', $term)
