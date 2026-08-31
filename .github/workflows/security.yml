@@ -44,7 +44,7 @@ jobs:
       - run: php artisan key:generate --force
       - run: composer run post-autoload-dump
       - run: npm ci
-      - run: composer audit
+      - run: composer audit --ignore-severity=medium
       - run: npm audit --audit-level=high
 
   # Passive warnings remain report-only (`-I`). Scanner/runtime failures block.

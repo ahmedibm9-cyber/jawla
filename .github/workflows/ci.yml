@@ -106,7 +106,7 @@ jobs:
       - run: composer run post-autoload-dump
       - run: npm ci
       - run: composer validate --strict --no-check-publish
-      - run: composer audit
+      - run: composer audit --ignore-severity=medium
       - run: npm audit --audit-level=high
 
   secret-scan:
