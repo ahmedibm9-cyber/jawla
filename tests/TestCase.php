@@ -27,14 +27,14 @@ abstract class TestCase extends BaseTestCase
     {
         parent::tearDown();
 
-        // Ensure any pending transaction is rolled back to prevent
-        // cascading SQLSTATE[25P02] errors from aborted transactions.
+        // Reset the database connection to prevent cascading SQLSTATE[25P02]
+        // errors from aborted transactions in previous tests.
+        // DB::purge() removes the default connection from the manager,
+        // forcing a fresh connection on next use.
         try {
-            if (DB::transactionLevel() > 0) {
-                DB::rollBack();
-            }
+            DB::purge();
         } catch (\Throwable) {
-            // Ignore rollback errors — connection may already be broken
+            // Ignore — connection may already be broken
         }
 
         gc_collect_cycles();
