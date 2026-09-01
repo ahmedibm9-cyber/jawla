@@ -28,6 +28,7 @@ use App\Filament\Resources\DailyVisitAssignmentResource;
 use App\Filament\Resources\DeviceResource;
 use App\Filament\Resources\ExpenseResource;
 use App\Filament\Resources\GoodsInTransitResource;
+use App\Filament\Resources\InstallationLicenseResource;
 use App\Filament\Resources\InvoiceResource;
 use App\Filament\Resources\OrganizationUnitResource;
 use App\Filament\Resources\PaymentResource;
@@ -150,6 +151,7 @@ final class VisualUiCoverage
             DeviceResource::class,
             ExpenseResource::class,
             GoodsInTransitResource::class,
+            InstallationLicenseResource::class,
             InvoiceResource::class,
             OrganizationUnitResource::class,
             PaymentResource::class,
