@@ -46,6 +46,8 @@ use App\Filament\Resources\SalesOrderResource;
 use App\Filament\Resources\SalesTargetResource;
 use App\Filament\Resources\StockResource;
 use App\Filament\Resources\TaskResource;
+use App\Filament\Resources\TicketResource;
+use App\Filament\Resources\TodoResource;
 use App\Filament\Resources\UserResource;
 use App\Filament\Resources\VanTransferResource;
 use App\Filament\Widgets\LowStockAlertWidget;
@@ -169,6 +171,8 @@ final class VisualUiCoverage
             SalesTargetResource::class,
             StockResource::class,
             TaskResource::class,
+            TicketResource::class,
+            TodoResource::class,
             UserResource::class,
             VanTransferResource::class,
         ];
