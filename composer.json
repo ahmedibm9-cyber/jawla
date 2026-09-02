@@ -19,7 +19,7 @@
     "ext-zip": "*",
     "bezhansalleh/filament-shield": "^4.3.1",
     "blade-ui-kit/blade-heroicons": "^2.5",
-    "filament/filament": "^4.0",
+    "filament/filament": "^5.7",
     "laravel/framework": "^13.8",
     "laravel/sanctum": "^4.3.2",
     "laravel/tinker": "^3.0",
